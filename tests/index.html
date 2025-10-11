@@ -1,0 +1,25 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4"></script>
+
+    <title>SQLite3 OPFS Demo - User Management</title>
+</head>
+
+<body class="bg-gray-50 min-h-screen">
+    <div class="container mx-auto px-4 py-8"></div>
+    <!-- // Allow es import  -->
+    <script type="module">
+        const worker = new Worker('./worker.js', { type: 'module' });
+        worker.postMessage({ cmd: 'start' });
+
+
+
+
+    </script>
+</body>
+
+</html>
