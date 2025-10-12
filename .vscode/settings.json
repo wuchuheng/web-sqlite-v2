@@ -19,7 +19,6 @@
   "[javascriptreact]": {
     "editor.defaultFormatter": "esbenp.prettier-vscode"
   },
-
   "[jsonc]": {
     "editor.defaultFormatter": "vscode.json-language-features"
   },
@@ -29,4 +28,35 @@
   "[html]": {
     "editor.defaultFormatter": "vscode.html-language-features"
   },
+  "cSpell.words": [
+    "ATINIT",
+    "ATPOSTRUN",
+    "ATPRERUN",
+    "Blkdev",
+    "Capi",
+    "cflag",
+    "chrdev",
+    "dont",
+    "Emscripten",
+    "getattr",
+    "HEAPF",
+    "HEAPU",
+    "iflag",
+    "kvinfo",
+    "kvvfs",
+    "lflag",
+    "llseek",
+    "memalign",
+    "mknod",
+    "mmap",
+    "msync",
+    "oflag",
+    "opfs",
+    "pdir",
+    "setattr",
+    "tcgets",
+    "tcsets",
+    "tiocgwinsz",
+    "wasmfs"
+  ],
 }
