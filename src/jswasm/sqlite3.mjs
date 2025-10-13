@@ -40,6 +40,7 @@ import {
     stringToUTF8Array,
     intArrayFromString,
 } from "./utils/utf8.mjs";
+import { createTTY } from "./tty-operations.mjs";
 
 export let Module;
 
@@ -428,151 +429,6 @@ var sqlite3InitModule = (() => {
         };
         var randomFill = (view) => {
             return (randomFill = initRandomFill())(view);
-        };
-
-        var FS_stdin_getChar_buffer = [];
-
-        var FS_stdin_getChar = () => {
-            if (!FS_stdin_getChar_buffer.length) {
-                var result = null;
-                if (
-                    typeof window != "undefined" &&
-                    typeof window.prompt == "function"
-                ) {
-                    result = window.prompt("Input: ");
-                    if (result !== null) {
-                        result += "\n";
-                    }
-                }
-                if (!result) {
-                    return null;
-                }
-                FS_stdin_getChar_buffer = intArrayFromString(result, true);
-            }
-            return FS_stdin_getChar_buffer.shift();
-        };
-        var TTY = {
-            ttys: [],
-            init() {},
-            shutdown() {},
-            register(dev, ops) {
-                TTY.ttys[dev] = { input: [], output: [], ops: ops };
-                FS.registerDevice(dev, TTY.stream_ops);
-            },
-            stream_ops: {
-                open(stream) {
-                    var tty = TTY.ttys[stream.node.rdev];
-                    if (!tty) {
-                        throw new FS.ErrnoError(43);
-                    }
-                    stream.tty = tty;
-                    stream.seekable = false;
-                },
-                close(stream) {
-                    stream.tty.ops.fsync(stream.tty);
-                },
-                fsync(stream) {
-                    stream.tty.ops.fsync(stream.tty);
-                },
-                read(stream, buffer, offset, length, _pos) {
-                    if (!stream.tty || !stream.tty.ops.get_char) {
-                        throw new FS.ErrnoError(60);
-                    }
-                    var bytesRead = 0;
-                    for (var i = 0; i < length; i++) {
-                        var result;
-                        try {
-                            result = stream.tty.ops.get_char(stream.tty);
-                        } catch (_e) {
-                            throw new FS.ErrnoError(29);
-                        }
-                        if (result === undefined && bytesRead === 0) {
-                            throw new FS.ErrnoError(6);
-                        }
-                        if (result === null || result === undefined) break;
-                        bytesRead++;
-                        buffer[offset + i] = result;
-                    }
-                    if (bytesRead) {
-                        stream.node.timestamp = Date.now();
-                    }
-                    return bytesRead;
-                },
-                write(stream, buffer, offset, length, _pos) {
-                    if (!stream.tty || !stream.tty.ops.put_char) {
-                        throw new FS.ErrnoError(60);
-                    }
-                    try {
-                        for (var i = 0; i < length; i++) {
-                            stream.tty.ops.put_char(
-                                stream.tty,
-                                buffer[offset + i]
-                            );
-                        }
-                    } catch (_e) {
-                        throw new FS.ErrnoError(29);
-                    }
-                    if (length) {
-                        stream.node.timestamp = Date.now();
-                    }
-                    return i;
-                },
-            },
-            default_tty_ops: {
-                get_char(_tty) {
-                    return FS_stdin_getChar();
-                },
-                put_char(tty, val) {
-                    if (val === null || val === 10) {
-                        out(UTF8ArrayToString(tty.output));
-                        tty.output = [];
-                    } else {
-                        if (val != 0) tty.output.push(val);
-                    }
-                },
-                fsync(tty) {
-                    if (tty.output && tty.output.length > 0) {
-                        out(UTF8ArrayToString(tty.output));
-                        tty.output = [];
-                    }
-                },
-                ioctl_tcgets(_tty) {
-                    return {
-                        c_iflag: 25856,
-                        c_oflag: 5,
-                        c_cflag: 191,
-                        c_lflag: 35387,
-                        c_cc: [
-                            0x03, 0x1c, 0x7f, 0x15, 0x04, 0x00, 0x01, 0x00,
-                            0x11, 0x13, 0x1a, 0x00, 0x12, 0x0f, 0x17, 0x16,
-                            0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
-                            0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
-                        ],
-                    };
-                },
-                ioctl_tcsets(_tty, _optional_actions, _data) {
-                    return 0;
-                },
-                ioctl_tiocgwinsz(_tty) {
-                    return [24, 80];
-                },
-            },
-            default_tty1_ops: {
-                put_char(tty, val) {
-                    if (val === null || val === 10) {
-                        err(UTF8ArrayToString(tty.output));
-                        tty.output = [];
-                    } else {
-                        if (val != 0) tty.output.push(val);
-                    }
-                },
-                fsync(tty) {
-                    if (tty.output && tty.output.length > 0) {
-                        err(UTF8ArrayToString(tty.output));
-                        tty.output = [];
-                    }
-                },
-            },
         };
 
         var zeroMemory = (address, size) => {
@@ -3647,6 +3503,9 @@ var sqlite3InitModule = (() => {
 
         // Create PATH_FS with FS reference for cwd() support - must be before FS.staticInit()
         const PATH_FS = createPathFS(FS);
+
+        // Initialize TTY operations with FS reference
+        var TTY = createTTY(out, err, FS);
 
         FS.staticInit();
 
