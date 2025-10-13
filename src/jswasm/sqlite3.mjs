@@ -33,6 +33,7 @@
  ** Using the Emscripten SDK version 3.1.70.
  */
 import { runSQLite3PostLoadInit } from "./sqlite3Apibootstrap.mjs";
+import { PATH, createPathFS } from "./utils/path.mjs";
 
 export let Module;
 
@@ -411,75 +412,6 @@ var sqlite3InitModule = (() => {
             callbacks.forEach((f) => f(Module));
         };
 
-        var PATH = {
-            isAbs: (path) => path.charAt(0) === "/",
-            splitPath: (filename) => {
-                var splitPathRe =
-                    /^(\/?|)([\s\S]*?)((?:\.{1,2}|[^/]+?|)(\.[^./]*|))(?:[/]*)$/;
-                return splitPathRe.exec(filename).slice(1);
-            },
-            normalizeArray: (parts, allowAboveRoot) => {
-                var up = 0;
-                for (var i = parts.length - 1; i >= 0; i--) {
-                    var last = parts[i];
-                    if (last === ".") {
-                        parts.splice(i, 1);
-                    } else if (last === "..") {
-                        parts.splice(i, 1);
-                        up++;
-                    } else if (up) {
-                        parts.splice(i, 1);
-                        up--;
-                    }
-                }
-
-                if (allowAboveRoot) {
-                    for (; up; up--) {
-                        parts.unshift("..");
-                    }
-                }
-                return parts;
-            },
-            normalize: (path) => {
-                var isAbsolute = PATH.isAbs(path),
-                    trailingSlash = path.substr(-1) === "/";
-
-                path = PATH.normalizeArray(
-                    path.split("/").filter((p) => !!p),
-                    !isAbsolute
-                ).join("/");
-                if (!path && !isAbsolute) {
-                    path = ".";
-                }
-                if (path && trailingSlash) {
-                    path += "/";
-                }
-                return (isAbsolute ? "/" : "") + path;
-            },
-            dirname: (path) => {
-                var result = PATH.splitPath(path),
-                    root = result[0],
-                    dir = result[1];
-                if (!root && !dir) {
-                    return ".";
-                }
-                if (dir) {
-                    dir = dir.substr(0, dir.length - 1);
-                }
-                return root + dir;
-            },
-            basename: (path) => {
-                if (path === "/") return "/";
-                path = PATH.normalize(path);
-                path = path.replace(/\/$/, "");
-                var lastSlash = path.lastIndexOf("/");
-                if (lastSlash === -1) return path;
-                return path.substr(lastSlash + 1);
-            },
-            join: (...paths) => PATH.normalize(paths.join("/")),
-            join2: (l, r) => PATH.normalize(l + "/" + r),
-        };
-
         var initRandomFill = () => {
             if (
                 typeof crypto == "object" &&
@@ -490,70 +422,6 @@ var sqlite3InitModule = (() => {
         };
         var randomFill = (view) => {
             return (randomFill = initRandomFill())(view);
-        };
-
-        var PATH_FS = {
-            resolve: (...args) => {
-                var resolvedPath = "",
-                    resolvedAbsolute = false;
-                for (
-                    var i = args.length - 1;
-                    i >= -1 && !resolvedAbsolute;
-                    i--
-                ) {
-                    var path = i >= 0 ? args[i] : FS.cwd();
-
-                    if (typeof path != "string") {
-                        throw new TypeError(
-                            "Arguments to path.resolve must be strings"
-                        );
-                    } else if (!path) {
-                        return "";
-                    }
-                    resolvedPath = path + "/" + resolvedPath;
-                    resolvedAbsolute = PATH.isAbs(path);
-                }
-
-                resolvedPath = PATH.normalizeArray(
-                    resolvedPath.split("/").filter((p) => !!p),
-                    !resolvedAbsolute
-                ).join("/");
-                return (resolvedAbsolute ? "/" : "") + resolvedPath || ".";
-            },
-            relative: (from, to) => {
-                from = PATH_FS.resolve(from).substr(1);
-                to = PATH_FS.resolve(to).substr(1);
-                function trim(arr) {
-                    var start = 0;
-                    for (; start < arr.length; start++) {
-                        if (arr[start] !== "") break;
-                    }
-                    var end = arr.length - 1;
-                    for (; end >= 0; end--) {
-                        if (arr[end] !== "") break;
-                    }
-                    if (start > end) return [];
-                    return arr.slice(start, end - start + 1);
-                }
-                var fromParts = trim(from.split("/"));
-                var toParts = trim(to.split("/"));
-                var length = Math.min(fromParts.length, toParts.length);
-                var samePartsLength = length;
-                for (let i = 0; i < length; i++) {
-                    if (fromParts[i] !== toParts[i]) {
-                        samePartsLength = i;
-                        break;
-                    }
-                }
-                var outputParts = [];
-                for (let i = samePartsLength; i < fromParts.length; i++) {
-                    outputParts.push("..");
-                }
-                outputParts = outputParts.concat(
-                    toParts.slice(samePartsLength)
-                );
-                return outputParts.join("/");
-            },
         };
 
         var UTF8Decoder =
@@ -3889,6 +3757,10 @@ var sqlite3InitModule = (() => {
         }
 
         FS.createPreloadedFile = FS_createPreloadedFile;
+
+        // Create PATH_FS with FS reference for cwd() support - must be before FS.staticInit()
+        const PATH_FS = createPathFS(FS);
+
         FS.staticInit();
 
         var wasmImports = {
