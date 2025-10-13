@@ -1,6 +1,6 @@
 /**
  * MEMFS - In-Memory File System Implementation
- * 
+ *
  * This module provides a complete in-memory file system implementation
  * for use with Emscripten/WebAssembly SQLite3.
  */
@@ -16,7 +16,7 @@
 export function createMEMFS(FS, HEAP8, mmapAlloc, _zeroMemory) {
     const MEMFS = {
         ops_table: null,
-        
+
         /**
          * Mounts the MEMFS file system.
          * @param {Object} _mount - Mount configuration (unused)
@@ -25,7 +25,7 @@ export function createMEMFS(FS, HEAP8, mmapAlloc, _zeroMemory) {
         mount(_mount) {
             return MEMFS.createNode(null, "/", 16384 | 511, 0);
         },
-        
+
         /**
          * Creates a new file system node.
          * @param {Object} parent - Parent node
@@ -39,7 +39,7 @@ export function createMEMFS(FS, HEAP8, mmapAlloc, _zeroMemory) {
             if (FS.isBlkdev(mode) || FS.isFIFO(mode)) {
                 throw new FS.ErrnoError(63);
             }
-            
+
             // 2. Core processing
             if (!MEMFS.ops_table) {
                 MEMFS.ops_table = {
@@ -90,9 +90,9 @@ export function createMEMFS(FS, HEAP8, mmapAlloc, _zeroMemory) {
                     },
                 };
             }
-            
+
             var node = FS.createNode(parent, name, mode, dev);
-            
+
             if (FS.isDir(node.mode)) {
                 node.node_ops = MEMFS.ops_table.dir.node;
                 node.stream_ops = MEMFS.ops_table.dir.stream;
@@ -109,9 +109,9 @@ export function createMEMFS(FS, HEAP8, mmapAlloc, _zeroMemory) {
                 node.node_ops = MEMFS.ops_table.chrdev.node;
                 node.stream_ops = MEMFS.ops_table.chrdev.stream;
             }
-            
+
             node.timestamp = Date.now();
-            
+
             // 3. Output handling
             if (parent) {
                 parent.contents[name] = node;
@@ -119,7 +119,7 @@ export function createMEMFS(FS, HEAP8, mmapAlloc, _zeroMemory) {
             }
             return node;
         },
-        
+
         /**
          * Gets file data as a typed array.
          * @param {Object} node - File node
@@ -131,7 +131,7 @@ export function createMEMFS(FS, HEAP8, mmapAlloc, _zeroMemory) {
                 return node.contents.subarray(0, node.usedBytes);
             return new Uint8Array(node.contents);
         },
-        
+
         /**
          * Expands file storage capacity.
          * @param {Object} node - File node
@@ -141,24 +141,25 @@ export function createMEMFS(FS, HEAP8, mmapAlloc, _zeroMemory) {
             // 1. Input handling
             var prevCapacity = node.contents ? node.contents.length : 0;
             if (prevCapacity >= newCapacity) return;
-            
+
             // 2. Core processing
             var CAPACITY_DOUBLING_MAX = 1024 * 1024;
             newCapacity = Math.max(
                 newCapacity,
                 (prevCapacity *
-                    (prevCapacity < CAPACITY_DOUBLING_MAX ? 2.0 : 1.125)) >>> 0
+                    (prevCapacity < CAPACITY_DOUBLING_MAX ? 2.0 : 1.125)) >>>
+                    0
             );
             if (prevCapacity != 0) newCapacity = Math.max(newCapacity, 256);
-            
+
             var oldContents = node.contents;
             node.contents = new Uint8Array(newCapacity);
-            
+
             // 3. Output handling
             if (node.usedBytes > 0)
                 node.contents.set(oldContents.subarray(0, node.usedBytes), 0);
         },
-        
+
         /**
          * Resizes file storage to exact size.
          * @param {Object} node - File node
@@ -167,7 +168,7 @@ export function createMEMFS(FS, HEAP8, mmapAlloc, _zeroMemory) {
         resizeFileStorage(node, newSize) {
             // 1. Input handling
             if (node.usedBytes == newSize) return;
-            
+
             // 2. Core processing
             if (newSize == 0) {
                 node.contents = null;
@@ -177,13 +178,16 @@ export function createMEMFS(FS, HEAP8, mmapAlloc, _zeroMemory) {
                 node.contents = new Uint8Array(newSize);
                 if (oldContents) {
                     node.contents.set(
-                        oldContents.subarray(0, Math.min(newSize, node.usedBytes))
+                        oldContents.subarray(
+                            0,
+                            Math.min(newSize, node.usedBytes)
+                        )
                     );
                 }
                 node.usedBytes = newSize;
             }
         },
-        
+
         node_ops: {
             /**
              * Gets file attributes.
@@ -193,7 +197,7 @@ export function createMEMFS(FS, HEAP8, mmapAlloc, _zeroMemory) {
             getattr(node) {
                 // 1. Input handling
                 var attr = {};
-                
+
                 // 2. Core processing
                 attr.dev = FS.isChrdev(node.mode) ? node.id : 1;
                 attr.ino = node.id;
@@ -202,7 +206,7 @@ export function createMEMFS(FS, HEAP8, mmapAlloc, _zeroMemory) {
                 attr.uid = 0;
                 attr.gid = 0;
                 attr.rdev = node.rdev;
-                
+
                 if (FS.isDir(node.mode)) {
                     attr.size = 4096;
                 } else if (FS.isFile(node.mode)) {
@@ -212,17 +216,17 @@ export function createMEMFS(FS, HEAP8, mmapAlloc, _zeroMemory) {
                 } else {
                     attr.size = 0;
                 }
-                
+
                 attr.atime = new Date(node.timestamp);
                 attr.mtime = new Date(node.timestamp);
                 attr.ctime = new Date(node.timestamp);
                 attr.blksize = 4096;
                 attr.blocks = Math.ceil(attr.size / attr.blksize);
-                
+
                 // 3. Output handling
                 return attr;
             },
-            
+
             /**
              * Sets file attributes.
              * @param {Object} node - File node
@@ -239,7 +243,7 @@ export function createMEMFS(FS, HEAP8, mmapAlloc, _zeroMemory) {
                     MEMFS.resizeFileStorage(node, attr.size);
                 }
             },
-            
+
             /**
              * Looks up a child node (throws error - not found).
              * @param {Object} _parent - Parent node
@@ -249,7 +253,7 @@ export function createMEMFS(FS, HEAP8, mmapAlloc, _zeroMemory) {
             lookup(_parent, _name) {
                 throw FS.genericErrors[44];
             },
-            
+
             /**
              * Creates a new node.
              * @param {Object} parent - Parent node
@@ -261,7 +265,7 @@ export function createMEMFS(FS, HEAP8, mmapAlloc, _zeroMemory) {
             mknod(parent, name, mode, dev) {
                 return MEMFS.createNode(parent, name, mode, dev);
             },
-            
+
             /**
              * Renames a node.
              * @param {Object} old_node - Node to rename
@@ -275,14 +279,14 @@ export function createMEMFS(FS, HEAP8, mmapAlloc, _zeroMemory) {
                     try {
                         new_node = FS.lookupNode(new_dir, new_name);
                     } catch (_e) {}
-                    
+
                     if (new_node) {
                         for (var _i in new_node.contents) {
                             throw new FS.ErrnoError(55);
                         }
                     }
                 }
-                
+
                 // 2. Core processing
                 delete old_node.parent.contents[old_node.name];
                 old_node.parent.timestamp = Date.now();
@@ -290,7 +294,7 @@ export function createMEMFS(FS, HEAP8, mmapAlloc, _zeroMemory) {
                 new_dir.contents[new_name] = old_node;
                 new_dir.timestamp = old_node.parent.timestamp;
             },
-            
+
             /**
              * Unlinks (deletes) a file.
              * @param {Object} parent - Parent directory
@@ -300,7 +304,7 @@ export function createMEMFS(FS, HEAP8, mmapAlloc, _zeroMemory) {
                 delete parent.contents[name];
                 parent.timestamp = Date.now();
             },
-            
+
             /**
              * Removes a directory.
              * @param {Object} parent - Parent directory
@@ -312,12 +316,12 @@ export function createMEMFS(FS, HEAP8, mmapAlloc, _zeroMemory) {
                 for (var _i in node.contents) {
                     throw new FS.ErrnoError(55);
                 }
-                
+
                 // 2. Core processing
                 delete parent.contents[name];
                 parent.timestamp = Date.now();
             },
-            
+
             /**
              * Reads directory contents.
              * @param {Object} node - Directory node
@@ -326,16 +330,16 @@ export function createMEMFS(FS, HEAP8, mmapAlloc, _zeroMemory) {
             readdir(node) {
                 // 1. Input handling
                 var entries = [".", ".."];
-                
+
                 // 2. Core processing
                 for (var key of Object.keys(node.contents)) {
                     entries.push(key);
                 }
-                
+
                 // 3. Output handling
                 return entries;
             },
-            
+
             /**
              * Creates a symbolic link.
              * @param {Object} parent - Parent directory
@@ -348,7 +352,7 @@ export function createMEMFS(FS, HEAP8, mmapAlloc, _zeroMemory) {
                 node.link = oldpath;
                 return node;
             },
-            
+
             /**
              * Reads a symbolic link target.
              * @param {Object} node - Link node
@@ -361,7 +365,7 @@ export function createMEMFS(FS, HEAP8, mmapAlloc, _zeroMemory) {
                 return node.link;
             },
         },
-        
+
         stream_ops: {
             /**
              * Reads data from a file stream.
@@ -376,7 +380,7 @@ export function createMEMFS(FS, HEAP8, mmapAlloc, _zeroMemory) {
                 // 1. Input handling
                 var contents = stream.node.contents;
                 if (position >= stream.node.usedBytes) return 0;
-                
+
                 // 2. Core processing
                 var size = Math.min(stream.node.usedBytes - position, length);
                 if (size > 8 && contents.subarray) {
@@ -388,11 +392,11 @@ export function createMEMFS(FS, HEAP8, mmapAlloc, _zeroMemory) {
                     for (var i = 0; i < size; i++)
                         buffer[offset + i] = contents[position + i];
                 }
-                
+
                 // 3. Output handling
                 return size;
             },
-            
+
             /**
              * Writes data to a file stream.
              * @param {Object} stream - File stream
@@ -409,14 +413,20 @@ export function createMEMFS(FS, HEAP8, mmapAlloc, _zeroMemory) {
                     canOwn = false;
                 }
                 if (!length) return 0;
-                
+
                 var node = stream.node;
                 node.timestamp = Date.now();
-                
+
                 // 2. Core processing
-                if (buffer.subarray && (!node.contents || node.contents.subarray)) {
+                if (
+                    buffer.subarray &&
+                    (!node.contents || node.contents.subarray)
+                ) {
                     if (canOwn) {
-                        node.contents = buffer.subarray(offset, offset + length);
+                        node.contents = buffer.subarray(
+                            offset,
+                            offset + length
+                        );
                         node.usedBytes = length;
                         return length;
                     } else if (node.usedBytes === 0 && position === 0) {
@@ -431,7 +441,7 @@ export function createMEMFS(FS, HEAP8, mmapAlloc, _zeroMemory) {
                         return length;
                     }
                 }
-                
+
                 MEMFS.expandFileStorage(node, position + length);
                 if (node.contents.subarray && buffer.subarray) {
                     node.contents.set(
@@ -443,12 +453,12 @@ export function createMEMFS(FS, HEAP8, mmapAlloc, _zeroMemory) {
                         node.contents[position + i] = buffer[offset + i];
                     }
                 }
-                
+
                 // 3. Output handling
                 node.usedBytes = Math.max(node.usedBytes, position + length);
                 return length;
             },
-            
+
             /**
              * Seeks to a position in the file.
              * @param {Object} stream - File stream
@@ -466,16 +476,16 @@ export function createMEMFS(FS, HEAP8, mmapAlloc, _zeroMemory) {
                         position += stream.node.usedBytes;
                     }
                 }
-                
+
                 // 2. Core processing
                 if (position < 0) {
                     throw new FS.ErrnoError(28);
                 }
-                
+
                 // 3. Output handling
                 return position;
             },
-            
+
             /**
              * Allocates space for a file.
              * @param {Object} stream - File stream
@@ -489,7 +499,7 @@ export function createMEMFS(FS, HEAP8, mmapAlloc, _zeroMemory) {
                     offset + length
                 );
             },
-            
+
             /**
              * Memory maps a file.
              * @param {Object} stream - File stream
@@ -504,13 +514,17 @@ export function createMEMFS(FS, HEAP8, mmapAlloc, _zeroMemory) {
                 if (!FS.isFile(stream.node.mode)) {
                     throw new FS.ErrnoError(43);
                 }
-                
+
                 var ptr;
                 var allocated;
                 var contents = stream.node.contents;
-                
+
                 // 2. Core processing
-                if (!(flags & 2) && contents && contents.buffer === HEAP8.buffer) {
+                if (
+                    !(flags & 2) &&
+                    contents &&
+                    contents.buffer === HEAP8.buffer
+                ) {
                     allocated = false;
                     ptr = contents.byteOffset;
                 } else {
@@ -520,7 +534,10 @@ export function createMEMFS(FS, HEAP8, mmapAlloc, _zeroMemory) {
                         throw new FS.ErrnoError(48);
                     }
                     if (contents) {
-                        if (position > 0 || position + length < contents.length) {
+                        if (
+                            position > 0 ||
+                            position + length < contents.length
+                        ) {
                             if (contents.subarray) {
                                 contents = contents.subarray(
                                     position,
@@ -537,11 +554,11 @@ export function createMEMFS(FS, HEAP8, mmapAlloc, _zeroMemory) {
                         HEAP8.set(contents, ptr);
                     }
                 }
-                
+
                 // 3. Output handling
                 return { ptr, allocated };
             },
-            
+
             /**
              * Synchronizes memory-mapped file.
              * @param {Object} stream - File stream
@@ -552,11 +569,18 @@ export function createMEMFS(FS, HEAP8, mmapAlloc, _zeroMemory) {
              * @returns {number} Success status (0)
              */
             msync(stream, buffer, offset, length, _mmapFlags) {
-                MEMFS.stream_ops.write(stream, buffer, 0, length, offset, false);
+                MEMFS.stream_ops.write(
+                    stream,
+                    buffer,
+                    0,
+                    length,
+                    offset,
+                    false
+                );
                 return 0;
             },
         },
     };
-    
+
     return MEMFS;
 }
