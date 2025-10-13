@@ -34,6 +34,12 @@
  */
 import { runSQLite3PostLoadInit } from "./sqlite3Apibootstrap.mjs";
 import { PATH, createPathFS } from "./utils/path.mjs";
+import {
+    UTF8ArrayToString,
+    lengthBytesUTF8,
+    stringToUTF8Array,
+    intArrayFromString,
+} from "./utils/utf8.mjs";
 
 export let Module;
 
@@ -424,127 +430,8 @@ var sqlite3InitModule = (() => {
             return (randomFill = initRandomFill())(view);
         };
 
-        var UTF8Decoder =
-            typeof TextDecoder != "undefined" ? new TextDecoder() : undefined;
-
-        var UTF8ArrayToString = (
-            heapOrArray,
-            idx = 0,
-            maxBytesToRead = NaN
-        ) => {
-            var endIdx = idx + maxBytesToRead;
-            var endPtr = idx;
-
-            while (heapOrArray[endPtr] && !(endPtr >= endIdx)) ++endPtr;
-
-            if (endPtr - idx > 16 && heapOrArray.buffer && UTF8Decoder) {
-                return UTF8Decoder.decode(heapOrArray.subarray(idx, endPtr));
-            }
-            var str = "";
-
-            while (idx < endPtr) {
-                var u0 = heapOrArray[idx++];
-                if (!(u0 & 0x80)) {
-                    str += String.fromCharCode(u0);
-                    continue;
-                }
-                var u1 = heapOrArray[idx++] & 63;
-                if ((u0 & 0xe0) == 0xc0) {
-                    str += String.fromCharCode(((u0 & 31) << 6) | u1);
-                    continue;
-                }
-                var u2 = heapOrArray[idx++] & 63;
-                if ((u0 & 0xf0) == 0xe0) {
-                    u0 = ((u0 & 15) << 12) | (u1 << 6) | u2;
-                } else {
-                    u0 =
-                        ((u0 & 7) << 18) |
-                        (u1 << 12) |
-                        (u2 << 6) |
-                        (heapOrArray[idx++] & 63);
-                }
-
-                if (u0 < 0x10000) {
-                    str += String.fromCharCode(u0);
-                } else {
-                    var ch = u0 - 0x10000;
-                    str += String.fromCharCode(
-                        0xd800 | (ch >> 10),
-                        0xdc00 | (ch & 0x3ff)
-                    );
-                }
-            }
-            return str;
-        };
-
         var FS_stdin_getChar_buffer = [];
 
-        var lengthBytesUTF8 = (str) => {
-            var len = 0;
-            for (var i = 0; i < str.length; ++i) {
-                var c = str.charCodeAt(i);
-                if (c <= 0x7f) {
-                    len++;
-                } else if (c <= 0x7ff) {
-                    len += 2;
-                } else if (c >= 0xd800 && c <= 0xdfff) {
-                    len += 4;
-                    ++i;
-                } else {
-                    len += 3;
-                }
-            }
-            return len;
-        };
-
-        var stringToUTF8Array = (str, heap, outIdx, maxBytesToWrite) => {
-            if (!(maxBytesToWrite > 0)) return 0;
-
-            var startIdx = outIdx;
-            var endIdx = outIdx + maxBytesToWrite - 1;
-            for (var i = 0; i < str.length; ++i) {
-                var u = str.charCodeAt(i);
-                if (u >= 0xd800 && u <= 0xdfff) {
-                    var u1 = str.charCodeAt(++i);
-                    u = (0x10000 + ((u & 0x3ff) << 10)) | (u1 & 0x3ff);
-                }
-                if (u <= 0x7f) {
-                    if (outIdx >= endIdx) break;
-                    heap[outIdx++] = u;
-                } else if (u <= 0x7ff) {
-                    if (outIdx + 1 >= endIdx) break;
-                    heap[outIdx++] = 0xc0 | (u >> 6);
-                    heap[outIdx++] = 0x80 | (u & 63);
-                } else if (u <= 0xffff) {
-                    if (outIdx + 2 >= endIdx) break;
-                    heap[outIdx++] = 0xe0 | (u >> 12);
-                    heap[outIdx++] = 0x80 | ((u >> 6) & 63);
-                    heap[outIdx++] = 0x80 | (u & 63);
-                } else {
-                    if (outIdx + 3 >= endIdx) break;
-                    heap[outIdx++] = 0xf0 | (u >> 18);
-                    heap[outIdx++] = 0x80 | ((u >> 12) & 63);
-                    heap[outIdx++] = 0x80 | ((u >> 6) & 63);
-                    heap[outIdx++] = 0x80 | (u & 63);
-                }
-            }
-
-            heap[outIdx] = 0;
-            return outIdx - startIdx;
-        };
-
-        function intArrayFromString(stringy, dontAddNull, length) {
-            var len = length > 0 ? length : lengthBytesUTF8(stringy) + 1;
-            var u8array = new Array(len);
-            var numBytesWritten = stringToUTF8Array(
-                stringy,
-                u8array,
-                0,
-                u8array.length
-            );
-            if (dontAddNull) u8array.length = numBytesWritten;
-            return u8array;
-        }
         var FS_stdin_getChar = () => {
             if (!FS_stdin_getChar_buffer.length) {
                 var result = null;
