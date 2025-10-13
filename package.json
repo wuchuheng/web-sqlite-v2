@@ -4,7 +4,8 @@
   "description": "",
   "main": "index.js",
   "scripts": {
-    "test": "tsx ./scripts/http-server.ts --base-path ./ --url-path-name /tests/index.html"
+    "test": "tsx ./scripts/http-server.ts --base-path ./ --url-path-name /tests/index.html",
+    "lint": "eslint . --ext .ts,.js --fix"
   },
   "keywords": [],
   "author": "",
