@@ -43,6 +43,7 @@ import {
 import { createTTY } from "./tty-operations.mjs";
 import { createMEMFS } from "./memfs.mjs";
 import { createSYSCALLS } from "./syscalls.mjs";
+import { createWASIFunctions } from "./wasi-functions.mjs";
 
 export let Module;
 
@@ -81,8 +82,6 @@ var sqlite3InitModule = (() => {
         }.bind(sqlite3InitModuleState);
 
         var moduleOverrides = Object.assign({}, Module);
-
-        var thisProgram = "./this.program";
 
         var scriptDirectory = "";
         function locateFile(path) {
@@ -151,8 +150,6 @@ var sqlite3InitModule = (() => {
         Object.assign(Module, moduleOverrides);
 
         moduleOverrides = null;
-
-        if (Module["thisProgram"]) thisProgram = Module["thisProgram"];
 
         var wasmBinary = Module["wasmBinary"];
 
@@ -2273,140 +2270,37 @@ var sqlite3InitModule = (() => {
         const ___syscall_unlinkat = syscallsModule.___syscall_unlinkat;
         const ___syscall_utimensat = syscallsModule.___syscall_utimensat;
 
-        // Utility functions also used outside syscalls
-        var stringToUTF8 = (str, outPtr, maxBytesToWrite) => {
-            return stringToUTF8Array(str, HEAPU8, outPtr, maxBytesToWrite);
-        };
+        // Create WASI functions using the extracted module
+        const wasiFunctions = createWASIFunctions(
+            FS,
+            SYSCALLS,
+            HEAP8,
+            HEAP16,
+            HEAP32,
+            HEAPU8,
+            HEAPU32,
+            HEAP64,
+            stringToUTF8Array
+        );
 
-        var INT53_MAX = 9007199254740992;
-        var INT53_MIN = -9007199254740992;
-        var bigintToI53Checked = (num) =>
-            num < INT53_MIN || num > INT53_MAX ? NaN : Number(num);
-
-        var nowIsMonotonic = 1;
-        var __emscripten_get_now_is_monotonic = () => nowIsMonotonic;
-
-        var isLeapYear = (year) =>
-            year % 4 === 0 && (year % 100 !== 0 || year % 400 === 0);
-
-        var MONTH_DAYS_LEAP_CUMULATIVE = [
-            0, 31, 60, 91, 121, 152, 182, 213, 244, 274, 305, 335,
-        ];
-
-        var MONTH_DAYS_REGULAR_CUMULATIVE = [
-            0, 31, 59, 90, 120, 151, 181, 212, 243, 273, 304, 334,
-        ];
-        var ydayFromDate = (date) => {
-            var leap = isLeapYear(date.getFullYear());
-            var monthDaysCumulative = leap
-                ? MONTH_DAYS_LEAP_CUMULATIVE
-                : MONTH_DAYS_REGULAR_CUMULATIVE;
-            var yday =
-                monthDaysCumulative[date.getMonth()] + date.getDate() - 1;
-
-            return yday;
-        };
-
-        function __localtime_js(time, tmPtr) {
-            time = bigintToI53Checked(time);
-
-            var date = new Date(time * 1000);
-            HEAP32[tmPtr >> 2] = date.getSeconds();
-            HEAP32[(tmPtr + 4) >> 2] = date.getMinutes();
-            HEAP32[(tmPtr + 8) >> 2] = date.getHours();
-            HEAP32[(tmPtr + 12) >> 2] = date.getDate();
-            HEAP32[(tmPtr + 16) >> 2] = date.getMonth();
-            HEAP32[(tmPtr + 20) >> 2] = date.getFullYear() - 1900;
-            HEAP32[(tmPtr + 24) >> 2] = date.getDay();
-
-            var yday = ydayFromDate(date) | 0;
-            HEAP32[(tmPtr + 28) >> 2] = yday;
-            HEAP32[(tmPtr + 36) >> 2] = -(date.getTimezoneOffset() * 60);
-
-            var start = new Date(date.getFullYear(), 0, 1);
-            var summerOffset = new Date(
-                date.getFullYear(),
-                6,
-                1
-            ).getTimezoneOffset();
-            var winterOffset = start.getTimezoneOffset();
-            var dst =
-                (summerOffset != winterOffset &&
-                    date.getTimezoneOffset() ==
-                        Math.min(winterOffset, summerOffset)) | 0;
-            HEAP32[(tmPtr + 32) >> 2] = dst;
-        }
-
-        function __mmap_js(len, prot, flags, fd, offset, allocated, addr) {
-            offset = bigintToI53Checked(offset);
-
-            try {
-                if (isNaN(offset)) return 61;
-                var stream = SYSCALLS.getStreamFromFD(fd);
-                var res = FS.mmap(stream, len, offset, prot, flags);
-                var ptr = res.ptr;
-                HEAP32[allocated >> 2] = res.allocated;
-                HEAPU32[addr >> 2] = ptr;
-                return 0;
-            } catch (e) {
-                if (typeof FS == "undefined" || !(e.name === "ErrnoError"))
-                    throw e;
-                return -e.errno;
-            }
-        }
-
-        function __munmap_js(addr, len, prot, flags, fd, offset) {
-            offset = bigintToI53Checked(offset);
-
-            try {
-                var stream = SYSCALLS.getStreamFromFD(fd);
-                if (prot & 2) {
-                    SYSCALLS.doMsync(addr, stream, len, flags, offset);
-                }
-            } catch (e) {
-                if (typeof FS == "undefined" || !(e.name === "ErrnoError"))
-                    throw e;
-                return -e.errno;
-            }
-        }
-
-        var __tzset_js = (timezone, daylight, std_name, dst_name) => {
-            var currentYear = new Date().getFullYear();
-            var winter = new Date(currentYear, 0, 1);
-            var summer = new Date(currentYear, 6, 1);
-            var winterOffset = winter.getTimezoneOffset();
-            var summerOffset = summer.getTimezoneOffset();
-
-            var stdTimezoneOffset = Math.max(winterOffset, summerOffset);
-
-            HEAPU32[timezone >> 2] = stdTimezoneOffset * 60;
-
-            HEAP32[daylight >> 2] = Number(winterOffset != summerOffset);
-
-            var extractZone = (timezoneOffset) => {
-                var sign = timezoneOffset >= 0 ? "-" : "+";
-
-                var absOffset = Math.abs(timezoneOffset);
-                var hours = String(Math.floor(absOffset / 60)).padStart(2, "0");
-                var minutes = String(absOffset % 60).padStart(2, "0");
-
-                return `UTC${sign}${hours}${minutes}`;
-            };
-
-            var winterName = extractZone(winterOffset);
-            var summerName = extractZone(summerOffset);
-            if (summerOffset < winterOffset) {
-                stringToUTF8(winterName, std_name, 17);
-                stringToUTF8(summerName, dst_name, 17);
-            } else {
-                stringToUTF8(winterName, dst_name, 17);
-                stringToUTF8(summerName, std_name, 17);
-            }
-        };
-
-        var _emscripten_date_now = () => Date.now();
-
-        var _emscripten_get_now = () => performance.now();
+        // Destructure WASI functions for use in wasmImports
+        const {
+            __emscripten_get_now_is_monotonic,
+            __localtime_js,
+            __mmap_js,
+            __munmap_js,
+            __tzset_js,
+            _emscripten_date_now,
+            _emscripten_get_now,
+            _environ_get,
+            _environ_sizes_get,
+            _fd_close,
+            _fd_fdstat_get,
+            _fd_read,
+            _fd_seek,
+            _fd_sync,
+            _fd_write,
+        } = wasiFunctions;
 
         var getHeapMax = () => 2147483648;
 
@@ -2453,203 +2347,6 @@ var sqlite3InitModule = (() => {
             return false;
         };
 
-        var ENV = {};
-
-        var getExecutableName = () => {
-            return thisProgram || "./this.program";
-        };
-        var getEnvStrings = () => {
-            if (!getEnvStrings.strings) {
-                var lang =
-                    (
-                        (typeof navigator == "object" &&
-                            navigator.languages &&
-                            navigator.languages[0]) ||
-                        "C"
-                    ).replace("-", "_") + ".UTF-8";
-                var env = {
-                    USER: "web_user",
-                    LOGNAME: "web_user",
-                    PATH: "/",
-                    PWD: "/",
-                    HOME: "/home/web_user",
-                    LANG: lang,
-                    _: getExecutableName(),
-                };
-
-                for (var x in ENV) {
-                    if (ENV[x] === undefined) delete env[x];
-                    else env[x] = ENV[x];
-                }
-                var strings = [];
-                for (let x in env) {
-                    strings.push(`${x}=${env[x]}`);
-                }
-                getEnvStrings.strings = strings;
-            }
-            return getEnvStrings.strings;
-        };
-
-        var stringToAscii = (str, buffer) => {
-            for (var i = 0; i < str.length; ++i) {
-                HEAP8[buffer++] = str.charCodeAt(i);
-            }
-
-            HEAP8[buffer] = 0;
-        };
-        var _environ_get = (__environ, environ_buf) => {
-            var bufSize = 0;
-            getEnvStrings().forEach((string, i) => {
-                var ptr = environ_buf + bufSize;
-                HEAPU32[(__environ + i * 4) >> 2] = ptr;
-                stringToAscii(string, ptr);
-                bufSize += string.length + 1;
-            });
-            return 0;
-        };
-
-        var _environ_sizes_get = (penviron_count, penviron_buf_size) => {
-            var strings = getEnvStrings();
-            HEAPU32[penviron_count >> 2] = strings.length;
-            var bufSize = 0;
-            strings.forEach((string) => (bufSize += string.length + 1));
-            HEAPU32[penviron_buf_size >> 2] = bufSize;
-            return 0;
-        };
-
-        function _fd_close(fd) {
-            try {
-                var stream = SYSCALLS.getStreamFromFD(fd);
-                FS.close(stream);
-                return 0;
-            } catch (e) {
-                if (typeof FS == "undefined" || !(e.name === "ErrnoError"))
-                    throw e;
-                return e.errno;
-            }
-        }
-
-        function _fd_fdstat_get(fd, pbuf) {
-            try {
-                var rightsBase = 0;
-                var rightsInheriting = 0;
-                var flags = 0;
-                {
-                    var stream = SYSCALLS.getStreamFromFD(fd);
-
-                    var type = stream.tty
-                        ? 2
-                        : FS.isDir(stream.mode)
-                        ? 3
-                        : FS.isLink(stream.mode)
-                        ? 7
-                        : 4;
-                }
-                HEAP8[pbuf] = type;
-                HEAP16[(pbuf + 2) >> 1] = flags;
-                HEAP64[(pbuf + 8) >> 3] = BigInt(rightsBase);
-                HEAP64[(pbuf + 16) >> 3] = BigInt(rightsInheriting);
-                return 0;
-            } catch (e) {
-                if (typeof FS == "undefined" || !(e.name === "ErrnoError"))
-                    throw e;
-                return e.errno;
-            }
-        }
-
-        var doReadv = (stream, iov, iovcnt, offset) => {
-            var ret = 0;
-            for (var i = 0; i < iovcnt; i++) {
-                var ptr = HEAPU32[iov >> 2];
-                var len = HEAPU32[(iov + 4) >> 2];
-                iov += 8;
-                var curr = FS.read(stream, HEAP8, ptr, len, offset);
-                if (curr < 0) return -1;
-                ret += curr;
-                if (curr < len) break;
-                if (typeof offset != "undefined") {
-                    offset += curr;
-                }
-            }
-            return ret;
-        };
-
-        function _fd_read(fd, iov, iovcnt, pnum) {
-            try {
-                var stream = SYSCALLS.getStreamFromFD(fd);
-                var num = doReadv(stream, iov, iovcnt);
-                HEAPU32[pnum >> 2] = num;
-                return 0;
-            } catch (e) {
-                if (typeof FS == "undefined" || !(e.name === "ErrnoError"))
-                    throw e;
-                return e.errno;
-            }
-        }
-
-        function _fd_seek(fd, offset, whence, newOffset) {
-            offset = bigintToI53Checked(offset);
-
-            try {
-                if (isNaN(offset)) return 61;
-                var stream = SYSCALLS.getStreamFromFD(fd);
-                FS.llseek(stream, offset, whence);
-                HEAP64[newOffset >> 3] = BigInt(stream.position);
-                if (stream.getdents && offset === 0 && whence === 0)
-                    stream.getdents = null;
-                return 0;
-            } catch (e) {
-                if (typeof FS == "undefined" || !(e.name === "ErrnoError"))
-                    throw e;
-                return e.errno;
-            }
-        }
-
-        function _fd_sync(fd) {
-            try {
-                var stream = SYSCALLS.getStreamFromFD(fd);
-                if (stream.stream_ops?.fsync) {
-                    return stream.stream_ops.fsync(stream);
-                }
-                return 0;
-            } catch (e) {
-                if (typeof FS == "undefined" || !(e.name === "ErrnoError"))
-                    throw e;
-                return e.errno;
-            }
-        }
-
-        var doWritev = (stream, iov, iovcnt, offset) => {
-            var ret = 0;
-            for (var i = 0; i < iovcnt; i++) {
-                var ptr = HEAPU32[iov >> 2];
-                var len = HEAPU32[(iov + 4) >> 2];
-                iov += 8;
-                var curr = FS.write(stream, HEAP8, ptr, len, offset);
-                if (curr < 0) return -1;
-                ret += curr;
-                if (curr < len) {
-                    break;
-                }
-                if (typeof offset != "undefined") {
-                    offset += curr;
-                }
-            }
-            return ret;
-        };
-
-        function _fd_write(fd, iov, iovcnt, pnum) {
-            try {
-                var stream = SYSCALLS.getStreamFromFD(fd);
-                var num = doWritev(stream, iov, iovcnt);
-                HEAPU32[pnum >> 2] = num;
-                return 0;
-            } catch (e) {
-                if (typeof FS == "undefined" || !(e.name === "ErrnoError"))
-                    throw e;
-                return e.errno;
-            }
-        }
 
         FS.createPreloadedFile = FS_createPreloadedFile;
 
