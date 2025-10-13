@@ -350,7 +350,7 @@ const installAsyncProxy = function () {
         if (state.opfsFlags.OPFS_UNLINK_BEFORE_OPEN & opfsFlags) {
           try {
             await hDir.removeEntry(filenamePart);
-          } catch (e) {}
+          } catch (_e) {}
         }
         const hFile = await hDir.getFileHandle(filenamePart, { create });
         const fh = Object.assign(Object.create(null), {
@@ -395,7 +395,7 @@ const installAsyncProxy = function () {
       await releaseImplicitLock(fh);
       storeAndNotify("xRead", rc);
     },
-    xSync: async function (fid, flags) {
+    xSync: async function (fid, _flags) {
       const fh = __openFiles[fid];
       let rc = 0;
       if (!fh.readOnly && fh.syncHandle) {
