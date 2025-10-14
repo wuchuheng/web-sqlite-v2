@@ -44,6 +44,13 @@ import { createMEMFS } from "./memfs.mjs";
 import { createSYSCALLS } from "./syscalls.mjs";
 import { createWASIFunctions } from "./wasi-functions.mjs";
 import { createFS as createFileSystem } from "./filesystem.mjs";
+import {
+    randomFill as randomFillUtil,
+    zeroMemory,
+    alignMemory,
+    createMmapAlloc,
+} from "./utils/memory-utils.mjs";
+import { createAsyncLoad } from "./utils/async-utils.mjs";
 
 export let Module;
 
@@ -418,49 +425,16 @@ var sqlite3InitModule = (() => {
             callbacks.forEach((f) => f(Module));
         };
 
-        var initRandomFill = () => {
-            if (
-                typeof crypto == "object" &&
-                typeof crypto["getRandomValues"] == "function"
-            ) {
-                return (view) => crypto.getRandomValues(view);
-            } else abort("initRandomDevice");
-        };
-        var randomFill = (view) => {
-            return (randomFill = initRandomFill())(view);
-        };
+        var randomFill = randomFillUtil;
 
-        var zeroMemory = (address, size) => {
-            HEAPU8.fill(0, address, address + size);
-        };
+        var mmapAlloc = createMmapAlloc(_emscripten_builtin_memalign, HEAPU8);
 
-        var alignMemory = (size, alignment) => {
-            return Math.ceil(size / alignment) * alignment;
-        };
-        var mmapAlloc = (size) => {
-            size = alignMemory(size, 65536);
-            var ptr = _emscripten_builtin_memalign(65536, size);
-            if (ptr) zeroMemory(ptr, size);
-            return ptr;
-        };
-
-        var asyncLoad = (url, onload, onerror, noRunDep) => {
-            var dep = !noRunDep ? getUniqueRunDependency(`al ${url}`) : "";
-            readAsync(url).then(
-                (arrayBuffer) => {
-                    onload(new Uint8Array(arrayBuffer));
-                    if (dep) removeRunDependency(dep);
-                },
-                (_err) => {
-                    if (onerror) {
-                        onerror();
-                    } else {
-                        throw `Loading data file "${url}" failed.`;
-                    }
-                }
-            );
-            if (dep) addRunDependency(dep);
-        };
+        var asyncLoad = createAsyncLoad(
+            readAsync,
+            getUniqueRunDependency,
+            addRunDependency,
+            removeRunDependency
+        );
 
         var FS_createDataFile = (
             parent,
@@ -695,7 +669,7 @@ var sqlite3InitModule = (() => {
         FS.createPreloadedFile = FS_createPreloadedFile;
 
         // Create MEMFS after FS is fully defined
-        var MEMFS = createMEMFS(FS, HEAP8, mmapAlloc, zeroMemory);
+        var MEMFS = createMEMFS(FS, HEAP8, mmapAlloc, (address, size) => zeroMemory(HEAPU8, address, size));
 
         // Initialize TTY operations with FS reference
         var TTY = createTTY(out, err, FS);
