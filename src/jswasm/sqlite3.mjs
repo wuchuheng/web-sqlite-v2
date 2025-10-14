@@ -51,6 +51,7 @@ import {
     createMmapAlloc,
 } from "./utils/memory-utils.mjs";
 import { createAsyncLoad } from "./utils/async-utils.mjs";
+import { wrapSqlite3InitModule } from "./utils/sqlite3-init-wrapper.mjs";
 
 export let Module;
 
@@ -2303,68 +2304,5 @@ var sqlite3InitModule = (() => {
     };
 })();
 
-const toExportForESM = (function () {
-    const originalInit = sqlite3InitModule;
-    if (!originalInit) {
-        throw new Error(
-            "Expecting globalThis.sqlite3InitModule to be defined by the Emscripten build."
-        );
-    }
-
-    const initModuleState = (globalThis.sqlite3InitModuleState = Object.assign(
-        Object.create(null),
-        {
-            moduleScript: globalThis?.document?.currentScript,
-            isWorker: "undefined" !== typeof WorkerGlobalScope,
-            location: globalThis.location,
-            urlParams: globalThis?.location?.href
-                ? new URL(globalThis.location.href).searchParams
-                : new URLSearchParams(),
-        }
-    ));
-    initModuleState.debugModule = initModuleState.urlParams.has(
-        "sqlite3.debugModule"
-    )
-        ? (...args) => console.warn("sqlite3.debugModule:", ...args)
-        : () => {};
-
-    if (initModuleState.urlParams.has("sqlite3.dir")) {
-        initModuleState.sqlite3Dir =
-            initModuleState.urlParams.get("sqlite3.dir") + "/";
-    } else if (initModuleState.moduleScript) {
-        const li = initModuleState.moduleScript.src.split("/");
-        li.pop();
-        initModuleState.sqlite3Dir = li.join("/") + "/";
-    }
-
-    globalThis.sqlite3InitModule = function ff(...args) {
-        return originalInit(...args)
-            .then((EmscriptenModule) => {
-                EmscriptenModule.runSQLite3PostLoadInit(EmscriptenModule);
-                const s = EmscriptenModule.sqlite3;
-                s.scriptInfo = initModuleState;
-
-                if (ff.__isUnderTest) s.__isUnderTest = true;
-                const f = s.asyncPostInit;
-                delete s.asyncPostInit;
-                const rv = f();
-                return rv;
-            })
-            .catch((e) => {
-                console.error("Exception loading sqlite3 module:", e);
-                throw e;
-            });
-    };
-    globalThis.sqlite3InitModule.ready = originalInit.ready;
-
-    if (globalThis.sqlite3InitModuleState.moduleScript) {
-        const sim = globalThis.sqlite3InitModuleState;
-        let src = sim.moduleScript.src.split("/");
-        src.pop();
-        sim.scriptDir = src.join("/") + "/";
-    }
-    initModuleState.debugModule("sqlite3InitModuleState =", initModuleState);
-    return globalThis.sqlite3InitModule;
-})();
-sqlite3InitModule = toExportForESM;
+sqlite3InitModule = wrapSqlite3InitModule(sqlite3InitModule);
 export default sqlite3InitModule;
