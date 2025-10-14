@@ -32,18 +32,18 @@
  **
  ** Using the Emscripten SDK version 3.1.70.
  */
-import { runSQLite3PostLoadInit } from "./sqlite3Apibootstrap.mjs";
+import { runSQLite3PostLoadInit } from "./wasm/sqlite3Apibootstrap.mjs";
 import { PATH } from "./utils/path.mjs";
 import {
     UTF8ArrayToString,
     lengthBytesUTF8,
     stringToUTF8Array,
 } from "./utils/utf8.mjs";
-import { createTTY } from "./tty-operations.mjs";
-import { createMEMFS } from "./memfs.mjs";
-import { createSYSCALLS } from "./syscalls.mjs";
-import { createWASIFunctions } from "./wasi-functions.mjs";
-import { createFS as createFileSystem } from "./filesystem.mjs";
+import { createTTY } from "./system/tty-operations.mjs";
+import { createMEMFS } from "./vfs/memfs.mjs";
+import { createSYSCALLS } from "./system/syscalls.mjs";
+import { createWASIFunctions } from "./system/wasi-functions.mjs";
+import { createFS as createFileSystem } from "./vfs/filesystem.mjs";
 import {
     randomFill as randomFillUtil,
     zeroMemory,
@@ -53,7 +53,7 @@ import {
 import { createAsyncLoad } from "./utils/async-utils.mjs";
 import { wrapSqlite3InitModule } from "./utils/sqlite3-init-wrapper.mjs";
 import { createWasmLoader } from "./utils/wasm-loader.mjs";
-import { attachSqlite3WasmExports } from "./sqlite3-wasm-exports.mjs";
+import { attachSqlite3WasmExports } from "./wasm/sqlite3-wasm-exports.mjs";
 
 export let Module;
 
@@ -88,6 +88,9 @@ var sqlite3InitModule = (() => {
         );
 
         Module["locateFile"] = function (path, _prefix) {
+            if (path === 'sqlite3.wasm') {
+                return new URL('./wasm/sqlite3.wasm', import.meta.url).href;
+            }
             return new URL(path, import.meta.url).href;
         }.bind(sqlite3InitModuleState);
 

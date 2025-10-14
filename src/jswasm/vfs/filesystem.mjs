@@ -13,12 +13,12 @@
  * for both in-memory databases and persistent OPFS-backed storage.
  */
 
-import { PATH, createPathFS } from "./utils/path.mjs";
+import { PATH, createPathFS } from "../utils/path.mjs";
 import {
     UTF8ArrayToString,
     lengthBytesUTF8,
     stringToUTF8Array,
-} from "./utils/utf8.mjs";
+} from "../utils/utf8.mjs";
 
 /**
  * Creates and returns the FS (File System) object with all its methods and state.

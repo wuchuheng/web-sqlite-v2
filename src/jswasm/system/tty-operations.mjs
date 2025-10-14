@@ -3,7 +3,7 @@
  * Handles terminal input/output and TTY device management.
  */
 
-import { UTF8ArrayToString, intArrayFromString } from "./utils/utf8.mjs";
+import { UTF8ArrayToString, intArrayFromString } from "../utils/utf8.mjs";
 
 /**
  * Buffer for stdin character input.

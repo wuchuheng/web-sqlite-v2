@@ -1,9 +1,9 @@
-import { Module, wasmExports } from "./sqlite3.mjs";
-import { createOpfsSahpoolInitializer } from "./opfs-sahpool-vfs.mjs";
-import { createInstallOpfsVfsContext } from "./install-opfs-vfs.mjs";
-import { StructBinderFactory } from "./struct-binder-factory.mjs";
-import { createInstallOo1Initializer } from "./install-oo1.mjs";
-import { createInstallOo1DbApiInitializer } from "./install-oo1-db-api.mjs";
+import { Module, wasmExports } from "../sqlite3.mjs";
+import { createOpfsSahpoolInitializer } from "../vfs/opfs/opfs-sahpool-vfs.mjs";
+import { createInstallOpfsVfsContext } from "../vfs/opfs/install-opfs-vfs.mjs";
+import { StructBinderFactory } from "../utils/struct-binder-factory.mjs";
+import { createInstallOo1Initializer } from "../api/install-oo1.mjs";
+import { createInstallOo1DbApiInitializer } from "../api/install-oo1-db-api.mjs";
 
 export function runSQLite3PostLoadInit(_EmscriptenModule) {
     "use strict";

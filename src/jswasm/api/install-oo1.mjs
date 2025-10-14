@@ -1,4 +1,4 @@
-import { createWhWasmUtilInstaller } from "./create-wh-wasm-util-installer.mjs";
+import { createWhWasmUtilInstaller } from "../utils/create-wh-wasm-util-installer.mjs";
 
 export function createInstallOo1Initializer() {
     const installWhWasmUtils = createWhWasmUtilInstaller();
