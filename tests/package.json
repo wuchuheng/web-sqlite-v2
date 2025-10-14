@@ -1,0 +1,22 @@
+{
+  "name": "@wuchuheng/web-sqlite-tests",
+  "version": "1.0.0",
+  "description": "Test suite for @wuchuheng/web-sqlite",
+  "type": "module",
+  "scripts": {
+    "dev": "vite",
+    "build": "tsc && vite build",
+    "preview": "vite preview",
+    "test": "vite --open"
+  },
+  "keywords": ["sqlite", "wasm", "opfs", "tests"],
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "@wuchuheng/web-sqlite": "workspace:*"
+  },
+  "devDependencies": {
+    "typescript": "^5.7.3",
+    "vite": "^6.0.11"
+  }
+}

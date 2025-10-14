@@ -1,13 +1,27 @@
 {
-  "name": "web-sqlite-v2",
+  "name": "@wuchuheng/web-sqlite",
   "version": "1.0.0",
-  "description": "",
-  "main": "index.js",
-  "scripts": {
-    "test": "tsx ./scripts/http-server.ts --base-path ./ --url-path-name /tests/index.html",
-    "lint": "eslint . --ext .ts,.js --fix"
+  "description": "SQLite3 WebAssembly implementation with OPFS support",
+  "type": "module",
+  "main": "./src/jswasm/sqlite3.mjs",
+  "types": "./src/types/index.d.ts",
+  "exports": {
+    ".": {
+      "types": "./src/types/index.d.ts",
+      "default": "./src/jswasm/sqlite3.mjs"
+    }
   },
-  "keywords": [],
+  "scripts": {
+    "test": "pnpm -w --filter @wuchuheng/web-sqlite-tests dev",
+    "lint": "eslint . --ext .ts,.js,.mjs --fix"
+  },
+  "keywords": [
+    "sqlite",
+    "wasm",
+    "opfs",
+    "webassembly",
+    "database"
+  ],
   "author": "",
   "license": "ISC",
   "packageManager": "pnpm@10.17.1",

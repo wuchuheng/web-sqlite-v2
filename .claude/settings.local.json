@@ -7,7 +7,12 @@
       "Bash(pnpm test)",
       "Bash(pkill:*)",
       "Bash(lsof:*)",
-      "Bash(xargs kill:*)"
+      "Bash(xargs kill:*)",
+      "Bash(pnpm list:*)",
+      "Bash(pnpm -w run --help)",
+      "Bash(pnpm -w run lint tests/src/worker.ts)",
+      "Bash(npx tsc:*)",
+      "Bash(pnpm -w run lint)"
     ],
     "deny": [],
     "ask": []
