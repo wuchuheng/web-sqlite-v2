@@ -52,6 +52,7 @@ import {
 } from "./utils/memory-utils.mjs";
 import { createAsyncLoad } from "./utils/async-utils.mjs";
 import { wrapSqlite3InitModule } from "./utils/sqlite3-init-wrapper.mjs";
+import { createWasmLoader } from "./utils/wasm-loader.mjs";
 import { attachSqlite3WasmExports } from "./sqlite3-wasm-exports.mjs";
 
 export let Module;
@@ -292,135 +293,6 @@ var sqlite3InitModule = (() => {
             readyPromiseReject(e);
 
             throw e;
-        }
-
-        var dataURIPrefix = "data:application/octet-stream;base64,";
-
-        var isDataURI = (filename) => filename.startsWith(dataURIPrefix);
-
-        function findWasmBinary() {
-            if (Module["locateFile"]) {
-                var f = "sqlite3.wasm";
-                if (!isDataURI(f)) {
-                    return locateFile(f);
-                }
-                return f;
-            }
-
-            return new URL("sqlite3.wasm", import.meta.url).href;
-        }
-
-        var wasmBinaryFile;
-
-        function getBinarySync(file) {
-            if (file == wasmBinaryFile && wasmBinary) {
-                return new Uint8Array(wasmBinary);
-            }
-            if (readBinary) {
-                return readBinary(file);
-            }
-            throw "both async and sync fetching of the wasm failed";
-        }
-
-        function getBinaryPromise(binaryFile) {
-            if (!wasmBinary) {
-                return readAsync(binaryFile).then(
-                    (response) => new Uint8Array(response),
-
-                    () => getBinarySync(binaryFile)
-                );
-            }
-
-            return Promise.resolve().then(() => getBinarySync(binaryFile));
-        }
-
-        function instantiateArrayBuffer(binaryFile, imports, receiver) {
-            return getBinaryPromise(binaryFile)
-                .then((binary) => {
-                    return WebAssembly.instantiate(binary, imports);
-                })
-                .then(receiver, (reason) => {
-                    err(`failed to asynchronously prepare wasm: ${reason}`);
-
-                    abort(reason);
-                });
-        }
-
-        function instantiateAsync(binary, binaryFile, imports, callback) {
-            if (
-                !binary &&
-                typeof WebAssembly.instantiateStreaming == "function" &&
-                !isDataURI(binaryFile) &&
-                typeof fetch == "function"
-            ) {
-                return fetch(binaryFile, { credentials: "same-origin" }).then(
-                    (response) => {
-                        var result = WebAssembly.instantiateStreaming(
-                            response,
-                            imports
-                        );
-
-                        return result.then(callback, function (reason) {
-                            err(`wasm streaming compile failed: ${reason}`);
-                            err("falling back to ArrayBuffer instantiation");
-                            return instantiateArrayBuffer(
-                                binaryFile,
-                                imports,
-                                callback
-                            );
-                        });
-                    }
-                );
-            }
-            return instantiateArrayBuffer(binaryFile, imports, callback);
-        }
-
-        function getWasmImports() {
-            return {
-                env: wasmImports,
-                wasi_snapshot_preview1: wasmImports,
-            };
-        }
-
-        function createWasm() {
-            var info = getWasmImports();
-
-            function receiveInstance(instance, _module) {
-                wasmExports = instance.exports;
-
-                addOnInit(wasmExports["__wasm_call_ctors"]);
-
-                removeRunDependency("wasm-instantiate");
-                return wasmExports;
-            }
-
-            addRunDependency("wasm-instantiate");
-
-            function receiveInstantiationResult(result) {
-                receiveInstance(result["instance"]);
-            }
-
-            if (Module["instantiateWasm"]) {
-                try {
-                    return Module["instantiateWasm"](info, receiveInstance);
-                } catch (e) {
-                    err(
-                        `Module.instantiateWasm callback failed with error: ${e}`
-                    );
-
-                    readyPromiseReject(e);
-                }
-            }
-
-            wasmBinaryFile ??= findWasmBinary();
-
-            instantiateAsync(
-                wasmBinary,
-                wasmBinaryFile,
-                info,
-                receiveInstantiationResult
-            ).catch(readyPromiseReject);
-            return {};
         }
 
         var callRuntimeCallbacks = (callbacks) => {
@@ -753,6 +625,26 @@ var sqlite3InitModule = (() => {
 
             memory: wasmMemory,
         };
+        const { createWasm } = createWasmLoader({
+            Module,
+            wasmBinary,
+            locateFile,
+            readAsync,
+            readBinary,
+            addRunDependency,
+            removeRunDependency,
+            readyPromiseReject,
+            addOnInit,
+            abort,
+            err,
+            getWasmImports: () => ({
+                env: wasmImports,
+                wasi_snapshot_preview1: wasmImports,
+            }),
+            setWasmExports: (exportsValue) => {
+                wasmExports = exportsValue;
+            },
+        });
         wasmExports = createWasm();
         const { emscriptenBuiltinMemalign } = attachSqlite3WasmExports(
             Module,
