@@ -4,21 +4,1351 @@
 <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4"></script>
+    <title>SQLite3 OPFS/WASM Test Runner</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
 
-    <title>SQLite3 OPFS Demo - User Management</title>
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+            background: #f5f5f5;
+            overflow: hidden;
+        }
+
+        .header {
+            background: white;
+            border-bottom: 1px solid #e5e7eb;
+            padding: 8px 16px;
+        }
+
+        .header-content {
+            display: flex;
+            align-items: center;
+            justify-between;
+        }
+
+        .header-title {
+            font-size: 14px;
+            font-weight: 600;
+            color: #1f2937;
+        }
+
+        .header-actions {
+            display: flex;
+            gap: 8px;
+        }
+
+        .btn {
+            padding: 6px 12px;
+            font-size: 13px;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            font-weight: 500;
+            transition: background-color 0.15s;
+        }
+
+        .btn-primary {
+            background: #10b981;
+            color: white;
+        }
+
+        .btn-primary:hover {
+            background: #059669;
+        }
+
+        .btn-secondary {
+            background: #e5e7eb;
+            color: #374151;
+        }
+
+        .btn-secondary:hover {
+            background: #d1d5db;
+        }
+
+        .btn:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+
+        .toolbar {
+            background: white;
+            border-bottom: 1px solid #e5e7eb;
+            padding: 6px 16px;
+            display: flex;
+            align-items: center;
+            justify-between;
+            font-size: 12px;
+        }
+
+        .toolbar-left,
+        .toolbar-right {
+            display: flex;
+            gap: 16px;
+            align-items: center;
+        }
+
+        .env-item {
+            display: flex;
+            align-items: center;
+            gap: 4px;
+        }
+
+        .progress-bar {
+            height: 2px;
+            background: #e5e7eb;
+            position: relative;
+        }
+
+        .progress-fill {
+            height: 100%;
+            background: #10b981;
+            transition: width 0.3s;
+        }
+
+        .split-layout {
+            display: flex;
+            height: calc(100vh - 100px);
+        }
+
+        .left-panel {
+            width: 40%;
+            min-width: 300px;
+            border-right: 1px solid #e5e7eb;
+            overflow-y: auto;
+            background: white;
+        }
+
+        .right-panel {
+            flex: 1;
+            overflow-y: auto;
+            background: #1e1e1e;
+            color: #d4d4d4;
+        }
+
+        .suite-header {
+            padding: 8px 12px;
+            background: #f9fafb;
+            border-bottom: 1px solid #e5e7eb;
+            font-size: 13px;
+            font-weight: 600;
+            cursor: pointer;
+            user-select: none;
+            display: flex;
+            align-items: center;
+            justify-between;
+        }
+
+        .suite-header:hover {
+            background: #f3f4f6;
+        }
+
+        .suite-stats {
+            font-size: 11px;
+            font-weight: 400;
+            display: flex;
+            gap: 12px;
+            align-items: center;
+        }
+
+        .test-item {
+            padding: 6px 12px 6px 24px;
+            border-left: 3px solid transparent;
+            cursor: pointer;
+            transition: background-color 0.15s;
+            display: flex;
+            align-items: center;
+            justify-between;
+            font-size: 13px;
+        }
+
+        .test-item:hover {
+            background: #f9fafb;
+        }
+
+        .test-item.selected {
+            background: #dbeafe;
+            border-left-color: #3b82f6;
+        }
+
+        .test-item.passed {
+            border-left-color: #10b981;
+        }
+
+        .test-item.failed {
+            border-left-color: #ef4444;
+        }
+
+        .test-item.running {
+            border-left-color: #3b82f6;
+            background: #eff6ff;
+        }
+
+        .test-name {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            flex: 1;
+        }
+
+        .test-meta {
+            display: flex;
+            gap: 8px;
+            align-items: center;
+            font-size: 11px;
+            color: #9ca3af;
+        }
+
+        .status-icon {
+            width: 16px;
+            text-align: center;
+        }
+
+        .view-source-btn {
+            padding: 2px 6px;
+            font-size: 10px;
+            background: #e5e7eb;
+            border: 1px solid #d1d5db;
+            border-radius: 3px;
+            cursor: pointer;
+            color: #4b5563;
+            transition: all 0.15s;
+            opacity: 0;
+        }
+
+        .test-item:hover .view-source-btn {
+            opacity: 1;
+        }
+
+        .view-source-btn:hover {
+            background: #3b82f6;
+            border-color: #3b82f6;
+            color: white;
+        }
+
+        .test-item.active {
+            background: #dbeafe;
+        }
+
+        .test-passed .status-icon {
+            color: #10b981;
+        }
+
+        .test-failed .status-icon {
+            color: #ef4444;
+        }
+
+        .test-running .status-icon {
+            color: #3b82f6;
+            animation: pulse 1.5s ease-in-out infinite;
+        }
+
+        .test-pending .status-icon {
+            color: #d1d5db;
+        }
+
+        .log-container {
+            padding: 8px;
+            font-family: 'JetBrains Mono', 'Fira Code', 'Consolas', monospace;
+            font-size: 12px;
+            line-height: 1.6;
+        }
+
+        .log-entry {
+            padding: 2px 8px;
+            white-space: pre-wrap;
+            word-break: break-all;
+        }
+
+        .log-info {
+            color: #d4d4d4;
+        }
+
+        .log-success {
+            color: #4ade80;
+        }
+
+        .log-error {
+            color: #f87171;
+            background: rgba(248, 113, 113, 0.1);
+        }
+
+        .log-warn {
+            color: #fbbf24;
+            background: rgba(251, 191, 36, 0.1);
+        }
+
+        .log-suite {
+            color: #94a3b8;
+            font-weight: 600;
+            margin-top: 12px;
+            padding: 4px 8px;
+            background: rgba(100, 116, 139, 0.1);
+        }
+
+        .source-viewer {
+            padding: 16px;
+            background: #1e1e1e;
+            color: #d4d4d4;
+            font-family: 'JetBrains Mono', 'Fira Code', 'Consolas', monospace;
+            font-size: 13px;
+            line-height: 1.6;
+        }
+
+        .source-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 12px 16px;
+            background: #2d2d2d;
+            border-bottom: 1px solid #3e3e3e;
+            color: #d4d4d4;
+        }
+
+        .source-title {
+            font-size: 13px;
+            font-weight: 600;
+        }
+
+        .source-close-btn {
+            padding: 4px 12px;
+            font-size: 12px;
+            background: #3e3e3e;
+            border: none;
+            border-radius: 3px;
+            color: #d4d4d4;
+            cursor: pointer;
+            transition: background 0.15s;
+        }
+
+        .source-close-btn:hover {
+            background: #4e4e4e;
+        }
+
+        .source-code {
+            white-space: pre;
+            overflow-x: auto;
+        }
+
+        .source-line {
+            display: block;
+            padding: 0 8px;
+        }
+
+        .source-line:hover {
+            background: rgba(255, 255, 255, 0.05);
+        }
+
+        .keyword {
+            color: #569cd6;
+        }
+
+        .string {
+            color: #ce9178;
+        }
+
+        .comment {
+            color: #6a9955;
+        }
+
+        .function-name {
+            color: #dcdcaa;
+        }
+
+        .log-entry.highlight {
+            background: rgba(59, 130, 246, 0.15);
+            border-left: 3px solid #3b82f6;
+        }
+
+        .log-block-highlight {
+            background: rgba(16, 185, 129, 0.08);
+            border-left: 3px solid #10b981;
+            padding: 4px 0;
+            margin: 2px 0;
+        }
+
+        .log-block-group {
+            margin: 12px 0;
+            padding: 8px 0;
+            border-left: 3px solid transparent;
+            border-radius: 4px;
+        }
+
+        .log-block-group.active {
+            background: rgba(59, 130, 246, 0.08);
+            border-left-color: #3b82f6;
+            box-shadow: 0 0 0 1px rgba(59, 130, 246, 0.1);
+        }
+
+        .log-block-item {
+            margin: 6px 8px;
+            padding: 4px 0;
+            border-left: 2px solid transparent;
+            border-radius: 3px;
+            transition: all 0.2s;
+        }
+
+        .log-block-item.active {
+            background: rgba(16, 185, 129, 0.12);
+            border-left-color: #10b981;
+            border-left-width: 3px;
+            box-shadow: 0 0 0 1px rgba(16, 185, 129, 0.15);
+        }
+
+        .log-block-header {
+            padding: 6px 12px;
+            font-weight: 600;
+            color: #94a3b8;
+            background: rgba(100, 116, 139, 0.12);
+            margin: 0 0 8px 0;
+            border-radius: 3px;
+            font-size: 13px;
+        }
+
+        .log-block-item-header {
+            padding: 4px 12px;
+            font-weight: 500;
+            color: #64748b;
+            font-size: 11px;
+            margin-bottom: 2px;
+        }
+
+        .log-block-item .log-entry {
+            padding: 2px 12px;
+        }
+
+        .log-block-group>.log-entry {
+            padding: 2px 12px;
+        }
+
+        .suite-collapsed .suite-tests {
+            display: none;
+        }
+
+        .suite-tests {
+            display: block;
+        }
+
+        .suite-icon {
+            display: inline-block;
+            width: 16px;
+            height: 16px;
+            margin-right: 6px;
+            transition: transform 0.2s;
+            transform: rotate(180deg);
+            /* Point down when expanded */
+        }
+
+        .suite-collapsed .suite-icon {
+            transform: rotate(90deg);
+            /* Point right when collapsed */
+        }
+
+        .suite-status-icon {
+            margin-right: 8px;
+        }
+
+        .suite-status-icon.success {
+            color: #10b981;
+        }
+
+        .suite-status-icon.error {
+            color: #ef4444;
+        }
+
+        .suite-status-icon.running {
+            color: #3b82f6;
+        }
+
+        @keyframes pulse {
+
+            0%,
+            100% {
+                opacity: 1;
+            }
+
+            50% {
+                opacity: 0.4;
+            }
+        }
+
+        @keyframes spin {
+            from {
+                transform: rotate(0deg);
+            }
+
+            to {
+                transform: rotate(360deg);
+            }
+        }
+
+        .spinner {
+            display: inline-block;
+            animation: spin 1s linear infinite;
+        }
+
+        ::-webkit-scrollbar {
+            width: 10px;
+            height: 10px;
+        }
+
+        ::-webkit-scrollbar-track {
+            background: #f1f1f1;
+        }
+
+        ::-webkit-scrollbar-thumb {
+            background: #cbd5e1;
+            border-radius: 5px;
+        }
+
+        ::-webkit-scrollbar-thumb:hover {
+            background: #94a3b8;
+        }
+
+        .right-panel::-webkit-scrollbar-track {
+            background: #2d2d2d;
+        }
+
+        .right-panel::-webkit-scrollbar-thumb {
+            background: #4a4a4a;
+        }
+    </style>
 </head>
 
-<body class="bg-gray-50 min-h-screen">
-    <div class="container mx-auto px-4 py-8"></div>
-    <!-- // Allow es import  -->
+<body>
+    <!-- Header -->
+    <div class="header">
+        <div class="header-content">
+            <div class="header-title">SQLite3 OPFS/WASM Test Runner</div>
+            <div class="header-actions">
+                <button id="run-tests-btn" class="btn btn-primary">
+                    <span class="spinner" id="run-spinner" style="display: none;">⟳</span>
+                    <span id="run-btn-text">Rerun Tests</span>
+                </button>
+                <button id="clear-log-btn" class="btn btn-secondary">Clear Console</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Toolbar -->
+    <div class="toolbar">
+        <div class="toolbar-left">
+            <div class="env-item">
+                <span id="env-opfs-icon">⏳</span>
+                <span>OPFS: <span id="env-opfs-status">...</span></span>
+            </div>
+            <div class="env-item">
+                <span id="env-sab-icon">⏳</span>
+                <span>SAB: <span id="env-sab-status">...</span></span>
+            </div>
+            <div class="env-item">
+                <span id="env-worker-icon">⏳</span>
+                <span>Worker: <span id="env-worker-status">...</span></span>
+            </div>
+        </div>
+        <div class="toolbar-right">
+            <span id="test-progress-text">0 / 0 tests</span>
+            <span style="color: #10b981;">✓ <span id="test-passed-count">0</span></span>
+            <span style="color: #ef4444;">✗ <span id="test-failed-count">0</span></span>
+            <span style="font-weight: 600;" id="test-pass-rate">0%</span>
+        </div>
+    </div>
+
+    <!-- Progress Bar -->
+    <div class="progress-bar">
+        <div class="progress-fill" id="test-progress-bar" style="width: 0%"></div>
+    </div>
+
+    <!-- Two-Column Layout -->
+    <div class="split-layout">
+        <!-- Left Panel: Test Tree -->
+        <div class="left-panel">
+            <div id="test-tree"></div>
+        </div>
+
+        <!-- Right Panel: Console Log -->
+        <div class="right-panel">
+            <div class="log-container" id="console-log">
+                <div class="log-entry log-info">Initializing test runner...</div>
+            </div>
+        </div>
+    </div>
+
     <script type="module">
-        const worker = new Worker('./worker.js', { type: 'module' });
-        worker.postMessage({ cmd: 'start' });
+        /**
+         * Test UI Controller - JetBrains Style
+         */
+        class TestUIController {
+            constructor() {
+                // 1. Input handling - Initialize state
+                this.worker = null;
+                this.testStats = { total: 0, passed: 0, failed: 0 };
+                this.testTree = new Map();
+                this.testLogs = new Map();
+                this.suiteStats = new Map();
+                this.collapsedSuites = new Set();
+                this.isRunning = false;
+                this.viewMode = 'console';
+                this.activeTest = null;
+                this.consoleContent = '';
+                this.suiteIdMap = new Map(); // Map suite name to numeric ID
+                this.currentSuiteId = 0;
+                this.currentLogBlock = null; // Current active log block
+                this.currentTestId = null; // Current test ID (e.g., "1-2")
 
+                // 2. Core processing - Setup
+                this.initializeWorker();
+                this.setupEventListeners();
+                this.checkEnvironment();
 
+                // 3. Output handling - Auto-run tests after initialization
+                setTimeout(() => this.runTests(), 500);
+            }
 
+            /**
+             * Initialize Web Worker
+             */
+            initializeWorker() {
+                // 1. Input handling
+                try {
+                    // 2. Core processing
+                    this.worker = new Worker('./worker.js', { type: 'module' });
+                    this.worker.onmessage = (event) => this.handleWorkerMessage(event);
+                    this.worker.onerror = (error) => this.handleWorkerError(error);
 
+                    // 3. Output handling
+                    this.updateEnvironmentStatus('worker', 'ready', '✅', 'Ready');
+                } catch (error) {
+                    this.updateEnvironmentStatus('worker', 'error', '❌', 'Failed');
+                    this.logInitial('error', `Worker init failed: ${error.message}`);
+                }
+            }
+
+            /**
+             * Setup event listeners
+             */
+            setupEventListeners() {
+                // 1. Input handling
+                const runBtn = document.getElementById('run-tests-btn');
+                const clearBtn = document.getElementById('clear-log-btn');
+
+                // 2. Core processing
+                runBtn?.addEventListener('click', () => this.runTests());
+                clearBtn?.addEventListener('click', () => this.clearConsole());
+            }
+
+            /**
+             * Check environment
+             */
+            checkEnvironment() {
+                // 1. Input handling
+                const hasOPFS = typeof navigator.storage?.getDirectory === 'function';
+                const hasSAB = typeof SharedArrayBuffer !== 'undefined';
+
+                // 2. Core processing
+                this.updateEnvironmentStatus('opfs', hasOPFS ? 'ready' : 'error',
+                    hasOPFS ? '✅' : '❌', hasOPFS ? 'OK' : 'No');
+                this.updateEnvironmentStatus('sab', hasSAB ? 'ready' : 'error',
+                    hasSAB ? '✅' : '❌', hasSAB ? 'OK' : 'No');
+
+                // 3. Output handling
+                this.logInitial('info', `Environment: OPFS=${hasOPFS}, SAB=${hasSAB}`);
+            }
+
+            /**
+             * Update environment status
+             */
+            updateEnvironmentStatus(key, status, icon, text) {
+                // 1. Input handling
+                const iconEl = document.getElementById(`env-${key}-icon`);
+                const statusEl = document.getElementById(`env-${key}-status`);
+
+                // 2. Core processing
+                if (iconEl) iconEl.textContent = icon;
+                if (statusEl) statusEl.textContent = text;
+            }
+
+            /**
+             * Handle worker messages
+             */
+            handleWorkerMessage(event) {
+                // 1. Input handling
+                const { type, data } = event.data;
+
+                // 2. Core processing
+                switch (type) {
+                    case 'test-start':
+                        this.handleTestStart(data);
+                        break;
+                    case 'test-complete':
+                        this.handleTestComplete(data);
+                        break;
+                    case 'test-suite-complete':
+                        this.handleSuiteComplete(data);
+                        break;
+                    case 'all-tests-complete':
+                        this.handleAllComplete(data);
+                        break;
+                    case 'log':
+                        this.logInitial(data.level, data.message);
+                        break;
+                    case 'error':
+                        this.handleWorkerError(data.error);
+                        break;
+                }
+            }
+
+            /**
+             * Handle worker error
+             */
+            handleWorkerError(error) {
+                // 1. Input handling
+                this.logInitial('error', `Worker error: ${error.message || error}`);
+
+                // 2. Core processing
+                this.isRunning = false;
+                document.getElementById('run-tests-btn').disabled = false;
+                document.getElementById('run-spinner').style.display = 'none';
+            }
+
+            /**
+             * Run all tests
+             */
+            runTests() {
+                // 1. Input handling
+                if (this.isRunning) return;
+
+                // 2. Core processing
+                this.isRunning = true;
+                this.testStats = { total: 0, passed: 0, failed: 0 };
+                this.testTree.clear();
+                this.suiteIdMap.clear();
+                this.currentSuiteId = 0;
+                this.currentLogBlock = null;
+                this.currentTestId = null;
+                this.clearConsole();
+
+                // 3. Output handling
+                this.logInitial('info', '🚀 Starting test suite...\n');
+                document.getElementById('run-tests-btn').disabled = true;
+                document.getElementById('run-spinner').style.display = 'inline-block';
+                this.worker.postMessage({ cmd: 'run-tests' });
+            }
+
+            /**
+             * Handle test start
+             */
+            handleTestStart(data) {
+                // 1. Input handling
+                const { suite, test, source } = data;
+                const testKey = `${suite}::${test}`;
+
+                // 2. Core processing
+                // Assign suite ID if new suite
+                if (!this.testTree.has(suite)) {
+                    this.currentSuiteId++;
+                    this.suiteIdMap.set(suite, this.currentSuiteId);
+                    this.testTree.set(suite, []);
+                    this.suiteStats.set(suite, { passed: 0, failed: 0, duration: 0, startTime: performance.now() });
+
+                    // Create suite log block
+                    this.createSuiteLogBlock(suite, this.currentSuiteId);
+                }
+
+                const suiteId = this.suiteIdMap.get(suite);
+                const testIndex = this.testTree.get(suite).length + 1;
+                const testId = `${suiteId}-${testIndex}`;
+
+                this.testTree.get(suite).push({
+                    name: test,
+                    status: 'running',
+                    duration: null,
+                    source: source || null,
+                    testId: testId
+                });
+
+                this.testLogs.set(testKey, {
+                    testId: testId,
+                    suiteId: suiteId
+                });
+
+                // Create test log block
+                this.createTestLogBlock(suite, test, testId, suiteId);
+                this.currentTestId = testId;
+
+                // 3. Output handling
+                this.renderTestTree();
+            }
+
+            /**
+             * Handle test complete
+             */
+            handleTestComplete(data) {
+                // 1. Input handling
+                const { suite, test, passed, error, duration } = data;
+                const testKey = `${suite}::${test}`;
+
+                // 2. Core processing
+                if (passed) {
+                    this.testStats.passed++;
+                } else {
+                    this.testStats.failed++;
+                }
+                this.testStats.total++;
+
+                const tests = this.testTree.get(suite);
+                const testItem = tests?.find(t => t.name === test);
+                if (testItem) {
+                    testItem.status = passed ? 'passed' : 'failed';
+                    testItem.error = error;
+                    testItem.duration = duration;
+                }
+
+                const logInfo = this.testLogs.get(testKey);
+                const testId = logInfo?.testId;
+
+                // 3. Output handling
+                this.renderTestTree();
+                this.updateProgress();
+
+                const icon = passed ? '✓' : '✗';
+                const level = passed ? 'success' : 'error';
+                this.logToBlock(testId, level, `${icon} ${test} (${duration}ms)`);
+                if (error) {
+                    this.logToBlock(testId, 'error', `  └─ ${error}`);
+                }
+            }
+
+            /**
+             * Handle suite complete
+             */
+            handleSuiteComplete(data) {
+                // 1. Input handling
+                const { suite, passed, failed, duration } = data;
+
+                // 2. Core processing
+                const stats = this.suiteStats.get(suite);
+                if (stats) {
+                    stats.passed = passed;
+                    stats.failed = failed;
+                    stats.duration = duration;
+                }
+
+                const suiteId = this.suiteIdMap.get(suite);
+
+                this.renderTestTree();
+                this.logToBlock(suiteId, 'info', `✓ Suite completed: ${passed} passed, ${failed} failed (${duration}ms)`);
+            }
+
+            /**
+             * Handle all tests complete
+             */
+            handleAllComplete(data) {
+                // 1. Input handling
+                const { total, passed, failed, duration } = data;
+
+                // 2. Core processing
+                this.isRunning = false;
+
+                // 3. Output handling
+                document.getElementById('run-tests-btn').disabled = false;
+                document.getElementById('run-spinner').style.display = 'none';
+
+                this.logFinal('success', `\n${'='.repeat(60)}`);
+                this.logFinal('success', `🏁 All tests completed in ${duration}ms`);
+                this.logFinal('success', `   Total: ${total} | Passed: ${passed} | Failed: ${failed}`);
+                this.logFinal('success', `   Success Rate: ${((passed / total) * 100).toFixed(1)}%`);
+                this.logFinal('success', `${'='.repeat(60)}`);
+            }
+
+            /**
+             * Render test tree
+             */
+            renderTestTree() {
+                // 1. Input handling
+                const container = document.getElementById('test-tree');
+                if (!container) return;
+
+                // 2. Core processing - Generate SVG icons
+                const chevronSvg = `<svg class="suite-icon" viewBox="0 0 16 16" fill="currentColor"><path d="M4.427 9.573l3.396-3.396a.25.25 0 01.354 0l3.396 3.396a.25.25 0 01-.177.427H4.604a.25.25 0 01-.177-.427z"/></svg>`;
+
+                const html = Array.from(this.testTree.entries()).map(([suite, tests]) => {
+                    const passed = tests.filter(t => t.status === 'passed').length;
+                    const failed = tests.filter(t => t.status === 'failed').length;
+                    const running = tests.filter(t => t.status === 'running').length;
+                    const total = tests.length;
+                    const stats = this.suiteStats.get(suite);
+                    const suiteDuration = stats?.duration || 0;
+
+                    // Suite status icon
+                    let suiteStatusIcon = '○';
+                    let suiteStatusClass = '';
+                    if (running > 0) {
+                        suiteStatusIcon = '▶';
+                        suiteStatusClass = 'running';
+                    } else if (failed > 0) {
+                        suiteStatusIcon = '✗';
+                        suiteStatusClass = 'error';
+                    } else if (passed === total && total > 0) {
+                        suiteStatusIcon = '✓';
+                        suiteStatusClass = 'success';
+                    }
+
+                    const isCollapsed = this.collapsedSuites.has(suite);
+                    const suiteClass = isCollapsed ? 'suite-collapsed' : '';
+
+                    const suiteHtml = `
+                        <div class="suite-wrapper ${suiteClass}" data-suite="${suite}">
+                            <div class="suite-header" data-suite="${suite}">
+                                ${chevronSvg}
+                                <span class="suite-status-icon ${suiteStatusClass}">${suiteStatusIcon}</span>
+                                <span>${suite}</span>
+                                <span class="suite-stats">
+                                    <span>${passed}/${total}</span>
+                                    <span>${suiteDuration}ms</span>
+                                </span>
+                            </div>
+                            <div class="suite-tests">
+                                ${tests.map((test) => {
+                        const statusClass = `test-${test.status}`;
+                        const icon = test.status === 'passed' ? '✓' :
+                            test.status === 'failed' ? '✗' :
+                                test.status === 'running' ? '▶' : '○';
+                        const testKey = `${suite}::${test.name}`;
+                        const testId = test.testId || '';
+                        const isActive = this.activeTest === testKey ? 'active' : '';
+
+                        return `
+                                    <div class="test-item ${statusClass} ${isActive}" data-test-key="${testKey}" data-test-id="${testId}">
+                                        <div class="test-name">
+                                            <span class="status-icon">${icon}</span>
+                                            <span>${test.name}</span>
+                                        </div>
+                                        <div class="test-meta">
+                                            ${test.duration !== null ? `<span>${test.duration}ms</span>` : ''}
+                                            <button class="view-source-btn" data-action="view-source" data-test-key="${testKey}">📄 Source</button>
+                                        </div>
+                                    </div>
+                                `;
+                    }).join('')}
+                            </div>
+                        </div>
+                    `;
+                    return suiteHtml;
+                }).join('');
+
+                // 3. Output handling
+                container.innerHTML = html || '<div style="padding: 16px; color: #9ca3af;">No tests available</div>';
+
+                // Attach event listeners for suite headers (folding)
+                container.querySelectorAll('.suite-header').forEach(header => {
+                    header.addEventListener('click', (e) => {
+                        const suite = e.currentTarget.dataset.suite;
+                        this.toggleSuite(suite);
+                    });
+                });
+
+                // Attach event listeners for test items
+                container.querySelectorAll('.test-item').forEach(item => {
+                    const testKey = item.dataset.testKey;
+                    item.addEventListener('click', (e) => {
+                        if (e.target.dataset.action !== 'view-source') {
+                            this.scrollToTestLogs(testKey);
+                        }
+                    });
+                });
+
+                // Attach event listeners for source buttons
+                container.querySelectorAll('.view-source-btn').forEach(btn => {
+                    btn.addEventListener('click', (e) => {
+                        e.stopPropagation();
+                        const testKey = e.target.dataset.testKey;
+                        this.showTestSource(testKey);
+                    });
+                });
+            }
+
+            /**
+             * Toggle suite collapse/expand
+             */
+            toggleSuite(suite) {
+                // 1. Input handling
+                if (this.collapsedSuites.has(suite)) {
+                    this.collapsedSuites.delete(suite);
+                } else {
+                    this.collapsedSuites.add(suite);
+                }
+
+                // 2. Core processing - Re-render
+                this.renderTestTree();
+            }
+
+            /**
+             * Update progress
+             */
+            updateProgress() {
+                // 1. Input handling
+                const { total, passed, failed } = this.testStats;
+
+                // 2. Core processing
+                const percentage = total > 0 ? (total / 51) * 100 : 0;
+                const passRate = total > 0 ? (passed / total) * 100 : 0;
+
+                // 3. Output handling
+                document.getElementById('test-progress-text').textContent = `${total} / 51 tests`;
+                document.getElementById('test-pass-rate').textContent = `${passRate.toFixed(1)}%`;
+                document.getElementById('test-progress-bar').style.width = `${percentage}%`;
+                document.getElementById('test-passed-count').textContent = passed;
+                document.getElementById('test-failed-count').textContent = failed;
+            }
+
+            /**
+             * Log to console
+             */
+            log(level, message) {
+                // 1. Input handling
+                const consoleLog = document.getElementById('console-log');
+
+                // 2. Core processing
+                const levelClass = `log-${level === 'success' ? 'success' :
+                    level === 'error' ? 'error' :
+                        level === 'warn' ? 'warn' : 'info'}`;
+
+                const entry = document.createElement('div');
+                entry.className = `log-entry ${levelClass}`;
+                entry.textContent = message;
+
+                // Save to consoleContent for restoration
+                this.consoleContent += entry.outerHTML;
+
+                // 3. Output handling - Append if console exists
+                if (consoleLog) {
+                    consoleLog.appendChild(entry);
+                    consoleLog.parentElement.scrollTop = consoleLog.parentElement.scrollHeight;
+                }
+            }
+
+            /**
+             * Clear console
+             */
+            clearConsole() {
+                // 1. Input handling
+                const consoleLog = document.getElementById('console-log');
+
+                // 2. Core processing
+                this.consoleContent = '';
+                if (consoleLog) {
+                    consoleLog.innerHTML = '';
+                }
+            }
+
+            /**
+             * Scroll to test logs
+             */
+            scrollToTestLogs(testKey) {
+                // 1. Input handling
+                this.activeTest = testKey;
+
+                // Restore console if in source view
+                if (this.viewMode === 'source') {
+                    this.viewMode = 'console';
+                    this.renderRightPanel();
+                }
+
+                this.renderTestTree();
+
+                const logInfo = this.testLogs.get(testKey);
+                if (!logInfo) return;
+
+                const { testId, suiteId } = logInfo;
+
+                // 2. Core processing - Wait for console to be restored
+                setTimeout(() => {
+                    const consoleLog = document.getElementById('console-log');
+                    if (!consoleLog) return;
+
+                    // Clear all previous active states
+                    consoleLog.querySelectorAll('.log-block-group.active, .log-block-item.active').forEach(el => {
+                        el.classList.remove('active');
+                    });
+
+                    // Activate the suite log block
+                    const suiteBlock = consoleLog.querySelector(`[data-log-id="group-${suiteId}"]`);
+                    if (suiteBlock) {
+                        suiteBlock.classList.add('active');
+                    }
+
+                    // Activate the test log block
+                    const testBlock = consoleLog.querySelector(`[data-log-id="item-${testId}"]`);
+                    if (testBlock) {
+                        testBlock.classList.add('active');
+
+                        // 3. Output handling - Scroll to test log block (centered)
+                        testBlock.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                    }
+                }, 100);
+            }
+
+            /**
+             * Show test source code
+             */
+            showTestSource(testKey) {
+                // 1. Input handling
+                this.activeTest = testKey;
+                this.viewMode = 'source';
+                this.renderTestTree();
+
+                const [suite, testName] = testKey.split('::');
+                const tests = this.testTree.get(suite);
+                const test = tests?.find(t => t.name === testName);
+
+                if (!test || !test.source) {
+                    this.logInitial('warn', 'No source code available for this test');
+                    return;
+                }
+
+                // 2. Core processing - Build source viewer
+                const rightPanel = document.querySelector('.right-panel');
+                if (!rightPanel) return;
+
+                // Create elements programmatically to avoid double-escaping
+                rightPanel.innerHTML = '';
+
+                const sourceHeader = document.createElement('div');
+                sourceHeader.className = 'source-header';
+
+                const sourceTitle = document.createElement('div');
+                sourceTitle.className = 'source-title';
+                sourceTitle.textContent = `${suite} > ${testName}`;
+
+                const closeBtn = document.createElement('button');
+                closeBtn.className = 'source-close-btn';
+                closeBtn.id = 'close-source-btn';
+                closeBtn.textContent = '← Back to Console';
+
+                sourceHeader.appendChild(sourceTitle);
+                sourceHeader.appendChild(closeBtn);
+
+                const sourceViewer = document.createElement('div');
+                sourceViewer.className = 'source-viewer';
+
+                const sourceCode = document.createElement('div');
+                sourceCode.className = 'source-code';
+                sourceCode.innerHTML = this.highlightCode(test.source);
+
+                sourceViewer.appendChild(sourceCode);
+
+                // 3. Output handling
+                rightPanel.appendChild(sourceHeader);
+                rightPanel.appendChild(sourceViewer);
+
+                document.getElementById('close-source-btn')?.addEventListener('click', () => {
+                    this.viewMode = 'console';
+                    this.renderRightPanel();
+                });
+            }
+
+            /**
+             * Render right panel based on view mode
+             */
+            renderRightPanel() {
+                // 1. Input handling
+                const rightPanel = document.querySelector('.right-panel');
+                if (!rightPanel) return;
+
+                // 2. Core processing - Restore console with saved content
+                if (this.viewMode === 'console') {
+                    const consoleHtml = `<div class="log-container" id="console-log">${this.consoleContent}</div>`;
+                    rightPanel.innerHTML = consoleHtml;
+                }
+            }
+
+            /**
+             * Highlight code syntax
+             */
+            highlightCode(code) {
+                // 1. Input handling
+                if (!code) return '';
+
+                // 2. Core processing - Basic syntax highlighting
+                // Escape HTML entities that are part of the source code
+                let highlighted = code
+                    .replace(/&/g, '&amp;')
+                    .replace(/</g, '&lt;')
+                    .replace(/>/g, '&gt;');
+
+                // Then apply syntax highlighting with properly escaped entities
+                // Keywords
+                highlighted = highlighted.replace(
+                    /\b(async|await|function|const|let|var|if|else|for|while|return|try|catch|throw|new|class|import|export|from|default)\b/g,
+                    (match) => `${match}`
+                );
+
+                // Strings
+                highlighted = highlighted.replace(
+                    /(['"`])(?:(?=(\\?))\2.)*?\1/g,
+                    (match) => `<span class="string">${match}</span>`
+                );
+
+                // Comments
+                highlighted = highlighted.replace(
+                    /\/\/.*/g,
+                    (match) => `<span class="comment">${match}</span>`
+                );
+
+                // Function names
+                highlighted = highlighted.replace(
+                    /\b([a-zA-Z_$][a-zA-Z0-9_$]*)\s*(?=\()/g,
+                    (match, name) => `<span class="function-name">${name}</span>(`
+                );
+
+                // 3. Output handling
+                return highlighted;
+            }
+
+            /**
+             * Create suite log block
+             */
+            createSuiteLogBlock(suiteName, suiteId) {
+                // 1. Input handling
+                const consoleLog = document.getElementById('console-log');
+                if (!consoleLog) return;
+
+                // 2. Core processing - Create group log block
+                const groupBlock = document.createElement('div');
+                groupBlock.className = 'log-block-group';
+                groupBlock.setAttribute('data-log-id', `group-${suiteId}`);
+
+                const header = document.createElement('div');
+                header.className = 'log-block-header';
+                header.textContent = `📦 Test Suite: ${suiteName}`;
+                groupBlock.appendChild(header);
+
+                // 3. Output handling
+                consoleLog.appendChild(groupBlock);
+                this.currentLogBlock = groupBlock;
+
+                // Save to console content
+                this.consoleContent += groupBlock.outerHTML;
+            }
+
+            /**
+             * Create test log block
+             */
+            createTestLogBlock(suiteName, testName, testId, suiteId) {
+                // 1. Input handling
+                const consoleLog = document.getElementById('console-log');
+                if (!consoleLog) return;
+
+                // Find the parent group block
+                const groupBlock = consoleLog.querySelector(`[data-log-id="group-${suiteId}"]`);
+                if (!groupBlock) return;
+
+                // 2. Core processing - Create test item block
+                const itemBlock = document.createElement('div');
+                itemBlock.className = 'log-block-item';
+                itemBlock.setAttribute('data-log-id', `item-${testId}`);
+
+                const header = document.createElement('div');
+                header.className = 'log-block-item-header';
+                header.textContent = `▶ Running: ${testName}`;
+                itemBlock.appendChild(header);
+
+                // 3. Output handling
+                groupBlock.appendChild(itemBlock);
+                this.currentLogBlock = itemBlock;
+            }
+
+            /**
+             * Log to specific block
+             */
+            logToBlock(blockId, level, message) {
+                // 1. Input handling
+                const consoleLog = document.getElementById('console-log');
+                if (!consoleLog) return;
+
+                // 2. Core processing
+                const levelClass = `log-${level === 'success' ? 'success' :
+                    level === 'error' ? 'error' :
+                        level === 'warn' ? 'warn' : 'info'}`;
+
+                const entry = document.createElement('div');
+                entry.className = `log-entry ${levelClass}`;
+                entry.textContent = message;
+
+                // Find the target block (either group or item)
+                let targetBlock = consoleLog.querySelector(`[data-log-id="item-${blockId}"]`);
+                if (!targetBlock) {
+                    targetBlock = consoleLog.querySelector(`[data-log-id="group-${blockId}"]`);
+                }
+
+                // 3. Output handling
+                if (targetBlock) {
+                    targetBlock.appendChild(entry);
+                } else {
+                    // Fallback: append to console
+                    consoleLog.appendChild(entry);
+                }
+
+                // Update console content for restoration
+                this.consoleContent = consoleLog.innerHTML;
+
+                // Auto-scroll
+                consoleLog.parentElement.scrollTop = consoleLog.parentElement.scrollHeight;
+            }
+
+            /**
+             * Log initial message (before any blocks created)
+             */
+            logInitial(level, message) {
+                // 1. Input handling
+                const consoleLog = document.getElementById('console-log');
+                if (!consoleLog) return;
+
+                // 2. Core processing
+                const levelClass = `log-${level === 'success' ? 'success' :
+                    level === 'error' ? 'error' :
+                        level === 'warn' ? 'warn' : 'info'}`;
+
+                const entry = document.createElement('div');
+                entry.className = `log-entry ${levelClass}`;
+                entry.textContent = message;
+
+                // 3. Output handling
+                consoleLog.appendChild(entry);
+                this.consoleContent += entry.outerHTML;
+                consoleLog.parentElement.scrollTop = consoleLog.parentElement.scrollHeight;
+            }
+
+            /**
+             * Log final message (after all blocks)
+             */
+            logFinal(level, message) {
+                // 1. Input handling
+                const consoleLog = document.getElementById('console-log');
+                if (!consoleLog) return;
+
+                // 2. Core processing
+                const levelClass = `log-${level === 'success' ? 'success' :
+                    level === 'error' ? 'error' :
+                        level === 'warn' ? 'warn' : 'info'}`;
+
+                const entry = document.createElement('div');
+                entry.className = `log-entry ${levelClass}`;
+                entry.textContent = message;
+
+                // 3. Output handling
+                consoleLog.appendChild(entry);
+                this.consoleContent += entry.outerHTML;
+                consoleLog.parentElement.scrollTop = consoleLog.parentElement.scrollHeight;
+            }
+        }
+
+        // Initialize controller
+        new TestUIController();
     </script>
 </body>
 

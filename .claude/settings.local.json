@@ -1,7 +1,13 @@
 {
   "permissions": {
     "allow": [
-      "Bash(pnpm run lint)"
+      "Bash(pnpm run lint)",
+      "WebSearch",
+      "WebFetch(domain:sqlite.org)",
+      "Bash(pnpm test)",
+      "Bash(pkill:*)",
+      "Bash(lsof:*)",
+      "Bash(xargs kill:*)"
     ],
     "deny": [],
     "ask": []
