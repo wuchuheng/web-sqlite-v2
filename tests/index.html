@@ -130,7 +130,7 @@
         }
 
         .suite-header {
-            padding: 8px 12px;
+            padding: 8px 20px;
             background: #f9fafb;
             border-bottom: 1px solid #e5e7eb;
             font-size: 13px;
@@ -139,7 +139,7 @@
             user-select: none;
             display: flex;
             align-items: center;
-            justify-between;
+            justify-content: space-between;
         }
 
         .suite-header:hover {
@@ -903,13 +903,15 @@
                     const suiteHtml = `
                         <div class="suite-wrapper ${suiteClass}" data-suite="${suite}">
                             <div class="suite-header" data-suite="${suite}">
-                                ${chevronSvg}
-                                <span class="suite-status-icon ${suiteStatusClass}">${suiteStatusIcon}</span>
-                                <span>${suite}</span>
-                                <span class="suite-stats">
+                                <div>
+                                    ${chevronSvg}
+                                    <span class="suite-status-icon ${suiteStatusClass}">${suiteStatusIcon}</span>
+                                    <span>${suite}</span>
+                                </div>
+                                <div class="suite-stats">
                                     <span>${passed}/${total}</span>
                                     <span>${suiteDuration}ms</span>
-                                </span>
+                                </div>
                             </div>
                             <div class="suite-tests">
                                 ${tests.map((test) => {
