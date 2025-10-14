@@ -173,7 +173,7 @@ const installAsyncProxy = function () {
         msBase = state.asyncIdleWaitTime * 2;
       let i = 1,
         ms = msBase;
-      for (; true; ms = msBase * ++i) {
+      for (;; ms = msBase * ++i) {
         try {
           fh.syncHandle = await fh.fileHandle.createSyncAccessHandle();
           break;
