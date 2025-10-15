@@ -47,273 +47,87 @@ import { createFS as createFileSystem } from "./vfs/filesystem.mjs";
 import {
     randomFill as randomFillUtil,
     zeroMemory,
-    alignMemory,
     createMmapAlloc,
 } from "./utils/memory-utils.mjs";
 import { createAsyncLoad } from "./utils/async-utils.mjs";
 import { wrapSqlite3InitModule } from "./utils/sqlite3-init-wrapper.mjs";
 import { createWasmLoader } from "./utils/wasm-loader.mjs";
 import { attachSqlite3WasmExports } from "./wasm/sqlite3-wasm-exports.mjs";
+import {
+    detectEnvironment,
+    createFileReaders,
+} from "./runtime/environment-detector.mjs";
+import {
+    initializeWasmMemory,
+    createMemoryManager,
+} from "./runtime/memory-manager.mjs";
+import { createLifecycleManager } from "./runtime/lifecycle-manager.mjs";
+import {
+    setupModuleLocateFile,
+    createModuleLocateFile,
+    setupConsoleOutput,
+    createAbortFunction,
+    initializeModule,
+    applyModuleOverrides,
+    runPreInitCallbacks,
+} from "./runtime/module-configurator.mjs";
 
 export let Module;
 
 export let wasmExports;
 
+/**
+ * Main SQLite3 WebAssembly module initialization function.
+ * This is the entry point for creating a new SQLite3 instance.
+ *
+ * @returns {(moduleArg?: Object) => Promise<Object>} Module initialization function
+ */
 var sqlite3InitModule = (() => {
-    var _scriptName = import.meta.url;
+    const _scriptName = import.meta.url;
 
+    /**
+     * Initializes the SQLite3 WebAssembly module with the given configuration.
+     *
+     * @param {Object} [moduleArg={}] - Module configuration options
+     * @returns {Promise<Object>} Promise that resolves to the initialized module
+     */
     return function (moduleArg = {}) {
-        var moduleRtn;
-
+        // 1. Initialize module and promise
         Module = moduleArg;
-
-        var readyPromiseResolve, readyPromiseReject;
-        var readyPromise = new Promise((resolve, reject) => {
+        let readyPromiseResolve, readyPromiseReject;
+        const readyPromise = new Promise((resolve, reject) => {
             readyPromiseResolve = resolve;
             readyPromiseReject = reject;
         });
 
-        var ENVIRONMENT_IS_WEB = typeof window == "object";
-        var ENVIRONMENT_IS_WORKER = typeof importScripts == "function";
+        // 2. Detect environment and setup file readers
+        const { ENVIRONMENT_IS_WEB: _ENVIRONMENT_IS_WEB, ENVIRONMENT_IS_WORKER, scriptDirectory } =
+            detectEnvironment();
+        const { readAsync, readBinary } = createFileReaders(ENVIRONMENT_IS_WORKER);
 
-        const sqlite3InitModuleState =
-            globalThis.sqlite3InitModuleState ||
-            Object.assign(Object.create(null), {
-                debugModule: () => {},
-            });
-        delete globalThis.sqlite3InitModuleState;
-        sqlite3InitModuleState.debugModule(
-            "globalThis.location =",
-            globalThis.location
-        );
+        // 3. Setup module configuration
+        setupModuleLocateFile(Module, _scriptName);
+        const moduleOverrides = initializeModule(Module, moduleArg);
+        const locateFile = createModuleLocateFile(Module, scriptDirectory);
+        const { out, err } = setupConsoleOutput(Module);
+        const abort = createAbortFunction(Module, err, readyPromiseReject);
 
-        Module["locateFile"] = function (path, _prefix) {
-            if (path === 'sqlite3.wasm') {
-                return new URL('./wasm/sqlite3.wasm', import.meta.url).href;
-            }
-            return new URL(path, import.meta.url).href;
-        }.bind(sqlite3InitModuleState);
+        // 4. Apply module overrides
+        applyModuleOverrides(Module, moduleOverrides);
 
-        var moduleOverrides = Object.assign({}, Module);
+        // 5. Initialize WebAssembly memory
+        const wasmBinary = Module["wasmBinary"];
+        const wasmMemory = initializeWasmMemory(Module);
+        const memoryManager = createMemoryManager(wasmMemory, Module);
+        const { HEAP8, HEAPU8, HEAP16, HEAP32, HEAPU32, HEAP64 } = memoryManager;
+        const _emscripten_resize_heap = memoryManager.createResizeHeapFunction();
 
-        var scriptDirectory = "";
-        function locateFile(path) {
-            if (Module["locateFile"]) {
-                return Module["locateFile"](path, scriptDirectory);
-            }
-            return scriptDirectory + path;
-        }
+        // 6. Setup utilities
+        const randomFill = randomFillUtil;
+        let mmapAlloc;
 
-        var readAsync, readBinary;
-
-        if (ENVIRONMENT_IS_WEB || ENVIRONMENT_IS_WORKER) {
-            if (ENVIRONMENT_IS_WORKER) {
-                scriptDirectory = self.location.href;
-            } else if (
-                typeof document != "undefined" &&
-                document.currentScript
-            ) {
-                scriptDirectory = document.currentScript.src;
-            }
-
-            if (_scriptName) {
-                scriptDirectory = _scriptName;
-            }
-
-            if (scriptDirectory.startsWith("blob:")) {
-                scriptDirectory = "";
-            } else {
-                scriptDirectory = scriptDirectory.substr(
-                    0,
-                    scriptDirectory.replace(/[?#].*/, "").lastIndexOf("/") + 1
-                );
-            }
-
-            {
-                if (ENVIRONMENT_IS_WORKER) {
-                    readBinary = (url) => {
-                        var xhr = new XMLHttpRequest();
-                        xhr.open("GET", url, false);
-                        xhr.responseType = "arraybuffer";
-                        xhr.send(null);
-                        return new Uint8Array(xhr.response);
-                    };
-                }
-
-                readAsync = (url) => {
-                    return fetch(url, { credentials: "same-origin" }).then(
-                        (response) => {
-                            if (response.ok) {
-                                return response.arrayBuffer();
-                            }
-                            return Promise.reject(
-                                new Error(
-                                    response.status + " : " + response.url
-                                )
-                            );
-                        }
-                    );
-                };
-            }
-        }
-
-        var out = Module["print"] || console.log.bind(console);
-        var err = Module["printErr"] || console.error.bind(console);
-
-        Object.assign(Module, moduleOverrides);
-
-        moduleOverrides = null;
-
-        var wasmBinary = Module["wasmBinary"];
-
-        var wasmMemory;
-
-        var ABORT = false;
-
-        var HEAP8, HEAPU8, HEAP16, HEAP32, HEAPU32, HEAP64;
-
-        function updateMemoryViews() {
-            var b = wasmMemory.buffer;
-            Module["HEAP8"] = HEAP8 = new Int8Array(b);
-            Module["HEAP16"] = HEAP16 = new Int16Array(b);
-            Module["HEAPU8"] = HEAPU8 = new Uint8Array(b);
-            Module["HEAPU16"] = new Uint16Array(b);
-            Module["HEAP32"] = HEAP32 = new Int32Array(b);
-            Module["HEAPU32"] = HEAPU32 = new Uint32Array(b);
-            Module["HEAPF32"] = new Float32Array(b);
-            Module["HEAPF64"] = new Float64Array(b);
-            Module["HEAP64"] = HEAP64 = new BigInt64Array(b);
-            Module["HEAPU64"] = new BigUint64Array(b);
-        }
-
-        if (Module["wasmMemory"]) {
-            wasmMemory = Module["wasmMemory"];
-        } else {
-            var INITIAL_MEMORY = Module["INITIAL_MEMORY"] || 16777216;
-
-            wasmMemory = new WebAssembly.Memory({
-                initial: INITIAL_MEMORY / 65536,
-
-                maximum: 32768,
-            });
-        }
-
-        updateMemoryViews();
-
-        var __ATPRERUN__ = [];
-        var __ATINIT__ = [];
-        var __ATPOSTRUN__ = [];
-
-        let runtimeInitialized = false;
-
-        function preRun() {
-            var preRuns = Module["preRun"];
-            if (preRuns) {
-                if (typeof preRuns == "function") preRuns = [preRuns];
-                preRuns.forEach(addOnPreRun);
-            }
-            callRuntimeCallbacks(__ATPRERUN__);
-        }
-
-        function initRuntime() {
-            runtimeInitialized = true;
-            console.log(runtimeInitialized);
-
-            if (!Module["noFSInit"] && !FS.initialized) FS.init();
-            FS.ignorePermissions = false;
-
-            TTY.init();
-            callRuntimeCallbacks(__ATINIT__);
-        }
-
-        function postRun() {
-            var postRuns = Module["postRun"];
-            if (postRuns) {
-                if (typeof postRuns == "function") postRuns = [postRuns];
-                postRuns.forEach(addOnPostRun);
-            }
-
-            callRuntimeCallbacks(__ATPOSTRUN__);
-        }
-
-        function addOnPreRun(cb) {
-            __ATPRERUN__.unshift(cb);
-        }
-
-        function addOnInit(cb) {
-            __ATINIT__.unshift(cb);
-        }
-
-        function addOnPostRun(cb) {
-            __ATPOSTRUN__.unshift(cb);
-        }
-
-        var runDependencies = 0;
-        var runDependencyWatcher = null;
-        var dependenciesFulfilled = null;
-
-        function getUniqueRunDependency(id) {
-            return id;
-        }
-
-        function addRunDependency(_id) {
-            runDependencies++;
-
-            Module["monitorRunDependencies"]?.(runDependencies);
-        }
-
-        function removeRunDependency(_id) {
-            runDependencies--;
-
-            Module["monitorRunDependencies"]?.(runDependencies);
-
-            if (runDependencies == 0) {
-                if (runDependencyWatcher !== null) {
-                    clearInterval(runDependencyWatcher);
-                    runDependencyWatcher = null;
-                }
-                if (dependenciesFulfilled) {
-                    var callback = dependenciesFulfilled;
-                    dependenciesFulfilled = null;
-                    callback();
-                }
-            }
-        }
-
-        function abort(what) {
-            Module["onAbort"]?.(what);
-
-            what = "Aborted(" + what + ")";
-
-            err(what);
-
-            ABORT = true;
-
-            what += ". Build with -sASSERTIONS for more info.";
-
-            var e = new WebAssembly.RuntimeError(what);
-
-            readyPromiseReject(e);
-
-            throw e;
-        }
-
-        var callRuntimeCallbacks = (callbacks) => {
-            callbacks.forEach((f) => f(Module));
-        };
-
-        var randomFill = randomFillUtil;
-
-        var mmapAlloc;
-
-        var asyncLoad = createAsyncLoad(
-            readAsync,
-            getUniqueRunDependency,
-            addRunDependency,
-            removeRunDependency
-        );
-
-        var FS_createDataFile = (
+        // 7. Create file system helper functions
+        const FS_createDataFile = (
             parent,
             name,
             fileData,
@@ -331,17 +145,18 @@ var sqlite3InitModule = (() => {
             );
         };
 
-        var preloadPlugins = Module["preloadPlugins"] || [];
-        var FS_handledByPreloadPlugin = (
+        const preloadPlugins = Module["preloadPlugins"] || [];
+        const FS_handledByPreloadPlugin = (
             byteArray,
             fullname,
             finish,
             onerror
         ) => {
-            if (typeof globalThis.Browser != "undefined")
+            if (typeof globalThis.Browser !== "undefined") {
                 globalThis.Browser.init();
+            }
 
-            var handled = false;
+            let handled = false;
             preloadPlugins.forEach((plugin) => {
                 if (handled) return;
                 if (plugin["canHandle"](fullname)) {
@@ -351,7 +166,39 @@ var sqlite3InitModule = (() => {
             });
             return handled;
         };
-        var FS_createPreloadedFile = (
+
+        // 8. Create lifecycle manager
+        let FS, PATH_FS, TTY;
+        const lifecycleManager = createLifecycleManager(
+            Module,
+            { get initialized() { return FS?.initialized; }, init: () => FS?.init() },
+            { init: () => TTY?.init() }
+        );
+
+        const {
+            addOnPreRun: _addOnPreRun,
+            addOnInit,
+            addOnPostRun: _addOnPostRun,
+            addRunDependency,
+            removeRunDependency,
+            getUniqueRunDependency,
+            run,
+        } = lifecycleManager;
+
+        lifecycleManager.setDependenciesFulfilled(function runCaller() {
+            if (!Module.calledRun) run();
+            if (!Module.calledRun) lifecycleManager.setDependenciesFulfilled(runCaller);
+        });
+
+        // 9. Create async load utility
+        const asyncLoad = createAsyncLoad(
+            readAsync,
+            getUniqueRunDependency,
+            addRunDependency,
+            removeRunDependency
+        );
+
+        const FS_createPreloadedFile = (
             parent,
             name,
             url,
@@ -363,10 +210,11 @@ var sqlite3InitModule = (() => {
             canOwn,
             preFinish
         ) => {
-            var fullname = name
+            const fullname = name
                 ? PATH_FS.resolve(PATH.join2(parent, name))
                 : parent;
-            var dep = getUniqueRunDependency(`cp ${fullname}`);
+            const dep = getUniqueRunDependency(`cp ${fullname}`);
+
             function processData(byteArray) {
                 function finish(byteArray) {
                     preFinish?.();
@@ -398,16 +246,17 @@ var sqlite3InitModule = (() => {
                 }
                 finish(byteArray);
             }
+
             addRunDependency(dep);
-            if (typeof url == "string") {
+            if (typeof url === "string") {
                 asyncLoad(url, processData, onerror);
             } else {
                 processData(url);
             }
         };
 
-        var FS_modeStringToFlags = (str) => {
-            var flagModes = {
+        const FS_modeStringToFlags = (str) => {
+            const flagModes = {
                 r: 0,
                 "r+": 2,
                 w: 512 | 64 | 1,
@@ -415,21 +264,21 @@ var sqlite3InitModule = (() => {
                 a: 1024 | 64 | 1,
                 "a+": 1024 | 64 | 2,
             };
-            var flags = flagModes[str];
-            if (typeof flags == "undefined") {
+            const flags = flagModes[str];
+            if (typeof flags === "undefined") {
                 throw new Error(`Unknown file open mode: ${str}`);
             }
             return flags;
         };
 
-        var FS_getMode = (canRead, canWrite) => {
-            var mode = 0;
+        const FS_getMode = (canRead, canWrite) => {
+            let mode = 0;
             if (canRead) mode |= 292 | 73;
             if (canWrite) mode |= 146;
             return mode;
         };
 
-        // Create FS using the modular createFS function
+        // 10. Create file system
         const fsModule = createFileSystem({
             FS_createPreloadedFile,
             FS_createDataFile,
@@ -440,11 +289,23 @@ var sqlite3InitModule = (() => {
             err,
         });
 
-        var FS = fsModule.FS;
-        var PATH_FS = fsModule.PATH_FS;
+        FS = fsModule.FS;
+        PATH_FS = fsModule.PATH_FS;
 
-        // Create SYSCALLS and syscall functions using the extracted module
-        const syscallsModule = createSYSCALLS(FS, PATH, HEAPU8, HEAP8, HEAP16, HEAP32, HEAPU32, HEAP64, UTF8ArrayToString, lengthBytesUTF8, stringToUTF8Array);
+        // 11. Create system calls
+        const syscallsModule = createSYSCALLS(
+            FS,
+            PATH,
+            HEAPU8,
+            HEAP8,
+            HEAP16,
+            HEAP32,
+            HEAPU32,
+            HEAP64,
+            UTF8ArrayToString,
+            lengthBytesUTF8,
+            stringToUTF8Array
+        );
         const SYSCALLS = syscallsModule.SYSCALLS;
         const ___syscall_chmod = syscallsModule.___syscall_chmod;
         const ___syscall_faccessat = syscallsModule.___syscall_faccessat;
@@ -465,7 +326,7 @@ var sqlite3InitModule = (() => {
         const ___syscall_unlinkat = syscallsModule.___syscall_unlinkat;
         const ___syscall_utimensat = syscallsModule.___syscall_utimensat;
 
-        // Create WASI functions using the extracted module
+        // 12. Create WASI functions
         const wasiFunctions = createWASIFunctions(
             FS,
             SYSCALLS,
@@ -478,7 +339,6 @@ var sqlite3InitModule = (() => {
             stringToUTF8Array
         );
 
-        // Destructure WASI functions for use in wasmImports
         const {
             __emscripten_get_now_is_monotonic,
             __localtime_js,
@@ -497,137 +357,59 @@ var sqlite3InitModule = (() => {
             _fd_write,
         } = wasiFunctions;
 
-        var getHeapMax = () => 2147483648;
-
-        var growMemory = (size) => {
-            var b = wasmMemory.buffer;
-            var pages = ((size - b.byteLength + 65535) / 65536) | 0;
-            try {
-                wasmMemory.grow(pages);
-                updateMemoryViews();
-                return 1;
-            } catch (_e) {}
-        };
-        var _emscripten_resize_heap = (requestedSize) => {
-            var oldSize = HEAPU8.length;
-
-            requestedSize >>>= 0;
-
-            var maxHeapSize = getHeapMax();
-            if (requestedSize > maxHeapSize) {
-                return false;
-            }
-
-            for (var cutDown = 1; cutDown <= 4; cutDown *= 2) {
-                var overGrownHeapSize = oldSize * (1 + 0.2 / cutDown);
-
-                overGrownHeapSize = Math.min(
-                    overGrownHeapSize,
-                    requestedSize + 100663296
-                );
-
-                var newSize = Math.min(
-                    maxHeapSize,
-                    alignMemory(
-                        Math.max(requestedSize, overGrownHeapSize),
-                        65536
-                    )
-                );
-
-                var replacement = growMemory(newSize);
-                if (replacement) {
-                    return true;
-                }
-            }
-            return false;
-        };
-
-
+        // 13. Attach preloaded file function
         FS.createPreloadedFile = FS_createPreloadedFile;
 
-        // Create MEMFS after FS is fully defined
-        var MEMFS = createMEMFS(FS, HEAP8, mmapAlloc, (address, size) => zeroMemory(HEAPU8, address, size));
+        // 14. Create MEMFS and TTY
+        const MEMFS = createMEMFS(FS, HEAP8, mmapAlloc, (address, size) =>
+            zeroMemory(HEAPU8, address, size)
+        );
+        TTY = createTTY(out, err, FS);
 
-        // Initialize TTY operations with FS reference
-        var TTY = createTTY(out, err, FS);
-
-        // Call staticInit with MEMFS - this will setup the filesystem
+        // 15. Initialize file system
         FS.staticInit(MEMFS);
-
-        // Create default devices with TTY and randomFill
         FS.createDefaultDevices(TTY, randomFill);
 
-        var wasmImports = {
+        // 16. Create WASM imports
+        const wasmImports = {
             __syscall_chmod: ___syscall_chmod,
-
             __syscall_faccessat: ___syscall_faccessat,
-
             __syscall_fchmod: ___syscall_fchmod,
-
             __syscall_fchown32: ___syscall_fchown32,
-
             __syscall_fcntl64: ___syscall_fcntl64,
-
             __syscall_fstat64: ___syscall_fstat64,
-
             __syscall_ftruncate64: ___syscall_ftruncate64,
-
             __syscall_getcwd: ___syscall_getcwd,
-
             __syscall_ioctl: ___syscall_ioctl,
-
             __syscall_lstat64: ___syscall_lstat64,
-
             __syscall_mkdirat: ___syscall_mkdirat,
-
             __syscall_newfstatat: ___syscall_newfstatat,
-
             __syscall_openat: ___syscall_openat,
-
             __syscall_readlinkat: ___syscall_readlinkat,
-
             __syscall_rmdir: ___syscall_rmdir,
-
             __syscall_stat64: ___syscall_stat64,
-
             __syscall_unlinkat: ___syscall_unlinkat,
-
             __syscall_utimensat: ___syscall_utimensat,
-
             _emscripten_get_now_is_monotonic: __emscripten_get_now_is_monotonic,
-
             _localtime_js: __localtime_js,
-
             _mmap_js: __mmap_js,
-
             _munmap_js: __munmap_js,
-
             _tzset_js: __tzset_js,
-
             emscripten_date_now: _emscripten_date_now,
-
             emscripten_get_now: _emscripten_get_now,
-
             emscripten_resize_heap: _emscripten_resize_heap,
-
             environ_get: _environ_get,
-
             environ_sizes_get: _environ_sizes_get,
-
             fd_close: _fd_close,
-
             fd_fdstat_get: _fd_fdstat_get,
-
             fd_read: _fd_read,
-
             fd_seek: _fd_seek,
-
             fd_sync: _fd_sync,
-
             fd_write: _fd_write,
-
             memory: wasmMemory,
         };
+
+        // 17. Load WebAssembly module
         const { createWasm } = createWasmLoader({
             Module,
             wasmBinary,
@@ -649,78 +431,28 @@ var sqlite3InitModule = (() => {
             },
         });
         wasmExports = createWasm();
+
+        // 18. Attach SQLite3 exports and setup mmap
         const { emscriptenBuiltinMemalign } = attachSqlite3WasmExports(
             Module,
             wasmExports
         );
-
         mmapAlloc = createMmapAlloc(emscriptenBuiltinMemalign, HEAPU8);
-
         Module["wasmMemory"] = wasmMemory;
 
-        var calledRun;
-        var calledPrerun;
+        // 19. Store promise resolvers for lifecycle manager
+        Module.readyPromiseResolve = readyPromiseResolve;
+        Module.readyPromiseReject = readyPromiseReject;
 
-        dependenciesFulfilled = function runCaller() {
-            if (!calledRun) run();
-            if (!calledRun) dependenciesFulfilled = runCaller;
-        };
-
-        function run() {
-            if (runDependencies > 0) {
-                return;
-            }
-
-            if (!calledPrerun) {
-                calledPrerun = 1;
-                preRun();
-
-                if (runDependencies > 0) {
-                    return;
-                }
-            }
-
-            function doRun() {
-                if (calledRun) return;
-                calledRun = 1;
-                Module["calledRun"] = 1;
-
-                if (ABORT) return;
-
-                initRuntime();
-
-                readyPromiseResolve(Module);
-                Module["onRuntimeInitialized"]?.();
-
-                postRun();
-            }
-
-            if (Module["setStatus"]) {
-                Module["setStatus"]("Running...");
-                setTimeout(() => {
-                    setTimeout(() => Module["setStatus"](""), 1);
-                    doRun();
-                }, 1);
-            } else {
-                doRun();
-            }
-        }
-
-        if (Module["preInit"]) {
-            if (typeof Module["preInit"] == "function")
-                Module["preInit"] = [Module["preInit"]];
-            while (Module["preInit"].length > 0) {
-                Module["preInit"].pop()();
-            }
-        }
-
+        // 20. Execute preInit callbacks and start runtime
+        runPreInitCallbacks(Module);
         run();
 
+        // 21. Attach post-load init function
         Module.runSQLite3PostLoadInit = runSQLite3PostLoadInit;
 
-        moduleRtn = readyPromise;
-
-        return moduleRtn;
+        // 22. Return ready promise
+        return readyPromise;
     };
 })();
 
