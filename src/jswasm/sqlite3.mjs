@@ -82,7 +82,7 @@ export let wasmExports;
  *
  * @returns {(moduleArg?: Object) => Promise<Object>} Module initialization function
  */
-var sqlite3InitModule = (() => {
+let sqlite3InitModule = (() => {
     const _scriptName = import.meta.url;
 
     /**
@@ -101,9 +101,14 @@ var sqlite3InitModule = (() => {
         });
 
         // 2. Detect environment and setup file readers
-        const { ENVIRONMENT_IS_WEB: _ENVIRONMENT_IS_WEB, ENVIRONMENT_IS_WORKER, scriptDirectory } =
-            detectEnvironment();
-        const { readAsync, readBinary } = createFileReaders(ENVIRONMENT_IS_WORKER);
+        const {
+            ENVIRONMENT_IS_WEB: _ENVIRONMENT_IS_WEB,
+            ENVIRONMENT_IS_WORKER,
+            scriptDirectory,
+        } = detectEnvironment();
+        const { readAsync, readBinary } = createFileReaders(
+            ENVIRONMENT_IS_WORKER
+        );
 
         // 3. Setup module configuration
         setupModuleLocateFile(Module, _scriptName);
@@ -119,8 +124,10 @@ var sqlite3InitModule = (() => {
         const wasmBinary = Module["wasmBinary"];
         const wasmMemory = initializeWasmMemory(Module);
         const memoryManager = createMemoryManager(wasmMemory, Module);
-        const { HEAP8, HEAPU8, HEAP16, HEAP32, HEAPU32, HEAP64 } = memoryManager;
-        const _emscripten_resize_heap = memoryManager.createResizeHeapFunction();
+        const { HEAP8, HEAPU8, HEAP16, HEAP32, HEAPU32, HEAP64 } =
+            memoryManager;
+        const _emscripten_resize_heap =
+            memoryManager.createResizeHeapFunction();
 
         // 6. Setup utilities
         const randomFill = randomFillUtil;
@@ -171,7 +178,12 @@ var sqlite3InitModule = (() => {
         let FS, PATH_FS, TTY;
         const lifecycleManager = createLifecycleManager(
             Module,
-            { get initialized() { return FS?.initialized; }, init: () => FS?.init() },
+            {
+                get initialized() {
+                    return FS?.initialized;
+                },
+                init: () => FS?.init(),
+            },
             { init: () => TTY?.init() }
         );
 
@@ -187,7 +199,8 @@ var sqlite3InitModule = (() => {
 
         lifecycleManager.setDependenciesFulfilled(function runCaller() {
             if (!Module.calledRun) run();
-            if (!Module.calledRun) lifecycleManager.setDependenciesFulfilled(runCaller);
+            if (!Module.calledRun)
+                lifecycleManager.setDependenciesFulfilled(runCaller);
         });
 
         // 9. Create async load utility

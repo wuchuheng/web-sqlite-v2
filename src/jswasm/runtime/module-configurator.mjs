@@ -54,7 +54,9 @@ export function setupModuleLocateFile(Module, importMetaUrl) {
     );
 
     // 4. Set up Module's locateFile function
-    Module["locateFile"] = createLocateFile(importMetaUrl).bind(sqlite3InitModuleState);
+    Module["locateFile"] = createLocateFile(importMetaUrl).bind(
+        sqlite3InitModuleState
+    );
 }
 
 /**
@@ -159,7 +161,7 @@ export function initializeModule(Module, moduleArg) {
 /**
  * Applies saved module overrides.
  *
- * @param {Object} Module - The Emscripten module object
+ * @param {import("../sqlite3.mjs").Module} Module - The Emscripten module object
  * @param {Object} moduleOverrides - Previously saved module overrides
  */
 export function applyModuleOverrides(Module, moduleOverrides) {
@@ -170,7 +172,7 @@ export function applyModuleOverrides(Module, moduleOverrides) {
 /**
  * Executes Module's preInit callbacks.
  *
- * @param {Object} Module - The Emscripten module object
+ * @param {import("../sqlite3.mjs").Module} Module - The Emscripten module object
  */
 export function runPreInitCallbacks(Module) {
     // 1. Check if preInit exists
