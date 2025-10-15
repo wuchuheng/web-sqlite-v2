@@ -23,26 +23,30 @@ export const createAsyncLoad = (
 ) => {
     return (url, onload, onerror, noRunDep) => {
         // 1. Input handling - get unique dependency ID if needed
-        var dep = !noRunDep ? getUniqueRunDependency(`al ${url}`) : "";
+        const dep = !noRunDep ? getUniqueRunDependency(`al ${url}`) : "";
 
         // 2. Core processing - read async and handle result
         readAsync(url).then(
             (arrayBuffer) => {
                 // 2.1. Success path
                 onload(new Uint8Array(arrayBuffer));
-                if (dep) removeRunDependency(dep);
+                if (dep) {
+                    removeRunDependency(dep);
+                }
             },
             (_err) => {
                 // 2.2. Error path
                 if (onerror) {
                     onerror();
                 } else {
-                    throw `Loading data file "${url}" failed.`;
+                    throw new Error(`Loading data file "${url}" failed.`);
                 }
             }
         );
 
         // 3. Output handling - add dependency tracking
-        if (dep) addRunDependency(dep);
+        if (dep) {
+            addRunDependency(dep);
+        }
     };
 };

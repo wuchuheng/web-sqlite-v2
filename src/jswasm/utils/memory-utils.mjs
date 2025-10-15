@@ -3,6 +3,9 @@
  * Provides memory initialization, zeroing, alignment, and allocation helpers
  */
 
+/** 64KB alignment boundary for mmap-style allocations */
+const MMAP_ALIGNMENT_BYTES = 65536;
+
 /**
  * Initialize random fill function using crypto.getRandomValues
  * @returns {Function} Function that fills a view with random values
@@ -11,8 +14,8 @@
 export const initRandomFill = () => {
     // 1. Input validation
     if (
-        typeof crypto == "object" &&
-        typeof crypto["getRandomValues"] == "function"
+        typeof crypto === "object" &&
+        typeof crypto["getRandomValues"] === "function"
     ) {
         // 2. Core processing - return crypto random fill function
         return (view) => crypto.getRandomValues(view);
@@ -74,13 +77,15 @@ export const alignMemory = (size, alignment) => {
 export const createMmapAlloc = (_emscripten_builtin_memalign, HEAPU8) => {
     return (size) => {
         // 1. Input handling - align size to 64KB
-        size = alignMemory(size, 65536);
+        const alignedSize = alignMemory(size, MMAP_ALIGNMENT_BYTES);
 
         // 2. Core processing - allocate aligned memory
-        var ptr = _emscripten_builtin_memalign(65536, size);
+        const ptr = _emscripten_builtin_memalign(MMAP_ALIGNMENT_BYTES, alignedSize);
 
         // 3. Output handling - zero memory and return pointer
-        if (ptr) zeroMemory(HEAPU8, ptr, size);
+        if (ptr) {
+            zeroMemory(HEAPU8, ptr, alignedSize);
+        }
         return ptr;
     };
 };

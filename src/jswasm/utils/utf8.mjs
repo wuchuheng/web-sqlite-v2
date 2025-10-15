@@ -3,11 +3,62 @@
  * Provides functions for converting between JavaScript strings and UTF-8 byte arrays.
  */
 
+/** UTF-8 encoding constants and bit masks. */
+const UTF8_CONSTANTS = {
+    /** Maximum single-byte character value (0-127). */
+    MAX_SINGLE_BYTE: 0x7f,
+    /** Maximum two-byte character value. */
+    MAX_TWO_BYTES: 0x7ff,
+    /** Maximum three-byte character value. */
+    MAX_THREE_BYTES: 0xffff,
+    /** Maximum code point value (BMP limit). */
+    MAX_BMP: 0x10000,
+    /** High surrogate start. */
+    HIGH_SURROGATE_START: 0xd800,
+    /** High surrogate end. */
+    HIGH_SURROGATE_END: 0xdfff,
+    /** Low surrogate start. */
+    LOW_SURROGATE_START: 0xdc00,
+    /** Surrogate offset for code point calculation. */
+    SURROGATE_OFFSET: 0x10000,
+    /** Surrogate mask. */
+    SURROGATE_MASK: 0x3ff,
+};
+
+/** UTF-8 byte sequence prefixes and masks. */
+const UTF8_BYTE_MASKS = {
+    /** Single-byte character mask (0xxxxxxx). */
+    SINGLE_BYTE_MASK: 0x80,
+    /** Two-byte prefix (110xxxxx). */
+    TWO_BYTE_PREFIX: 0xc0,
+    /** Two-byte check mask. */
+    TWO_BYTE_MASK: 0xe0,
+    /** Three-byte prefix (1110xxxx). */
+    THREE_BYTE_PREFIX: 0xe0,
+    /** Three-byte check mask. */
+    THREE_BYTE_MASK: 0xf0,
+    /** Four-byte prefix (11110xxx). */
+    FOUR_BYTE_PREFIX: 0xf0,
+    /** Continuation byte prefix (10xxxxxx). */
+    CONTINUATION_PREFIX: 0x80,
+    /** Continuation byte mask. */
+    CONTINUATION_MASK: 63,
+    /** Two-byte data mask. */
+    TWO_BYTE_DATA_MASK: 31,
+    /** Three-byte data mask. */
+    THREE_BYTE_DATA_MASK: 15,
+    /** Four-byte data mask. */
+    FOUR_BYTE_DATA_MASK: 7,
+};
+
+/** Minimum length threshold for using TextDecoder optimization. */
+const TEXT_DECODER_THRESHOLD = 16;
+
 /**
  * TextDecoder instance for UTF-8 decoding.
  */
 const UTF8Decoder =
-    typeof TextDecoder != "undefined" ? new TextDecoder() : undefined;
+    typeof TextDecoder !== "undefined" ? new TextDecoder() : undefined;
 
 /**
  * Converts a UTF-8 encoded byte array to a JavaScript string.
@@ -18,49 +69,84 @@ const UTF8Decoder =
  * @returns {string} The decoded string.
  */
 export function UTF8ArrayToString(heapOrArray, idx = 0, maxBytesToRead = NaN) {
-    var endIdx = idx + maxBytesToRead;
-    var endPtr = idx;
+    // 1. Input handling
+    const endIdx = idx + maxBytesToRead;
+    let endPtr = idx;
 
+    // Find the end of the string (null terminator or max bytes)
     while (heapOrArray[endPtr] && !(endPtr >= endIdx)) ++endPtr;
 
-    if (endPtr - idx > 16 && heapOrArray.buffer && UTF8Decoder) {
+    // 2. Core processing - use TextDecoder for longer strings if available
+    if (
+        endPtr - idx > TEXT_DECODER_THRESHOLD &&
+        heapOrArray.buffer &&
+        UTF8Decoder
+    ) {
         return UTF8Decoder.decode(heapOrArray.subarray(idx, endPtr));
     }
-    var str = "";
+
+    // Manual UTF-8 decoding for shorter strings or when TextDecoder unavailable
+    let decodedString = "";
 
     while (idx < endPtr) {
-        var u0 = heapOrArray[idx++];
-        if (!(u0 & 0x80)) {
-            str += String.fromCharCode(u0);
+        let byte0 = heapOrArray[idx++];
+
+        // 2.1 Single-byte character (ASCII)
+        if (!(byte0 & UTF8_BYTE_MASKS.SINGLE_BYTE_MASK)) {
+            decodedString += String.fromCharCode(byte0);
             continue;
-        }
-        var u1 = heapOrArray[idx++] & 63;
-        if ((u0 & 0xe0) == 0xc0) {
-            str += String.fromCharCode(((u0 & 31) << 6) | u1);
-            continue;
-        }
-        var u2 = heapOrArray[idx++] & 63;
-        if ((u0 & 0xf0) == 0xe0) {
-            u0 = ((u0 & 15) << 12) | (u1 << 6) | u2;
-        } else {
-            u0 =
-                ((u0 & 7) << 18) |
-                (u1 << 12) |
-                (u2 << 6) |
-                (heapOrArray[idx++] & 63);
         }
 
-        if (u0 < 0x10000) {
-            str += String.fromCharCode(u0);
+        // 2.2 Multi-byte character
+        const byte1 = heapOrArray[idx++] & UTF8_BYTE_MASKS.CONTINUATION_MASK;
+
+        if (
+            (byte0 & UTF8_BYTE_MASKS.TWO_BYTE_MASK) ===
+            UTF8_BYTE_MASKS.TWO_BYTE_PREFIX
+        ) {
+            // Two-byte character
+            decodedString += String.fromCharCode(
+                ((byte0 & UTF8_BYTE_MASKS.TWO_BYTE_DATA_MASK) << 6) | byte1
+            );
+            continue;
+        }
+
+        const byte2 = heapOrArray[idx++] & UTF8_BYTE_MASKS.CONTINUATION_MASK;
+
+        if (
+            (byte0 & UTF8_BYTE_MASKS.THREE_BYTE_MASK) ===
+            UTF8_BYTE_MASKS.THREE_BYTE_PREFIX
+        ) {
+            // Three-byte character
+            byte0 =
+                ((byte0 & UTF8_BYTE_MASKS.THREE_BYTE_DATA_MASK) << 12) |
+                (byte1 << 6) |
+                byte2;
         } else {
-            var ch = u0 - 0x10000;
-            str += String.fromCharCode(
-                0xd800 | (ch >> 10),
-                0xdc00 | (ch & 0x3ff)
+            // Four-byte character
+            byte0 =
+                ((byte0 & UTF8_BYTE_MASKS.FOUR_BYTE_DATA_MASK) << 18) |
+                (byte1 << 12) |
+                (byte2 << 6) |
+                (heapOrArray[idx++] & UTF8_BYTE_MASKS.CONTINUATION_MASK);
+        }
+
+        // 2.3 Convert code point to character(s)
+        if (byte0 < UTF8_CONSTANTS.MAX_BMP) {
+            decodedString += String.fromCharCode(byte0);
+        } else {
+            // Surrogate pair for code points outside BMP
+            const codePoint = byte0 - UTF8_CONSTANTS.MAX_BMP;
+            decodedString += String.fromCharCode(
+                UTF8_CONSTANTS.HIGH_SURROGATE_START | (codePoint >> 10),
+                UTF8_CONSTANTS.LOW_SURROGATE_START |
+                    (codePoint & UTF8_CONSTANTS.SURROGATE_MASK)
             );
         }
     }
-    return str;
+
+    // 3. Output handling
+    return decodedString;
 }
 
 /**
@@ -70,21 +156,31 @@ export function UTF8ArrayToString(heapOrArray, idx = 0, maxBytesToRead = NaN) {
  * @returns {number} The byte length in UTF-8 encoding.
  */
 export const lengthBytesUTF8 = (str) => {
-    var len = 0;
-    for (var i = 0; i < str.length; ++i) {
-        var c = str.charCodeAt(i);
-        if (c <= 0x7f) {
-            len++;
-        } else if (c <= 0x7ff) {
-            len += 2;
-        } else if (c >= 0xd800 && c <= 0xdfff) {
-            len += 4;
-            ++i;
+    // 1. Input handling
+    let totalBytes = 0;
+
+    // 2. Core processing - calculate byte length for each character
+    for (let i = 0; i < str.length; ++i) {
+        const charCode = str.charCodeAt(i);
+
+        if (charCode <= UTF8_CONSTANTS.MAX_SINGLE_BYTE) {
+            totalBytes++;
+        } else if (charCode <= UTF8_CONSTANTS.MAX_TWO_BYTES) {
+            totalBytes += 2;
+        } else if (
+            charCode >= UTF8_CONSTANTS.HIGH_SURROGATE_START &&
+            charCode <= UTF8_CONSTANTS.HIGH_SURROGATE_END
+        ) {
+            // Surrogate pair (4 bytes)
+            totalBytes += 4;
+            ++i; // Skip the next character (low surrogate)
         } else {
-            len += 3;
+            totalBytes += 3;
         }
     }
-    return len;
+
+    // 3. Output handling
+    return totalBytes;
 };
 
 /**
@@ -100,34 +196,62 @@ export const stringToUTF8Array = (str, heap, outIdx, maxBytesToWrite) => {
     // 1. Input handling
     if (!(maxBytesToWrite > 0)) return 0;
 
-    var startIdx = outIdx;
-    var endIdx = outIdx + maxBytesToWrite - 1;
+    const startIdx = outIdx;
+    const endIdx = outIdx + maxBytesToWrite - 1;
 
     // 2. Core processing - encode string to UTF-8
-    for (var i = 0; i < str.length; ++i) {
-        var u = str.charCodeAt(i);
-        if (u >= 0xd800 && u <= 0xdfff) {
-            var u1 = str.charCodeAt(++i);
-            u = (0x10000 + ((u & 0x3ff) << 10)) | (u1 & 0x3ff);
+    for (let i = 0; i < str.length; ++i) {
+        let codePoint = str.charCodeAt(i);
+
+        // 2.1 Handle surrogate pairs
+        if (
+            codePoint >= UTF8_CONSTANTS.HIGH_SURROGATE_START &&
+            codePoint <= UTF8_CONSTANTS.HIGH_SURROGATE_END
+        ) {
+            const lowSurrogate = str.charCodeAt(++i);
+            codePoint =
+                (UTF8_CONSTANTS.SURROGATE_OFFSET +
+                    ((codePoint & UTF8_CONSTANTS.SURROGATE_MASK) << 10)) |
+                (lowSurrogate & UTF8_CONSTANTS.SURROGATE_MASK);
         }
-        if (u <= 0x7f) {
+
+        // 2.2 Encode based on character range
+        if (codePoint <= UTF8_CONSTANTS.MAX_SINGLE_BYTE) {
+            // Single-byte character (ASCII)
             if (outIdx >= endIdx) break;
-            heap[outIdx++] = u;
-        } else if (u <= 0x7ff) {
+            heap[outIdx++] = codePoint;
+        } else if (codePoint <= UTF8_CONSTANTS.MAX_TWO_BYTES) {
+            // Two-byte character
             if (outIdx + 1 >= endIdx) break;
-            heap[outIdx++] = 0xc0 | (u >> 6);
-            heap[outIdx++] = 0x80 | (u & 63);
-        } else if (u <= 0xffff) {
+            heap[outIdx++] = UTF8_BYTE_MASKS.TWO_BYTE_PREFIX | (codePoint >> 6);
+            heap[outIdx++] =
+                UTF8_BYTE_MASKS.CONTINUATION_PREFIX |
+                (codePoint & UTF8_BYTE_MASKS.CONTINUATION_MASK);
+        } else if (codePoint <= UTF8_CONSTANTS.MAX_THREE_BYTES) {
+            // Three-byte character
             if (outIdx + 2 >= endIdx) break;
-            heap[outIdx++] = 0xe0 | (u >> 12);
-            heap[outIdx++] = 0x80 | ((u >> 6) & 63);
-            heap[outIdx++] = 0x80 | (u & 63);
+            heap[outIdx++] =
+                UTF8_BYTE_MASKS.THREE_BYTE_PREFIX | (codePoint >> 12);
+            heap[outIdx++] =
+                UTF8_BYTE_MASKS.CONTINUATION_PREFIX |
+                ((codePoint >> 6) & UTF8_BYTE_MASKS.CONTINUATION_MASK);
+            heap[outIdx++] =
+                UTF8_BYTE_MASKS.CONTINUATION_PREFIX |
+                (codePoint & UTF8_BYTE_MASKS.CONTINUATION_MASK);
         } else {
+            // Four-byte character
             if (outIdx + 3 >= endIdx) break;
-            heap[outIdx++] = 0xf0 | (u >> 18);
-            heap[outIdx++] = 0x80 | ((u >> 12) & 63);
-            heap[outIdx++] = 0x80 | ((u >> 6) & 63);
-            heap[outIdx++] = 0x80 | (u & 63);
+            heap[outIdx++] =
+                UTF8_BYTE_MASKS.FOUR_BYTE_PREFIX | (codePoint >> 18);
+            heap[outIdx++] =
+                UTF8_BYTE_MASKS.CONTINUATION_PREFIX |
+                ((codePoint >> 12) & UTF8_BYTE_MASKS.CONTINUATION_MASK);
+            heap[outIdx++] =
+                UTF8_BYTE_MASKS.CONTINUATION_PREFIX |
+                ((codePoint >> 6) & UTF8_BYTE_MASKS.CONTINUATION_MASK);
+            heap[outIdx++] =
+                UTF8_BYTE_MASKS.CONTINUATION_PREFIX |
+                (codePoint & UTF8_BYTE_MASKS.CONTINUATION_MASK);
         }
     }
 
@@ -146,18 +270,18 @@ export const stringToUTF8Array = (str, heap, outIdx, maxBytesToWrite) => {
  */
 export function intArrayFromString(stringy, dontAddNull, length) {
     // 1. Input handling
-    var len = length > 0 ? length : lengthBytesUTF8(stringy) + 1;
-    var u8array = new Array(len);
+    const byteLength = length > 0 ? length : lengthBytesUTF8(stringy) + 1;
+    const byteArray = new Array(byteLength);
 
     // 2. Core processing
-    var numBytesWritten = stringToUTF8Array(
+    const numBytesWritten = stringToUTF8Array(
         stringy,
-        u8array,
+        byteArray,
         0,
-        u8array.length
+        byteArray.length
     );
 
     // 3. Output handling
-    if (dontAddNull) u8array.length = numBytesWritten;
-    return u8array;
+    if (dontAddNull) byteArray.length = numBytesWritten;
+    return byteArray;
 }
