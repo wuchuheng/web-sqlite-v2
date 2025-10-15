@@ -6,11 +6,16 @@
  * Installs the JsStorageDb convenience class when running on the UI thread.
  *
  * @param {object} context - Runtime context.
- * @param {typeof import("./classes.mjs").createDbClasses extends (...args: any) => infer R ? R["Database"] : never} Database - Database class.
+ * @param {typeof import("./db-statement/index.mjs").createDbClasses extends (...args: any) => infer R ? R["Database"] : never} Database - Database class.
  * @param {Function} dbCtorHelper - Helper for opening DB handles.
  * @param {Function} ensureDbOpen - Helper that asserts DB handles are open.
  */
-export function attachJsStorageDb(context, Database, dbCtorHelper, ensureDbOpen) {
+export function attachJsStorageDb(
+    context,
+    Database,
+    dbCtorHelper,
+    ensureDbOpen
+) {
     const { sqlite3, capi, toss } = context;
 
     class JsStorageDb extends Database {

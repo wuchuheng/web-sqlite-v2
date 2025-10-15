@@ -8,7 +8,7 @@ import { createDbCtorHelper } from "./oo1-db/db-ctor-helper.mjs";
 import {
     createDbClasses,
     definePointerAccessors,
-} from "./oo1-db/classes.mjs";
+} from "./oo1-db/db-statement/index.mjs";
 import { attachJsStorageDb } from "./oo1-db/js-storage-db.mjs";
 
 /**
