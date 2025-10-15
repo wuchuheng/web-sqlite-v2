@@ -1,61 +1,93 @@
 import type { TestCase } from "../core/test-runner";
 import { TestUtils } from "../utils/test-utils";
 
+const LIFECYCLE_DB_FILE = TestUtils.getSharedDbFile();
+const LIFECYCLE_TABLES = {
+  persistence: "lifecycle_persistence",
+} as const;
+
+TestUtils.trackOpfsDb(LIFECYCLE_DB_FILE);
+
 /**
  * Database Lifecycle Tests
  * Tests for database creation, connection, and persistence
  */
 export const databaseLifecycleTests: TestCase[] = [
   {
-    name: "Create in-memory database",
+    name: "Create OPFS database",
     fn: async (sqlite3) => {
-      const db = new sqlite3.oo1.DB();
-      TestUtils.assert(db, "Database should be created");
-      db.close();
+      const db = TestUtils.createTestDb(sqlite3, LIFECYCLE_DB_FILE);
+
+      try {
+        TestUtils.assert(db.isOpen(), "Database should be created and open");
+      } finally {
+        db.close();
+      }
     },
   },
   {
-    name: "Create OPFS database",
+    name: "Create OPFS database with helper",
     fn: async (sqlite3) => {
-      const db = TestUtils.createTestDb(sqlite3, "lifecycle_test.db");
-      TestUtils.assert(db, "OPFS database should be created");
-      TestUtils.cleanupDb(db);
+      const db = TestUtils.createTestDb(sqlite3, LIFECYCLE_DB_FILE);
+
+      try {
+        TestUtils.assert(db, "OPFS database should be created");
+      } finally {
+        db.close();
+      }
     },
   },
   {
     name: "Database persistence across connections",
     fn: async (sqlite3) => {
-      const dbName = "file:///persist_test.db?vfs=opfs";
-      let db = new sqlite3.oo1.DB(dbName);
+      const tableName = LIFECYCLE_TABLES.persistence;
+      const firstConnection = TestUtils.createTestDb(sqlite3, LIFECYCLE_DB_FILE);
 
-      db.exec("CREATE TABLE IF NOT EXISTS test (id INTEGER PRIMARY KEY, value TEXT)");
-      db.exec("INSERT INTO test (value) VALUES ('persistent_data')");
-      db.close();
+      try {
+        firstConnection.exec(
+          `CREATE TABLE ${tableName} (id INTEGER PRIMARY KEY, value TEXT)`
+        );
+        firstConnection.exec(
+          `INSERT INTO ${tableName} (value) VALUES ('persistent_data')`
+        );
+      } finally {
+        firstConnection.close();
+      }
 
-      db = new sqlite3.oo1.DB(dbName);
-      const result = TestUtils.execQuery(db, "SELECT value FROM test");
-      TestUtils.assertEqual(result.length, 1, "Should have one row");
-      TestUtils.assertEqual(
-        result[0].value,
-        "persistent_data",
-        "Data should persist"
+      const secondConnection = TestUtils.createTestDb(
+        sqlite3,
+        LIFECYCLE_DB_FILE
       );
 
-      db.exec("DROP TABLE test");
-      db.close();
+      try {
+        const result = TestUtils.execQuery(
+          secondConnection,
+          `SELECT value FROM ${tableName}`
+        );
+        TestUtils.assertEqual(result.length, 1, "Should have one row");
+        TestUtils.assertEqual(
+          result[0].value,
+          "persistent_data",
+          "Data should persist"
+        );
+      } finally {
+        secondConnection.close();
+      }
     },
   },
   {
-    name: "Multiple database connections",
+    name: "Multiple OPFS database connections",
     fn: async (sqlite3) => {
-      const db1 = new sqlite3.oo1.DB();
-      const db2 = new sqlite3.oo1.DB();
+      const db1 = TestUtils.createTestDb(sqlite3, LIFECYCLE_DB_FILE);
+      const db2 = TestUtils.createTestDb(sqlite3, LIFECYCLE_DB_FILE);
 
-      TestUtils.assert(db1, "First database should be created");
-      TestUtils.assert(db2, "Second database should be created");
-
-      db1.close();
-      db2.close();
+      try {
+        TestUtils.assert(db1.isOpen(), "First database should be created");
+        TestUtils.assert(db2.isOpen(), "Second database should be created");
+      } finally {
+        db1.close();
+        db2.close();
+      }
     },
   },
 ];

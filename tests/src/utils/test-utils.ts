@@ -1,12 +1,108 @@
 import type { BindValue, SQLite3API } from "@wuchuheng/web-sqlite";
 
 type Database = InstanceType<SQLite3API["oo1"]["DB"]>;
+type SQLite3WithOpfs = SQLite3API & {
+  opfs?: {
+    unlink?: (fsEntryName: string, recursive?: boolean) => Promise<unknown>;
+    getResolvedPath?: (filename: string, splitIt?: boolean) => string | string[];
+    mkdir?: (dirName: string) => Promise<unknown>;
+  };
+};
 
 /**
  * Test Utilities
  * Helper functions for assertions and database operations
  */
 export class TestUtils {
+  private static readonly opfsTestRoot = "tests";
+  private static readonly sharedDbFile = "shared-tests.db";
+  private static trackedDbFiles = new Set<string>();
+
+  /**
+   * Expose the shared OPFS database filename used across suites.
+   */
+  static getSharedDbFile(): string {
+    return this.sharedDbFile;
+  }
+
+  /**
+   * Normalize test database paths so they are namespaced under the tests directory in OPFS.
+   */
+  private static normalizeOpfsPath(filename: string): string | null {
+    if (!filename) return null;
+
+    const trimmed = filename.trim();
+    if (!trimmed) return null;
+
+    const withoutScheme = trimmed.replace(/^file:\/+/, "");
+    const withoutQuery = withoutScheme.split("?")[0];
+    const segments = withoutQuery.split("/").filter(Boolean);
+
+    if (!segments.length) return null;
+
+    if (segments[0] !== this.opfsTestRoot) {
+      segments.unshift(this.opfsTestRoot);
+    }
+
+    return segments.join("/");
+  }
+
+  /**
+   * Best-effort creation of the backing tests directory on OPFS.
+   */
+  private static async ensureOpfsTestDirectory(
+    opfs: NonNullable<SQLite3WithOpfs["opfs"]>
+  ): Promise<void> {
+    if (typeof opfs.mkdir !== "function") return;
+
+    const target = `/${this.opfsTestRoot}`;
+    try {
+      await opfs.mkdir(target);
+    } catch (_error) {
+      // Directory likely already exists; ignore.
+    }
+  }
+
+  /**
+   * Track an OPFS database file for cleanup at test initialization.
+   */
+  static trackOpfsDb(filename: string): void {
+    const normalized = this.normalizeOpfsPath(filename);
+    if (normalized) {
+      this.trackedDbFiles.add(normalized);
+    }
+  }
+
+  /**
+   * Remove tracked OPFS database files before running tests to avoid state bleed.
+   */
+  static async cleanupTrackedOpfsDatabases(sqlite3: SQLite3API): Promise<void> {
+    const api = sqlite3 as SQLite3WithOpfs;
+    const opfs = api.opfs;
+    if (!opfs || typeof opfs.unlink !== "function") {
+      return;
+    }
+    await this.ensureOpfsTestDirectory(opfs);
+
+    const files = Array.from(this.trackedDbFiles);
+    for (const filename of files) {
+      try {
+        const resolved = opfs.getResolvedPath
+          ? opfs.getResolvedPath(filename)
+          : `/${filename}`;
+        const target =
+          typeof resolved === "string"
+            ? resolved
+            : `/${resolved.filter(Boolean).join("/")}`;
+        await opfs.unlink(target, true);
+      } catch (error) {
+        console.warn(
+          `Failed to cleanup OPFS database ${filename}: ${(error as Error).message}`
+        );
+      }
+    }
+  }
+
   /**
    * Assert that a condition is true
    */
@@ -60,8 +156,14 @@ export class TestUtils {
   /**
    * Create a test database with OPFS
    */
-  static createTestDb(sqlite3: SQLite3API, name = "test.db"): Database {
-    const dbName = `file:///${name}?vfs=opfs`;
+  static createTestDb(sqlite3: SQLite3API, name?: string): Database {
+    const normalized = this.normalizeOpfsPath(name ?? this.sharedDbFile);
+    if (!normalized) {
+      throw new Error("Test database name is required");
+    }
+
+    this.trackedDbFiles.add(normalized);
+    const dbName = `file:///${normalized}?vfs=opfs`;
     return new sqlite3.oo1.DB(dbName);
   }
 

@@ -1,4 +1,5 @@
 import type { SQLite3API } from "@wuchuheng/web-sqlite";
+import { TestUtils } from "../utils/test-utils";
 
 export interface TestCase {
   name: string;
@@ -67,6 +68,9 @@ export class TestRunner {
         hasOpfs ? "success" : "warn",
         `🏗️ OPFS VFS: ${hasOpfs ? "Available" : "Not available"}`
       );
+
+      await TestUtils.cleanupTrackedOpfsDatabases(this.sqlite3);
+      this.log("info", "🧹 Reset OPFS databases for fresh test run");
 
       return true;
     } catch (error) {
