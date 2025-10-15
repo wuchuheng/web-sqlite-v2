@@ -202,11 +202,12 @@ body {
   padding: 6px 16px 6px 32px;
   border-left: 3px solid transparent;
   cursor: pointer;
-  transition: background-color 0.15s;
+  transition: all 0.15s ease;
   display: flex;
   align-items: center;
   gap: 4px;
   font-size: 13px;
+  user-select: none;
 }
 
 .test-item:hover {
@@ -273,8 +274,14 @@ body {
   color: white;
 }
 
-.test-item.active {
-  background: #dbeafe;
+.test-item.test-active {
+  background: #dbeafe !important;
+  border-left-width: 4px !important;
+  font-weight: 500;
+}
+
+.test-suite.suite-active > .suite-header {
+  background: #eff6ff;
 }
 
 .test-passed .status-icon {
@@ -408,10 +415,28 @@ body {
 }
 
 .log-block-highlight {
-  background: rgba(16, 185, 129, 0.08);
-  border-left: 3px solid #10b981;
-  padding: 4px 0;
-  margin: 2px 0;
+  background: rgba(59, 130, 246, 0.2) !important;
+  border-left: 4px solid #3b82f6 !important;
+  padding: 8px 4px;
+  margin: 4px 0;
+  box-shadow: 0 0 10px rgba(59, 130, 246, 0.3);
+  animation: highlight-pulse 2s ease-in-out;
+  transition: all 0.3s ease-out;
+}
+
+@keyframes highlight-pulse {
+  0% {
+    background: rgba(59, 130, 246, 0.4);
+    box-shadow: 0 0 15px rgba(59, 130, 246, 0.5);
+  }
+  50% {
+    background: rgba(59, 130, 246, 0.3);
+    box-shadow: 0 0 20px rgba(59, 130, 246, 0.4);
+  }
+  100% {
+    background: rgba(59, 130, 246, 0.2);
+    box-shadow: 0 0 10px rgba(59, 130, 246, 0.3);
+  }
 }
 
 .log-block-group {

@@ -411,8 +411,11 @@ class TestUIController {
         suiteClass += " suite-failed";
       }
 
+      const isSuiteActive = this.activeTest && this.activeTest.startsWith(`${suite}::`);
+      if (isSuiteActive) suiteClass += " suite-active";
+
       html += `<div class="${suiteClass}" data-suite-id="${suiteId}">`;
-      html += `<div class="suite-header" onclick="window.testController?.toggleSuite('${suite}')">`;
+      html += `<div class="suite-header" onclick="window.testController?.handleSuiteClick('${suite}', ${suiteId})">`;
       html += `<span class="collapse-icon">${isCollapsed ? "▶" : "▼"}</span>`;
       html += `<span class="suite-icon">${suiteIcon}</span>`;
       html += `<span class="suite-name">${suite}</span>`;
@@ -439,7 +442,7 @@ class TestUIController {
           const isActive = this.activeTest === `${suite}::${test.name}`;
           if (isActive) testClass += " test-active";
 
-          html += `<div class="${testClass}" data-test-id="${test.testId}">`;
+          html += `<div class="${testClass}" data-test-id="${test.testId}" onclick="window.testController?.handleTestClick('${suite}', '${test.name}', '${test.testId}')">`;
           html += `<span class="test-icon">${testIcon}</span>`;
           html += `<span class="test-name">${test.name}</span>`;
           if (test.duration !== null) {
@@ -458,6 +461,24 @@ class TestUIController {
   }
 
   /**
+   * Handle suite header click
+   */
+  public handleSuiteClick(suite: string, suiteId: number): void {
+    // 1. Input handling - Toggle collapse
+    if (this.collapsedSuites.has(suite)) {
+      this.collapsedSuites.delete(suite);
+    } else {
+      this.collapsedSuites.add(suite);
+    }
+
+    // 2. Core processing - Scroll to suite log block
+    this.scrollToLogBlock(`group-${suiteId}`);
+
+    // 3. Output handling
+    this.renderTestTree();
+  }
+
+  /**
    * Toggle suite collapse/expand
    */
   public toggleSuite(suite: string): void {
@@ -470,6 +491,75 @@ class TestUIController {
 
     // 2. Core processing & 3. Output handling
     this.renderTestTree();
+  }
+
+  /**
+   * Handle test item click
+   */
+  public handleTestClick(suite: string, testName: string, testId: string): void {
+    // 1. Input handling - Set active test
+    const testKey = `${suite}::${testName}`;
+    this.activeTest = testKey;
+
+    // 2. Core processing - Scroll to test log block and highlight
+    this.scrollToLogBlock(`item-${testId}`);
+    this.highlightLogBlock(`item-${testId}`);
+
+    // 3. Output handling
+    this.renderTestTree();
+  }
+
+  /**
+   * Scroll log block into center view
+   */
+  private scrollToLogBlock(logId: string): void {
+    // 1. Input handling
+    const consoleLog = document.getElementById("console-log");
+    if (!consoleLog) return;
+
+    const logBlock = consoleLog.querySelector(`[data-log-id="${logId}"]`);
+    if (!logBlock) return;
+
+    // 2. Core processing - Calculate scroll position to center the block
+    const scrollContainer = consoleLog.parentElement;
+    if (!scrollContainer) return;
+
+    const blockRect = logBlock.getBoundingClientRect();
+    const containerRect = scrollContainer.getBoundingClientRect();
+    const scrollOffset = blockRect.top - containerRect.top -
+                        (containerRect.height / 2) + (blockRect.height / 2);
+
+    // 3. Output handling - Smooth scroll to center
+    scrollContainer.scrollBy({
+      top: scrollOffset,
+      behavior: "smooth"
+    });
+  }
+
+  /**
+   * Highlight log block temporarily
+   */
+  private highlightLogBlock(logId: string): void {
+    // 1. Input handling
+    const consoleLog = document.getElementById("console-log");
+    if (!consoleLog) return;
+
+    // Remove previous highlights
+    consoleLog.querySelectorAll(".log-block-highlight").forEach(el => {
+      el.classList.remove("log-block-highlight");
+    });
+
+    // 2. Core processing - Add highlight to target block
+    const logBlock = consoleLog.querySelector(`[data-log-id="${logId}"]`);
+    if (!logBlock) return;
+
+    // 3. Output handling - Add highlight class
+    logBlock.classList.add("log-block-highlight");
+
+    // Remove highlight after animation
+    setTimeout(() => {
+      logBlock.classList.remove("log-block-highlight");
+    }, 2000);
   }
 
   /**
