@@ -5,6 +5,34 @@
 
 import { UTF8ArrayToString, intArrayFromString } from "../utils/utf8.mjs";
 
+/** Errno constants for TTY operations. */
+const ERRNO = {
+    /** ENXIO: No such device or address. */
+    ENXIO: 6,
+    /** ENODEV: No such device. */
+    ENODEV: 19,
+    /** EIO: Input/output error. */
+    EIO: 29,
+    /** ENOPROTOOPT: Protocol not available. */
+    ENOPROTOOPT: 43,
+    /** ENODATA: No data available. */
+    ENODATA: 60,
+};
+
+/** Terminal control character codes. */
+const TTY_CHAR_CODES = {
+    /** Null character. */
+    NULL: 0,
+    /** Newline character. */
+    NEWLINE: 10,
+};
+
+/** Default terminal dimensions. */
+const TTY_DEFAULT_DIMENSIONS = {
+    rows: 24,
+    cols: 80,
+};
+
 /**
  * Buffer for stdin character input.
  */
@@ -17,21 +45,21 @@ let FS_stdin_getChar_buffer = [];
 const FS_stdin_getChar = () => {
     // 1. Input handling
     if (!FS_stdin_getChar_buffer.length) {
-        var result = null;
+        let userInput = null;
         if (
-            typeof window != "undefined" &&
-            typeof window.prompt == "function"
+            typeof window !== "undefined" &&
+            typeof window.prompt === "function"
         ) {
-            result = window.prompt("Input: ");
-            if (result !== null) {
-                result += "\n";
+            userInput = window.prompt("Input: ");
+            if (userInput !== null) {
+                userInput += "\n";
             }
         }
-        if (!result) {
+        if (!userInput) {
             return null;
         }
         // 2. Core processing
-        FS_stdin_getChar_buffer = intArrayFromString(result, true);
+        FS_stdin_getChar_buffer = intArrayFromString(userInput, true);
     }
 
     // 3. Output handling
@@ -77,9 +105,9 @@ export function createTTY(out, err, FS) {
              */
             open(stream) {
                 // 1. Input handling
-                var tty = TTY.ttys[stream.node.rdev];
+                const tty = TTY.ttys[stream.node.rdev];
                 if (!tty) {
-                    throw new FS.ErrnoError(43);
+                    throw new FS.ErrnoError(ERRNO.ENOPROTOOPT);
                 }
 
                 // 2. Core processing
@@ -115,22 +143,24 @@ export function createTTY(out, err, FS) {
             read(stream, buffer, offset, length, _pos) {
                 // 1. Input handling
                 if (!stream.tty || !stream.tty.ops.get_char) {
-                    throw new FS.ErrnoError(60);
-                } // 2. Core processing
-                var bytesRead = 0;
-                for (var i = 0; i < length; i++) {
-                    var result;
+                    throw new FS.ErrnoError(ERRNO.ENODATA);
+                }
+
+                // 2. Core processing
+                let bytesRead = 0;
+                for (let i = 0; i < length; i++) {
+                    let charCode;
                     try {
-                        result = stream.tty.ops.get_char(stream.tty);
+                        charCode = stream.tty.ops.get_char(stream.tty);
                     } catch (_e) {
-                        throw new FS.ErrnoError(29);
+                        throw new FS.ErrnoError(ERRNO.EIO);
                     }
-                    if (result === undefined && bytesRead === 0) {
-                        throw new FS.ErrnoError(6);
+                    if (charCode === undefined && bytesRead === 0) {
+                        throw new FS.ErrnoError(ERRNO.ENXIO);
                     }
-                    if (result === null || result === undefined) break;
+                    if (charCode === null || charCode === undefined) break;
                     bytesRead++;
-                    buffer[offset + i] = result;
+                    buffer[offset + i] = charCode;
                 }
 
                 // 3. Output handling
@@ -152,24 +182,31 @@ export function createTTY(out, err, FS) {
             write(stream, buffer, offset, length, _pos) {
                 // 1. Input handling
                 if (!stream.tty || !stream.tty.ops.put_char) {
-                    throw new FS.ErrnoError(60);
+                    throw new FS.ErrnoError(ERRNO.ENODATA);
                 }
 
                 // 2. Core processing
-                var i;
+                let bytesWritten = 0;
                 try {
-                    for (i = 0; i < length; i++) {
-                        stream.tty.ops.put_char(stream.tty, buffer[offset + i]);
+                    for (
+                        bytesWritten = 0;
+                        bytesWritten < length;
+                        bytesWritten++
+                    ) {
+                        stream.tty.ops.put_char(
+                            stream.tty,
+                            buffer[offset + bytesWritten]
+                        );
                     }
                 } catch (_e) {
-                    throw new FS.ErrnoError(29);
+                    throw new FS.ErrnoError(ERRNO.EIO);
                 }
 
                 // 3. Output handling
                 if (length) {
                     stream.node.timestamp = Date.now();
                 }
-                return i;
+                return bytesWritten;
             },
         },
 
@@ -191,12 +228,12 @@ export function createTTY(out, err, FS) {
              */
             put_char(tty, val) {
                 // 1. Input handling
-                if (val === null || val === 10) {
+                if (val === null || val === TTY_CHAR_CODES.NEWLINE) {
                     // 2. Core processing
                     out(UTF8ArrayToString(tty.output));
                     tty.output = [];
                 } else {
-                    if (val != 0) tty.output.push(val);
+                    if (val !== TTY_CHAR_CODES.NULL) tty.output.push(val);
                 }
             },
 
@@ -250,7 +287,10 @@ export function createTTY(out, err, FS) {
              * @returns {number[]} Window size [rows, cols]
              */
             ioctl_tiocgwinsz(_tty) {
-                return [24, 80];
+                return [
+                    TTY_DEFAULT_DIMENSIONS.rows,
+                    TTY_DEFAULT_DIMENSIONS.cols,
+                ];
             },
         },
 
@@ -263,12 +303,12 @@ export function createTTY(out, err, FS) {
              */
             put_char(tty, val) {
                 // 1. Input handling
-                if (val === null || val === 10) {
+                if (val === null || val === TTY_CHAR_CODES.NEWLINE) {
                     // 2. Core processing
                     err(UTF8ArrayToString(tty.output));
                     tty.output = [];
                 } else {
-                    if (val != 0) tty.output.push(val);
+                    if (val !== TTY_CHAR_CODES.NULL) tty.output.push(val);
                 }
             },
 
