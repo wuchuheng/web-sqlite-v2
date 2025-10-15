@@ -9,11 +9,17 @@
     "preview": "vite preview",
     "test": "vite --open"
   },
-  "keywords": ["sqlite", "wasm", "opfs", "tests"],
+  "keywords": [
+    "sqlite",
+    "wasm",
+    "opfs",
+    "tests"
+  ],
   "author": "",
   "license": "ISC",
   "dependencies": {
-    "@wuchuheng/web-sqlite": "workspace:*"
+    "@wuchuheng/web-sqlite": "workspace:*",
+    "highlight.js": "^11.11.1"
   },
   "devDependencies": {
     "typescript": "^5.7.3",

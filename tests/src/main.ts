@@ -1,6 +1,13 @@
 /**
  * Main entry point for SQLite3 OPFS/WASM Test Runner
  */
+import hljs from "highlight.js/lib/core";
+import javascript from "highlight.js/lib/languages/javascript";
+import typescript from "highlight.js/lib/languages/typescript";
+
+// Register languages for syntax highlighting
+hljs.registerLanguage("javascript", javascript);
+hljs.registerLanguage("typescript", typescript);
 
 /**
  * Test item interface
@@ -250,6 +257,7 @@ class TestUIController {
     const testIndex = this.testTree.get(suite)!.length + 1;
     const testId = `${suiteId}-${testIndex}`;
 
+    // Automatically capture source code if provided
     this.testTree.get(suite)!.push({
       name: test,
       status: "running",
@@ -411,7 +419,8 @@ class TestUIController {
         suiteClass += " suite-failed";
       }
 
-      const isSuiteActive = this.activeTest && this.activeTest.startsWith(`${suite}::`);
+      const isSuiteActive =
+        this.activeTest && this.activeTest.startsWith(`${suite}::`);
       if (isSuiteActive) suiteClass += " suite-active";
 
       html += `<div class="${suiteClass}" data-suite-id="${suiteId}">`;
@@ -442,12 +451,23 @@ class TestUIController {
           const isActive = this.activeTest === `${suite}::${test.name}`;
           if (isActive) testClass += " test-active";
 
-          html += `<div class="${testClass}" data-test-id="${test.testId}" onclick="window.testController?.handleTestClick('${suite}', '${test.name}', '${test.testId}')">`;
+          html += `<div class="${testClass}" data-test-id="${test.testId}">`;
+          html += `<div class="test-info" onclick="window.testController?.handleTestClick('${suite}', '${test.name}', '${test.testId}')">`;
           html += `<span class="test-icon">${testIcon}</span>`;
           html += `<span class="test-name">${test.name}</span>`;
+          html += `</div>`;
+          html += `<div class="test-actions">`;
           if (test.duration !== null) {
             html += `<span class="test-duration">${test.duration}ms</span>`;
           }
+          if (test.source) {
+            html += `<button class="view-source-btn" onclick="event.stopPropagation(); window.testController?.viewTestSource('${suite}', '${test.name}', '${test.testId}')" title="View source code">
+              <svg width="14" height="14" viewBox="0 0 16 16" fill="currentColor">
+                <path d="M5.854 4.854a.5.5 0 1 0-.708-.708l-3.5 3.5a.5.5 0 0 0 0 .708l3.5 3.5a.5.5 0 0 0 .708-.708L2.707 8l3.147-3.146zm4.292 0a.5.5 0 0 1 .708-.708l3.5 3.5a.5.5 0 0 1 0 .708l-3.5 3.5a.5.5 0 0 1-.708-.708L13.293 8l-3.147-3.146z"/>
+              </svg>
+            </button>`;
+          }
+          html += `</div>`;
           html += `</div>`;
         }
         html += `</div>`;
@@ -496,17 +516,57 @@ class TestUIController {
   /**
    * Handle test item click
    */
-  public handleTestClick(suite: string, testName: string, testId: string): void {
+  public handleTestClick(
+    suite: string,
+    testName: string,
+    testId: string
+  ): void {
     // 1. Input handling - Set active test
     const testKey = `${suite}::${testName}`;
     this.activeTest = testKey;
 
-    // 2. Core processing - Scroll to test log block and highlight
+    // 2. Core processing - Switch to console mode and scroll to log
+    if (this.viewMode === "source") {
+      this.viewMode = "console";
+      this.renderConsoleView();
+    }
     this.scrollToLogBlock(`item-${testId}`);
     this.highlightLogBlock(`item-${testId}`);
 
     // 3. Output handling
     this.renderTestTree();
+  }
+
+  /**
+   * View test source code
+   */
+  public viewTestSource(
+    suite: string,
+    testName: string,
+    _testId: string
+  ): void {
+    // 1. Input handling - Find test
+    const tests = this.testTree.get(suite);
+    const test = tests?.find((t) => t.name === testName);
+    if (!test || !test.source) return;
+
+    // 2. Core processing - Switch to source view
+    this.viewMode = "source";
+
+    // 3. Output handling - Render source code
+    this.renderSourceView(suite, testName, test.source);
+    this.renderTestTree();
+  }
+
+  /**
+   * Go back to console view
+   */
+  public goBackToConsole(): void {
+    // 1. Input handling
+    this.viewMode = "console";
+
+    // 2. Core processing & 3. Output handling
+    this.renderConsoleView();
   }
 
   /**
@@ -526,13 +586,16 @@ class TestUIController {
 
     const blockRect = logBlock.getBoundingClientRect();
     const containerRect = scrollContainer.getBoundingClientRect();
-    const scrollOffset = blockRect.top - containerRect.top -
-                        (containerRect.height / 2) + (blockRect.height / 2);
+    const scrollOffset =
+      blockRect.top -
+      containerRect.top -
+      containerRect.height / 2 +
+      blockRect.height / 2;
 
     // 3. Output handling - Smooth scroll to center
     scrollContainer.scrollBy({
       top: scrollOffset,
-      behavior: "smooth"
+      behavior: "smooth",
     });
   }
 
@@ -545,7 +608,7 @@ class TestUIController {
     if (!consoleLog) return;
 
     // Remove previous highlights
-    consoleLog.querySelectorAll(".log-block-highlight").forEach(el => {
+    consoleLog.querySelectorAll(".log-block-highlight").forEach((el) => {
       el.classList.remove("log-block-highlight");
     });
 
@@ -600,6 +663,77 @@ class TestUIController {
     this.consoleContent = "";
     if (consoleLog) {
       consoleLog.innerHTML = "";
+    }
+  }
+
+  /**
+   * Render source code view
+   */
+  private renderSourceView(
+    suite: string,
+    testName: string,
+    source: string
+  ): void {
+    // 1. Input handling
+    const rightPanel = document.querySelector(".right-panel");
+    if (!rightPanel) return;
+
+    // 2. Core processing - Format source code
+    const formattedSource = this.formatSourceCode(source);
+
+    // 3. Output handling - Display source viewer
+    rightPanel.innerHTML = `
+      <div class="source-viewer-container">
+        <div class="source-header">
+          <div class="source-title">
+            <svg width="16" height="16" viewBox="0 0 16 16" fill="currentColor" style="margin-right: 8px;">
+              <path d="M5.854 4.854a.5.5 0 1 0-.708-.708l-3.5 3.5a.5.5 0 0 0 0 .708l3.5 3.5a.5.5 0 0 0 .708-.708L2.707 8l3.147-3.146zm4.292 0a.5.5 0 0 1 .708-.708l3.5 3.5a.5.5 0 0 1 0 .708l-3.5 3.5a.5.5 0 0 1-.708-.708L13.293 8l-3.147-3.146z"/>
+            </svg>
+            ${suite} › ${testName}
+          </div>
+          <button class="source-close-btn" onclick="window.testController?.goBackToConsole()">
+            <svg width="14" height="14" viewBox="0 0 16 16" fill="currentColor" style="margin-right: 6px;">
+              <path d="M8 0a8 8 0 1 1 0 16A8 8 0 0 1 8 0zM4.5 7.5a.5.5 0 0 0 0 1h5.793l-2.147 2.146a.5.5 0 0 0 .708.708l3-3a.5.5 0 0 0 0-.708l-3-3a.5.5 0 1 0-.708.708L10.293 7.5H4.5z"/>
+            </svg>
+            Back to Console
+          </button>
+        </div>
+        <div class="source-viewer">
+          <pre class="source-code">${formattedSource}</pre>
+        </div>
+      </div>
+    `;
+  }
+
+  /**
+   * Render console view
+   */
+  private renderConsoleView(): void {
+    // 1. Input handling
+    const rightPanel = document.querySelector(".right-panel");
+    if (!rightPanel) return;
+
+    // 2. Core processing & 3. Output handling - Restore console
+    rightPanel.innerHTML = `<div class="log-container" id="console-log">${this.consoleContent}</div>`;
+  }
+
+  /**
+   * Format source code with syntax highlighting using highlight.js
+   */
+  private formatSourceCode(source: string): string {
+    // 1. Input handling - Detect language
+    const language = source.includes("=>") || source.includes("async") ? "javascript" : "typescript";
+
+    try {
+      // 2. Core processing - Apply highlight.js syntax highlighting
+      const highlighted = hljs.highlight(source, { language }).value;
+
+      // 3. Output handling
+      return highlighted;
+    } catch (error) {
+      // Fallback to plain text if highlighting fails
+      console.error("Syntax highlighting failed:", error);
+      return source.replace(/</g, "&lt;").replace(/>/g, "&gt;");
     }
   }
 

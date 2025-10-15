@@ -201,17 +201,33 @@ body {
 .test-item {
   padding: 6px 16px 6px 32px;
   border-left: 3px solid transparent;
-  cursor: pointer;
   transition: all 0.15s ease;
   display: flex;
   align-items: center;
-  gap: 4px;
+  justify-content: space-between;
+  gap: 8px;
   font-size: 13px;
   user-select: none;
 }
 
 .test-item:hover {
   background: #f9fafb;
+}
+
+.test-info {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  flex: 1;
+  cursor: pointer;
+  min-width: 0;
+}
+
+.test-actions {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-shrink: 0;
 }
 
 .test-item.selected {
@@ -253,14 +269,16 @@ body {
 }
 
 .view-source-btn {
-  padding: 2px 6px;
-  font-size: 10px;
-  background: #e5e7eb;
+  padding: 4px 6px;
+  font-size: 11px;
+  background: transparent;
   border: 1px solid #d1d5db;
   border-radius: 3px;
   cursor: pointer;
-  color: #4b5563;
-  transition: all 0.15s;
+  color: #6b7280;
+  transition: all 0.2s;
+  display: flex;
+  align-items: center;
   opacity: 0;
 }
 
@@ -272,6 +290,11 @@ body {
   background: #3b82f6;
   border-color: #3b82f6;
   color: white;
+  transform: scale(1.05);
+}
+
+.view-source-btn svg {
+  pointer-events: none;
 }
 
 .test-item.test-active {
@@ -340,7 +363,16 @@ body {
   background: rgba(100, 116, 139, 0.1);
 }
 
+.source-viewer-container {
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  background: #1e1e1e;
+}
+
 .source-viewer {
+  flex: 1;
+  overflow: auto;
   padding: 16px;
   background: #1e1e1e;
   color: #d4d4d4;
@@ -382,6 +414,16 @@ body {
 .source-code {
   white-space: pre;
   overflow-x: auto;
+  margin: 0;
+  padding: 16px;
+  background: #282c34 !important;
+  border-radius: 4px;
+  line-height: 1.5;
+}
+
+.source-code .hljs {
+  background: transparent;
+  padding: 0;
 }
 
 .source-line {
@@ -391,22 +433,6 @@ body {
 
 .source-line:hover {
   background: rgba(255, 255, 255, 0.05);
-}
-
-.keyword {
-  color: #569cd6;
-}
-
-.string {
-  color: #ce9178;
-}
-
-.comment {
-  color: #6a9955;
-}
-
-.function-name {
-  color: #dcdcaa;
 }
 
 .log-entry.highlight {

@@ -13,7 +13,9 @@
       "Bash(pnpm -w run lint tests/src/worker.ts)",
       "Bash(npx tsc:*)",
       "Bash(pnpm -w run lint)",
-      "Bash(pnpm -w run lint tests/src/main.ts)"
+      "Bash(pnpm -w run lint tests/src/main.ts)",
+      "Bash(pnpm -w run lint tests/src)",
+      "Bash(pnpm add:*)"
     ],
     "deny": [],
     "ask": []
