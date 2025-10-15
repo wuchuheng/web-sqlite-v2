@@ -99,6 +99,12 @@ export class TestRunner {
   async runAllTests(): Promise<void> {
     this.results = { total: 0, passed: 0, failed: 0 };
     const startTime = performance.now();
+    const plannedTotal = this.testSuites.reduce(
+      (sum, suite) => sum + suite.tests.length,
+      0
+    );
+
+    this.sendMessage("test-plan", { total: plannedTotal });
 
     for (const suite of this.testSuites) {
       await this.runSuite(suite);

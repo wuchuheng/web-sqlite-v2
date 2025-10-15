@@ -44,7 +44,8 @@ interface SuiteStats {
  */
 class TestUIController {
   private worker: Worker | null = null;
-  private testStats = { total: 0, passed: 0, failed: 0 };
+  private testStats = { completed: 0, passed: 0, failed: 0 };
+  private plannedTestTotal = 0;
   private testTree = new Map<string, TestItem[]>();
   private testLogs = new Map<string, LogInfo>();
   private suiteStats = new Map<string, SuiteStats>();
@@ -159,6 +160,9 @@ class TestUIController {
 
     // 2. Core processing
     switch (type) {
+      case "test-plan":
+        this.handleTestPlan(data);
+        break;
       case "test-start":
         this.handleTestStart(data);
         break;
@@ -207,13 +211,15 @@ class TestUIController {
 
     // 2. Core processing
     this.isRunning = true;
-    this.testStats = { total: 0, passed: 0, failed: 0 };
+    this.testStats = { completed: 0, passed: 0, failed: 0 };
+    this.plannedTestTotal = 0;
     this.testTree.clear();
     this.suiteIdMap.clear();
     this.currentSuiteId = 0;
     this.currentLogBlock = null;
     this.currentTestId = null;
     this.clearConsole();
+    this.updateProgress();
 
     // 3. Output handling
     this.logInitial("info", "🚀 Starting test suite...\\n");
@@ -224,6 +230,15 @@ class TestUIController {
     if (runBtn) runBtn.disabled = true;
     if (spinner) spinner.style.display = "inline-block";
     this.worker?.postMessage({ cmd: "run-tests" });
+  }
+
+  /**
+   * Handle test plan metadata
+   */
+  private handleTestPlan(data: { total?: number }): void {
+    const { total = 0 } = data;
+    this.plannedTestTotal = total;
+    this.updateProgress();
   }
 
   /**
@@ -298,7 +313,7 @@ class TestUIController {
     } else {
       this.testStats.failed++;
     }
-    this.testStats.total++;
+    this.testStats.completed++;
 
     const tests = this.testTree.get(suite);
     const testItem = tests?.find((t) => t.name === test);
@@ -367,6 +382,9 @@ class TestUIController {
 
     // 2. Core processing
     this.isRunning = false;
+    this.plannedTestTotal = total;
+    this.testStats.completed = total;
+    this.updateProgress();
 
     // 3. Output handling
     const runBtn = document.getElementById(
@@ -422,7 +440,7 @@ class TestUIController {
       const isSuiteActive =
         this.activeTest && this.activeTest.startsWith(`${suite}::`);
       if (isSuiteActive) suiteClass += " suite-active";
-      if (isCollapsed) suiteClass += " collapsed";
+      if (isCollapsed) suiteClass += " collapsed suite-collapsed";
 
       html += `<div class="${suiteClass}" data-suite-id="${suiteId}">`;
       html += `<div class="suite-header" onclick="window.testController?.handleSuiteClick('${suite}', ${suiteId})">`;
@@ -440,46 +458,44 @@ class TestUIController {
       html += `</div>`;
 
       // Test items
-      if (!isCollapsed) {
-        html += `<div class="test-items">`;
-        for (const test of tests) {
-          let testIcon = "⏳";
-          let testClass = "test-item";
+      html += `<div class="test-items suite-tests">`;
+      for (const test of tests) {
+        let testIcon = "⏳";
+        let testClass = "test-item";
 
-          if (test.status === "passed") {
-            testIcon = "✓";
-            testClass += " test-passed";
-          } else if (test.status === "failed") {
-            testIcon = "✗";
-            testClass += " test-failed";
-          } else {
-            testClass += " test-running";
-          }
+        if (test.status === "passed") {
+          testIcon = "✓";
+          testClass += " test-passed";
+        } else if (test.status === "failed") {
+          testIcon = "✗";
+          testClass += " test-failed";
+        } else {
+          testClass += " test-running";
+        }
 
-          const isActive = this.activeTest === `${suite}::${test.name}`;
-          if (isActive) testClass += " test-active";
+        const isActive = this.activeTest === `${suite}::${test.name}`;
+        if (isActive) testClass += " test-active";
 
-          html += `<div class="${testClass}" data-test-id="${test.testId}">`;
-          html += `<div class="test-info" onclick="window.testController?.handleTestClick('${suite}', '${test.name}', '${test.testId}')">`;
-          html += `<span class="test-icon">${testIcon}</span>`;
-          html += `<span class="test-name">${test.name}</span>`;
-          html += `</div>`;
-          html += `<div class="test-actions">`;
-          if (test.duration !== null) {
-            html += `<span class="test-duration">${test.duration}ms</span>`;
-          }
-          if (test.source) {
-            html += `<button class="view-source-btn" onclick="event.stopPropagation(); window.testController?.viewTestSource('${suite}', '${test.name}', '${test.testId}')" title="View source code">
+        html += `<div class="${testClass}" data-test-id="${test.testId}">`;
+        html += `<div class="test-info" onclick="window.testController?.handleTestClick('${suite}', '${test.name}', '${test.testId}')">`;
+        html += `<span class="test-icon">${testIcon}</span>`;
+        html += `<span class="test-name">${test.name}</span>`;
+        html += `</div>`;
+        html += `<div class="test-actions">`;
+        if (test.duration !== null) {
+          html += `<span class="test-duration">${test.duration}ms</span>`;
+        }
+        if (test.source) {
+          html += `<button class="view-source-btn" onclick="event.stopPropagation(); window.testController?.viewTestSource('${suite}', '${test.name}', '${test.testId}')" title="View source code">
               <svg width="14" height="14" viewBox="0 0 16 16" fill="currentColor">
                 <path d="M5.854 4.854a.5.5 0 1 0-.708-.708l-3.5 3.5a.5.5 0 0 0 0 .708l3.5 3.5a.5.5 0 0 0 .708-.708L2.707 8l3.147-3.146zm4.292 0a.5.5 0 0 1 .708-.708l3.5 3.5a.5.5 0 0 1 0 .708l-3.5 3.5a.5.5 0 0 1-.708-.708L13.293 8l-3.147-3.146z"/>
               </svg>
             </button>`;
-          }
-          html += `</div>`;
-          html += `</div>`;
         }
         html += `</div>`;
+        html += `</div>`;
       }
+      html += `</div>`;
 
       html += `</div>`;
     }
@@ -510,11 +526,13 @@ class TestUIController {
       if (suiteElement) {
         if (isCurrentlyCollapsed) {
           suiteElement.classList.remove("collapsed");
+          suiteElement.classList.remove("suite-collapsed");
           // Update collapse icon
           const collapseIcon = suiteElement.querySelector(".collapse-icon");
           if (collapseIcon) collapseIcon.textContent = "▼";
         } else {
           suiteElement.classList.add("collapsed");
+          suiteElement.classList.add("suite-collapsed");
           // Update collapse icon
           const collapseIcon = suiteElement.querySelector(".collapse-icon");
           if (collapseIcon) collapseIcon.textContent = "▶";
@@ -658,11 +676,13 @@ class TestUIController {
    */
   private updateProgress(): void {
     // 1. Input handling
-    const { total, passed, failed } = this.testStats;
+    const { completed, passed, failed } = this.testStats;
 
     // 2. Core processing
-    const percentage = total > 0 ? (total / 51) * 100 : 0;
-    const passRate = total > 0 ? (passed / total) * 100 : 0;
+    const expectedTotal = this.plannedTestTotal || completed;
+    const percentage =
+      expectedTotal > 0 ? (completed / expectedTotal) * 100 : 0;
+    const passRate = completed > 0 ? (passed / completed) * 100 : 0;
 
     // 3. Output handling
     const progressText = document.getElementById("test-progress-text");
@@ -673,9 +693,15 @@ class TestUIController {
     const passedCount = document.getElementById("test-passed-count");
     const failedCount = document.getElementById("test-failed-count");
 
-    if (progressText) progressText.textContent = ` ${total} / 51 tests`;
+    if (progressText) {
+      const label =
+        this.plannedTestTotal > 0
+          ? ` ${completed} / ${this.plannedTestTotal} tests`
+          : ` ${completed} test${completed === 1 ? "" : "s"}`;
+      progressText.textContent = label;
+    }
     if (passRateEl) passRateEl.textContent = `${passRate.toFixed(1)}%`;
-    if (progressBar) progressBar.style.width = `${percentage}%`;
+    if (progressBar) progressBar.style.width = `${Math.min(percentage, 100)}%`;
     if (passedCount) passedCount.textContent = String(passed);
     if (failedCount) failedCount.textContent = String(failed);
   }
