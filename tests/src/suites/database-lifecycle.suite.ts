@@ -41,7 +41,10 @@ export const databaseLifecycleTests: TestCase[] = [
     name: "Database persistence across connections",
     fn: async (sqlite3) => {
       const tableName = LIFECYCLE_TABLES.persistence;
-      const firstConnection = TestUtils.createTestDb(sqlite3, LIFECYCLE_DB_FILE);
+      const firstConnection = TestUtils.createTestDb(
+        sqlite3,
+        LIFECYCLE_DB_FILE
+      );
 
       try {
         firstConnection.exec(

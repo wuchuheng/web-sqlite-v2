@@ -14,3 +14,4 @@ export { constraintsTests } from "./constraints.suite";
 export { errorHandlingTests } from "./error-handling.suite";
 export { performanceTests } from "./performance.suite";
 export { dataTypesTests } from "./data-types.suite";
+export { versionInfoTests } from "./version-info.suite";

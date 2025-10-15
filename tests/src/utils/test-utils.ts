@@ -4,7 +4,10 @@ type Database = InstanceType<SQLite3API["oo1"]["DB"]>;
 type SQLite3WithOpfs = SQLite3API & {
   opfs?: {
     unlink?: (fsEntryName: string, recursive?: boolean) => Promise<unknown>;
-    getResolvedPath?: (filename: string, splitIt?: boolean) => string | string[];
+    getResolvedPath?: (
+      filename: string,
+      splitIt?: boolean
+    ) => string | string[];
     mkdir?: (dirName: string) => Promise<unknown>;
   };
 };
@@ -97,7 +100,9 @@ export class TestUtils {
         await opfs.unlink(target, true);
       } catch (error) {
         console.warn(
-          `Failed to cleanup OPFS database ${filename}: ${(error as Error).message}`
+          `Failed to cleanup OPFS database ${filename}: ${
+            (error as Error).message
+          }`
         );
       }
     }
@@ -118,9 +123,7 @@ export class TestUtils {
    */
   static assertEqual<T>(actual: T, expected: T, message?: string): void {
     if (actual !== expected) {
-      throw new Error(
-        message || `Expected ${expected} but got ${actual}`
-      );
+      throw new Error(message || `Expected ${expected} but got ${actual}`);
     }
   }
 
@@ -128,14 +131,20 @@ export class TestUtils {
    * Assert that value is truthy
    */
   static assertTrue(value: unknown, message?: string): void {
-    TestUtils.assert(!!value, message || `Expected truthy value but got ${value}`);
+    TestUtils.assert(
+      !!value,
+      message || `Expected truthy value but got ${value}`
+    );
   }
 
   /**
    * Assert that value is falsy
    */
   static assertFalse(value: unknown, message?: string): void {
-    TestUtils.assert(!value, message || `Expected falsy value but got ${value}`);
+    TestUtils.assert(
+      !value,
+      message || `Expected falsy value but got ${value}`
+    );
   }
 
   /**

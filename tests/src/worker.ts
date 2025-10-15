@@ -12,6 +12,7 @@ import {
   errorHandlingTests,
   performanceTests,
   dataTypesTests,
+  versionInfoTests,
 } from "./suites";
 
 /**
@@ -33,6 +34,7 @@ testRunner.registerSuite("Constraints", constraintsTests);
 testRunner.registerSuite("Error Handling", errorHandlingTests);
 testRunner.registerSuite("Performance", performanceTests);
 testRunner.registerSuite("Data Types", dataTypesTests);
+testRunner.registerSuite("Version Info", versionInfoTests);
 
 /**
  * Message handler for worker commands
