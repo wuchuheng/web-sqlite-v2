@@ -44,6 +44,10 @@ export default defineConfig([
                 ...globals.node,
                 ...globals.es2024,
             },
+            parserOptions: {
+                projectService: true,
+                tsconfigRootDir: import.meta.dirname,
+            },
         },
         rules: {
             "no-empty": [

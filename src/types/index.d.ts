@@ -41,8 +41,8 @@ declare module '@wuchuheng/web-sqlite' {
     libVersionNumber: number
     /** Source ID */
     sourceId: string
-    /** Download URL */
-    downloadUrl: string
+    /** Download/build version identifier */
+    downloadVersion: number
   }
 
   /**
@@ -172,6 +172,9 @@ declare module '@wuchuheng/web-sqlite' {
     sqlite3_sql(pStmt: number): string
     sqlite3_db_filename(pDb: number, dbName: string): string
     sqlite3_db_name(pDb: number, dbNumber: number): string
+    sqlite3_libversion(): string
+    sqlite3_libversion_number(): number
+    sqlite3_sourceid(): string
     sqlite3_stmt_busy(pStmt: number): number
     sqlite3_stmt_readonly(pStmt: number): number
     sqlite3_trace_v2(pDb: number, mask: number, callback: number, pCtx: number): number
@@ -479,6 +482,9 @@ declare module '@wuchuheng/web-sqlite' {
       jstrlen(str: string): number
       jstrcpy(str: string, tgt: Int8Array | Uint8Array, offset: number, maxBytes: number, addNul: boolean): number
       alloc(size: number): number
+      realloc(ptr: number, size: number): number
+      dealloc(ptr: number): void
+      allocFromTypedArray(data: ArrayBufferView | ArrayBuffer): number
       pstack: {
         pointer: number
         alloc(size: number): number
@@ -499,14 +505,29 @@ declare module '@wuchuheng/web-sqlite' {
       isInt32(value: unknown): boolean
       isSQLableTypedArray(value: unknown): boolean
       isBindableTypedArray(value: unknown): boolean
+      isTypedArray(value: unknown): boolean
+      isSharedTypedArray(value: unknown): boolean
       bigIntFits64(value: bigint): boolean
+      bigIntFits32(value: bigint): boolean
       bigIntFitsDouble(value: bigint): boolean
       flexibleString(value: unknown): string
+      typedArrayToString(array: ArrayBufferView): string
+      typedArrayPart(array: ArrayBufferView, offset: number, length: number): Uint8Array
+      affirmDbHeader(bytes: ArrayBufferView | ArrayBuffer): void
+      affirmIsDb(bytes: ArrayBufferView | ArrayBuffer): void
+      isUIThread(): boolean
+      toss(...args: unknown[]): never
+      toss3(...args: unknown[]): never
     }
     /** Configuration */
     config: {
       error(...args: unknown[]): void
       warn(...args: unknown[]): void
+      log(...args: unknown[]): void
+      debug(...args: unknown[]): void
+      wasmfsOpfsDir?: string
+      useStdAlloc?: boolean
+      bigIntEnabled?: boolean
     }
   }
 

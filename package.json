@@ -13,8 +13,8 @@
   },
   "scripts": {
     "test": "pnpm -w --filter @wuchuheng/web-sqlite-tests dev",
-    "lint": "eslint . --ext .ts,.js,.mjs --fix; pnpm run typecheck",
-    "typecheck": "cd tests && pnpm exec tsc --noEmit --pretty"
+    "lint": "eslint . --ext .ts,.js,.mjs --fix; pnpm run test:lint",
+    "test:lint": "cd tests && pnpm run lint"
   },
   "keywords": [
     "sqlite",

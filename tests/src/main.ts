@@ -56,8 +56,6 @@ class TestUIController {
   private consoleContent = "";
   private suiteIdMap = new Map<string, number>();
   private currentSuiteId = 0;
-  private currentLogBlock: HTMLElement | null = null;
-  private currentTestId: string | null = null;
 
   constructor() {
     // 1. Input handling - Initialize state
@@ -216,8 +214,6 @@ class TestUIController {
     this.testTree.clear();
     this.suiteIdMap.clear();
     this.currentSuiteId = 0;
-    this.currentLogBlock = null;
-    this.currentTestId = null;
     this.clearConsole();
     this.updateProgress();
 
@@ -287,7 +283,6 @@ class TestUIController {
     });
 
     this.createTestLogBlock(suite, test, testId, suiteId);
-    this.currentTestId = testId;
 
     // 3. Output handling
     this.renderTestTree();
@@ -814,7 +809,6 @@ class TestUIController {
 
     // 3. Output handling
     consoleLog.appendChild(groupBlock);
-    this.currentLogBlock = groupBlock;
 
     this.consoleContent += groupBlock.outerHTML;
   }
@@ -849,7 +843,6 @@ class TestUIController {
 
     // 3. Output handling
     groupBlock.appendChild(itemBlock);
-    this.currentLogBlock = itemBlock;
   }
 
   /**

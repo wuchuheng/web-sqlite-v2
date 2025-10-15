@@ -120,7 +120,6 @@ export function createFS({
             constructor(parent, name, mode, rdev) {
                 // 1. Handle root node case
                 if (!parent) {
-                    // eslint-disable-next-line @typescript-eslint/no-this-alias
                     parent = this;
                 }
 
@@ -337,11 +336,7 @@ export function createFS({
 
             // 2. Search hash table
             const hash = FS.hashName(parent.id, name);
-            for (
-                let node = FS.nameTable[hash];
-                node;
-                node = node.name_next
-            ) {
+            for (let node = FS.nameTable[hash]; node; node = node.name_next) {
                 const nodeName = node.name;
                 if (node.parent.id === parent.id && nodeName === name) {
                     return node;
@@ -613,19 +608,13 @@ export function createFS({
             if (FS.isLink(node.mode)) {
                 return 32;
             } else if (FS.isDir(node.mode)) {
-                if (
-                    FS.flagsToPermissionString(flags) !== "r" ||
-                    flags & 512
-                ) {
+                if (FS.flagsToPermissionString(flags) !== "r" || flags & 512) {
                     return 31;
                 }
             }
 
             // 3. Check node permissions
-            return FS.nodePermissions(
-                node,
-                FS.flagsToPermissionString(flags)
-            );
+            return FS.nodePermissions(node, FS.flagsToPermissionString(flags));
         },
 
         MAX_OPEN_FDS: 4096,
@@ -1609,9 +1598,7 @@ export function createFS({
 
             // 2. Parse flags
             flags =
-                typeof flags == "string"
-                    ? FS_modeStringToFlags(flags)
-                    : flags;
+                typeof flags == "string" ? FS_modeStringToFlags(flags) : flags;
 
             // 3. Set mode if creating
             if (flags & 64) {
@@ -1771,11 +1758,7 @@ export function createFS({
             }
 
             // 4. Perform seek
-            stream.position = stream.stream_ops.llseek(
-                stream,
-                offset,
-                whence
-            );
+            stream.position = stream.stream_ops.llseek(stream, offset, whence);
             stream.ungotten = [];
 
             // 5. Return position
@@ -1936,10 +1919,7 @@ export function createFS({
             }
 
             // 4. Check if file or directory
-            if (
-                !FS.isFile(stream.node.mode) &&
-                !FS.isDir(stream.node.mode)
-            ) {
+            if (!FS.isFile(stream.node.mode) && !FS.isDir(stream.node.mode)) {
                 throw new FS.ErrnoError(43);
             }
 
@@ -2444,8 +2424,7 @@ export function createFS({
          */
         createPath(parent, path, _canRead, _canWrite) {
             // 1. Get parent path
-            parent =
-                typeof parent == "string" ? parent : FS.getPath(parent);
+            parent = typeof parent == "string" ? parent : FS.getPath(parent);
 
             // 2. Split path
             const parts = path.split("/").reverse();

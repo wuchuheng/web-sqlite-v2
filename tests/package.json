@@ -7,7 +7,9 @@
     "dev": "vite",
     "build": "tsc && vite build",
     "preview": "vite preview",
-    "test": "vite --open"
+    "test": "vite --open",
+    "lint": "eslint . --ext .ts,.js,.mjs --fix; pnpm run typeCheck",
+    "typeCheck": "tsc --noEmit --pretty"
   },
   "keywords": [
     "sqlite",
@@ -23,6 +25,10 @@
   },
   "devDependencies": {
     "typescript": "^5.7.3",
-    "vite": "^6.0.11"
+    "vite": "^6.0.11",
+    "@eslint/js": "^9.37.0",
+    "eslint": "^9.37.0",
+    "jiti": "^2.6.1",
+    "typescript-eslint": "^8.46.0"
   }
 }
