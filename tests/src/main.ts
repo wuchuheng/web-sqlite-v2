@@ -422,13 +422,21 @@ class TestUIController {
       const isSuiteActive =
         this.activeTest && this.activeTest.startsWith(`${suite}::`);
       if (isSuiteActive) suiteClass += " suite-active";
+      if (isCollapsed) suiteClass += " collapsed";
 
       html += `<div class="${suiteClass}" data-suite-id="${suiteId}">`;
       html += `<div class="suite-header" onclick="window.testController?.handleSuiteClick('${suite}', ${suiteId})">`;
       html += `<span class="collapse-icon">${isCollapsed ? "▶" : "▼"}</span>`;
       html += `<span class="suite-icon">${suiteIcon}</span>`;
       html += `<span class="suite-name">${suite}</span>`;
+      html += `<div class="suite-stats">`;
       html += `<span class="suite-count">${passedCount}/${totalCount}</span>`;
+
+      const stats = this.suiteStats.get(suite);
+      if (stats && stats.duration > 0) {
+        html += `<span class="suite-duration">${stats.duration}ms</span>`;
+      }
+      html += `</div>`;
       html += `</div>`;
 
       // Test items
@@ -485,17 +493,37 @@ class TestUIController {
    */
   public handleSuiteClick(suite: string, suiteId: number): void {
     // 1. Input handling - Toggle collapse
-    if (this.collapsedSuites.has(suite)) {
+    const isCurrentlyCollapsed = this.collapsedSuites.has(suite);
+
+    if (isCurrentlyCollapsed) {
       this.collapsedSuites.delete(suite);
     } else {
       this.collapsedSuites.add(suite);
     }
 
-    // 2. Core processing - Scroll to suite log block
-    this.scrollToLogBlock(`group-${suiteId}`);
+    // 2. Core processing - Toggle collapsed class for animation
+    const testTreeEl = document.getElementById("test-tree");
+    if (testTreeEl) {
+      const suiteElement = testTreeEl.querySelector(
+        `[data-suite-id="${suiteId}"]`
+      );
+      if (suiteElement) {
+        if (isCurrentlyCollapsed) {
+          suiteElement.classList.remove("collapsed");
+          // Update collapse icon
+          const collapseIcon = suiteElement.querySelector(".collapse-icon");
+          if (collapseIcon) collapseIcon.textContent = "▼";
+        } else {
+          suiteElement.classList.add("collapsed");
+          // Update collapse icon
+          const collapseIcon = suiteElement.querySelector(".collapse-icon");
+          if (collapseIcon) collapseIcon.textContent = "▶";
+        }
+      }
+    }
 
-    // 3. Output handling
-    this.renderTestTree();
+    // 3. Output handling - Scroll to suite log block
+    this.scrollToLogBlock(`group-${suiteId}`);
   }
 
   /**
@@ -645,7 +673,7 @@ class TestUIController {
     const passedCount = document.getElementById("test-passed-count");
     const failedCount = document.getElementById("test-failed-count");
 
-    if (progressText) progressText.textContent = `${total} / 51 tests`;
+    if (progressText) progressText.textContent = ` ${total} / 51 tests`;
     if (passRateEl) passRateEl.textContent = `${passRate.toFixed(1)}%`;
     if (progressBar) progressBar.style.width = `${percentage}%`;
     if (passedCount) passedCount.textContent = String(passed);
@@ -722,7 +750,10 @@ class TestUIController {
    */
   private formatSourceCode(source: string): string {
     // 1. Input handling - Detect language
-    const language = source.includes("=>") || source.includes("async") ? "javascript" : "typescript";
+    const language =
+      source.includes("=>") || source.includes("async")
+        ? "javascript"
+        : "typescript";
 
     try {
       // 2. Core processing - Apply highlight.js syntax highlighting

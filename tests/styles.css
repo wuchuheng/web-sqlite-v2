@@ -138,7 +138,6 @@ body {
   font-size: 11px;
   color: #6b7280;
   font-weight: 400;
-  margin-left: 8px;
 }
 
 .suite-passed .suite-icon {
@@ -151,6 +150,22 @@ body {
 
 .test-items {
   background: white;
+  transform-origin: top;
+  transform: scaleY(1);
+  opacity: 1;
+  height: auto;
+  overflow: hidden;
+  transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1),
+    opacity 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  will-change: transform, opacity;
+}
+
+.test-suite.collapsed .test-items {
+  transform: scaleY(0);
+  opacity: 0;
+  height: 0;
+  transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1),
+    opacity 0.3s cubic-bezier(0.4, 0, 0.2, 1), height 0s 0.3s;
 }
 
 .test-icon {
@@ -158,6 +173,20 @@ body {
   width: 16px;
   margin-right: 8px;
   text-align: center;
+  font-weight: 600;
+}
+
+.test-passed .test-icon {
+  color: #10b981;
+}
+
+.test-failed .test-icon {
+  color: #ef4444;
+}
+
+.test-running .test-icon {
+  color: #3b82f6;
+  animation: pulse 1.5s ease-in-out infinite;
 }
 
 .test-duration {
