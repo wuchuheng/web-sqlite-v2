@@ -11,7 +11,11 @@ import {
 
 /**
  * @typedef {import("../sqlite3Apibootstrap.d.ts").Sqlite3Initializer} Sqlite3Initializer
+ * @typedef {import("../sqlite3Apibootstrap.d.ts").Sqlite3AsyncInitializer} Sqlite3AsyncInitializer
  * @typedef {import("../sqlite3Apibootstrap.d.ts").Sqlite3BootstrapFunction} Sqlite3BootstrapFunction
+ * @typedef {import("../sqlite3Apibootstrap.d.ts").Sqlite3ConfigSnapshot} Sqlite3ConfigSnapshot
+ * @typedef {import("../sqlite3Apibootstrap.d.ts").Sqlite3Facade["version"]} Sqlite3VersionInfo
+ * @typedef {import("./configuration.d.ts").BootstrapConfig} BootstrapConfig
  */
 
 /**
@@ -35,11 +39,15 @@ export function applyDefaultBootstrapState(sqlite3ApiBootstrap) {
         );
     }
 
+    /** @type {Sqlite3Initializer[]} */
     sqlite3ApiBootstrap.initializers = [];
+    /** @type {Sqlite3AsyncInitializer[]} */
     sqlite3ApiBootstrap.initializersAsync = [];
+    /** @type {Partial<BootstrapConfig>} */
     sqlite3ApiBootstrap.defaultConfig = Object.create(null);
     sqlite3ApiBootstrap.sqlite3 = undefined;
 
+    /** @type {typeof StructBinderFactory} */
     globalThis.Jaccwabyt = StructBinderFactory;
 
     sqlite3ApiBootstrap.initializers.push(createInstallOo1Initializer());
@@ -48,11 +56,19 @@ export function applyDefaultBootstrapState(sqlite3ApiBootstrap) {
     sqlite3ApiBootstrap.initializers.push(createWorker1ApiInitializer());
     sqlite3ApiBootstrap.initializers.push(createVfsInitializer());
     sqlite3ApiBootstrap.initializers.push(createVtabInitializer());
-    sqlite3ApiBootstrap.initializers.push((sqlite3) => {
-        const { installOpfsVfsInitializer } =
-            createInstallOpfsVfsContext(sqlite3);
-        sqlite3ApiBootstrap.initializersAsync.push(installOpfsVfsInitializer);
-    });
+    sqlite3ApiBootstrap.initializers.push(
+        /**
+         * Schedules the OPFS VFS initializer for asynchronous execution.
+         *
+         * @param {import("../sqlite3Apibootstrap.d.ts").Sqlite3Facade} sqlite3
+         * @returns {void}
+         */
+        (sqlite3) => {
+            const { installOpfsVfsInitializer } =
+                createInstallOpfsVfsContext(sqlite3);
+            sqlite3ApiBootstrap.initializersAsync.push(installOpfsVfsInitializer);
+        }
+    );
     sqlite3ApiBootstrap.initializers.push(createOpfsSahpoolInitializer());
 }
 
@@ -66,6 +82,7 @@ export function applyDefaultBootstrapState(sqlite3ApiBootstrap) {
  */
 function createVersionInitializer() {
     return function initializeVersion(sqlite3) {
+        /** @type {Sqlite3VersionInfo} */
         sqlite3.version = {
             libVersion: "3.50.4",
             libVersionNumber: 3050004,

@@ -14,6 +14,9 @@ import { createSqlite3Facade } from "./bootstrap/runtime/create-sqlite3-facade.m
 
 /**
  * @typedef {import("./bootstrap/configuration.d.ts").BootstrapConfig} BootstrapConfig
+ * @typedef {import("./sqlite3Apibootstrap.d.ts").Sqlite3BootstrapFunction} Sqlite3BootstrapFunction
+ * @typedef {import("./sqlite3Apibootstrap.d.ts").Sqlite3EmscriptenModule} Sqlite3EmscriptenModule
+ * @typedef {import("./sqlite3Apibootstrap.d.ts").Sqlite3Facade} Sqlite3Facade
  */
 
 /**
@@ -21,9 +24,10 @@ import { createSqlite3Facade } from "./bootstrap/runtime/create-sqlite3-facade.m
  * function wires the high-level JavaScript bridge after the WebAssembly module
  * becomes available.
  *
- * @param {unknown} _EmscriptenModule The instantiated Emscripten module. The
- * parameter is accepted for compatibility with upstream entry points but is not
- * used directly in the browser integration.
+ * @param {Sqlite3EmscriptenModule | undefined} _EmscriptenModule The instantiated
+ *        Emscripten module. The parameter is accepted for compatibility with
+ *        upstream entry points but is not used directly in the browser
+ *        integration.
  */
 export function runSQLite3PostLoadInit(_EmscriptenModule) {
     "use strict";
@@ -36,7 +40,9 @@ export function runSQLite3PostLoadInit(_EmscriptenModule) {
      * @param {Partial<BootstrapConfig> | undefined} apiConfig Optional configuration
      *        overrides supplied by the embedding application. The object is normalized by
      *        {@link resolveBootstrapConfig} before use.
+     * @returns {Sqlite3Facade}
      */
+    /** @type {Sqlite3BootstrapFunction} */
     globalThis.sqlite3ApiBootstrap = function sqlite3ApiBootstrap(
         apiConfig = globalThis.sqlite3ApiConfig ||
             sqlite3ApiBootstrap.defaultConfig
@@ -51,6 +57,7 @@ export function runSQLite3PostLoadInit(_EmscriptenModule) {
         // Normalize configuration once so the rest of the bootstrapper can rely
         // on a predictable shape regardless of how the host page provided the
         // overrides.
+        /** @type {BootstrapConfig} */
         const config = resolveBootstrapConfig(apiConfig, {
             moduleRef: Module,
         });
@@ -125,6 +132,7 @@ export function runSQLite3PostLoadInit(_EmscriptenModule) {
         );
 
         // Build the public facade and run any synchronous bootstrap hooks.
+        /** @type {Sqlite3Facade} */
         const sqlite3 = createSqlite3Facade({
             sqlite3ApiBootstrap,
             WasmAllocError,

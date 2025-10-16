@@ -1,6 +1,7 @@
 /**
  * @typedef {import("../sqlite3Apibootstrap.d.ts").Sqlite3Facade} Sqlite3Facade
  * @typedef {import("../sqlite3Apibootstrap.d.ts").Sqlite3Initializer} Sqlite3Initializer
+ * @typedef {import("../sqlite3Apibootstrap.d.ts").Sqlite3VfsInstallOptions} Sqlite3VfsInstallOptions
  */
 
 /**
@@ -42,6 +43,12 @@ export function createVfsInitializer() {
             return this;
         };
 
+        /**
+         * Registers VFS and IO method implementations with the sqlite3 runtime.
+         *
+         * @param {Sqlite3VfsInstallOptions} opt
+         * @returns {typeof vfs}
+         */
         vfs.installVfs = function (opt) {
             let count = 0;
             const propList = ["io", "vfs"];
