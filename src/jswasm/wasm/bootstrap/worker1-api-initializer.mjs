@@ -1,15 +1,15 @@
 /**
- * @typedef {import("./types/sqlite3-bootstrap").Sqlite3Facade} Sqlite3Facade
- * @typedef {import("./types/sqlite3-bootstrap").Sqlite3Initializer} Sqlite3Initializer
- * @typedef {import("./types/sqlite3-bootstrap").WorkerRuntimeState} WorkerRuntimeState
- * @typedef {import("./types/sqlite3-bootstrap").Sqlite3WorkerMessage} Sqlite3WorkerMessage
- * @typedef {import("./types/sqlite3-bootstrap").Sqlite3DatabaseHandle} Sqlite3DatabaseHandle
- * @typedef {import("./types/sqlite3-bootstrap").WorkerOpenResponse} WorkerOpenResponse
- * @typedef {import("./types/sqlite3-bootstrap").WorkerCloseResponse} WorkerCloseResponse
- * @typedef {import("./types/sqlite3-bootstrap").WorkerExecResult} WorkerExecResult
- * @typedef {import("./types/sqlite3-bootstrap").WorkerConfigResponse} WorkerConfigResponse
- * @typedef {import("./types/sqlite3-bootstrap").WorkerExtensionResponse} WorkerExtensionResponse
- * @typedef {import("./types/sqlite3-bootstrap").Sqlite3StatusObject} Sqlite3StatusObject
+ * @typedef {import("../sqlite3Apibootstrap.d.ts").Sqlite3Facade} Sqlite3Facade
+ * @typedef {import("../sqlite3Apibootstrap.d.ts").Sqlite3Initializer} Sqlite3Initializer
+ * @typedef {import("../sqlite3Apibootstrap.d.ts").WorkerRuntimeState} WorkerRuntimeState
+ * @typedef {import("../sqlite3Apibootstrap.d.ts").Sqlite3WorkerMessage} Sqlite3WorkerMessage
+ * @typedef {import("../sqlite3Apibootstrap.d.ts").Sqlite3DatabaseHandle} Sqlite3DatabaseHandle
+ * @typedef {import("../sqlite3Apibootstrap.d.ts").WorkerOpenResponse} WorkerOpenResponse
+ * @typedef {import("../sqlite3Apibootstrap.d.ts").WorkerCloseResponse} WorkerCloseResponse
+ * @typedef {import("../sqlite3Apibootstrap.d.ts").WorkerExecResult} WorkerExecResult
+ * @typedef {import("../sqlite3Apibootstrap.d.ts").WorkerConfigResponse} WorkerConfigResponse
+ * @typedef {import("../sqlite3Apibootstrap.d.ts").WorkerExtensionResponse} WorkerExtensionResponse
+ * @typedef {import("../sqlite3Apibootstrap.d.ts").Sqlite3StatusObject} Sqlite3StatusObject
  */
 
 /**
@@ -510,4 +510,3 @@ class Worker1Runtime {
         });
     }
 }
-

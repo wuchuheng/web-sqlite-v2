@@ -1,6 +1,6 @@
 /**
- * @typedef {import("./types/sqlite3-bootstrap").Sqlite3Facade} Sqlite3Facade
- * @typedef {import("./types/sqlite3-bootstrap").Sqlite3Initializer} Sqlite3Initializer
+ * @typedef {import("../sqlite3Apibootstrap.d.ts").Sqlite3Facade} Sqlite3Facade
+ * @typedef {import("../sqlite3Apibootstrap.d.ts").Sqlite3Initializer} Sqlite3Initializer
  */
 
 /**

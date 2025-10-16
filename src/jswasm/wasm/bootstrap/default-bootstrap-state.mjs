@@ -10,8 +10,8 @@ import {
 } from "./vfs-initializers.mjs";
 
 /**
- * @typedef {import("./types/sqlite3-bootstrap").Sqlite3Initializer} Sqlite3Initializer
- * @typedef {import("./types/sqlite3-bootstrap").Sqlite3BootstrapFunction} Sqlite3BootstrapFunction
+ * @typedef {import("../sqlite3Apibootstrap.d.ts").Sqlite3Initializer} Sqlite3Initializer
+ * @typedef {import("../sqlite3Apibootstrap.d.ts").Sqlite3BootstrapFunction} Sqlite3BootstrapFunction
  */
 
 /**
