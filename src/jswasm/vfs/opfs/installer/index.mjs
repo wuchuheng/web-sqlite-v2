@@ -38,7 +38,7 @@
  * await installOpfsVfs({
  *     verbose: 2,
  *     sanityChecks: true,
- *     proxyUri: "../sqlite3-opfs-async-proxy.js", // Relative to installer/ directory
+ *     proxyUri: "sqlite3-opfs-async-proxy.js", // Relative to installer/ directory
  * });
  * ```
  *
@@ -160,7 +160,9 @@ export function createInstallOpfsVfsContext(sqlite3) {
             };
 
             // 2.4 Initialize worker
-            const W = new Worker(new URL(config.proxyUri, import.meta.url));
+            const W = new Worker(new URL(config.proxyUri, import.meta.url), {
+                type: "module",
+            });
             setTimeout(() => {
                 if (undefined === promiseWasRejected.value) {
                     promiseReject(
@@ -328,7 +330,7 @@ export function createInstallOpfsVfsContext(sqlite3) {
         return thePromise;
     };
 
-    installOpfsVfs.defaultProxyUri = "../sqlite3-opfs-async-proxy.js";
+    installOpfsVfs.defaultProxyUri = "sqlite3-opfs-async-proxy.js";
 
     /**
      * Initializer function for OPFS VFS.

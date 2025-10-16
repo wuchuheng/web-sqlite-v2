@@ -4,9 +4,10 @@
  * @returns {Error | undefined} Error if OPFS unsupported, undefined if supported
  */
 export function validateOpfsEnvironment(globalObj) {
+    const root = globalObj ?? globalThis;
     // 1. Input handling
     // 1.1 Check SharedArrayBuffer and Atomics
-    if (!globalThis.SharedArrayBuffer || !globalThis.Atomics) {
+    if (!root.SharedArrayBuffer || !root.Atomics) {
         return new Error(
             "Cannot install OPFS: Missing SharedArrayBuffer and/or Atomics. " +
                 "The server must emit the COOP/COEP response headers to enable those. " +
@@ -15,7 +16,7 @@ export function validateOpfsEnvironment(globalObj) {
     }
 
     // 1.2 Check worker environment
-    if ("undefined" === typeof WorkerGlobalScope) {
+    if ("undefined" === typeof root.WorkerGlobalScope) {
         return new Error(
             "The OPFS sqlite3_vfs cannot run in the main thread " +
                 "because it requires Atomics.wait()."
@@ -24,17 +25,17 @@ export function validateOpfsEnvironment(globalObj) {
 
     // 1.3 Check OPFS APIs
     if (
-        !globalThis.FileSystemHandle ||
-        !globalThis.FileSystemDirectoryHandle ||
-        !globalThis.FileSystemFileHandle ||
-        !globalThis.FileSystemFileHandle.prototype.createSyncAccessHandle ||
-        !globalThis.navigator?.storage?.getDirectory
+        !root.FileSystemHandle ||
+        !root.FileSystemDirectoryHandle ||
+        !root.FileSystemFileHandle ||
+        !root.FileSystemFileHandle.prototype.createSyncAccessHandle ||
+        !root.navigator?.storage?.getDirectory
     ) {
         return new Error("Missing required OPFS APIs.");
     }
 
     // 3. Output handling
-    return null;
+    return undefined;
 }
 
 /**

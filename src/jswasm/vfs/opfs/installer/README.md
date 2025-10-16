@@ -75,14 +75,14 @@ W.postMessage({ type: "opfs-async-init", args: stateForWorker });
 
 #### 2. Proxy Worker Path (Fixed ✅)
 
-**Problem:** Incorrect relative path to `sqlite3-opfs-async-proxy.js`  
-**Solution:** Updated path to be relative to `installer/` directory  
+**Problem:** Legacy builds still requested `sqlite3-opfs-async-proxy.js`
+**Solution:** Added compatibility shim that forwards to the refactored worker module
 **File:** `index.mjs` line 331
 
 ```javascript
-// Changed from: "sqlite3-opfs-async-proxy.js"
-installOpfsVfs.defaultProxyUri = "../sqlite3-opfs-async-proxy.js";
-// Now correctly points to parent opfs/ directory
+// Default worker shim keeps backward compatible URL
+installOpfsVfs.defaultProxyUri = "sqlite3-opfs-async-proxy.js";
+// Under the hood this loads async-proxy/index.mjs
 ```
 
 ### Verification Documents
@@ -127,7 +127,7 @@ installer/
 src/jswasm/vfs/opfs/
 ├── install-opfs-vfs.mjs              # Original monolithic file (kept for reference)
 ├── opfs-sahpool-vfs.mjs              # Existing file (unchanged)
-├── sqlite3-opfs-async-proxy.js       # Worker script (unchanged)
+├── async-proxy/index.mjs             # Worker script entry point
 └── installer/                         # 🆕 NEW ORGANIZED CODE
     ├── index.mjs                      # Entry point (230 lines)
     ├── core/                          # Infrastructure (5 modules)
@@ -197,7 +197,7 @@ const { installOpfsVfs, installOpfsVfsInitializer } =
 await installOpfsVfs({
     verbose: 2,
     sanityChecks: true,
-    proxyUri: "../sqlite3-opfs-async-proxy.js", // Relative to installer/ directory
+    proxyUri: "sqlite3-opfs-async-proxy.js", // Relative to installer/ directory
 });
 ```
 
@@ -505,7 +505,7 @@ DataCloneError: Failed to execute 'postMessage' on 'Worker':
 **Symptom:**
 
 ```
-Refused to execute script from '...sqlite3-opfs-async-proxy.js'
+Refused to execute script from '...async-proxy/index.mjs'
 because its MIME type ('text/html') is not executable.
 ```
 
@@ -513,8 +513,8 @@ because its MIME type ('text/html') is not executable.
 
 **Solution:** ✅ Already fixed in `index.mjs`
 
--   Changed `defaultProxyUri` from `"sqlite3-opfs-async-proxy.js"` to `"../sqlite3-opfs-async-proxy.js"`
--   The path is now correctly relative to the `installer/` directory
+-   Retained `defaultProxyUri` as `"sqlite3-opfs-async-proxy.js"` for backward compatibility while the implementation now lives under `async-proxy/`
+-   The path is now correctly relative to the `installer/` directory and targets the module worker entry
 
 **Verification:** Check `index.mjs` line 331 for the correct relative path
 
