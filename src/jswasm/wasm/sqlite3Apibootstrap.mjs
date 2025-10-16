@@ -4,10 +4,35 @@ import { createInstallOpfsVfsContext } from "../vfs/opfs/install-opfs-vfs.mjs";
 import { StructBinderFactory } from "../utils/struct-binder-factory.mjs";
 import { createInstallOo1Initializer } from "../api/install-oo1.mjs";
 import { createInstallOo1DbApiInitializer } from "../api/install-oo1-db-api.mjs";
+import { resolveBootstrapConfig } from "./bootstrap/configuration.mjs";
+import {
+    createResultCodeStringifier,
+    createSQLite3Error,
+    createWasmAllocError,
+} from "./bootstrap/error-utils.mjs";
+import { createBootstrapUtil } from "./bootstrap/util-factory.mjs";
 
+/**
+ * Applies post-load initialization hooks to the compiled SQLite3 module. This
+ * function wires the high-level JavaScript bridge after the WebAssembly module
+ * becomes available.
+ *
+ * @param {unknown} _EmscriptenModule The instantiated Emscripten module. The
+ * parameter is accepted for compatibility with upstream entry points but is not
+ * used directly in the browser integration.
+ */
 export function runSQLite3PostLoadInit(_EmscriptenModule) {
     "use strict";
 
+    /**
+     * Initializes the SQLite3 JavaScript bindings and caches the resulting API
+     * instance on the bootstrapper. Subsequent invocations return the cached
+     * instance to prevent reconfiguration.
+     *
+     * @param {object | undefined} apiConfig Optional configuration overrides
+     *        supplied by the embedding application. The object is normalized by
+     *        {@link resolveBootstrapConfig} before use.
+     */
     globalThis.sqlite3ApiBootstrap = function sqlite3ApiBootstrap(
         apiConfig = globalThis.sqlite3ApiConfig ||
             sqlite3ApiBootstrap.defaultConfig
@@ -19,100 +44,26 @@ export function runSQLite3PostLoadInit(_EmscriptenModule) {
             );
             return sqlite3ApiBootstrap.sqlite3;
         }
-        const config = Object.assign(
-            Object.create(null),
-            {
-                exports: undefined,
-                memory: undefined,
-                bigIntEnabled: (() => {
-                    if ("undefined" !== typeof Module) {
-                        if (Module.HEAPU64) return true;
-                    }
-                    return !!globalThis.BigInt64Array;
-                })(),
-                debug: console.debug.bind(console),
-                warn: console.warn.bind(console),
-                error: console.error.bind(console),
-                log: console.log.bind(console),
-                wasmfsOpfsDir: "/opfs",
-
-                useStdAlloc: false,
-            },
-            apiConfig || {}
-        );
-
-        Object.assign(
-            config,
-            {
-                allocExportName: config.useStdAlloc
-                    ? "malloc"
-                    : "sqlite3_malloc",
-                deallocExportName: config.useStdAlloc ? "free" : "sqlite3_free",
-                reallocExportName: config.useStdAlloc
-                    ? "realloc"
-                    : "sqlite3_realloc",
-            },
-            config
-        );
-
-        ["exports", "memory", "wasmfsOpfsDir"].forEach((k) => {
-            if ("function" === typeof config[k]) {
-                config[k] = config[k]();
-            }
+        // Normalize configuration once so the rest of the bootstrapper can rely
+        // on a predictable shape regardless of how the host page provided the
+        // overrides.
+        const config = resolveBootstrapConfig(apiConfig, {
+            moduleRef: Module,
         });
 
         delete globalThis.sqlite3ApiConfig;
         delete sqlite3ApiBootstrap.defaultConfig;
 
         const capi = Object.create(null);
-
         const wasm = Object.create(null);
 
-        const __rcStr = (rc) => {
-            return (
-                (capi.sqlite3_js_rc_str && capi.sqlite3_js_rc_str(rc)) ||
-                "Unknown result code #" + rc
-            );
-        };
-
-        const __isInt = (n) => "number" === typeof n && n === (n | 0);
-
-        class SQLite3Error extends Error {
-            constructor(...args) {
-                let rc;
-                if (args.length) {
-                    if (__isInt(args[0])) {
-                        rc = args[0];
-                        if (1 === args.length) {
-                            super(__rcStr(args[0]));
-                        } else {
-                            const rcStr = __rcStr(rc);
-                            if ("object" === typeof args[1]) {
-                                super(rcStr, args[1]);
-                            } else {
-                                args[0] = rcStr + ":";
-                                super(args.join(" "));
-                            }
-                        }
-                    } else {
-                        if (2 === args.length && "object" === typeof args[1]) {
-                            super(...args);
-                        } else {
-                            super(args.join(" "));
-                        }
-                    }
-                } else {
-                    super();
-                }
-                this.resultCode = rc || capi.SQLITE_ERROR;
-                this.name = "SQLite3Error";
-            }
-        }
-
-        SQLite3Error.toss = (...args) => {
-            throw new SQLite3Error(...args);
-        };
+        // Error helpers are configured first so subsequent initialization steps
+        // can surface actionable feedback when required exports are missing or
+        // inputs are malformed.
+        const rcToString = createResultCodeStringifier(capi);
+        const SQLite3Error = createSQLite3Error(capi, rcToString);
         const toss3 = SQLite3Error.toss;
+        const WasmAllocError = createWasmAllocError(capi);
 
         if (config.wasmfsOpfsDir && !/^\/[^/]+$/.test(config.wasmfsOpfsDir)) {
             toss3(
@@ -120,112 +71,14 @@ export function runSQLite3PostLoadInit(_EmscriptenModule) {
             );
         }
 
-        const isInt32 = (n) => {
-            return (
-                "bigint" !== typeof n &&
-                !!(n === (n | 0) && n <= 2147483647 && n >= -2147483648)
-            );
-        };
+        // Provide the frequently used wasm/typed-array helpers up front. The
+        // bootstrapper mutates the returned `wasm` object with additional
+        // methods in subsequent sections.
+        const { util } = createBootstrapUtil({ toss3 }, wasm);
 
-        const bigIntFits64 = function f(b) {
-            if (!f._max) {
-                f._max = BigInt("0x7fffffffffffffff");
-                f._min = ~f._max;
-            }
-            return b >= f._min && b <= f._max;
-        };
-
-        const bigIntFits32 = (b) => b >= -0x7fffffffn - 1n && b <= 0x7fffffffn;
-
-        const bigIntFitsDouble = function f(b) {
-            if (!f._min) {
-                f._min = Number.MIN_SAFE_INTEGER;
-                f._max = Number.MAX_SAFE_INTEGER;
-            }
-            return b >= f._min && b <= f._max;
-        };
-
-        const isTypedArray = (v) => {
-            return v &&
-                v.constructor &&
-                isInt32(v.constructor.BYTES_PER_ELEMENT)
-                ? v
-                : false;
-        };
-
-        const __SAB =
-            "undefined" === typeof SharedArrayBuffer
-                ? function () {}
-                : SharedArrayBuffer;
-
-        const isSharedTypedArray = (aTypedArray) =>
-            aTypedArray.buffer instanceof __SAB;
-
-        const typedArrayPart = (aTypedArray, begin, end) => {
-            return isSharedTypedArray(aTypedArray)
-                ? aTypedArray.slice(begin, end)
-                : aTypedArray.subarray(begin, end);
-        };
-
-        const isBindableTypedArray = (v) => {
-            return (
-                v &&
-                (v instanceof Uint8Array ||
-                    v instanceof Int8Array ||
-                    v instanceof ArrayBuffer)
-            );
-        };
-
-        const isSQLableTypedArray = (v) => {
-            return (
-                v &&
-                (v instanceof Uint8Array ||
-                    v instanceof Int8Array ||
-                    v instanceof ArrayBuffer)
-            );
-        };
-
-        const affirmBindableTypedArray = (v) => {
-            return (
-                isBindableTypedArray(v) ||
-                toss3("Value is not of a supported TypedArray type.")
-            );
-        };
-
-        const utf8Decoder = new TextDecoder("utf-8");
-
-        const typedArrayToString = function (typedArray, begin, end) {
-            return utf8Decoder.decode(typedArrayPart(typedArray, begin, end));
-        };
-
-        const flexibleString = function (v) {
-            if (isSQLableTypedArray(v)) {
-                return typedArrayToString(
-                    v instanceof ArrayBuffer ? new Uint8Array(v) : v
-                );
-            } else if (Array.isArray(v)) return v.join("");
-            else if (wasm.isPtr(v)) v = wasm.cstrToJs(v);
-            return v;
-        };
-
-        class WasmAllocError extends Error {
-            constructor(...args) {
-                if (2 === args.length && "object" === typeof args[1]) {
-                    super(...args);
-                } else if (args.length) {
-                    super(args.join(" "));
-                } else {
-                    super("Allocation failed.");
-                }
-                this.resultCode = capi.SQLITE_NOMEM;
-                this.name = "WasmAllocError";
-            }
-        }
-
-        WasmAllocError.toss = (...args) => {
-            throw new WasmAllocError(...args);
-        };
-
+        // Many parts of the legacy C API surface still expect these methods to
+        // exist. Stub them here so later feature modules can replace them with
+        // fully wired implementations without having to guard every reference.
         Object.assign(capi, {
             sqlite3_bind_blob: undefined,
 
@@ -289,56 +142,9 @@ export function runSQLite3PostLoadInit(_EmscriptenModule) {
             sqlite3_randomness: (_n, _outPtr) => {},
         });
 
-        const util = {
-            affirmBindableTypedArray,
-            flexibleString,
-            bigIntFits32,
-            bigIntFits64,
-            bigIntFitsDouble,
-            isBindableTypedArray,
-            isInt32,
-            isSQLableTypedArray,
-            isTypedArray,
-            typedArrayToString,
-            isUIThread: () =>
-                globalThis.window === globalThis && !!globalThis.document,
-
-            isSharedTypedArray,
-            toss: function (...args) {
-                throw new Error(args.join(" "));
-            },
-            toss3,
-            typedArrayPart,
-
-            affirmDbHeader: function (bytes) {
-                if (bytes instanceof ArrayBuffer) bytes = new Uint8Array(bytes);
-                const header = "SQLite format 3";
-                if (header.length > bytes.byteLength) {
-                    toss3("Input does not contain an SQLite3 database header.");
-                }
-                for (let i = 0; i < header.length; ++i) {
-                    if (header.charCodeAt(i) !== bytes[i]) {
-                        toss3(
-                            "Input does not contain an SQLite3 database header."
-                        );
-                    }
-                }
-            },
-
-            affirmIsDb: function (bytes) {
-                if (bytes instanceof ArrayBuffer) bytes = new Uint8Array(bytes);
-                const n = bytes.byteLength;
-                if (n < 512 || n % 512 !== 0) {
-                    toss3(
-                        "Byte array size",
-                        n,
-                        "is invalid for an SQLite3 db."
-                    );
-                }
-                util.affirmDbHeader(bytes);
-            },
-        };
-
+        // Capture the raw WASM exports and allocator symbols. These helpers are
+        // used by all higher-level APIs so we fail fast when an expected export
+        // is missing.
         Object.assign(wasm, {
             ptrSizeof: config.wasmPtrSizeof || 4,
 
@@ -366,11 +172,13 @@ export function runSQLite3PostLoadInit(_EmscriptenModule) {
             dealloc: undefined,
         });
 
+        // Allocate and populate WASM memory from an arbitrary typed array. The
+        // helper is reused by blob binding and byte-buffer import utilities.
         wasm.allocFromTypedArray = function (srcTypedArray) {
             if (srcTypedArray instanceof ArrayBuffer) {
                 srcTypedArray = new Uint8Array(srcTypedArray);
             }
-            affirmBindableTypedArray(srcTypedArray);
+            util.affirmBindableTypedArray(srcTypedArray);
             const pRet = wasm.alloc(srcTypedArray.byteLength || 1);
             wasm.heapForSize(srcTypedArray.constructor).set(
                 srcTypedArray.byteLength ? srcTypedArray : [0],
@@ -412,6 +220,9 @@ export function runSQLite3PostLoadInit(_EmscriptenModule) {
         }
 
         wasm.compileOptionUsed = function f(optName) {
+            // Lazily builds a cache of compile-time options exposed from the C
+            // build so repeated lookups avoid walking the linked list on the
+            // WASM boundary.
             if (!arguments.length) {
                 if (f._result) return f._result;
                 else if (!f._opt) {
@@ -549,7 +360,10 @@ export function runSQLite3PostLoadInit(_EmscriptenModule) {
                     do {
                         const j = n > nAlloc ? nAlloc : n;
                         r(j, ptr);
-                        ta.set(typedArrayPart(heap, ptr, ptr + j), offset);
+                        ta.set(
+                            util.typedArrayPart(heap, ptr, ptr + j),
+                            offset
+                        );
                         n -= j;
                         offset += j;
                     } while (n > 0);
@@ -794,7 +608,7 @@ export function runSQLite3PostLoadInit(_EmscriptenModule) {
             if ("string" === typeof sql) {
                 return sql;
             }
-            const x = flexibleString(sql);
+            const x = util.flexibleString(sql);
             return x === sql ? undefined : x;
         };
 
