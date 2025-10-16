@@ -1,3 +1,5 @@
+import { MODE, OPEN_FLAGS, STREAM_STATE_MASK, PERMISSION } from "./constants.mjs";
+
 /**
  * Creates the mutable filesystem state container that other helper modules
  * extend in order to expose POSIX-like filesystem behaviors.
@@ -36,13 +38,13 @@ export function createBaseState() {
                 this.node = val;
             }
             get isRead() {
-                return (this.flags & 2097155) !== 1;
+                return (this.flags & STREAM_STATE_MASK) !== OPEN_FLAGS.O_WRONLY;
             }
             get isWrite() {
-                return (this.flags & 2097155) !== 0;
+                return (this.flags & STREAM_STATE_MASK) !== OPEN_FLAGS.O_RDONLY;
             }
             get isAppend() {
-                return this.flags & 1024;
+                return (this.flags & OPEN_FLAGS.O_APPEND) !== 0;
             }
             get flags() {
                 return this.shared.flags;
@@ -71,8 +73,8 @@ export function createBaseState() {
                 this.node_ops = {};
                 this.stream_ops = {};
                 this.rdev = rdev;
-                this.readMode = 292 | 73;
-                this.writeMode = 146;
+                this.readMode = PERMISSION.READ_EXECUTE;
+                this.writeMode = MODE.PERMISSION_WRITE;
             }
             assignId(fs) {
                 this.id = fs.nextInode++;
@@ -99,10 +101,10 @@ export function createBaseState() {
                 }
             }
             get isFolder() {
-                return (this.mode & 61440) === 16384;
+                return (this.mode & MODE.TYPE_MASK) === MODE.DIRECTORY;
             }
             get isDevice() {
-                return (this.mode & 61440) === 8192;
+                return (this.mode & MODE.TYPE_MASK) === MODE.CHARACTER_DEVICE;
             }
         },
     };

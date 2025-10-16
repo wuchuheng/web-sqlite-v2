@@ -1,4 +1,5 @@
 import { PATH } from "../../utils/path.mjs";
+import { ERRNO_CODES, MODE, OPEN_FLAGS, STREAM_STATE_MASK } from "./constants.mjs";
 
 /**
  * Generates high-level node manipulation helpers (create, rename, open, etc.)
@@ -57,15 +58,16 @@ export function createNodeActions(
 ) {
     return {
         create(path, mode) {
-            mode = mode !== undefined ? mode : 438;
-            mode &= 4095;
-            mode |= 32768;
+            mode = mode !== undefined ? mode : MODE.DEFAULT_FILE_PERMISSIONS;
+            mode &= MODE.PERMISSION_MASK;
+            mode |= MODE.FILE;
             return FS.mknod(path, mode, 0);
         },
         mkdir(path, mode) {
-            mode = mode !== undefined ? mode : 511;
-            mode &= 511 | 512;
-            mode |= 16384;
+            mode =
+                mode !== undefined ? mode : MODE.DEFAULT_DIRECTORY_PERMISSIONS;
+            mode &= MODE.DIR_PERMISSION_WITH_STICKY;
+            mode |= MODE.DIRECTORY;
             return FS.mknod(path, mode, 0);
         },
         mkdirTree(path, mode) {
@@ -77,27 +79,27 @@ export function createNodeActions(
                 try {
                     FS.mkdir(d, mode);
                 } catch (e) {
-                    if (e.errno != 20) throw e;
+                    if (e.errno != ERRNO_CODES.EEXIST) throw e;
                 }
             }
         },
         mkdev(path, mode, dev) {
             if (typeof dev == "undefined") {
                 dev = mode;
-                mode = 438;
+                mode = MODE.DEFAULT_FILE_PERMISSIONS;
             }
-            mode |= 8192;
+            mode |= MODE.CHARACTER_DEVICE;
             return FS.mknod(path, mode, dev);
         },
         symlink(oldpath, newpath) {
             const PATH_FS = getPathFS();
             if (!PATH_FS.resolve(oldpath)) {
-                throw new FS.ErrnoError(44);
+                throw new FS.ErrnoError(ERRNO_CODES.ENOENT);
             }
             const lookup = FS.lookupPath(newpath, { parent: true });
             const parent = lookup.node;
             if (!parent) {
-                throw new FS.ErrnoError(44);
+                throw new FS.ErrnoError(ERRNO_CODES.ENOENT);
             }
             const newname = PATH.basename(newpath);
             const errCode = FS.mayCreate(parent, newname);
@@ -105,7 +107,7 @@ export function createNodeActions(
                 throw new FS.ErrnoError(errCode);
             }
             if (!parent.node_ops.symlink) {
-                throw new FS.ErrnoError(63);
+                throw new FS.ErrnoError(ERRNO_CODES.EPERM);
             }
             return parent.node_ops.symlink(parent, newname, oldpath);
         },
@@ -118,18 +120,18 @@ export function createNodeActions(
             const newLookup = FS.lookupPath(newPath, { parent: true });
             const oldDir = oldLookup.node;
             const newDir = newLookup.node;
-            if (!oldDir || !newDir) throw new FS.ErrnoError(44);
+            if (!oldDir || !newDir) throw new FS.ErrnoError(ERRNO_CODES.ENOENT);
             if (oldDir.mount !== newDir.mount) {
-                throw new FS.ErrnoError(75);
+                throw new FS.ErrnoError(ERRNO_CODES.EXDEV);
             }
             const oldNode = FS.lookupNode(oldDir, oldName);
             let relative = getPathFS().relative(oldPath, newDirname);
             if (relative.charAt(0) !== ".") {
-                throw new FS.ErrnoError(28);
+                throw new FS.ErrnoError(ERRNO_CODES.EINVAL);
             }
             relative = getPathFS().relative(newPath, oldDirname);
             if (relative.charAt(0) !== ".") {
-                throw new FS.ErrnoError(55);
+                throw new FS.ErrnoError(ERRNO_CODES.ENOTEMPTY);
             }
             let newNode;
             try {
@@ -150,10 +152,10 @@ export function createNodeActions(
                 throw new FS.ErrnoError(errCode);
             }
             if (!oldDir.node_ops.rename) {
-                throw new FS.ErrnoError(63);
+                throw new FS.ErrnoError(ERRNO_CODES.EPERM);
             }
             if (FS.isMountpoint(oldNode) || (newNode && FS.isMountpoint(newNode))) {
-                throw new FS.ErrnoError(10);
+                throw new FS.ErrnoError(ERRNO_CODES.EBUSY);
             }
             if (newDir !== oldDir) {
                 errCode = FS.nodePermissions(oldDir, "w");
@@ -179,10 +181,10 @@ export function createNodeActions(
                 throw new FS.ErrnoError(errCode);
             }
             if (!parent.node_ops.rmdir) {
-                throw new FS.ErrnoError(63);
+                throw new FS.ErrnoError(ERRNO_CODES.EPERM);
             }
             if (FS.isMountpoint(node)) {
-                throw new FS.ErrnoError(10);
+                throw new FS.ErrnoError(ERRNO_CODES.EBUSY);
             }
             parent.node_ops.rmdir(parent, name);
             FS.destroyNode(node);
@@ -191,7 +193,7 @@ export function createNodeActions(
             const lookup = FS.lookupPath(path, { follow: true });
             const node = lookup.node;
             if (!node.node_ops.readdir) {
-                throw new FS.ErrnoError(54);
+                throw new FS.ErrnoError(ERRNO_CODES.ENOTDIR);
             }
             return node.node_ops.readdir(node);
         },
@@ -199,7 +201,7 @@ export function createNodeActions(
             const lookup = FS.lookupPath(path, { parent: true });
             const parent = lookup.node;
             if (!parent) {
-                throw new FS.ErrnoError(44);
+                throw new FS.ErrnoError(ERRNO_CODES.ENOENT);
             }
             const name = PATH.basename(path);
             const node = FS.lookupNode(parent, name);
@@ -208,10 +210,10 @@ export function createNodeActions(
                 throw new FS.ErrnoError(errCode);
             }
             if (!parent.node_ops.unlink) {
-                throw new FS.ErrnoError(63);
+                throw new FS.ErrnoError(ERRNO_CODES.EPERM);
             }
             if (FS.isMountpoint(node)) {
-                throw new FS.ErrnoError(10);
+                throw new FS.ErrnoError(ERRNO_CODES.EBUSY);
             }
             parent.node_ops.unlink(parent, name);
             FS.destroyNode(node);
@@ -221,10 +223,10 @@ export function createNodeActions(
             const lookup = FS.lookupPath(path);
             const link = lookup.node;
             if (!link) {
-                throw new FS.ErrnoError(44);
+                throw new FS.ErrnoError(ERRNO_CODES.ENOENT);
             }
             if (!link.node_ops.readlink) {
-                throw new FS.ErrnoError(28);
+                throw new FS.ErrnoError(ERRNO_CODES.EINVAL);
             }
             return PATH_FS.resolve(
                 FS.getPath(link.parent),
@@ -235,10 +237,10 @@ export function createNodeActions(
             const lookup = FS.lookupPath(path, { follow: !dontFollow });
             const node = lookup.node;
             if (!node) {
-                throw new FS.ErrnoError(44);
+                throw new FS.ErrnoError(ERRNO_CODES.ENOENT);
             }
             if (!node.node_ops.getattr) {
-                throw new FS.ErrnoError(63);
+                throw new FS.ErrnoError(ERRNO_CODES.EPERM);
             }
             return node.node_ops.getattr(node);
         },
@@ -254,10 +256,12 @@ export function createNodeActions(
                 node = path;
             }
             if (!node.node_ops.setattr) {
-                throw new FS.ErrnoError(63);
+                throw new FS.ErrnoError(ERRNO_CODES.EPERM);
             }
             node.node_ops.setattr(node, {
-                mode: (mode & 4095) | (node.mode & ~4095),
+                mode:
+                    (mode & MODE.PERMISSION_MASK) |
+                    (node.mode & ~MODE.PERMISSION_MASK),
                 timestamp: Date.now(),
             });
         },
@@ -277,7 +281,7 @@ export function createNodeActions(
                 node = path;
             }
             if (!node.node_ops.setattr) {
-                throw new FS.ErrnoError(63);
+                throw new FS.ErrnoError(ERRNO_CODES.EPERM);
             }
             node.node_ops.setattr(node, {
                 timestamp: Date.now(),
@@ -292,7 +296,7 @@ export function createNodeActions(
         },
         truncate(path, len) {
             if (len < 0) {
-                throw new FS.ErrnoError(28);
+                throw new FS.ErrnoError(ERRNO_CODES.EINVAL);
             }
             let node;
             if (typeof path == "string") {
@@ -302,13 +306,13 @@ export function createNodeActions(
                 node = path;
             }
             if (!node.node_ops.setattr) {
-                throw new FS.ErrnoError(63);
+                throw new FS.ErrnoError(ERRNO_CODES.EPERM);
             }
             if (FS.isDir(node.mode)) {
-                throw new FS.ErrnoError(31);
+                throw new FS.ErrnoError(ERRNO_CODES.EISDIR);
             }
             if (!FS.isFile(node.mode)) {
-                throw new FS.ErrnoError(28);
+                throw new FS.ErrnoError(ERRNO_CODES.EINVAL);
             }
             const errCode = FS.nodePermissions(node, "w");
             if (errCode) {
@@ -321,8 +325,8 @@ export function createNodeActions(
         },
         ftruncate(fd, len) {
             const stream = FS.getStreamChecked(fd);
-            if ((stream.flags & 2097155) === 0) {
-                throw new FS.ErrnoError(28);
+            if ((stream.flags & STREAM_STATE_MASK) === OPEN_FLAGS.O_RDONLY) {
+                throw new FS.ErrnoError(ERRNO_CODES.EINVAL);
             }
             FS.truncate(stream.node, len);
         },
@@ -335,13 +339,16 @@ export function createNodeActions(
         },
         open(path, flags, mode) {
             if (path === "") {
-                throw new FS.ErrnoError(44);
+                throw new FS.ErrnoError(ERRNO_CODES.ENOENT);
             }
             flags =
                 typeof flags == "string" ? FS_modeStringToFlags(flags) : flags;
-            if (flags & 64) {
-                mode = typeof mode == "undefined" ? 438 : mode;
-                mode = (mode & 4095) | 32768;
+            if (flags & OPEN_FLAGS.O_CREAT) {
+                mode =
+                    typeof mode == "undefined"
+                        ? MODE.DEFAULT_FILE_PERMISSIONS
+                        : mode;
+                mode = (mode & MODE.PERMISSION_MASK) | MODE.FILE;
             } else {
                 mode = 0;
             }
@@ -352,16 +359,16 @@ export function createNodeActions(
                 path = PATH.normalize(path);
                 try {
                     const lookup = FS.lookupPath(path, {
-                        follow: !(flags & 131072),
+                        follow: !(flags & OPEN_FLAGS.O_NOFOLLOW),
                     });
                     node = lookup.node;
                 } catch (_e) {}
             }
             let created = false;
-            if (flags & 64) {
+            if (flags & OPEN_FLAGS.O_CREAT) {
                 if (node) {
-                    if (flags & 128) {
-                        throw new FS.ErrnoError(20);
+                    if (flags & OPEN_FLAGS.O_EXCL) {
+                        throw new FS.ErrnoError(ERRNO_CODES.EEXIST);
                     }
                 } else {
                     node = FS.mknod(path, mode, 0);
@@ -369,13 +376,13 @@ export function createNodeActions(
                 }
             }
             if (!node) {
-                throw new FS.ErrnoError(44);
+                throw new FS.ErrnoError(ERRNO_CODES.ENOENT);
             }
             if (FS.isChrdev(node.mode)) {
-                flags &= ~512;
+                flags &= ~OPEN_FLAGS.O_TRUNC;
             }
-            if (flags & 65536 && !FS.isDir(node.mode)) {
-                throw new FS.ErrnoError(54);
+            if (flags & OPEN_FLAGS.O_DIRECTORY && !FS.isDir(node.mode)) {
+                throw new FS.ErrnoError(ERRNO_CODES.ENOTDIR);
             }
             if (!created) {
                 const errCode = FS.mayOpen(node, flags);
@@ -383,10 +390,15 @@ export function createNodeActions(
                     throw new FS.ErrnoError(errCode);
                 }
             }
-            if (flags & 512 && !created) {
+            if (flags & OPEN_FLAGS.O_TRUNC && !created) {
                 FS.truncate(node, 0);
             }
-            flags &= ~(128 | 512 | 131072);
+            flags &=
+                ~(
+                    OPEN_FLAGS.O_EXCL |
+                    OPEN_FLAGS.O_TRUNC |
+                    OPEN_FLAGS.O_NOFOLLOW
+                );
             const stream = FS.createStream({
                 node,
                 path: FS.getPath(node),
@@ -400,7 +412,12 @@ export function createNodeActions(
             if (stream.stream_ops.open) {
                 stream.stream_ops.open(stream);
             }
-            if (Module?.logReadFiles && !(flags & 1) && typeof path === "string") {
+            if (
+                Module?.logReadFiles &&
+                // Only log files opened with read intent.
+                (flags & OPEN_FLAGS.O_ACCMODE) !== OPEN_FLAGS.O_WRONLY &&
+                typeof path === "string"
+            ) {
                 if (!(path in FS.readFiles)) {
                     FS.readFiles[path] = 1;
                 }

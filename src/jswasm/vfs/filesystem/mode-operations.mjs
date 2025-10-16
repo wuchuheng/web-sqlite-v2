@@ -1,3 +1,5 @@
+import { ERRNO_CODES, MODE, OPEN_FLAGS } from "./constants.mjs";
+
 /**
  * Produces helpers for reasoning about POSIX mode bitmasks and validating
  * permissions for filesystem nodes.
@@ -22,29 +24,29 @@
 export function createModeOperations(FS) {
     return {
         isFile(mode) {
-            return (mode & 61440) === 32768;
+            return (mode & MODE.TYPE_MASK) === MODE.FILE;
         },
         isDir(mode) {
-            return (mode & 61440) === 16384;
+            return (mode & MODE.TYPE_MASK) === MODE.DIRECTORY;
         },
         isLink(mode) {
-            return (mode & 61440) === 40960;
+            return (mode & MODE.TYPE_MASK) === MODE.SYMLINK;
         },
         isChrdev(mode) {
-            return (mode & 61440) === 8192;
+            return (mode & MODE.TYPE_MASK) === MODE.CHARACTER_DEVICE;
         },
         isBlkdev(mode) {
-            return (mode & 61440) === 24576;
+            return (mode & MODE.TYPE_MASK) === MODE.BLOCK_DEVICE;
         },
         isFIFO(mode) {
-            return (mode & 61440) === 4096;
+            return (mode & MODE.TYPE_MASK) === MODE.FIFO;
         },
         isSocket(mode) {
-            return (mode & 49152) === 49152;
+            return (mode & MODE.TYPE_MASK) === MODE.SOCKET;
         },
         flagsToPermissionString(flag) {
-            let perms = ["r", "w", "rw"][flag & 3];
-            if (flag & 512) {
+            let perms = ["r", "w", "rw"][flag & OPEN_FLAGS.O_ACCMODE];
+            if (flag & OPEN_FLAGS.O_TRUNC) {
                 perms += "w";
             }
             return perms;
@@ -53,26 +55,32 @@ export function createModeOperations(FS) {
             if (FS.ignorePermissions) {
                 return 0;
             }
-            if (perms.includes("r") && !(node.mode & 292)) {
-                return 2;
-            } else if (perms.includes("w") && !(node.mode & 146)) {
-                return 2;
-            } else if (perms.includes("x") && !(node.mode & 73)) {
-                return 2;
+            if (perms.includes("r") && !(node.mode & MODE.PERMISSION_READ)) {
+                return ERRNO_CODES.EACCES;
+            } else if (
+                perms.includes("w") &&
+                !(node.mode & MODE.PERMISSION_WRITE)
+            ) {
+                return ERRNO_CODES.EACCES;
+            } else if (
+                perms.includes("x") &&
+                !(node.mode & MODE.PERMISSION_EXECUTE)
+            ) {
+                return ERRNO_CODES.EACCES;
             }
             return 0;
         },
         mayLookup(dir) {
-            if (!FS.isDir(dir.mode)) return 54;
+            if (!FS.isDir(dir.mode)) return ERRNO_CODES.ENOTDIR;
             const errCode = FS.nodePermissions(dir, "x");
             if (errCode) return errCode;
-            if (!dir.node_ops.lookup) return 2;
+            if (!dir.node_ops.lookup) return ERRNO_CODES.EACCES;
             return 0;
         },
         mayCreate(dir, name) {
             try {
                 FS.lookupNode(dir, name);
-                return 20;
+                return ERRNO_CODES.EEXIST;
             } catch (_e) {}
             return FS.nodePermissions(dir, "wx");
         },
@@ -89,25 +97,28 @@ export function createModeOperations(FS) {
             }
             if (isdir) {
                 if (!FS.isDir(node.mode)) {
-                    return 54;
+                    return ERRNO_CODES.ENOTDIR;
                 }
                 if (FS.isRoot(node) || FS.getPath(node) === FS.cwd()) {
-                    return 10;
+                    return ERRNO_CODES.EBUSY;
                 }
             } else if (FS.isDir(node.mode)) {
-                return 31;
+                return ERRNO_CODES.EISDIR;
             }
             return 0;
         },
         mayOpen(node, flags) {
             if (!node) {
-                return 44;
+                return ERRNO_CODES.ENOENT;
             }
             if (FS.isLink(node.mode)) {
-                return 32;
+                return ERRNO_CODES.ELOOP;
             } else if (FS.isDir(node.mode)) {
-                if (FS.flagsToPermissionString(flags) !== "r" || flags & 512) {
-                    return 31;
+                if (
+                    FS.flagsToPermissionString(flags) !== "r" ||
+                    flags & OPEN_FLAGS.O_TRUNC
+                ) {
+                    return ERRNO_CODES.EISDIR;
                 }
             }
             return FS.nodePermissions(node, FS.flagsToPermissionString(flags));

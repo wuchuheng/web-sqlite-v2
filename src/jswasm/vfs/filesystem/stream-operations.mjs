@@ -1,3 +1,5 @@
+import { ERRNO_CODES, MAX_OPEN_FDS } from "./constants.mjs";
+
 /**
  * Exposes low-level stream bookkeeping utilities used to manage file
  * descriptor allocation and device registration.
@@ -30,19 +32,19 @@
  */
 export function createStreamOperations(FS) {
     return {
-        MAX_OPEN_FDS: 4096,
+        MAX_OPEN_FDS,
         nextfd() {
             for (let fd = 0; fd <= FS.MAX_OPEN_FDS; fd++) {
                 if (!FS.streams[fd]) {
                     return fd;
                 }
             }
-            throw new FS.ErrnoError(33);
+            throw new FS.ErrnoError(ERRNO_CODES.EMFILE);
         },
         getStreamChecked(fd) {
             const stream = FS.getStream(fd);
             if (!stream) {
-                throw new FS.ErrnoError(8);
+                throw new FS.ErrnoError(ERRNO_CODES.EBADF);
             }
             return stream;
         },
@@ -71,7 +73,7 @@ export function createStreamOperations(FS) {
                 stream.stream_ops.open?.(stream);
             },
             llseek() {
-                throw new FS.ErrnoError(70);
+                throw new FS.ErrnoError(ERRNO_CODES.ESPIPE);
             },
         },
         major: (dev) => dev >> 8,

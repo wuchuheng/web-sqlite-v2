@@ -1,4 +1,10 @@
 import { UTF8ArrayToString, lengthBytesUTF8, stringToUTF8Array } from "../../utils/utf8.mjs";
+import { ERRNO_CODES, OPEN_FLAGS, STREAM_STATE_MASK } from "./constants.mjs";
+
+/** Write protection flag used with mmap/allocate helpers. */
+const PROT_WRITE = 0x2;
+/** Shared MAP_PRIVATE flag bit used by mmap. */
+const MAP_PRIVATE = 0x2;
 
 /**
  * Supplies stream-level helpers for interacting with file descriptors backed
@@ -57,7 +63,7 @@ export function createStreamHelpers(FS) {
     return {
         close(stream) {
             if (FS.isClosed(stream)) {
-                throw new FS.ErrnoError(8);
+                throw new FS.ErrnoError(ERRNO_CODES.EBADF);
             }
             if (stream.getdents) stream.getdents = null;
             try {
@@ -72,13 +78,13 @@ export function createStreamHelpers(FS) {
         },
         llseek(stream, offset, whence) {
             if (FS.isClosed(stream)) {
-                throw new FS.ErrnoError(8);
+                throw new FS.ErrnoError(ERRNO_CODES.EBADF);
             }
             if (!stream.seekable || !stream.stream_ops.llseek) {
-                throw new FS.ErrnoError(70);
+                throw new FS.ErrnoError(ERRNO_CODES.ESPIPE);
             }
             if (whence != 0 && whence != 1 && whence != 2) {
-                throw new FS.ErrnoError(28);
+                throw new FS.ErrnoError(ERRNO_CODES.EINVAL);
             }
             stream.position = stream.stream_ops.llseek(stream, offset, whence);
             stream.ungotten = [];
@@ -86,25 +92,25 @@ export function createStreamHelpers(FS) {
         },
         read(stream, buffer, offset, length, position) {
             if (length < 0 || position < 0) {
-                throw new FS.ErrnoError(28);
+                throw new FS.ErrnoError(ERRNO_CODES.EINVAL);
             }
             if (FS.isClosed(stream)) {
-                throw new FS.ErrnoError(8);
+                throw new FS.ErrnoError(ERRNO_CODES.EBADF);
             }
-            if ((stream.flags & 2097155) === 1) {
-                throw new FS.ErrnoError(8);
+            if ((stream.flags & STREAM_STATE_MASK) === OPEN_FLAGS.O_WRONLY) {
+                throw new FS.ErrnoError(ERRNO_CODES.EBADF);
             }
             if (FS.isDir(stream.node.mode)) {
-                throw new FS.ErrnoError(31);
+                throw new FS.ErrnoError(ERRNO_CODES.EISDIR);
             }
             if (!stream.stream_ops.read) {
-                throw new FS.ErrnoError(28);
+                throw new FS.ErrnoError(ERRNO_CODES.EINVAL);
             }
             const seeking = typeof position != "undefined";
             if (!seeking) {
                 position = stream.position;
             } else if (!stream.seekable) {
-                throw new FS.ErrnoError(70);
+                throw new FS.ErrnoError(ERRNO_CODES.ESPIPE);
             }
             const bytesRead = stream.stream_ops.read(
                 stream,
@@ -118,28 +124,28 @@ export function createStreamHelpers(FS) {
         },
         write(stream, buffer, offset, length, position, canOwn) {
             if (length < 0 || position < 0) {
-                throw new FS.ErrnoError(28);
+                throw new FS.ErrnoError(ERRNO_CODES.EINVAL);
             }
             if (FS.isClosed(stream)) {
-                throw new FS.ErrnoError(8);
+                throw new FS.ErrnoError(ERRNO_CODES.EBADF);
             }
-            if ((stream.flags & 2097155) === 0) {
-                throw new FS.ErrnoError(8);
+            if ((stream.flags & STREAM_STATE_MASK) === OPEN_FLAGS.O_RDONLY) {
+                throw new FS.ErrnoError(ERRNO_CODES.EBADF);
             }
             if (FS.isDir(stream.node.mode)) {
-                throw new FS.ErrnoError(31);
+                throw new FS.ErrnoError(ERRNO_CODES.EISDIR);
             }
             if (!stream.stream_ops.write) {
-                throw new FS.ErrnoError(28);
+                throw new FS.ErrnoError(ERRNO_CODES.EINVAL);
             }
-            if (stream.seekable && stream.flags & 1024) {
+            if (stream.seekable && stream.flags & OPEN_FLAGS.O_APPEND) {
                 FS.llseek(stream, 0, 2);
             }
             const seeking = typeof position != "undefined";
             if (!seeking) {
                 position = stream.position;
             } else if (!stream.seekable) {
-                throw new FS.ErrnoError(70);
+                throw new FS.ErrnoError(ERRNO_CODES.ESPIPE);
             }
             const bytesWritten = stream.stream_ops.write(
                 stream,
@@ -154,38 +160,41 @@ export function createStreamHelpers(FS) {
         },
         allocate(stream, offset, length) {
             if (FS.isClosed(stream)) {
-                throw new FS.ErrnoError(8);
+                throw new FS.ErrnoError(ERRNO_CODES.EBADF);
             }
             if (offset < 0 || length <= 0) {
-                throw new FS.ErrnoError(28);
+                throw new FS.ErrnoError(ERRNO_CODES.EINVAL);
             }
-            if ((stream.flags & 2097155) === 0) {
-                throw new FS.ErrnoError(8);
+            if ((stream.flags & STREAM_STATE_MASK) === OPEN_FLAGS.O_RDONLY) {
+                throw new FS.ErrnoError(ERRNO_CODES.EBADF);
             }
             if (!FS.isFile(stream.node.mode) && !FS.isDir(stream.node.mode)) {
-                throw new FS.ErrnoError(43);
+                throw new FS.ErrnoError(ERRNO_CODES.ENODEV);
             }
             if (!stream.stream_ops.allocate) {
-                throw new FS.ErrnoError(138);
+                throw new FS.ErrnoError(ERRNO_CODES.ENOTSUP);
             }
             stream.stream_ops.allocate(stream, offset, length);
         },
         mmap(stream, length, position, prot, flags) {
             if (
-                (prot & 2) !== 0 &&
-                (flags & 2) === 0 &&
-                (stream.flags & 2097155) !== 2
+                (prot & PROT_WRITE) !== 0 &&
+                (flags & MAP_PRIVATE) === 0 &&
+                (stream.flags & STREAM_STATE_MASK) !== OPEN_FLAGS.O_RDWR
             ) {
-                throw new FS.ErrnoError(2);
+                throw new FS.ErrnoError(ERRNO_CODES.EACCES);
             }
-            if ((stream.flags & 2097155) === 1) {
-                throw new FS.ErrnoError(2);
+            if (FS.isClosed(stream)) {
+                throw new FS.ErrnoError(ERRNO_CODES.EBADF);
+            }
+            if ((stream.flags & STREAM_STATE_MASK) === OPEN_FLAGS.O_WRONLY) {
+                throw new FS.ErrnoError(ERRNO_CODES.EACCES);
             }
             if (!stream.stream_ops.mmap) {
-                throw new FS.ErrnoError(43);
+                throw new FS.ErrnoError(ERRNO_CODES.ENODEV);
             }
             if (!length) {
-                throw new FS.ErrnoError(28);
+                throw new FS.ErrnoError(ERRNO_CODES.EINVAL);
             }
             return stream.stream_ops.mmap(stream, length, position, prot, flags);
         },
@@ -203,7 +212,7 @@ export function createStreamHelpers(FS) {
         },
         ioctl(stream, cmd, arg) {
             if (!stream.stream_ops.ioctl) {
-                throw new FS.ErrnoError(59);
+                throw new FS.ErrnoError(ERRNO_CODES.ENOTTY);
             }
             return stream.stream_ops.ioctl(stream, cmd, arg);
         },
@@ -228,7 +237,9 @@ export function createStreamHelpers(FS) {
             return ret;
         },
         writeFile(path, data, opts = {}) {
-            opts.flags = opts.flags || 577;
+            opts.flags =
+                opts.flags ||
+                (OPEN_FLAGS.O_WRONLY | OPEN_FLAGS.O_CREAT | OPEN_FLAGS.O_TRUNC);
             const stream = FS.open(path, opts.flags, opts.mode);
             if (typeof data == "string") {
                 const buf = new Uint8Array(lengthBytesUTF8(data) + 1);
@@ -257,10 +268,10 @@ export function createStreamHelpers(FS) {
         chdir(path) {
             const lookup = FS.lookupPath(path, { follow: true });
             if (lookup.node === null) {
-                throw new FS.ErrnoError(44);
+                throw new FS.ErrnoError(ERRNO_CODES.ENOENT);
             }
             if (!FS.isDir(lookup.node.mode)) {
-                throw new FS.ErrnoError(54);
+                throw new FS.ErrnoError(ERRNO_CODES.ENOTDIR);
             }
             const errCode = FS.nodePermissions(lookup.node, "x");
             if (errCode) {

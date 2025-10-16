@@ -1,4 +1,5 @@
 import { PATH } from "../../utils/path.mjs";
+import { ERRNO_CODES } from "./constants.mjs";
 
 /**
  * Provides helpers for managing mount points and device nodes within the
@@ -75,7 +76,7 @@ export function createMountOperations(FS, { err }) {
             const pseudo = !mountpoint;
             let node;
             if (root && FS.root) {
-                throw new FS.ErrnoError(10);
+                throw new FS.ErrnoError(ERRNO_CODES.EBUSY);
             } else if (!root && !pseudo) {
                 const lookup = FS.lookupPath(mountpoint, {
                     follow_mount: false,
@@ -83,10 +84,10 @@ export function createMountOperations(FS, { err }) {
                 mountpoint = lookup.path;
                 node = lookup.node;
                 if (FS.isMountpoint(node)) {
-                    throw new FS.ErrnoError(10);
+                    throw new FS.ErrnoError(ERRNO_CODES.EBUSY);
                 }
                 if (!FS.isDir(node.mode)) {
-                    throw new FS.ErrnoError(54);
+                    throw new FS.ErrnoError(ERRNO_CODES.ENOTDIR);
                 }
             }
             const mount = {
@@ -111,7 +112,7 @@ export function createMountOperations(FS, { err }) {
         unmount(mountpoint) {
             const lookup = FS.lookupPath(mountpoint, { follow_mount: false });
             if (!FS.isMountpoint(lookup.node)) {
-                throw new FS.ErrnoError(28);
+                throw new FS.ErrnoError(ERRNO_CODES.EINVAL);
             }
             const node = lookup.node;
             const mount = node.mounted;
@@ -138,14 +139,14 @@ export function createMountOperations(FS, { err }) {
             const parent = lookup.node;
             const name = PATH.basename(path);
             if (!name || name === "." || name === "..") {
-                throw new FS.ErrnoError(28);
+                throw new FS.ErrnoError(ERRNO_CODES.EINVAL);
             }
             const errCode = FS.mayCreate(parent, name);
             if (errCode) {
                 throw new FS.ErrnoError(errCode);
             }
             if (!parent.node_ops.mknod) {
-                throw new FS.ErrnoError(63);
+                throw new FS.ErrnoError(ERRNO_CODES.EPERM);
             }
             return parent.node_ops.mknod(parent, name, mode, dev);
         },

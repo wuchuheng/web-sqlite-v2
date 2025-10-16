@@ -1,3 +1,5 @@
+import { ERRNO_CODES, MODE, OPEN_FLAGS, MAX_OPEN_FDS } from "./constants.mjs";
+
 /**
  * Creates helper routines that bootstrap the filesystem and wire up default
  * devices, directories, and streams for the runtime.
@@ -47,7 +49,8 @@ export function createInitializationHelpers(FS, { Module }) {
             TTY.register(FS.makedev(6, 0), TTY.default_tty1_ops);
             FS.mkdev("/dev/tty", FS.makedev(5, 0));
             FS.mkdev("/dev/tty1", FS.makedev(6, 0));
-            let randomBuffer = new Uint8Array(1024),
+            const RANDOM_DEVICE_CHUNK_SIZE = 1024;
+            let randomBuffer = new Uint8Array(RANDOM_DEVICE_CHUNK_SIZE),
                 randomLeft = 0;
             const randomByte = () => {
                 if (randomLeft === 0) {
@@ -70,8 +73,9 @@ export function createInitializationHelpers(FS, { Module }) {
                         const node = FS.createNode(
                             procSelf,
                             "fd",
-                            16384 | 511,
-                            73
+                            MODE.DIRECTORY | MODE.DIR_PERMISSION_MASK,
+                            // Match the execute bits we expect the synthetic entries to expose.
+                            MODE.PERMISSION_EXECUTE
                         );
                         node.node_ops = {
                             lookup(parent, name) {
@@ -111,16 +115,16 @@ export function createInitializationHelpers(FS, { Module }) {
             } else {
                 FS.symlink("/dev/tty1", "/dev/stderr");
             }
-            FS.open("/dev/stdin", 0);
-            FS.open("/dev/stdout", 1);
-            FS.open("/dev/stderr", 1);
+            FS.open("/dev/stdin", OPEN_FLAGS.O_RDONLY);
+            FS.open("/dev/stdout", OPEN_FLAGS.O_WRONLY);
+            FS.open("/dev/stderr", OPEN_FLAGS.O_WRONLY);
         },
         staticInit(MEMFS) {
-            [44].forEach((code) => {
+            [ERRNO_CODES.ENOENT].forEach((code) => {
                 FS.genericErrors[code] = new FS.ErrnoError(code);
                 FS.genericErrors[code].stack = "<generic error, no stack>";
             });
-            FS.nameTable = new Array(4096);
+            FS.nameTable = new Array(MAX_OPEN_FDS);
             FS.mount(MEMFS, {}, "/");
             FS.createDefaultDirectories();
             FS.filesystems = {

@@ -1,4 +1,5 @@
 import { PATH } from "../../utils/path.mjs";
+import { ERRNO_CODES } from "./constants.mjs";
 
 /**
  * Builds helpers for resolving and manipulating filesystem paths while keeping
@@ -49,7 +50,7 @@ export function createPathOperations(FS, { getPathFS }) {
             };
             opts = Object.assign(defaults, opts);
             if (opts.recurse_count > 8) {
-                throw new FS.ErrnoError(32);
+                throw new FS.ErrnoError(ERRNO_CODES.ELOOP);
             }
             const parts = path.split("/").filter((p) => !!p);
             let current = FS.root;
@@ -79,7 +80,7 @@ export function createPathOperations(FS, { getPathFS }) {
                         });
                         current = lookup.node;
                         if (count++ > 40) {
-                            throw new FS.ErrnoError(32);
+                            throw new FS.ErrnoError(ERRNO_CODES.ELOOP);
                         }
                     }
                 }

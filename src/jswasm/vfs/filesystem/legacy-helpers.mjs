@@ -1,4 +1,10 @@
 import { PATH } from "../../utils/path.mjs";
+import {
+    DEVICE_MAJOR_BASE,
+    ERRNO_CODES,
+    MODE,
+    OPEN_FLAGS,
+} from "./constants.mjs";
 
 /**
  * Restores legacy compatibility helpers that mirror historical FS APIs used by
@@ -137,8 +143,11 @@ export function createLegacyHelpers(FS, { FS_getMode }) {
                         arr[i] = data.charCodeAt(i);
                     data = arr;
                 }
-                FS.chmod(node, mode | 146);
-                const stream = FS.open(node, 577);
+                FS.chmod(node, mode | MODE.PERMISSION_WRITE);
+                const stream = FS.open(
+                    node,
+                    OPEN_FLAGS.O_WRONLY | OPEN_FLAGS.O_CREAT | OPEN_FLAGS.O_TRUNC
+                );
                 FS.write(stream, data, 0, data.length, 0, canOwn);
                 FS.close(stream);
                 FS.chmod(node, mode);
@@ -150,7 +159,7 @@ export function createLegacyHelpers(FS, { FS_getMode }) {
                 name
             );
             const mode = FS_getMode(!!input, !!output);
-            FS.createDevice.major ??= 64;
+            FS.createDevice.major ??= DEVICE_MAJOR_BASE;
             const dev = FS.makedev(FS.createDevice.major++, 0);
             FS.registerDevice(dev, {
                 open(stream) {
@@ -158,7 +167,7 @@ export function createLegacyHelpers(FS, { FS_getMode }) {
                 },
                 close(_stream) {
                     if (output?.buffer?.length) {
-                        output(10);
+                        output(0x0a);
                     }
                 },
                 read(stream, buffer, offset, length) {
@@ -168,10 +177,10 @@ export function createLegacyHelpers(FS, { FS_getMode }) {
                         try {
                             result = input();
                         } catch (_e) {
-                            throw new FS.ErrnoError(29);
+                            throw new FS.ErrnoError(ERRNO_CODES.EIO);
                         }
                         if (result === undefined && bytesRead === 0) {
-                            throw new FS.ErrnoError(6);
+                            throw new FS.ErrnoError(ERRNO_CODES.ENXIO);
                         }
                         if (result === null || result === undefined) break;
                         bytesRead++;
@@ -187,7 +196,7 @@ export function createLegacyHelpers(FS, { FS_getMode }) {
                         try {
                             output(buffer[offset + i]);
                         } catch (_e) {
-                            throw new FS.ErrnoError(29);
+                            throw new FS.ErrnoError(ERRNO_CODES.EIO);
                         }
                     }
                     if (length) {
@@ -206,7 +215,7 @@ export function createLegacyHelpers(FS, { FS_getMode }) {
                     "Lazy loading should have been performed (contents set) in createLazyFile, but it was not. Lazy loading only works in web workers. Use --embed-file or --preload-file in emcc on the main thread."
                 );
             }
-            throw new FS.ErrnoError(29);
+            throw new FS.ErrnoError(ERRNO_CODES.EIO);
         },
         createLazyFile() {
             throw new Error(

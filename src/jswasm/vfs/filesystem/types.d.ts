@@ -90,7 +90,7 @@ export interface FSStream {
     object: FSNode;
     isRead: boolean;
     isWrite: boolean;
-    isAppend: number;
+    isAppend: boolean;
 }
 
 export interface MutableFS {
