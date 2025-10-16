@@ -1,10 +1,13 @@
 import { StructBinderFactory } from "../../utils/struct-binder-factory.mjs";
 import { createInstallOo1Initializer } from "../../api/install-oo1.mjs";
 import { createInstallOo1DbApiInitializer } from "../../api/install-oo1-db-api.mjs";
-import { createInstallOpfsVfsContext } from "../../vfs/opfs/install-opfs-vfs.mjs";
+import { createInstallOpfsVfsContext } from "../../vfs/opfs/installer/index.mjs";
 import { createOpfsSahpoolInitializer } from "../../vfs/opfs/opfs-sahpool-vfs.mjs";
 import { createWorker1ApiInitializer } from "./worker1-api-initializer.mjs";
-import { createVfsInitializer, createVtabInitializer } from "./vfs-initializers.mjs";
+import {
+    createVfsInitializer,
+    createVtabInitializer,
+} from "./vfs-initializers.mjs";
 
 /**
  * @typedef {import("./types/sqlite3-bootstrap").Sqlite3Initializer} Sqlite3Initializer
@@ -46,7 +49,8 @@ export function applyDefaultBootstrapState(sqlite3ApiBootstrap) {
     sqlite3ApiBootstrap.initializers.push(createVfsInitializer());
     sqlite3ApiBootstrap.initializers.push(createVtabInitializer());
     sqlite3ApiBootstrap.initializers.push((sqlite3) => {
-        const { installOpfsVfsInitializer } = createInstallOpfsVfsContext(sqlite3);
+        const { installOpfsVfsInitializer } =
+            createInstallOpfsVfsContext(sqlite3);
         sqlite3ApiBootstrap.initializersAsync.push(installOpfsVfsInitializer);
     });
     sqlite3ApiBootstrap.initializers.push(createOpfsSahpoolInitializer());
