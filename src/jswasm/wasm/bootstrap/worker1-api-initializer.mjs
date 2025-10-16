@@ -10,14 +10,6 @@
  * @typedef {import("../sqlite3Apibootstrap.d.ts").WorkerConfigResponse} WorkerConfigResponse
  * @typedef {import("../sqlite3Apibootstrap.d.ts").WorkerExtensionResponse} WorkerExtensionResponse
  * @typedef {import("../sqlite3Apibootstrap.d.ts").Sqlite3StatusObject} Sqlite3StatusObject
- * @typedef {import("../sqlite3Apibootstrap.d.ts").Sqlite3ConfigSnapshot} Sqlite3ConfigSnapshot
- * @typedef {import("../sqlite3Apibootstrap.d.ts").Sqlite3WorkerExecOptions} Sqlite3WorkerExecOptions
- * @typedef {import("../sqlite3Apibootstrap.d.ts").Sqlite3WorkerResponse} Sqlite3WorkerResponse
- * @typedef {import("../sqlite3Apibootstrap.d.ts").Sqlite3WasmCallResult} Sqlite3WasmCallResult
- * @typedef {import("../sqlite3Apibootstrap.d.ts").WorkerOpenRequest} WorkerOpenRequest
- * @typedef {import("../sqlite3Apibootstrap.d.ts").WorkerCloseRequest} WorkerCloseRequest
- * @typedef {import("../sqlite3Apibootstrap.d.ts").WorkerFunctionRequest} WorkerFunctionRequest
- * @typedef {import("../sqlite3Apibootstrap.d.ts").WorkerXCallRequest} WorkerXCallRequest
  */
 
 /**
@@ -91,25 +83,12 @@ class Worker1Runtime {
             dbs: Object.create(null),
         };
         this.state = state;
-        /**
-         * Opens a database connection within the worker.
-         *
-         * @param {WorkerOpenRequest} opt
-         * @returns {Sqlite3DatabaseHandle}
-         */
         state.open = (opt) => {
             const db = new this.DB(opt);
             state.dbs[this.getDbId(db)] = db;
             if (state.dbList.indexOf(db) < 0) state.dbList.push(db);
             return db;
         };
-        /**
-         * Closes a database handle and optionally unlinks the backing VFS entry.
-         *
-         * @param {Sqlite3DatabaseHandle | undefined} db
-         * @param {boolean} [alsoUnlink]
-         * @returns {void}
-         */
         state.close = (db, alsoUnlink) => {
             if (!db) return;
             delete state.dbs[this.getDbId(db)];
@@ -122,13 +101,6 @@ class Worker1Runtime {
                 this.util.sqlite3__wasm_vfs_unlink(pVfs, filename);
             }
         };
-        /**
-         * Posts a structured response back to the main thread.
-         *
-         * @param {Sqlite3WorkerResponse} msg
-         * @param {Transferable[]} [xferList]
-         * @returns {void}
-         */
         state.post = (msg, xferList) => {
             if (xferList && xferList.length) {
                 globalThis.postMessage(msg, Array.from(xferList));
@@ -137,13 +109,6 @@ class Worker1Runtime {
                 globalThis.postMessage(msg);
             }
         };
-        /**
-         * Retrieves a database handle by identifier, optionally enforcing presence.
-         *
-         * @param {string | undefined} id
-         * @param {boolean} [require=true]
-         * @returns {Sqlite3DatabaseHandle | undefined}
-         */
         state.getDb = (id, require = true) =>
             state.dbs[id] || (require ? this.toss("Unknown (or closed) DB ID:", id) : undefined);
         return state;
@@ -215,7 +180,7 @@ class Worker1Runtime {
     /**
      * Handles the `open` worker message.
      *
-     * @param {Sqlite3WorkerMessage & { args?: WorkerOpenRequest }} ev
+     * @param {Sqlite3WorkerMessage} ev
      * @returns {WorkerOpenResponse}
      */
     openDatabase(ev) {
@@ -238,7 +203,7 @@ class Worker1Runtime {
     /**
      * Handles the `close` worker message.
      *
-     * @param {Sqlite3WorkerMessage & { args?: WorkerCloseRequest }} ev
+     * @param {Sqlite3WorkerMessage} ev
      * @returns {WorkerCloseResponse}
      */
     closeDatabase(ev) {
@@ -257,11 +222,10 @@ class Worker1Runtime {
     /**
      * Executes SQL via the worker interface.
      *
-     * @param {Sqlite3WorkerMessage & { args: string | Sqlite3WorkerExecOptions }} ev
+     * @param {Sqlite3WorkerMessage} ev
      * @returns {WorkerExecResult}
      */
     exec(ev) {
-        /** @type {Sqlite3WorkerExecOptions} */
         const rc =
             "string" === typeof ev.args ? { sql: ev.args } : ev.args || Object.create(null);
         if ("stmt" === rc.rowMode) {
@@ -313,7 +277,7 @@ class Worker1Runtime {
     /**
      * Handles `configGet` messages.
      *
-     * @returns {Sqlite3ConfigSnapshot}
+     * @returns {unknown}
      */
     configGet() {
         return this.sqlite3.capi.sqlite3_wasm_config_get();
@@ -322,7 +286,7 @@ class Worker1Runtime {
     /**
      * Handles `configSet` messages.
      *
-     * @param {Sqlite3WorkerMessage & { args: Record<string, number | string | boolean> }} ev
+     * @param {Sqlite3WorkerMessage} ev
      * @returns {WorkerConfigResponse | Sqlite3StatusObject}
      */
     configSet(ev) {
@@ -340,8 +304,8 @@ class Worker1Runtime {
     /**
      * Registers a SQL function for the provided database or globally.
      *
-     * @param {Sqlite3WorkerMessage & { args: WorkerFunctionRequest }} ev
-     * @returns {number|Sqlite3StatusObject|Sqlite3DatabaseHandle}
+     * @param {Sqlite3WorkerMessage} ev
+     * @returns {number|Sqlite3StatusObject}
      */
     registerFunction(ev) {
         const db = this.getMessageDb(ev, false);
@@ -354,8 +318,8 @@ class Worker1Runtime {
     /**
      * Unregisters a SQL function for the provided database or globally.
      *
-     * @param {Sqlite3WorkerMessage & { args: WorkerFunctionRequest }} ev
-     * @returns {number|Sqlite3StatusObject|Sqlite3DatabaseHandle}
+     * @param {Sqlite3WorkerMessage} ev
+     * @returns {number|Sqlite3StatusObject}
      */
     unregisterFunction(ev) {
         const db = this.getMessageDb(ev, false);
@@ -368,7 +332,7 @@ class Worker1Runtime {
     /**
      * Handles `loadExtension` messages.
      *
-     * @param {Sqlite3WorkerMessage & { args: { filename: string; entryPoint?: string } }} ev
+     * @param {Sqlite3WorkerMessage} ev
      * @returns {WorkerExtensionResponse}
      */
     loadExtension(ev) {
@@ -380,8 +344,8 @@ class Worker1Runtime {
     /**
      * Invokes exported WASM functions based on structured worker messages.
      *
-     * @param {Sqlite3WorkerMessage & WorkerXCallRequest} ev
-     * @returns {Sqlite3WasmCallResult|Sqlite3WasmCallResult[]}
+     * @param {Sqlite3WorkerMessage} ev
+     * @returns {unknown}
      */
     xCall(ev) {
         const ptrsize = this.sqlite3.wasm.ptrSizeof;
