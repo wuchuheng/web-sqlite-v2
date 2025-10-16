@@ -88,7 +88,7 @@ export interface InstallOpfsVfsContext {
  * await installOpfsVfs({
  *     verbose: 2,
  *     sanityChecks: true,
- *     proxyUri: "../sqlite3-opfs-async-proxy.js",
+ *     proxyUri: "../async-proxy/index.mjs",
  * });
  * ```
  *

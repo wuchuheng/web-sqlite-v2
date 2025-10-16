@@ -38,7 +38,7 @@
  * await installOpfsVfs({
  *     verbose: 2,
  *     sanityChecks: true,
- *     proxyUri: "../sqlite3-opfs-async-proxy.js", // Relative to installer/ directory
+ *     proxyUri: "../async-proxy/index.mjs", // Relative to installer/ directory
  * });
  * ```
  *

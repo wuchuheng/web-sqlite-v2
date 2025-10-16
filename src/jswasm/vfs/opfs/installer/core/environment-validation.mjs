@@ -3,7 +3,7 @@
  * @param {import('./environment-validation.d.ts').GlobalWithOPFS} globalObj - Global object to check (globalThis)
  * @returns {Error | undefined} Error if OPFS unsupported, undefined if supported
  */
-export function validateOpfsEnvironment(globalObj) {
+export function validateOpfsEnvironment(_globalObj) {
     // 1. Input handling
     // 1.1 Check SharedArrayBuffer and Atomics
     if (!globalThis.SharedArrayBuffer || !globalThis.Atomics) {
