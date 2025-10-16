@@ -1,5 +1,27 @@
 import { PATH } from "../../utils/path.mjs";
 
+/**
+ * Provides helpers for managing mount points and device nodes within the
+ * virtual filesystem tree.
+ *
+ * @param {import("./types.d.ts").MutableFS} FS
+ * @param {{ err: (message: string) => void }} options
+ * @returns {{
+ *   getMounts(mount: import("./types.d.ts").FileSystemMount): import("./types.d.ts").FileSystemMount[],
+ *   syncfs(
+ *     populate: boolean | ((errCode: number | null) => void),
+ *     callback?: (errCode: number | null) => void
+ *   ): void,
+ *   mount(
+ *     type: import("./types.d.ts").FileSystemMountType,
+ *     opts: Record<string, unknown>,
+ *     mountpoint: string
+ *   ): import("./types.d.ts").FSNode,
+ *   unmount(mountpoint: string): void,
+ *   lookup(parent: import("./types.d.ts").FSNode, name: string): import("./types.d.ts").FSNode,
+ *   mknod(path: string, mode: number, dev: number): import("./types.d.ts").FSNode,
+ * }}
+ */
 export function createMountOperations(FS, { err }) {
     return {
         getMounts(mount) {

@@ -1,5 +1,58 @@
 import { PATH } from "../../utils/path.mjs";
 
+/**
+ * Restores legacy compatibility helpers that mirror historical FS APIs used by
+ * older Emscripten callers while delegating work to the modern helpers.
+ *
+ * @param {import("./types.d.ts").MutableFS} FS
+ * @param {{ FS_getMode: (canRead: boolean, canWrite: boolean) => number }} options
+ * @returns {{
+ *   findObject(path: string, dontResolveLastLink?: boolean): import("./types.d.ts").FSNode | null,
+ *   analyzePath(
+ *     path: string,
+ *     dontResolveLastLink?: boolean
+ *   ): {
+ *     isRoot: boolean,
+ *     exists: boolean,
+ *     error: number,
+ *     name: string | null,
+ *     path: string | null,
+ *     object: import("./types.d.ts").FSNode | null,
+ *     parentExists: boolean,
+ *     parentPath: string | null,
+ *     parentObject: import("./types.d.ts").FSNode | null,
+ *   },
+ *   createPath(
+ *     parent: string | import("./types.d.ts").FSNode,
+ *     path: string,
+ *     _canRead?: boolean,
+ *     _canWrite?: boolean
+ *   ): string,
+ *   createFile(
+ *     parent: string | import("./types.d.ts").FSNode,
+ *     name: string,
+ *     _properties: unknown,
+ *     canRead: boolean,
+ *     canWrite: boolean
+ *   ): import("./types.d.ts").FSNode,
+ *   createDataFile(
+ *     parent: string | import("./types.d.ts").FSNode | null,
+ *     name: string,
+ *     data: string | ArrayLike<number> | null,
+ *     canRead: boolean,
+ *     canWrite: boolean,
+ *     canOwn?: boolean
+ *   ): void,
+ *   createDevice(
+ *     parent: string | import("./types.d.ts").FSNode,
+ *     name: string,
+ *     input?: (() => number | null | undefined) | null,
+ *     output?: ((value: number) => void) | null
+ *   ): import("./types.d.ts").FSNode,
+ *   forceLoadFile(obj: import("./types.d.ts").FSNode): boolean,
+ *   createLazyFile(): never,
+ * }}
+ */
 export function createLegacyHelpers(FS, { FS_getMode }) {
     return {
         findObject(path, dontResolveLastLink) {

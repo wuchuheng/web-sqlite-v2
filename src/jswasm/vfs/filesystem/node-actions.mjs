@@ -1,5 +1,56 @@
 import { PATH } from "../../utils/path.mjs";
 
+/**
+ * Generates high-level node manipulation helpers (create, rename, open, etc.)
+ * that mirror POSIX semantics on top of the in-memory filesystem state.
+ *
+ * @param {import("./types.d.ts").MutableFS} FS
+ * @param {{
+ *   FS_modeStringToFlags: (mode: string) => number,
+ *   getPathFS: () => {
+ *     resolve: (...paths: string[]) => string,
+ *     relative: (from: string, to: string) => string,
+ *   },
+ *   Module: Record<string, any>,
+ * }} options
+ * @returns {{
+ *   create(path: string, mode?: number): import("./types.d.ts").FSNode,
+ *   mkdir(path: string, mode?: number): import("./types.d.ts").FSNode,
+ *   mkdirTree(path: string, mode?: number): void,
+ *   mkdev(path: string, mode: number, dev?: number): import("./types.d.ts").FSNode,
+ *   symlink(oldpath: string, newpath: string): import("./types.d.ts").FSNode,
+ *   rename(oldPath: string, newPath: string): void,
+ *   rmdir(path: string): void,
+ *   readdir(path: string): string[],
+ *   unlink(path: string): void,
+ *   readlink(path: string): string,
+ *   stat(path: string, dontFollow?: boolean): import("./types.d.ts").FSStats,
+ *   lstat(path: string): import("./types.d.ts").FSStats,
+ *   chmod(
+ *     path: string | import("./types.d.ts").FSNode,
+ *     mode: number,
+ *     dontFollow?: boolean
+ *   ): void,
+ *   lchmod(path: string | import("./types.d.ts").FSNode, mode: number): void,
+ *   fchmod(fd: number, mode: number): void,
+ *   chown(
+ *     path: string | import("./types.d.ts").FSNode,
+ *     uid: number,
+ *     gid: number,
+ *     dontFollow?: boolean
+ *   ): void,
+ *   lchown(path: string | import("./types.d.ts").FSNode, uid: number, gid: number): void,
+ *   fchown(fd: number, uid: number, gid: number): void,
+ *   truncate(path: string | import("./types.d.ts").FSNode, len: number): void,
+ *   ftruncate(fd: number, len: number): void,
+ *   utime(path: string, atime: number, mtime: number): void,
+ *   open(
+ *     path: string | import("./types.d.ts").FSNode,
+ *     flags: number | string,
+ *     mode?: number
+ *   ): import("./types.d.ts").FSStream,
+ * }}
+ */
 export function createNodeActions(
     FS,
     { FS_modeStringToFlags, getPathFS, Module }

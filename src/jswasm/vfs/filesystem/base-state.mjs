@@ -1,3 +1,9 @@
+/**
+ * Creates the mutable filesystem state container that other helper modules
+ * extend in order to expose POSIX-like filesystem behaviors.
+ *
+ * @returns {import("./types.d.ts").MutableFS}
+ */
 export function createBaseState() {
     return {
         root: null,

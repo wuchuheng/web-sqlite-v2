@@ -1,5 +1,58 @@
 import { UTF8ArrayToString, lengthBytesUTF8, stringToUTF8Array } from "../../utils/utf8.mjs";
 
+/**
+ * Supplies stream-level helpers for interacting with file descriptors backed
+ * by the filesystem implementation.
+ *
+ * @param {import("./types.d.ts").MutableFS} FS
+ * @returns {{
+ *   close(stream: import("./types.d.ts").FSStream): void,
+ *   isClosed(stream: import("./types.d.ts").FSStream): boolean,
+ *   llseek(stream: import("./types.d.ts").FSStream, offset: number, whence: number): number,
+ *   read(
+ *     stream: import("./types.d.ts").FSStream,
+ *     buffer: Uint8Array,
+ *     offset: number,
+ *     length: number,
+ *     position?: number
+ *   ): number,
+ *   write(
+ *     stream: import("./types.d.ts").FSStream,
+ *     buffer: Uint8Array | ArrayLike<number>,
+ *     offset: number,
+ *     length: number,
+ *     position?: number,
+ *     canOwn?: boolean
+ *   ): number,
+ *   allocate(stream: import("./types.d.ts").FSStream, offset: number, length: number): void,
+ *   mmap(
+ *     stream: import("./types.d.ts").FSStream,
+ *     length: number,
+ *     position: number,
+ *     prot: number,
+ *     flags: number
+ *   ): { ptr: number, length: number },
+ *   msync(
+ *     stream: import("./types.d.ts").FSStream,
+ *     buffer: Uint8Array | ArrayLike<number>,
+ *     offset: number,
+ *     length: number,
+ *     mmapFlags: number
+ *   ): number,
+ *   ioctl(stream: import("./types.d.ts").FSStream, cmd: number, arg: number): number,
+ *   readFile(
+ *     path: string,
+ *     opts?: { flags?: number, encoding?: "utf8" | "binary" }
+ *   ): Uint8Array | string,
+ *   writeFile(
+ *     path: string,
+ *     data: string | ArrayBufferView,
+ *     opts?: { flags?: number, mode?: number, canOwn?: boolean }
+ *   ): void,
+ *   cwd(): string,
+ *   chdir(path: string): void,
+ * }}
+ */
 export function createStreamHelpers(FS) {
     return {
         close(stream) {

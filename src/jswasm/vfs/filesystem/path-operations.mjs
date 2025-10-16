@@ -1,5 +1,42 @@
 import { PATH } from "../../utils/path.mjs";
 
+/**
+ * Builds helpers for resolving and manipulating filesystem paths while keeping
+ * the hash table that accelerates path lookups in sync.
+ *
+ * @param {import("./types.d.ts").MutableFS} FS
+ * @param {{
+ *   getPathFS: () => {
+ *     resolve: (...paths: string[]) => string,
+ *     relative: (from: string, to: string) => string,
+ *   },
+ * }} options
+ * @returns {{
+ *   lookupPath(
+ *     path: string,
+ *     opts?: {
+ *       follow_mount?: boolean,
+ *       recurse_count?: number,
+ *       parent?: boolean,
+ *       follow?: boolean,
+ *     }
+ *   ): { path: string, node: import("./types.d.ts").FSNode | null },
+ *   getPath(node: import("./types.d.ts").FSNode): string,
+ *   hashName(parentid: number, name: string): number,
+ *   hashAddNode(node: import("./types.d.ts").FSNode): void,
+ *   hashRemoveNode(node: import("./types.d.ts").FSNode): void,
+ *   lookupNode(parent: import("./types.d.ts").FSNode, name: string): import("./types.d.ts").FSNode,
+ *   createNode(
+ *     parent: import("./types.d.ts").FSNode,
+ *     name: string,
+ *     mode: number,
+ *     rdev: number
+ *   ): import("./types.d.ts").FSNode,
+ *   destroyNode(node: import("./types.d.ts").FSNode): void,
+ *   isRoot(node: import("./types.d.ts").FSNode): boolean,
+ *   isMountpoint(node: import("./types.d.ts").FSNode): boolean,
+ * }}
+ */
 export function createPathOperations(FS, { getPathFS }) {
     return {
         lookupPath(path, opts = {}) {

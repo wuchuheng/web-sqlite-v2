@@ -1,3 +1,24 @@
+/**
+ * Produces helpers for reasoning about POSIX mode bitmasks and validating
+ * permissions for filesystem nodes.
+ *
+ * @param {import("./types.d.ts").MutableFS} FS
+ * @returns {{
+ *   isFile(mode: number): boolean,
+ *   isDir(mode: number): boolean,
+ *   isLink(mode: number): boolean,
+ *   isChrdev(mode: number): boolean,
+ *   isBlkdev(mode: number): boolean,
+ *   isFIFO(mode: number): boolean,
+ *   isSocket(mode: number): boolean,
+ *   flagsToPermissionString(flag: number): string,
+ *   nodePermissions(node: import("./types.d.ts").FSNode, perms: string): number,
+ *   mayLookup(dir: import("./types.d.ts").FSNode): number,
+ *   mayCreate(dir: import("./types.d.ts").FSNode, name: string): number,
+ *   mayDelete(dir: import("./types.d.ts").FSNode, name: string, isdir: boolean): number,
+ *   mayOpen(node: import("./types.d.ts").FSNode | null, flags: number): number,
+ * }}
+ */
 export function createModeOperations(FS) {
     return {
         isFile(mode) {
