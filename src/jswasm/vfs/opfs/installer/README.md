@@ -75,14 +75,13 @@ W.postMessage({ type: "opfs-async-init", args: stateForWorker });
 
 #### 2. Proxy Worker Path (Fixed ✅)
 
-**Problem:** Incorrect relative path to `sqlite3-opfs-async-proxy.js`  
-**Solution:** Updated path to be relative to `installer/` directory  
-**File:** `index.mjs` line 331
+**Problem:** Legacy integrations still reference `sqlite3-opfs-async-proxy.js`
+**Solution:** Restored the default URI and added a compatibility wrapper that forwards to `async-proxy/index.mjs`
+**File:** `index.mjs` line 331, `sqlite3-opfs-async-proxy.js`
 
 ```javascript
-// Changed from: "sqlite3-opfs-async-proxy.js"
-installOpfsVfs.defaultProxyUri = "../sqlite3-opfs-async-proxy.js";
-// Now correctly points to parent opfs/ directory
+// Legacy entry point continues to exist but simply imports the modular worker.
+installOpfsVfs.defaultProxyUri = "./sqlite3-opfs-async-proxy.js";
 ```
 
 ### Verification Documents
@@ -127,7 +126,7 @@ installer/
 src/jswasm/vfs/opfs/
 ├── install-opfs-vfs.mjs              # Original monolithic file (kept for reference)
 ├── opfs-sahpool-vfs.mjs              # Existing file (unchanged)
-├── sqlite3-opfs-async-proxy.js       # Worker script (unchanged)
+├── async-proxy/index.mjs             # Worker script entry point
 └── installer/                         # 🆕 NEW ORGANIZED CODE
     ├── index.mjs                      # Entry point (230 lines)
     ├── core/                          # Infrastructure (5 modules)
@@ -197,7 +196,7 @@ const { installOpfsVfs, installOpfsVfsInitializer } =
 await installOpfsVfs({
     verbose: 2,
     sanityChecks: true,
-    proxyUri: "../sqlite3-opfs-async-proxy.js", // Relative to installer/ directory
+    proxyUri: "./sqlite3-opfs-async-proxy.js", // Relative to installer/ directory
 });
 ```
 
@@ -509,14 +508,14 @@ Refused to execute script from '...sqlite3-opfs-async-proxy.js'
 because its MIME type ('text/html') is not executable.
 ```
 
-**Cause:** Incorrect path to the worker script
+**Cause:** Downstream builds still request the legacy worker path which no longer existed after the refactor
 
 **Solution:** ✅ Already fixed in `index.mjs`
 
--   Changed `defaultProxyUri` from `"sqlite3-opfs-async-proxy.js"` to `"../sqlite3-opfs-async-proxy.js"`
--   The path is now correctly relative to the `installer/` directory
+-   Restore the default `defaultProxyUri` to `"./sqlite3-opfs-async-proxy.js"`
+-   Provide a thin wrapper at that path which immediately imports `../async-proxy/index.mjs`
 
-**Verification:** Check `index.mjs` line 331 for the correct relative path
+**Verification:** Check `index.mjs` line 331 and `sqlite3-opfs-async-proxy.js`
 
 ---
 
