@@ -1,408 +1,28 @@
-/*
-  2022-09-16
-
-  The author disclaims copyright to this source code.  In place of a
-  legal notice, here is a blessing:
-
-  *   May you do good and not evil.
-  *   May you find forgiveness for yourself and forgive others.
-  *   May you share freely, never taking more than you give.
-
-  ***********************************************************************
-
-  A Worker which manages asynchronous OPFS handles on behalf of a
-  synchronous API which controls it via a combination of Worker
-  messages, SharedArrayBuffer, and Atomics. It is the asynchronous
-  counterpart of the API defined in sqlite3-vfs-opfs.js.
-
-  Highly indebted to:
-
-  https://github.com/rhashimoto/wa-sqlite/blob/master/src/examples/OriginPrivateFileSystemVFS.js
-
-  for demonstrating how to use the OPFS APIs.
-
-  This file is to be loaded as a Worker. It does not have any direct
-  access to the sqlite3 JS/WASM bits, so any bits which it needs (most
-  notably SQLITE_xxx integer codes) have to be imported into it via an
-  initialization process.
-
-  This file represents an implementation detail of a larger piece of
-  code, and not a public interface. Its details may change at any time
-  and are not intended to be used by any client-level code.
-
-  2022-11-27: Chrome v108 changes some async methods to synchronous, as
-  documented at:
-
-  https://developer.chrome.com/blog/sync-methods-for-accesshandles/
-
-  Firefox v111 and Safari 16.4, both released in March 2023, also
-  include this.
-
-  We cannot change to the sync forms at this point without breaking
-  clients who use Chrome v104-ish or higher. truncate(), getSize(),
-  flush(), and close() are now (as of v108) synchronous. Calling them
-  with an "await", as we have to for the async forms, is still legal
-  with the sync forms but is superfluous. Calling the async forms with
-  theFunc().then(...) is not compatible with the change to
-  synchronous, but we do do not use those APIs that way. i.e. we don't
-  _need_ to change anything for this, but at some point (after Chrome
-  versions (approximately) 104-107 are extinct) should change our
-  usage of those methods to remove the "await".
-*/
-
 "use strict";
 
+import { getResolvedPath, toss } from "./environment.mjs";
+import { GetSyncHandleError } from "./errors.mjs";
+import { SerializationBuffer } from "./serialization-buffer.mjs";
+import { createDefaultState } from "./state.mjs";
+import { WorkerLogger } from "./worker-logger.mjs";
+
 /**
- * Posts a typed message back to the controller thread.
- * Uses the historical `type/payload` envelope required by the consumer.
+ * Main worker implementation that bridges SQLite's synchronous VFS contract
+ * with the asynchronous OPFS primitives.
  *
- * @param {string} type - Message type identifier understood by the main thread.
- * @param {...unknown} payload - Arbitrary payload forwarded as-is.
- */
-const wPost = (type, ...payload) => postMessage({ type, payload });
-
-/**
- * Throws an Error assembled from the provided string fragments.
- *
- * @param {...unknown} parts - Values concatenated into the error message.
- * @throws {Error}
- */
-const toss = (...parts) => {
-    throw new Error(parts.join(" "));
-};
-
-/**
- * Detects whether the current platform is missing any OPFS prerequisites.
- *
- * @returns {string[]|null} Tuple of error strings if unsupported, otherwise `null`.
- */
-const detectEnvironmentIssue = () => {
-    if (!globalThis.SharedArrayBuffer) {
-        return [
-            "Missing SharedArrayBuffer API.",
-            "The server must emit the COOP/COEP response headers to enable that.",
-        ];
-    }
-    if (!globalThis.Atomics) {
-        return [
-            "Missing Atomics API.",
-            "The server must emit the COOP/COEP response headers to enable that.",
-        ];
-    }
-    const haveOpfsApis =
-        globalThis.FileSystemHandle &&
-        globalThis.FileSystemDirectoryHandle &&
-        globalThis.FileSystemFileHandle &&
-        globalThis.FileSystemFileHandle.prototype
-            ?.createSyncAccessHandle &&
-        navigator?.storage?.getDirectory;
-    if (!haveOpfsApis) {
-        return ["Missing required OPFS APIs."];
-    }
-    return null;
-};
-
-/**
- * Normalises an absolute filename into path components.
- *
- * @param {string} filename - Absolute filename.
- * @returns {string[]} Components without leading/trailing empties.
- */
-const getResolvedPath = (filename) => {
-    const urlPath = new URL(filename, "file://irrelevant").pathname;
-    return urlPath.split("/").filter((segment) => segment.length > 0);
-};
-
-/**
- * Determines native endianness of the running platform.
- *
- * @returns {boolean} `true` if little-endian.
- */
-const detectLittleEndian = () => {
-    const buffer = new ArrayBuffer(2);
-    new DataView(buffer).setInt16(0, 256, true);
-    return new Int16Array(buffer)[0] === 256;
-};
-
-/**
- * Lightweight log helper mirroring the historic integer-based verbosity levels.
- */
-class WorkerLogger {
-    /**
-     * @param {() => number} levelProvider - Callable returning the current verbosity.
-     */
-    constructor(levelProvider) {
-        this.levelProvider = levelProvider;
-        this.backends = new Map([
-            [0, console.error.bind(console, "OPFS asyncer:")],
-            [1, console.warn.bind(console, "OPFS asyncer:")],
-            [2, console.log.bind(console, "OPFS asyncer:")],
-        ]);
-    }
-
-    /**
-     * Logs a message if the verbosity threshold allows it.
-     *
-     * @param {number} level - 0: error, 1: warn, 2: info.
-     * @param {...unknown} args - Forwarded console arguments.
-     */
-    logAt(level, ...args) {
-        if (this.levelProvider() > level) {
-            const backend = this.backends.get(level);
-            if (backend) backend(...args);
-        }
-    }
-
-    /**
-     * Convenience info-level logger.
-     *
-     * @param {...unknown} args - Console arguments.
-     */
-    log(...args) {
-        this.logAt(2, ...args);
-    }
-
-    /**
-     * Convenience warn-level logger.
-     *
-     * @param {...unknown} args - Console arguments.
-     */
-    warn(...args) {
-        this.logAt(1, ...args);
-    }
-
-    /**
-     * Convenience error-level logger.
-     *
-     * @param {...unknown} args - Console arguments.
-     */
-    error(...args) {
-        this.logAt(0, ...args);
-    }
-}
-
-/**
- * Error wrapper signalling repeated failures while requesting a sync access handle.
- */
-class GetSyncHandleError extends Error {
-    /**
-     * @param {DOMException|Error} cause - Underlying failure from the OPFS API.
-     * @param {...string} messageParts - Fragments describing the failed operation.
-     */
-    constructor(cause, ...messageParts) {
-        super([messageParts.join(" "), ": ", cause.name, ": ", cause.message].join(""), {
-            cause,
-        });
-        this.name = "GetSyncHandleError";
-    }
-
-    /**
-     * Converts an error into the appropriate SQLite error code.
-     *
-     * @param {unknown} error - Error to inspect.
-     * @param {number} fallbackCode - Error code used when no specific mapping exists.
-     * @param {Record<string, number>} sqliteCodes - Mapping of sqlite error codes.
-     * @returns {number} SQLite-compatible error code.
-     */
-    static toSQLiteCode(error, fallbackCode, sqliteCodes) {
-        if (error instanceof GetSyncHandleError) {
-            const cause = error.cause;
-            if (
-                cause?.name === "NoModificationAllowedError" ||
-                (cause?.name === "DOMException" &&
-                    cause?.message?.startsWith("Access Handles cannot"))
-            ) {
-                return sqliteCodes.SQLITE_BUSY;
-            }
-            if (cause?.name === "NotFoundError") {
-                return sqliteCodes.SQLITE_CANTOPEN;
-            }
-        } else if (error && typeof error === "object" && error.name === "NotFoundError") {
-            return sqliteCodes.SQLITE_CANTOPEN;
-        }
-        return fallbackCode;
-    }
-}
-
-/**
- * Handles serialization/deserialization of arguments across a SharedArrayBuffer.
- */
-class SerializationBuffer {
-    /**
-     * @param {Object} options - Construction options.
-     * @param {SharedArrayBuffer} options.sharedBuffer - Backing buffer shared with the main thread.
-     * @param {number} options.offset - Byte offset into the shared buffer.
-     * @param {number} options.size - Number of bytes available for serialization.
-     * @param {boolean} options.littleEndian - Platform endianness.
-     * @param {number} options.exceptionVerbosity - Max priority of exceptions to record (0 disables).
-     */
-    constructor({ sharedBuffer, offset, size, littleEndian, exceptionVerbosity }) {
-        this.bytes = new Uint8Array(sharedBuffer, offset, size);
-        this.view = new DataView(sharedBuffer, offset, size);
-        this.littleEndian = littleEndian;
-        this.exceptionVerbosity = exceptionVerbosity;
-        this.textEncoder = new TextEncoder();
-        this.textDecoder = new TextDecoder();
-
-        /**
-         * Metadata for the supported value kinds.
-         * @type {Record<string, {id:number,size?:number,getter?:string,setter?:string}>}
-         */
-        this.typeInfo = {
-            number: { id: 1, size: 8, getter: "getFloat64", setter: "setFloat64" },
-            bigint: { id: 2, size: 8, getter: "getBigInt64", setter: "setBigInt64" },
-            boolean: { id: 3, size: 4, getter: "getInt32", setter: "setInt32" },
-            string: { id: 4 },
-        };
-        this.typeInfoById = Object.fromEntries(
-            Object.values(this.typeInfo).map((info) => [info.id, info])
-        );
-    }
-
-    /**
-     * Encodes arbitrary values into the shared buffer.
-     *
-     * @param {...(string|number|bigint|boolean)} values - Values stored for the consumer.
-     */
-    serialize(...values) {
-        if (!values.length) {
-            this.bytes[0] = 0;
-            return;
-        }
-        const typeDescriptors = values.map((value) => {
-            const descriptor = this.typeInfo[typeof value];
-            if (!descriptor) {
-                toss(
-                    "Maintenance required: this value type cannot be serialized.",
-                    value
-                );
-            }
-            return descriptor;
-        });
-
-        let offset = 1;
-        this.bytes[0] = values.length & 0xff;
-        for (const descriptor of typeDescriptors) {
-            this.bytes[offset++] = descriptor.id;
-        }
-        for (let i = 0; i < values.length; i++) {
-            const descriptor = typeDescriptors[i];
-            const value = values[i];
-            if (descriptor.setter) {
-                this.view[descriptor.setter](offset, value, this.littleEndian);
-                offset += descriptor.size;
-            } else {
-                const encoded = this.textEncoder.encode(value);
-                this.view.setInt32(offset, encoded.byteLength, this.littleEndian);
-                offset += 4;
-                this.bytes.set(encoded, offset);
-                offset += encoded.byteLength;
-            }
-        }
-    }
-
-    /**
-     * Reads data previously written by {@link serialize}.
-     *
-     * @param {boolean} clear - When true the buffer is marked empty after reading.
-     * @returns {Array<string|number|bigint|boolean>|null} Payload values or `null` if empty.
-     */
-    deserialize(clear = false) {
-        const argc = this.bytes[0];
-        if (!argc) {
-            if (clear) this.bytes[0] = 0;
-            return null;
-        }
-
-        const values = [];
-        const types = [];
-        let offset = 1;
-        for (let i = 0; i < argc; i++, offset++) {
-            types.push(this.typeInfoById[this.bytes[offset]]);
-        }
-        for (const descriptor of types) {
-            if (descriptor.getter) {
-                values.push(this.view[descriptor.getter](offset, this.littleEndian));
-                offset += descriptor.size;
-            } else {
-                const length = this.view.getInt32(offset, this.littleEndian);
-                offset += 4;
-                const slice = this.bytes.slice(offset, offset + length);
-                values.push(this.textDecoder.decode(slice));
-                offset += length;
-            }
-        }
-
-        if (clear) this.bytes[0] = 0;
-        return values;
-    }
-
-    /**
-     * Conditionally serializes an exception string based on the configured threshold.
-     *
-     * @param {number} priority - Smaller numbers represent higher priority.
-     * @param {unknown} error - Error object to stringify.
-     */
-    storeException(priority, error) {
-        if (this.exceptionVerbosity <= 0 || priority > this.exceptionVerbosity) {
-            return;
-        }
-        if (!error || typeof error !== "object") {
-            this.serialize(String(error ?? "Unknown error"));
-            return;
-        }
-        const { name = "Error", message = "" } = /** @type {Error} */ (error);
-        this.serialize(`${name}: ${message}`);
-    }
-}
-
-/**
- * @typedef {Object} WorkerInitOptions
- * @property {number} verbose
- * @property {SharedArrayBuffer} sabOP
- * @property {SharedArrayBuffer} sabIO
- * @property {Record<string, number>} sq3Codes
- * @property {Record<string, number>} opfsFlags
- * @property {Record<string, number>} opIds
- * @property {number} asyncIdleWaitTime
- * @property {number} asyncS11nExceptions
- * @property {number} fileBufferSize
- * @property {number} sabS11nOffset
- * @property {number} sabS11nSize
+ * @module async-proxy/async-proxy-worker
  */
 
 /**
- * Creates the baseline worker state used by the OPFS proxy.
- *
- * @returns {WorkerInitOptions & {rootDir:FileSystemDirectoryHandle|null,littleEndian:boolean,sabOPView:Int32Array|null,sabFileBufView:Uint8Array|null,sabS11nView:Uint8Array|null,s11n:SerializationBuffer|null}} -
- * Default state with placeholders.
+ * @typedef {import('./async-proxy-worker.d.ts').PostFn} PostFn
+ * @typedef {import('./async-proxy-worker.d.ts').WorkerInitOptions} WorkerInitOptions
+ * @typedef {import('./async-proxy-worker.d.ts').OperationHandlerEntry} OperationHandlerEntry
+ * @typedef {import('./async-proxy-worker.d.ts').FileRecord} FileRecord
  */
-const createDefaultState = () => ({
-    verbose: 1,
-    sabOP: null,
-    sabIO: null,
-    sabOPView: null,
-    sabFileBufView: null,
-    sabS11nView: null,
-    sq3Codes: Object.create(null),
-    opfsFlags: Object.create(null),
-    opIds: Object.create(null),
-    asyncIdleWaitTime: 150,
-    asyncS11nExceptions: 1,
-    fileBufferSize: 0,
-    sabS11nOffset: 0,
-    sabS11nSize: 0,
-    rootDir: null,
-    littleEndian: detectLittleEndian(),
-    s11n: null,
-});
 
-/**
- * Encapsulates the asynchronous worker behaviour that bridges OPFS with the SQLite VFS.
- */
-class AsyncProxyWorker {
+export class AsyncProxyWorker {
     /**
-     * @param {(type:string,...payload:unknown[]) => void} postFn - Message bridge.
+     * @param {PostFn} postFn - Message bridge used to talk to the controller.
      */
     constructor(postFn) {
         this.postMessage = postFn;
@@ -420,7 +40,8 @@ class AsyncProxyWorker {
     /**
      * Initialises the worker by binding OPFS and message listeners.
      *
-     * @returns {Promise<void>} Resolves once the worker posts `opfs-async-loaded`.
+     * @returns {Promise<void>} Resolves once the worker posts
+     *   `opfs-async-loaded`.
      */
     async start() {
         try {
@@ -437,7 +58,10 @@ class AsyncProxyWorker {
     /**
      * Maps operation names to implementation functions.
      *
-     * @returns {Record<string, Function>} Operation dictionary.
+     * @returns {Record<
+     *   import('./state.d.ts').OperationName,
+     *   import('./async-proxy-worker.d.ts').OperationHandlerEntry['handler']
+     * >} Operation dictionary.
      */
     createOperationImplementations() {
         return {
@@ -582,7 +206,7 @@ class AsyncProxyWorker {
                 const handlerEntry =
                     this.operationHandlersById.get(opId) ??
                     toss("No waitLoop handler for whichOp #", opId);
-                const args = this.serialization.deserialize(true) ?? [];
+                const args = this.serialization.deserialize(true);
                 await handlerEntry.handler(...args);
             } catch (error) {
                 this.logger.error("waitLoop() caught:", error);
@@ -808,6 +432,7 @@ class AsyncProxyWorker {
 
             const fileHandle = await dirHandle.getFileHandle(filenamePart, { create });
 
+            /** @type {FileRecord} */
             const fileRecord = {
                 fid,
                 filenameAbs: filename,
@@ -966,30 +591,32 @@ class AsyncProxyWorker {
     }
 
     /**
-     * Retrieves (and optionally creates) the directory corresponding to a path.
+     * Resolves the directory and filename portion for the provided path.
      *
-     * @param {string} absFilename - Absolute filename.
-     * @param {boolean} [createDirs=false] - Whether to create intermediate directories.
-     * @returns {Promise<[FileSystemDirectoryHandle, string]>} Directory handle and filename part.
+     * @param {string} filename - Absolute file path.
+     * @param {boolean} createDirs - Whether missing directories should be created.
+     * @returns {Promise<[FileSystemDirectoryHandle, string]>} Directory/filename tuple.
      */
-    async getDirectoryForFilename(absFilename, createDirs = false) {
-        const pathParts = getResolvedPath(absFilename);
-        const filename = pathParts.pop() ?? "";
+    async getDirectoryForFilename(filename, createDirs = false) {
+        if (!filename) toss("Missing filename for getDirectoryForFilename().");
+        const parts = getResolvedPath(filename);
+        const last = parts.pop();
         let directory = this.state.rootDir;
-        for (const segment of pathParts) {
+        if (!directory) toss("Missing rootDir. Was handleInit() called?");
+        for (const segment of parts) {
             if (!segment) continue;
             directory = await directory.getDirectoryHandle(segment, {
                 create: !!createDirs,
             });
         }
-        return [directory, filename];
+        return [directory, last ?? ""];
     }
 
     /**
      * Ensures the file is writable, otherwise throws an error.
      *
      * @param {string} opName - Operation name for context.
-     * @param {{readOnly:boolean, filenameAbs:string}|undefined} file - File metadata.
+     * @param {FileRecord|undefined} file - File metadata.
      */
     affirmWritable(opName, file) {
         if (!file) toss(opName, "(): File handle not found.");
@@ -1013,11 +640,12 @@ class AsyncProxyWorker {
     /**
      * Obtains a sync access handle, retrying when the platform reports busy.
      *
-     * @param {any} file - File metadata record.
+     * @param {FileRecord|undefined} file - File metadata record.
      * @param {string} opName - Operation requesting the handle.
      * @returns {Promise<FileSystemSyncAccessHandle>} Sync handle.
      */
     async getSyncHandle(file, opName) {
+        if (!file) toss(opName, "(): File handle not found.");
         if (file.syncHandle) {
             return file.syncHandle;
         }
@@ -1090,7 +718,7 @@ class AsyncProxyWorker {
     /**
      * Releases a specific implicit lock if requested by the caller.
      *
-     * @param {any} file - File metadata record.
+     * @param {FileRecord|undefined} file - File metadata record.
      */
     async releaseImplicitLock(file) {
         if (file?.releaseImplicitLocks && this.implicitLocks.has(file.fid)) {
@@ -1101,7 +729,7 @@ class AsyncProxyWorker {
     /**
      * Closes a sync handle and forgets the associated lock.
      *
-     * @param {any} file - File metadata record.
+     * @param {FileRecord|undefined} file - File metadata record.
      */
     async closeSyncHandle(file) {
         if (!file?.syncHandle) return;
@@ -1116,7 +744,7 @@ class AsyncProxyWorker {
     /**
      * Closes a sync handle while ignoring any raised errors.
      *
-     * @param {any} file - File metadata record.
+     * @param {FileRecord|undefined} file - File metadata record.
      */
     async closeSyncHandleQuietly(file) {
         try {
@@ -1126,14 +754,3 @@ class AsyncProxyWorker {
         }
     }
 }
-
-(() => {
-    const environmentIssue = detectEnvironmentIssue();
-    if (environmentIssue) {
-        wPost("opfs-unavailable", ...environmentIssue);
-        return;
-    }
-
-    const worker = new AsyncProxyWorker(wPost);
-    worker.start().catch((error) => worker.logger.error(error));
-})();

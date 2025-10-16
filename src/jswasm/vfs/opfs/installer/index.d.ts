@@ -21,7 +21,7 @@ export interface InstallOpfsVfs {
   /**
    * Default URI for the OPFS async proxy worker script.
    * Relative to the installer directory.
-   * @default "../sqlite3-opfs-async-proxy.js"
+  * @default "../async-proxy/index.mjs"
    */
   defaultProxyUri: string;
 }
@@ -88,7 +88,7 @@ export interface InstallOpfsVfsContext {
  * await installOpfsVfs({
  *     verbose: 2,
  *     sanityChecks: true,
- *     proxyUri: "../sqlite3-opfs-async-proxy.js",
+ *     proxyUri: "../async-proxy/index.mjs",
  * });
  * ```
  *
