@@ -1,26 +1,7 @@
 /**
- * Creates message handler f      case 'opfs-async-loaded': {
-        // 2. Core processing - Send initialization data to worker
-        // 2.1 Create state copy without functions (functions can't be cloned for postMessage)
-        const stateForWorker = {
-          littleEndian: state.littleEndian,
-          asyncIdleWaitTime: state.asyncIdleWaitTime,
-          asyncS11nExceptions: state.asyncS11nExceptions,
-          fileBufferSize: state.fileBufferSize,
-          sabS11nOffset: state.sabS11nOffset,
-          sabS11nSize: state.sabS11nSize,
-          sabIO: state.sabIO,
-          sabOP: state.sabOP,
-          opIds: state.opIds,
-          sq3Codes: state.sq3Codes,
-          opfsFlags: state.opfsFlags,
-          verbose: state.verbose,
-        };
-        W.postMessage({ type: 'opfs-async-init', args: stateForWorker });
-        break;
-      }unication.
- * @param {object} deps - Dependencies object
- * @returns {Function} Message handler function
+ * Creates message handler for OPFS async worker communication.
+ * @param {import('./worker-message-handler.d.ts').WorkerMessageHandlerDeps} deps - Dependencies object
+ * @returns {(event: import('./worker-message-handler.d.ts').WorkerMessageEvent) => void} Message handler function
  */
 export function createWorkerMessageHandler(deps) {
     const {

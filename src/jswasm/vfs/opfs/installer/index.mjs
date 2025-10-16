@@ -91,8 +91,8 @@ import {
  * This is the main factory function that returns the installer and initializer functions.
  * It coordinates all modules to provide a complete OPFS VFS implementation.
  *
- * @param {object} sqlite3 - SQLite3 module instance with capi, wasm, util, and config
- * @returns {object} Object containing installOpfsVfs and installOpfsVfsInitializer functions
+ * @param {import('./index.d.ts').SQLite3Module} sqlite3 - SQLite3 module instance with capi, wasm, util, and config
+ * @returns {import('./index.d.ts').InstallOpfsVfsContext} Object containing installOpfsVfs and installOpfsVfsInitializer functions
  * @example
  * const { installOpfsVfs } = createInstallOpfsVfsContext(sqlite3);
  * await installOpfsVfs({ verbose: 2 });
@@ -100,8 +100,8 @@ import {
 export function createInstallOpfsVfsContext(sqlite3) {
     /**
      * Installs OPFS VFS for SQLite with async worker support.
-     * @param {object} options - Configuration options
-     * @returns {Promise<object>} Resolves with sqlite3 instance
+     * @param {Partial<import('./index.d.ts').OpfsConfig>} [options] - Configuration options
+     * @returns {Promise<import('./index.d.ts').SQLite3Module>} Resolves with sqlite3 instance
      */
     const installOpfsVfs = function callee(options) {
         // 1. Input handling
@@ -332,7 +332,7 @@ export function createInstallOpfsVfsContext(sqlite3) {
 
     /**
      * Initializer function for OPFS VFS.
-     * @param {object} sqlite3Ref - SQLite3 module reference
+     * @param {import('./index.d.ts').SQLite3Module} sqlite3Ref - SQLite3 module reference
      * @returns {Promise<void>} Resolves when initialization completes
      */
     const installOpfsVfsInitializer = async (sqlite3Ref) => {
