@@ -1,7 +1,7 @@
 /**
  * Sets up optional VFS methods (randomness and sleep).
  * @param {import('./vfs-integration.d.ts').OptionalVfsMethodsDeps} deps - Dependencies object
- * @returns {Partial<import('../../../../../../types/opfs-vfs-installer').VfsSyncWrappers>} Additional VFS methods
+ * @returns {Partial<import('../../../../../shared/opfs-vfs-installer').VfsSyncWrappers>} Additional VFS methods
  */
 export function setupOptionalVfsMethods(deps) {
     const { opfsVfs, dVfs, wasm, state } = deps;

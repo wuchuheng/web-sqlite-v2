@@ -80,7 +80,7 @@ export let wasmExports;
  * Main SQLite3 WebAssembly module initialization function.
  * This is the entry point for creating a new SQLite3 instance.
  *
- * @returns {(moduleArg?: Object) => Promise<Object>} Module initialization function
+ * @returns {import("@wuchuheng/web-sqlite").SQLite3InitModule} Module initialization function
  */
 let sqlite3InitModule = (() => {
     const _scriptName = import.meta.url;
@@ -88,8 +88,8 @@ let sqlite3InitModule = (() => {
     /**
      * Initializes the SQLite3 WebAssembly module with the given configuration.
      *
-     * @param {Object} [moduleArg={}] - Module configuration options
-     * @returns {Promise<Object>} Promise that resolves to the initialized module
+     * @param {import("@wuchuheng/web-sqlite").SQLite3ModuleConfig} [moduleArg={}] - Module configuration options
+     * @returns {Promise<import("@wuchuheng/web-sqlite").SQLite3API>} Promise that resolves to the initialized module
      */
     return function (moduleArg = {}) {
         // 1. Initialize module and promise

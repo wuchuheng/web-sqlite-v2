@@ -63,7 +63,7 @@ const UTF8Decoder =
 /**
  * Converts a UTF-8 encoded byte array to a JavaScript string.
  *
- * @param {Uint8Array|Array} heapOrArray - The byte array containing UTF-8 encoded data.
+ * @param {import("./utf8.d.ts").UTF8ByteArray} heapOrArray - The byte array containing UTF-8 encoded data.
  * @param {number} [idx=0] - Starting index in the array.
  * @param {number} [maxBytesToRead=NaN] - Maximum number of bytes to read.
  * @returns {string} The decoded string.
@@ -187,7 +187,7 @@ export const lengthBytesUTF8 = (str) => {
  * Encodes a JavaScript string as UTF-8 into a byte array.
  *
  * @param {string} str - The string to encode.
- * @param {Uint8Array|Array} heap - The destination byte array.
+ * @param {import("./utf8.d.ts").UTF8ByteArray} heap - The destination byte array.
  * @param {number} outIdx - Starting index in the destination array.
  * @param {number} maxBytesToWrite - Maximum bytes to write (including null terminator).
  * @returns {number} Number of bytes written (excluding null terminator).

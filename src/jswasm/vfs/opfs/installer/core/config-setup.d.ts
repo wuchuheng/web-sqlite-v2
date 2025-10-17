@@ -6,7 +6,7 @@
 import type {
   OpfsInstallerOptions,
   OpfsConfig,
-} from "../../../types/opfs-vfs-installer";
+} from "../../../shared/opfs-vfs-installer";
 
 /**
  * Normalizes and prepares OPFS configuration options

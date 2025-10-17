@@ -1,7 +1,7 @@
 import type {
   IoSyncWrappers,
   VfsSyncWrappers,
-} from "../../../../../../types/opfs-vfs-installer";
+} from "../../../../../shared/opfs-vfs-installer";
 
 /**
  * Dependencies required for running OPFS sanity checks.

@@ -8,7 +8,7 @@ const MMAP_ALIGNMENT_BYTES = 65536;
 
 /**
  * Initialize random fill function using crypto.getRandomValues
- * @returns {Function} Function that fills a view with random values
+ * @returns {import('./memory-utils.d.ts').RandomFillFunction} Function that fills a view with random values
  * @throws {Error} If crypto.getRandomValues is not available
  */
 export const initRandomFill = () => {
@@ -33,6 +33,7 @@ export const initRandomFill = () => {
  * @param {TypedArray} view - Typed array view to fill with random values
  * @returns {TypedArray} The filled view
  */
+/** @type {import('./memory-utils.d.ts').RandomFillFunction} */
 export let randomFill = (view) => {
     // 1. Input handling - initialize on first call
     randomFill = initRandomFill();
@@ -71,10 +72,13 @@ export const alignMemory = (size, alignment) => {
 /**
  * Allocate memory with mmap-style alignment
  * Allocates 64KB-aligned memory blocks and zeros them
- * @param {Function} _emscripten_builtin_memalign - Emscripten memalign function
+ * @param {import('./memory-utils.d.ts').BuiltinMemalign} _emscripten_builtin_memalign - Emscripten memalign function
  * @param {Uint8Array} HEAPU8 - Uint8 heap array for zeroing
  * @param {number} size - Size to allocate (will be aligned to 64KB)
  * @returns {number} Pointer to allocated memory, or 0 on failure
+ */
+/**
+ * @returns {import('./memory-utils.d.ts').MmapAllocator}
  */
 export const createMmapAlloc = (_emscripten_builtin_memalign, HEAPU8) => {
     return (size) => {

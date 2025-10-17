@@ -3,7 +3,7 @@
  * @param {import('./state-initialization.d.ts').StateInitDeps['opfsVfs']} opfsVfs - OPFS VFS structure
  * @param {import('./state-initialization.d.ts').StateInitDeps['capi']} capi - SQLite C API bindings
  * @param {import('./state-initialization.d.ts').StateInitDeps['toss']} toss - Error throwing utility
- * @returns {import('../../../../../../types/opfs-vfs-installer').OpfsState} Initialized state object
+ * @returns {import('../../../../../../shared/opfs-vfs-installer').OpfsState} Initialized state object
  */
 export function initializeOpfsState(opfsVfs, capi, toss) {
     // 1. Input handling
@@ -102,8 +102,8 @@ export function initializeOpfsState(opfsVfs, capi, toss) {
 
 /**
  * Initializes metrics tracking for OPFS operations.
- * @param {import('../../../../../../types/opfs-vfs-installer').OpfsState} state - OPFS state object
- * @returns {import('../../../../../../types/opfs-vfs-installer').OpfsMetrics} Metrics object with counters for each operation
+ * @param {import('../../../../../../shared/opfs-vfs-installer').OpfsState} state - OPFS state object
+ * @returns {import('../../../../../../shared/opfs-vfs-installer').OpfsMetrics} Metrics object with counters for each operation
  */
 export function initializeMetrics(state) {
     // 1. Input handling

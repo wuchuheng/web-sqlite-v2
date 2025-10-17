@@ -6,7 +6,7 @@
 import type {
   IoSyncWrappers,
   IoSyncWrapperDeps,
-} from "../../../types/opfs-vfs-installer";
+} from "../../../shared/opfs-vfs-installer";
 
 /**
  * Creates I/O synchronization wrappers for SQLite file operations

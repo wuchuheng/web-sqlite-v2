@@ -20,13 +20,13 @@ import { ERRNO, IOCTL_OPS } from './errno-constants.mjs';
 /**
  * Creates ioctl syscall implementation
  *
- * @param {Object} FS - File system implementation
- * @param {Object} SYSCALLS - Syscall helper utilities
- * @param {Function} syscallGetVarargP - Get next pointer from varargs
+ * @param {import("../shared/system-types.d.ts").SyscallFS} FS - File system implementation
+ * @param {import("../shared/system-types.d.ts").SyscallHelpers["SYSCALLS"]} SYSCALLS - Syscall helper utilities
+ * @param {() => number} syscallGetVarargP - Get next pointer from varargs
  * @param {Int8Array} HEAP8 - Signed 8-bit heap view
  * @param {Int16Array} HEAP16 - Signed 16-bit heap view
  * @param {Int32Array} HEAP32 - Signed 32-bit heap view
- * @returns {Object} Object containing ioctl syscall function
+ * @returns {import("../shared/system-types.d.ts").IoctlSyscalls} Object containing ioctl syscall function
  */
 export function createIoctlSyscalls(FS, SYSCALLS, syscallGetVarargP, HEAP8, HEAP16, HEAP32) {
     /**

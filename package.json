@@ -4,10 +4,10 @@
   "description": "SQLite3 WebAssembly implementation with OPFS support",
   "type": "module",
   "main": "./src/jswasm/sqlite3.mjs",
-  "types": "./src/types/index.d.ts",
+  "types": "./src/jswasm/sqlite3.d.ts",
   "exports": {
     ".": {
-      "types": "./src/types/index.d.ts",
+      "types": "./src/jswasm/sqlite3.d.ts",
       "default": "./src/jswasm/sqlite3.mjs"
     }
   },

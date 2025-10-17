@@ -1,7 +1,7 @@
 /**
  * Creates an operation runner for async OPFS calls.
- * @param {import('../../../../../../types/opfs-vfs-installer').OpfsState} state - OPFS state object
- * @param {import('../../../../../../types/opfs-vfs-installer').OpfsMetrics} metrics - Metrics tracking object
+ * @param {import('../../../../../../shared/opfs-vfs-installer').OpfsState} state - OPFS state object
+ * @param {import('../../../../../../shared/opfs-vfs-installer').OpfsMetrics} metrics - Metrics tracking object
  * @param {import('./operation-runner.d.ts').OperationRunnerDeps['error']} error - Error logging function
  * @param {import('./operation-runner.d.ts').OperationRunnerDeps['toss']} toss - Error throwing utility
  * @returns {import('./operation-runner.d.ts').OperationRunner} Operation runner function
@@ -52,7 +52,7 @@ export function createOperationRunner(state, metrics, error, toss) {
 
 /**
  * Creates timing utilities for operation metrics.
- * @param {import('../../../../../../types/opfs-vfs-installer').OpfsMetrics} metrics - Metrics tracking object
+ * @param {import('../../../../../../shared/opfs-vfs-installer').OpfsMetrics} metrics - Metrics tracking object
  * @returns {import('./operation-runner.d.ts').OperationTimer} Timer interface with mTimeStart and mTimeEnd
  */
 export function createOperationTimer(metrics) {

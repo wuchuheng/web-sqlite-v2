@@ -8,23 +8,10 @@
 /**
  * Creates a runtime lifecycle manager for coordinating module initialization phases.
  *
- * @param {Object} Module - The Emscripten module object
- * @param {Object} FS - The file system implementation
- * @param {Object} TTY - The TTY operations implementation
- * @returns {{
- *   preRun: () => void,
- *   initRuntime: () => void,
- *   postRun: () => void,
- *   addOnPreRun: (callback: Function) => void,
- *   addOnInit: (callback: Function) => void,
- *   addOnPostRun: (callback: Function) => void,
- *   addRunDependency: (id: string) => void,
- *   removeRunDependency: (id: string) => void,
- *   getUniqueRunDependency: (id: string) => string,
- *   setDependenciesFulfilled: (callback: Function) => void,
- *   getRunDependencies: () => number,
- *   run: () => void
- * }} Lifecycle manager API
+ * @param {import("../shared/runtime-types.d.ts").RuntimeModule} Module - The Emscripten module object
+ * @param {import("../shared/runtime-types.d.ts").RuntimeFS} FS - The file system implementation
+ * @param {import("../shared/runtime-types.d.ts").RuntimeTTY} TTY - The TTY operations implementation
+ * @returns {import("../shared/runtime-types.d.ts").RuntimeLifecycleManager} Lifecycle manager API
  */
 export function createLifecycleManager(Module, FS, TTY) {
     // Lifecycle callback arrays
@@ -43,7 +30,7 @@ export function createLifecycleManager(Module, FS, TTY) {
     /**
      * Executes all callbacks in the given array.
      *
-     * @param {Function[]} callbacks - Array of callbacks to execute
+     * @param {import("../shared/runtime-types.d.ts").LifecycleCallback[]} callbacks - Array of callbacks to execute
      */
     function callRuntimeCallbacks(callbacks) {
         // 1. Execute each callback with Module as argument
@@ -159,7 +146,7 @@ export function createLifecycleManager(Module, FS, TTY) {
     /**
      * Adds a callback to run before runtime initialization.
      *
-     * @param {Function} cb - Callback to execute during preRun phase
+     * @param {import("../shared/runtime-types.d.ts").LifecycleCallback} cb - Callback to execute during preRun phase
      */
     function addOnPreRun(cb) {
         __ATPRERUN__.unshift(cb);
@@ -168,7 +155,7 @@ export function createLifecycleManager(Module, FS, TTY) {
     /**
      * Adds a callback to run during runtime initialization.
      *
-     * @param {Function} cb - Callback to execute during init phase
+     * @param {import("../shared/runtime-types.d.ts").LifecycleCallback} cb - Callback to execute during init phase
      */
     function addOnInit(cb) {
         __ATINIT__.unshift(cb);
@@ -177,7 +164,7 @@ export function createLifecycleManager(Module, FS, TTY) {
     /**
      * Adds a callback to run after runtime initialization.
      *
-     * @param {Function} cb - Callback to execute during postRun phase
+     * @param {import("../shared/runtime-types.d.ts").LifecycleCallback} cb - Callback to execute during postRun phase
      */
     function addOnPostRun(cb) {
         __ATPOSTRUN__.unshift(cb);
@@ -186,7 +173,7 @@ export function createLifecycleManager(Module, FS, TTY) {
     /**
      * Sets the callback to execute when all run dependencies are fulfilled.
      *
-     * @param {Function} callback - Callback to execute when dependencies are resolved
+     * @param {() => void} callback - Callback to execute when dependencies are resolved
      */
     function setDependenciesFulfilled(callback) {
         dependenciesFulfilled = callback;

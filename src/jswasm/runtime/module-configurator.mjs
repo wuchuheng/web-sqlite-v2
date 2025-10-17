@@ -9,7 +9,7 @@
  * Creates a locateFile function for resolving WebAssembly file paths.
  *
  * @param {string} importMetaUrl - The import.meta.url value
- * @returns {(path: string, prefix: string) => string} File location resolver function
+ * @returns {import("../shared/runtime-types.d.ts").LocateFileFunction} File location resolver function
  */
 export function createLocateFile(importMetaUrl) {
     /**
@@ -33,7 +33,7 @@ export function createLocateFile(importMetaUrl) {
 /**
  * Creates the locateFile wrapper function for use in Module configuration.
  *
- * @param {Object} Module - The Emscripten module object
+ * @param {import("../shared/runtime-types.d.ts").RuntimeModule} Module - The Emscripten module object
  * @param {string} importMetaUrl - The import.meta.url value
  */
 export function setupModuleLocateFile(Module, importMetaUrl) {
@@ -62,9 +62,9 @@ export function setupModuleLocateFile(Module, importMetaUrl) {
 /**
  * Creates a locateFile function that uses Module's locateFile if available.
  *
- * @param {Object} Module - The Emscripten module object
+ * @param {import("../shared/runtime-types.d.ts").RuntimeModule} Module - The Emscripten module object
  * @param {string} scriptDirectory - The base script directory
- * @returns {(path: string) => string} File location function
+ * @returns {import("../shared/runtime-types.d.ts").LocateFileFunction} File location function
  */
 export function createModuleLocateFile(Module, scriptDirectory) {
     /**
@@ -87,11 +87,8 @@ export function createModuleLocateFile(Module, scriptDirectory) {
 /**
  * Configures console output functions for the module.
  *
- * @param {Object} Module - The Emscripten module object
- * @returns {{
- *   out: (...args: any[]) => void,
- *   err: (...args: any[]) => void
- * }} Output and error logging functions
+ * @param {import("../shared/runtime-types.d.ts").RuntimeModule} Module - The Emscripten module object
+ * @returns {import("../shared/runtime-types.d.ts").ConsoleOutputHandlers} Output and error logging functions
  */
 export function setupConsoleOutput(Module) {
     // 1. Set up standard output function
@@ -107,10 +104,10 @@ export function setupConsoleOutput(Module) {
 /**
  * Creates an abort function for handling fatal errors.
  *
- * @param {Object} Module - The Emscripten module object
- * @param {(...args: any[]) => void} err - Error logging function
- * @param {Function} readyPromiseReject - Promise rejection function
- * @returns {(what: any) => never} Abort function
+ * @param {import("../shared/runtime-types.d.ts").RuntimeModule} Module - The Emscripten module object
+ * @param {(...args: string[]) => void} err - Error logging function
+ * @param {(reason: Error) => void} readyPromiseReject - Promise rejection function
+ * @returns {import("../shared/runtime-types.d.ts").AbortFunction} Abort function
  */
 export function createAbortFunction(Module, err, readyPromiseReject) {
     /**
@@ -143,9 +140,9 @@ export function createAbortFunction(Module, err, readyPromiseReject) {
 /**
  * Initializes the module with configuration overrides.
  *
- * @param {Object} Module - The Emscripten module object
- * @param {Object} moduleArg - User-provided module configuration
- * @returns {Object} Module overrides that were applied
+ * @param {import("../shared/runtime-types.d.ts").RuntimeModule} Module - The Emscripten module object
+ * @param {Partial<import("../shared/runtime-types.d.ts").RuntimeModule>} moduleArg - User-provided module configuration
+ * @returns {import("../shared/runtime-types.d.ts").ModuleOverrides} Module overrides that were applied
  */
 export function initializeModule(Module, moduleArg) {
     // 1. Copy all properties from moduleArg to Module
@@ -161,8 +158,8 @@ export function initializeModule(Module, moduleArg) {
 /**
  * Applies saved module overrides.
  *
- * @param {import("../sqlite3.mjs").Module} Module - The Emscripten module object
- * @param {Object} moduleOverrides - Previously saved module overrides
+ * @param {import("../shared/runtime-types.d.ts").RuntimeModule} Module - The Emscripten module object
+ * @param {import("../shared/runtime-types.d.ts").ModuleOverrides} moduleOverrides - Previously saved module overrides
  */
 export function applyModuleOverrides(Module, moduleOverrides) {
     // 1. Apply all saved overrides
@@ -172,7 +169,7 @@ export function applyModuleOverrides(Module, moduleOverrides) {
 /**
  * Executes Module's preInit callbacks.
  *
- * @param {import("../sqlite3.mjs").Module} Module - The Emscripten module object
+ * @param {import("../shared/runtime-types.d.ts").RuntimeModule} Module - The Emscripten module object
  */
 export function runPreInitCallbacks(Module) {
     // 1. Check if preInit exists

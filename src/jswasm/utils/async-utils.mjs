@@ -6,10 +6,10 @@
 /**
  * Asynchronously load a resource from a URL
  * Handles dependency tracking and error handling
- * @param {Function} readAsync - Async read function that returns Promise<ArrayBuffer>
- * @param {Function} getUniqueRunDependency - Function to get unique dependency ID
- * @param {Function} addRunDependency - Function to add a run dependency
- * @param {Function} removeRunDependency - Function to remove a run dependency
+ * @param {import('./async-utils.d.ts').AsyncReadFunction} readAsync - Async read function that returns Promise<ArrayBuffer>
+ * @param {import('./async-utils.d.ts').DependencyIdFactory} getUniqueRunDependency - Function to get unique dependency ID
+ * @param {import('./async-utils.d.ts').DependencyTracker} addRunDependency - Function to add a run dependency
+ * @param {import('./async-utils.d.ts').DependencyTracker} removeRunDependency - Function to remove a run dependency
  * @param {string} url - URL to load from
  * @param {Function} onload - Callback function called with Uint8Array on success
  * @param {Function} onerror - Callback function called on error
@@ -21,7 +21,8 @@ export const createAsyncLoad = (
     addRunDependency,
     removeRunDependency
 ) => {
-    return (url, onload, onerror, noRunDep) => {
+    /** @type {import('./async-utils.d.ts').AsyncLoader} */
+    const asyncLoader = (url, onload, onerror, noRunDep) => {
         // 1. Input handling - get unique dependency ID if needed
         const dep = !noRunDep ? getUniqueRunDependency(`al ${url}`) : "";
 
@@ -49,4 +50,6 @@ export const createAsyncLoad = (
             addRunDependency(dep);
         }
     };
+
+    return asyncLoader;
 };

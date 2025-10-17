@@ -1,18 +1,23 @@
-export function createWasmLoader({
-    Module,
-    wasmBinary,
-    locateFile,
-    readAsync,
-    readBinary,
-    addRunDependency,
-    removeRunDependency,
-    readyPromiseReject,
-    addOnInit,
-    abort,
-    err,
-    getWasmImports,
-    setWasmExports,
-}) {
+/**
+ * @param {import('./wasm-loader.d.ts').WasmLoaderConfig} config
+ * @returns {import('./wasm-loader.d.ts').WasmLoader}
+ */
+export function createWasmLoader(config) {
+    const {
+        Module,
+        wasmBinary,
+        locateFile,
+        readAsync,
+        readBinary,
+        addRunDependency,
+        removeRunDependency,
+        readyPromiseReject,
+        addOnInit,
+        abort,
+        err,
+        getWasmImports,
+        setWasmExports,
+    } = config;
     const dataURIPrefix = "data:application/octet-stream;base64,";
 
     const isDataURI = (filename) => filename.startsWith(dataURIPrefix);
@@ -135,7 +140,10 @@ export function createWasmLoader({
         return {};
     }
 
-    return {
+    /** @type {import('./wasm-loader.d.ts').WasmLoader} */
+    const loader = {
         createWasm,
     };
+
+    return loader;
 }

@@ -7,7 +7,7 @@ import type {
   SQLite3Module,
   SQLite3VFSInstance,
   OpfsUtilInterface,
-} from "../../../types/opfs-vfs-installer";
+} from "../../../shared/opfs-vfs-installer";
 
 /**
  * Sets up optional VFS methods (xRandomness, xSleep) with fallbacks
