@@ -5,8 +5,10 @@
 /**
  * Builds the helper that opens database connections on demand.
  *
- * @param {object} context - Shared runtime context.
- * @returns {(this: any, ...args: any[]) => void} Function used internally by the DB constructor.
+ * @param {import("./context.d.ts").Oo1Context} context - Shared runtime
+ * context.
+ * @returns {import("./db-ctor-helper.d.ts").DbCtorHelper} Function used
+ * internally by the DB constructor.
  */
 export function createDbCtorHelper(context) {
     const { sqlite3, capi, wasm, ptrMap, stmtMap, vfsCallbacks, toss } =

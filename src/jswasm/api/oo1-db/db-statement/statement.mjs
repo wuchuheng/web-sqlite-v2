@@ -5,11 +5,14 @@
 /**
  * Creates the Statement class with all its methods.
  *
- * @param {object} context - Shared runtime context.
- * @param {object} validators - Validation helper functions.
- * @param {object} bindHelpers - Binding helper functions.
+ * @param {import("../context.d.ts").Oo1Context} context - Shared runtime
+ * context.
+ * @param {import("./validation.d.ts").ValidationHelpers} validators -
+ * Validation helper functions.
+ * @param {import("./binding.d.ts").BindingHelpers} bindHelpers - Binding
+ * helper functions.
  * @param {symbol} constructorToken - Guard to prevent external construction.
- * @returns {typeof Statement} Statement class.
+ * @returns {import("./statement.d.ts").StatementClass} Statement class.
  */
 export function createStatementClass(
     context,

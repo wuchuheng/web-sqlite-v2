@@ -13,9 +13,12 @@
 /**
  * Creates a database cleanup manager.
  *
- * @param {Object} wasm - The WASM utilities object
- * @param {Object} capi - The C API object
- * @returns {Object} Database cleanup utilities
+ * @param {import("../../sqlite3.d.ts").SQLite3API["wasm"]} wasm - The WASM
+ * utilities object
+ * @param {import("../../sqlite3.d.ts").SQLite3API["capi"]} capi - The C API
+ * object
+ * @returns {import("./db-cleanup.d.ts").DbCleanupMap} Database cleanup
+ * utilities
  */
 export function createDbCleanup(wasm, capi) {
     /**
