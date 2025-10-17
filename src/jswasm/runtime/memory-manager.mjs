@@ -11,17 +11,8 @@ import { alignMemory } from "../utils/memory-utils.mjs";
  * Creates a memory manager for WebAssembly heap operations.
  *
  * @param {WebAssembly.Memory} wasmMemory - The WebAssembly memory instance
- * @param {Object} Module - The Emscripten module object
- * @returns {{
- *   updateMemoryViews: () => void,
- *   createResizeHeapFunction: () => (requestedSize: number) => boolean,
- *   HEAP8: Int8Array,
- *   HEAPU8: Uint8Array,
- *   HEAP16: Int16Array,
- *   HEAP32: Int32Array,
- *   HEAPU32: Uint32Array,
- *   HEAP64: BigInt64Array
- * }} Memory management functions and heap views
+ * @param {import("../shared/runtime-types.d.ts").RuntimeModule} Module - The Emscripten module object
+ * @returns {import("../shared/runtime-types.d.ts").MemoryManager} Memory management functions and heap views
  */
 export function createMemoryManager(wasmMemory, Module) {
     let HEAP8, HEAPU8, HEAP16, HEAP32, HEAPU32, HEAP64;
@@ -158,7 +149,7 @@ export function createMemoryManager(wasmMemory, Module) {
 /**
  * Initializes WebAssembly memory with the specified initial size.
  *
- * @param {Object} Module - The Emscripten module object
+ * @param {import("../shared/runtime-types.d.ts").RuntimeModule} Module - The Emscripten module object
  * @param {number} [initialMemory=16777216] - Initial memory size in bytes (default 16MB)
  * @returns {WebAssembly.Memory} The initialized WebAssembly memory instance
  */

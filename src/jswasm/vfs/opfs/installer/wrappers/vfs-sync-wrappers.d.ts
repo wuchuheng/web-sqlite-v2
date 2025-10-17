@@ -6,7 +6,7 @@
 import type {
   VfsSyncWrappers,
   VfsSyncWrapperDeps,
-} from "../../../types/opfs-vfs-installer";
+} from "../../../shared/opfs-vfs-installer";
 
 /**
  * Creates VFS synchronization wrappers for SQLite virtual file system operations

@@ -6,6 +6,7 @@
 /**
  * Core path manipulation utilities.
  */
+/** @type {import('./path.d.ts').PathUtilities} */
 export const PATH = {
     /**
      * Check if a path is absolute.
@@ -159,7 +160,8 @@ export const PATH = {
 /**
  * File system path utilities.
  * Extends PATH with FS-specific functionality.
- * @param {Object} FS - File system object (optional, for resolve with cwd support).
+ * @param {import('./path.d.ts').FileSystemLike|null} FS - File system object (optional, for resolve with cwd support).
+ * @returns {import('./path.d.ts').PathFsUtilities}
  */
 export const createPathFS = (FS = null) => ({
     /**
@@ -258,4 +260,5 @@ export const createPathFS = (FS = null) => ({
 /**
  * Default PATH_FS instance without FS dependency.
  */
+/** @type {import('./path.d.ts').PathFsUtilities} */
 export const PATH_FS = createPathFS();

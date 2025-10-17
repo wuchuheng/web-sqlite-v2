@@ -13,18 +13,18 @@ import { SPECIAL_FLAGS, INT53_MAX, INT53_MIN } from './errno-constants.mjs';
 /**
  * Creates the SYSCALLS helper object and related utility functions
  *
- * @param {Object} FS - File system implementation
- * @param {Object} PATH - Path manipulation utilities
+ * @param {import("../shared/system-types.d.ts").SyscallFS} FS - File system implementation
+ * @param {import("../shared/system-types.d.ts").PathUtilities} PATH - Path manipulation utilities
  * @param {Uint8Array} HEAPU8 - Unsigned 8-bit heap view
  * @param {Int8Array} HEAP8 - Signed 8-bit heap view
  * @param {Int16Array} HEAP16 - Signed 16-bit heap view
  * @param {Int32Array} HEAP32 - Signed 32-bit heap view
  * @param {Uint32Array} HEAPU32 - Unsigned 32-bit heap view
  * @param {BigInt64Array} HEAP64 - Signed 64-bit heap view
- * @param {Function} UTF8ArrayToString - Convert UTF-8 byte array to string
- * @param {Function} lengthBytesUTF8 - Calculate UTF-8 byte length of string
- * @param {Function} stringToUTF8Array - Convert string to UTF-8 byte array
- * @returns {Object} Object containing SYSCALLS utilities and helper functions
+ * @param {(heap: Uint8Array, ptr: number, maxBytesToRead?: number) => string} UTF8ArrayToString - Convert UTF-8 byte array to string
+ * @param {(value: string) => number} lengthBytesUTF8 - Calculate UTF-8 byte length of string
+ * @param {(value: string, heap: Uint8Array, outPtr: number, maxBytesToWrite: number) => number} stringToUTF8Array - Convert string to UTF-8 byte array
+ * @returns {import("../shared/system-types.d.ts").SyscallHelpers} Object containing SYSCALLS utilities and helper functions
  */
 export function createSyscallHelpers(
     FS,
@@ -160,7 +160,7 @@ export function createSyscallHelpers(
          * Executes a stat function and writes results to a buffer
          * Converts file stat information into the POSIX stat structure format
          *
-         * @param {Function} func - Stat function (FS.stat, FS.lstat, etc.)
+         * @param {(path: string) => ReturnType<import("../shared/system-types.d.ts").SyscallFS["stat"]>} func - Stat function (FS.stat, FS.lstat, etc.)
          * @param {string} path - File path to stat
          * @param {number} buf - Pointer to stat buffer in WASM memory
          * @returns {number} 0 on success
@@ -215,7 +215,7 @@ export function createSyscallHelpers(
          * Syncs a memory-mapped region back to the underlying file
          *
          * @param {number} addr - Starting address in WASM memory
-         * @param {Object} stream - File stream object
+     * @param {import("../vfs/filesystem/types.d.ts").FSStream} stream - File stream object
          * @param {number} len - Length of region to sync
          * @param {number} flags - Sync flags (MS_ASYNC, MS_SYNC, etc.)
          * @param {number} offset - Offset in the file
@@ -245,7 +245,7 @@ export function createSyscallHelpers(
          * Validates the file descriptor and returns the associated stream
          *
          * @param {number} fd - File descriptor
-         * @returns {Object} File stream object
+         * @returns {ReturnType<import("../shared/system-types.d.ts").SyscallFS["getStreamChecked"]>} File stream object
          * @throws {FS.ErrnoError} If file descriptor is invalid
          */
         getStreamFromFD(fd) {

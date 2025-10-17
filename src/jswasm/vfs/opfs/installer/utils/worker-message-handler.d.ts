@@ -7,7 +7,7 @@ import type {
   OpfsState,
   OpfsUtilInterface,
   OpfsConfig,
-} from "../../../../../../types/opfs-vfs-installer";
+} from "../../../../../shared/opfs-vfs-installer";
 
 /**
  * Dependencies required for creating worker message handler.

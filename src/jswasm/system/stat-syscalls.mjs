@@ -14,9 +14,9 @@ import { SPECIAL_FLAGS } from './errno-constants.mjs';
 /**
  * Creates stat-related syscall implementations
  *
- * @param {Object} FS - File system implementation
- * @param {Object} SYSCALLS - Syscall helper utilities
- * @returns {Object} Object containing stat syscall functions
+ * @param {import("../shared/system-types.d.ts").SyscallFS} FS - File system implementation
+ * @param {import("../shared/system-types.d.ts").SyscallHelpers["SYSCALLS"]} SYSCALLS - Syscall helper utilities
+ * @returns {import("../shared/system-types.d.ts").StatSyscalls} Object containing stat syscall functions
  */
 export function createStatSyscalls(FS, SYSCALLS) {
     /**

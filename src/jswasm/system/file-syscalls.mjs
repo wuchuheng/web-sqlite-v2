@@ -19,19 +19,19 @@ import { ERRNO, FCNTL_CMD, ACCESS_MODE, SPECIAL_FLAGS, UTIME_VALUES } from './er
 /**
  * Creates file operation syscall implementations
  *
- * @param {Object} FS - File system implementation
- * @param {Object} PATH - Path manipulation utilities
- * @param {Object} SYSCALLS - Syscall helper utilities
- * @param {Function} syscallGetVarargI - Get next integer from varargs
- * @param {Function} syscallGetVarargP - Get next pointer from varargs
- * @param {Function} bigintToI53Checked - Convert BigInt to safe integer
- * @param {Function} readI53FromI64 - Read 53-bit integer from 64-bit pointer
- * @param {Function} stringToUTF8 - Convert string to UTF-8 bytes
- * @param {Function} lengthBytesUTF8 - Get UTF-8 byte length
+ * @param {import("../shared/system-types.d.ts").SyscallFS} FS - File system implementation
+ * @param {import("../shared/system-types.d.ts").PathUtilities} PATH - Path manipulation utilities
+ * @param {import("../shared/system-types.d.ts").SyscallHelpers["SYSCALLS"]} SYSCALLS - Syscall helper utilities
+ * @param {() => number} syscallGetVarargI - Get next integer from varargs
+ * @param {() => number} syscallGetVarargP - Get next pointer from varargs
+ * @param {(value: bigint) => number} bigintToI53Checked - Convert BigInt to safe integer
+ * @param {(ptr: number) => number} readI53FromI64 - Read 53-bit integer from 64-bit pointer
+ * @param {(value: string, outPtr: number, maxBytesToWrite: number) => number} stringToUTF8 - Convert string to UTF-8 bytes
+ * @param {(value: string) => number} lengthBytesUTF8 - Get UTF-8 byte length
  * @param {Int8Array} HEAP8 - Signed 8-bit heap view
  * @param {Int16Array} HEAP16 - Signed 16-bit heap view
  * @param {Int32Array} HEAP32 - Signed 32-bit heap view
- * @returns {Object} Object containing file syscall functions
+ * @returns {import("../shared/system-types.d.ts").FileSyscalls} Object containing file syscall functions
  */
 export function createFileSyscalls(
     FS,

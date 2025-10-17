@@ -10,7 +10,18 @@
  */
 
 /**
- * Creates and exports all WASI-related system functions
+ * Creates and exports all WASI-related system functions.
+ *
+ * @param {import("../shared/system-types.d.ts").SyscallFS} FS - Filesystem facade
+ * @param {import("../shared/system-types.d.ts").SyscallHelpers["SYSCALLS"]} SYSCALLS - Syscall helper utilities
+ * @param {Int8Array} HEAP8 - Signed 8-bit heap view
+ * @param {Int16Array} HEAP16 - Signed 16-bit heap view
+ * @param {Int32Array} HEAP32 - Signed 32-bit heap view
+ * @param {Uint8Array} HEAPU8 - Unsigned 8-bit heap view
+ * @param {Uint32Array} HEAPU32 - Unsigned 32-bit heap view
+ * @param {BigInt64Array} HEAP64 - Signed 64-bit heap view
+ * @param {(value: string, heap: Uint8Array, outPtr: number, maxBytesToWrite: number) => number} stringToUTF8Array - UTF-8 encoding helper
+ * @returns {import("../shared/system-types.d.ts").WASIFunctionTable}
  */
 export function createWASIFunctions(
     FS,

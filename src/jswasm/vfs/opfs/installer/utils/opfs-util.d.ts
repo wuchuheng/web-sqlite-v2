@@ -1,4 +1,4 @@
-import type { OpfsUtilInterface } from "../../../../../../types/opfs-vfs-installer";
+import type { OpfsUtilInterface } from "../../../../../shared/opfs-vfs-installer";
 
 /**
  * Dependencies required for creating OPFS utility functions.

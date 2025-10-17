@@ -8,7 +8,7 @@ import type {
   OpfsMetrics,
   OperationRunner,
   OperationTimer,
-} from "../../../types/opfs-vfs-installer";
+} from "../../../shared/opfs-vfs-installer";
 
 /**
  * Creates operation runner for executing atomic operations via worker

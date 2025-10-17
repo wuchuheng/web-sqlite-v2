@@ -1,7 +1,7 @@
 /**
  * Creates utility functions for OPFS filesystem operations.
  * @param {import('./opfs-util.d.ts').OpfsUtilDeps} deps - Dependencies object
- * @returns {import('../../../../../../types/opfs-vfs-installer').OpfsUtilInterface} OPFS utility interface
+ * @returns {import('../../../../../shared/opfs-vfs-installer').OpfsUtilInterface} OPFS utility interface
  */
 export function createOpfsUtil(deps) {
     const { state, util, sqlite3 } = deps;

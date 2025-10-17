@@ -8,11 +8,7 @@
 /**
  * Detects the current JavaScript execution environment.
  *
- * @returns {{
- *   ENVIRONMENT_IS_WEB: boolean,
- *   ENVIRONMENT_IS_WORKER: boolean,
- *   scriptDirectory: string
- * }} Environment detection results
+ * @returns {import("./environment-detector.d.ts").EnvironmentInfo} Environment detection results
  */
 export function detectEnvironment() {
     // 1. Detect environment type
@@ -55,10 +51,7 @@ export function detectEnvironment() {
  * Creates functions for reading files asynchronously and synchronously in the browser.
  *
  * @param {boolean} ENVIRONMENT_IS_WORKER - Whether running in a web worker
- * @returns {{
- *   readAsync: (url: string) => Promise<ArrayBuffer>,
- *   readBinary?: (url: string) => Uint8Array
- * }} File reading functions
+ * @returns {import("./environment-detector.d.ts").FileReaders} File reading functions
  */
 export function createFileReaders(ENVIRONMENT_IS_WORKER) {
     const readers = {};

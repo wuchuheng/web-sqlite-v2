@@ -1,7 +1,7 @@
 /**
  * Creates VFS method wrappers for OPFS filesystem operations.
  * @param {import('./vfs-sync-wrappers.d.ts').VfsSyncWrapperDeps} deps - Dependencies object
- * @returns {import('../../../../../../types/opfs-vfs-installer').VfsSyncWrappers} VFS method wrappers
+ * @returns {import('../../../../../shared/opfs-vfs-installer').VfsSyncWrappers} VFS method wrappers
  */
 export function createVfsSyncWrappers(deps) {
     const {

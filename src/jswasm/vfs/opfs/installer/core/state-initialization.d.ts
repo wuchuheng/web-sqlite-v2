@@ -8,7 +8,7 @@ import type {
   OpfsMetrics,
   SQLite3VFSInstance,
   SQLite3CAPI,
-} from "../../../types/opfs-vfs-installer";
+} from "../../../shared/opfs-vfs-installer";
 
 /**
  * Initializes OPFS state object with shared buffers and operation IDs

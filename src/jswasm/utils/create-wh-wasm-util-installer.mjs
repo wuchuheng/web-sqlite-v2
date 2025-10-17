@@ -26,7 +26,7 @@ import { createYawlLoader } from "./whwasm/yawl-loader.mjs";
 /**
  * Creates the installer used by the SQLite WASM bridge.
  *
- * @returns {(target: object) => object} Function that mutates the provided target
+ * @returns {import("./whwasm/types.d.ts").WhWasmInstaller & { yawl: import("./whwasm/types.d.ts").YawlLoaderFactory }} Function that mutates the provided target
  *   with the expected helpers and returns the augmented target.
  */
 export function createWhWasmUtilInstaller() {

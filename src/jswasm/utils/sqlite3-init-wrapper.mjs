@@ -1,3 +1,10 @@
+/**
+ * Wraps the Emscripten-generated sqlite3InitModule function to enrich the
+ * module with testing hooks and shared state.
+ *
+ * @param {import("../sqlite3.d.ts").SQLite3InitModule} originalInit - Original initializer
+ * @returns {import("../sqlite3.d.ts").SQLite3InitModule & { __isUnderTest?: boolean }}
+ */
 export function wrapSqlite3InitModule(originalInit) {
     if (!originalInit) {
         throw new Error(

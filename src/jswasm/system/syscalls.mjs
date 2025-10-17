@@ -35,18 +35,18 @@ import { createIoctlSyscalls } from './ioctl-syscalls.mjs';
  * - Return negative errno value on error
  * - Throw exceptions for unexpected errors
  *
- * @param {Object} FS - File system implementation with POSIX-like operations
- * @param {Object} PATH - Path manipulation utilities (join, normalize, etc.)
+ * @param {import("../shared/system-types.d.ts").SyscallFS} FS - File system implementation with POSIX-like operations
+ * @param {import("../shared/system-types.d.ts").PathUtilities} PATH - Path manipulation utilities (join, normalize, etc.)
  * @param {Uint8Array} HEAPU8 - Unsigned 8-bit WebAssembly heap view
  * @param {Int8Array} HEAP8 - Signed 8-bit WebAssembly heap view
  * @param {Int16Array} HEAP16 - Signed 16-bit WebAssembly heap view
  * @param {Int32Array} HEAP32 - Signed 32-bit WebAssembly heap view
  * @param {Uint32Array} HEAPU32 - Unsigned 32-bit WebAssembly heap view
  * @param {BigInt64Array} HEAP64 - Signed 64-bit WebAssembly heap view
- * @param {Function} UTF8ArrayToString - Convert UTF-8 byte array to JS string
- * @param {Function} lengthBytesUTF8 - Calculate UTF-8 byte length of string
- * @param {Function} stringToUTF8Array - Convert JS string to UTF-8 byte array
- * @returns {Object} Object containing SYSCALLS utilities and all syscall functions
+ * @param {(heap: Uint8Array, ptr: number, maxBytesToRead?: number) => string} UTF8ArrayToString - Convert UTF-8 byte array to JS string
+ * @param {(value: string) => number} lengthBytesUTF8 - Calculate UTF-8 byte length of string
+ * @param {(value: string, heap: Uint8Array, outPtr: number, maxBytesToWrite: number) => number} stringToUTF8Array - Convert JS string to UTF-8 byte array
+ * @returns {import("../shared/system-types.d.ts").UnifiedSyscalls} Object containing SYSCALLS utilities and all syscall functions
  *
  * @example
  * const syscalls = createSYSCALLS(FS, PATH, HEAPU8, HEAP8, HEAP16, HEAP32, HEAPU32, HEAP64,

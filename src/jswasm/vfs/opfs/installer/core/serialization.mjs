@@ -1,6 +1,6 @@
 /**
  * Creates a serialization/deserialization utility for SharedArrayBuffer communication.
- * @param {import('../../../../../../types/opfs-vfs-installer').OpfsState} state - OPFS state object
+ * @param {import('../../../../../../shared/opfs-vfs-installer').OpfsState} state - OPFS state object
  * @param {import('./serialization.d.ts').SerializerDeps['toss']} toss - Error throwing utility
  * @returns {import('./serialization.d.ts').SerializerInterface} Serialization interface with serialize and deserialize methods
  */

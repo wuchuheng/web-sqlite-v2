@@ -6,7 +6,7 @@
 import type {
   OpfsState,
   SerializerInterface,
-} from "../../../types/opfs-vfs-installer";
+} from "../../../shared/opfs-vfs-installer";
 
 /**
  * Creates serializer for SharedArrayBuffer communication between threads

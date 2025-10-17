@@ -1,7 +1,7 @@
 import type {
   SQLite3Module,
   OpfsConfig,
-} from "../../../../../types/opfs-vfs-installer";
+} from "../../../shared/opfs-vfs-installer";
 
 /**
  * OPFS VFS installer function that sets up the Origin Private File System
@@ -114,4 +114,4 @@ export type {
   IoSyncWrappers,
   VfsSyncWrappers,
   OpfsUtilInterface,
-} from "../../../../../types/opfs-vfs-installer";
+} from "../../../shared/opfs-vfs-installer";

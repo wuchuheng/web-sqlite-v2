@@ -69,9 +69,10 @@ const FS_stdin_getChar = () => {
 /**
  * TTY operations and device management.
  * Provides terminal input/output functionality for the virtual file system.
- * @param {Function} out - Output function for normal output
- * @param {Function} err - Output function for error output
- * @param {Object} FS - File system instance
+ * @param {(message: string) => void} out - Output function for normal output
+ * @param {(message: string) => void} err - Output function for error output
+ * @param {import("../shared/runtime-types.d.ts").RuntimeFS} FS - File system instance
+ * @returns {import("../shared/runtime-types.d.ts").RuntimeTTY}
  */
 export function createTTY(out, err, FS) {
     const TTY = {
@@ -87,7 +88,7 @@ export function createTTY(out, err, FS) {
         /**
          * Register a TTY device.
          * @param {number} dev - Device number
-         * @param {Object} ops - Device operations
+         * @param {import("../shared/runtime-types.d.ts").TTYDeviceOperations} ops - Device operations
          */
         register(dev, ops) {
             // 1. Input handling
@@ -101,7 +102,7 @@ export function createTTY(out, err, FS) {
         stream_ops: {
             /**
              * Open a TTY stream.
-             * @param {Object} stream - Stream to open
+             * @param {import("../vfs/filesystem/types.d.ts").FSStream & { tty?: import("../shared/runtime-types.d.ts").TTYDevice }} stream - Stream to open
              */
             open(stream) {
                 // 1. Input handling
@@ -117,7 +118,7 @@ export function createTTY(out, err, FS) {
 
             /**
              * Close a TTY stream.
-             * @param {Object} stream - Stream to close
+             * @param {import("../vfs/filesystem/types.d.ts").FSStream & { tty?: import("../shared/runtime-types.d.ts").TTYDevice }} stream - Stream to close
              */
             close(stream) {
                 stream.tty.ops.fsync(stream.tty);
@@ -125,7 +126,7 @@ export function createTTY(out, err, FS) {
 
             /**
              * Sync a TTY stream.
-             * @param {Object} stream - Stream to sync
+             * @param {import("../vfs/filesystem/types.d.ts").FSStream & { tty?: import("../shared/runtime-types.d.ts").TTYDevice }} stream - Stream to sync
              */
             fsync(stream) {
                 stream.tty.ops.fsync(stream.tty);
@@ -133,7 +134,7 @@ export function createTTY(out, err, FS) {
 
             /**
              * Read from a TTY stream.
-             * @param {Object} stream - Stream to read from
+             * @param {import("../vfs/filesystem/types.d.ts").FSStream & { tty?: import("../shared/runtime-types.d.ts").TTYDevice }} stream - Stream to read from
              * @param {Uint8Array} buffer - Buffer to read into
              * @param {number} offset - Buffer offset
              * @param {number} length - Bytes to read
@@ -172,7 +173,7 @@ export function createTTY(out, err, FS) {
 
             /**
              * Write to a TTY stream.
-             * @param {Object} stream - Stream to write to
+             * @param {import("../vfs/filesystem/types.d.ts").FSStream & { tty?: import("../shared/runtime-types.d.ts").TTYDevice }} stream - Stream to write to
              * @param {Uint8Array} buffer - Buffer to write from
              * @param {number} offset - Buffer offset
              * @param {number} length - Bytes to write
@@ -214,7 +215,7 @@ export function createTTY(out, err, FS) {
         default_tty_ops: {
             /**
              * Get a character from TTY.
-             * @param {Object} _tty - TTY device (unused)
+             * @param {import("../shared/runtime-types.d.ts").TTYDevice} _tty - TTY device (unused)
              * @returns {number|null} Character code
              */
             get_char(_tty) {
@@ -223,7 +224,7 @@ export function createTTY(out, err, FS) {
 
             /**
              * Put a character to TTY.
-             * @param {Object} tty - TTY device
+             * @param {import("../shared/runtime-types.d.ts").TTYDevice} tty - TTY device
              * @param {number} val - Character code
              */
             put_char(tty, val) {
@@ -239,7 +240,7 @@ export function createTTY(out, err, FS) {
 
             /**
              * Sync TTY output.
-             * @param {Object} tty - TTY device
+             * @param {import("../shared/runtime-types.d.ts").TTYDevice} tty - TTY device
              */
             fsync(tty) {
                 // 1. Input handling
@@ -252,8 +253,8 @@ export function createTTY(out, err, FS) {
 
             /**
              * Get terminal settings (tcgets ioctl).
-             * @param {Object} _tty - TTY device (unused)
-             * @returns {Object} Terminal settings
+             * @param {import("../shared/runtime-types.d.ts").TTYDevice} _tty - TTY device (unused)
+             * @returns {{ c_iflag: number; c_oflag: number; c_cflag: number; c_lflag: number; c_cc: number[] }} Terminal settings
              */
             ioctl_tcgets(_tty) {
                 return {
@@ -272,9 +273,9 @@ export function createTTY(out, err, FS) {
 
             /**
              * Set terminal settings (tcsets ioctl).
-             * @param {Object} _tty - TTY device (unused)
+             * @param {import("../shared/runtime-types.d.ts").TTYDevice} _tty - TTY device (unused)
              * @param {number} _optional_actions - Actions (unused)
-             * @param {Object} _data - Settings data (unused)
+             * @param {{ c_iflag: number; c_oflag: number; c_cflag: number; c_lflag: number; c_cc: number[] }} _data - Settings data (unused)
              * @returns {number} Success code
              */
             ioctl_tcsets(_tty, _optional_actions, _data) {
@@ -283,8 +284,8 @@ export function createTTY(out, err, FS) {
 
             /**
              * Get terminal window size.
-             * @param {Object} _tty - TTY device (unused)
-             * @returns {number[]} Window size [rows, cols]
+             * @param {import("../shared/runtime-types.d.ts").TTYDevice} _tty - TTY device (unused)
+            * @returns {number[]} Window size [rows, cols]
              */
             ioctl_tiocgwinsz(_tty) {
                 return [
@@ -298,7 +299,7 @@ export function createTTY(out, err, FS) {
         default_tty1_ops: {
             /**
              * Put a character to error TTY.
-             * @param {Object} tty - TTY device
+             * @param {import("../shared/runtime-types.d.ts").TTYDevice} tty - TTY device
              * @param {number} val - Character code
              */
             put_char(tty, val) {
@@ -314,7 +315,7 @@ export function createTTY(out, err, FS) {
 
             /**
              * Sync error TTY output.
-             * @param {Object} tty - TTY device
+             * @param {import("../shared/runtime-types.d.ts").TTYDevice} tty - TTY device
              */
             fsync(tty) {
                 // 1. Input handling

@@ -1,7 +1,7 @@
 /**
  * Creates I/O method wrappers for OPFS file operations.
  * @param {import('./io-sync-wrappers.d.ts').IoSyncWrapperDeps} deps - Dependencies object
- * @returns {import('../../../../../../types/opfs-vfs-installer').IoSyncWrappers} I/O method wrappers
+ * @returns {import('../../../../../shared/opfs-vfs-installer').IoSyncWrappers} I/O method wrappers
  */
 export function createIoSyncWrappers(deps) {
     const {
