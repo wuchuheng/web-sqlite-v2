@@ -14,10 +14,14 @@
 /**
  * Creates SQL preparation and binding utilities.
  *
- * @param {Object} wasm - The WASM utilities object
- * @param {Object} capi - The C API object
- * @param {Object} util - Utility functions
- * @returns {Object} Object containing preparation and binding functions
+ * @param {import("../../sqlite3.d.ts").SQLite3API["wasm"]} wasm - The WASM
+ * utilities object
+ * @param {import("../../sqlite3.d.ts").SQLite3API["capi"]} capi - The C API
+ * object
+ * @param {import("../../sqlite3.d.ts").SQLite3API["util"]} util - Utility
+ * functions
+ * @returns {import("./sql-preparation.d.ts").SqlPreparationHelpers} Object
+ * containing preparation and binding functions
  */
 export function createSqlPreparation(wasm, capi, util) {
     /**

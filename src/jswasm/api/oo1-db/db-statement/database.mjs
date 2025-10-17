@@ -5,13 +5,18 @@
 /**
  * Creates the Database class with all its methods.
  *
- * @param {object} context - Shared runtime context.
- * @param {Function} dbCtorHelper - Constructor helper to open DBs.
- * @param {object} validators - Validation helper functions.
- * @param {object} execHelpers - Execution helper functions.
- * @param {typeof Statement} Statement - Statement class.
+ * @param {import("../context.d.ts").Oo1Context} context - Shared runtime
+ * context.
+ * @param {import("../db-ctor-helper.d.ts").DbCtorHelper} dbCtorHelper -
+ * Constructor helper to open DBs.
+ * @param {import("./validation.d.ts").ValidationHelpers} validators -
+ * Validation helper functions.
+ * @param {import("./execution.d.ts").ExecHelpers} execHelpers - Execution
+ * helper functions.
+ * @param {import("./statement.d.ts").StatementClass} Statement - Statement
+ * class.
  * @param {symbol} statementToken - Guard for Statement construction.
- * @returns {typeof Database} Database class.
+ * @returns {import("./database.d.ts").DatabaseClass} Database class.
  */
 export function createDatabaseClass(
     context,

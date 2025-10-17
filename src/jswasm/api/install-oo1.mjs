@@ -24,7 +24,8 @@ import { createSqlPreparation } from "./utils/sql-preparation.mjs";
 /**
  * Creates the OO1 initializer function.
  *
- * @returns {Function} The initializer function that installs the OO1 API
+ * @returns {import("./install-oo1.d.ts").InstallOo1Initializer} The
+ * initializer function that installs the OO1 API
  */
 export function createInstallOo1Initializer() {
     const installWhWasmUtils = createWhWasmUtilInstaller();

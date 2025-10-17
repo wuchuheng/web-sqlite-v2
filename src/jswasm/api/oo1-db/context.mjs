@@ -5,8 +5,10 @@
 /**
  * Creates the shared context passed around the refactored helpers.
  *
- * @param {object} sqlite3 - The runtime API object.
- * @returns {object} Context with frequently accessed helpers.
+ * @param {import("../../sqlite3.d.ts").SQLite3API} sqlite3 - The runtime API
+ * object.
+ * @returns {import("./context.d.ts").Oo1Context} Context with frequently
+ * accessed helpers.
  */
 export function createOo1Context(sqlite3) {
     const { capi, wasm, util } = sqlite3;

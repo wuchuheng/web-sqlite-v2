@@ -5,9 +5,12 @@
 /**
  * Creates binding helper functions for statement parameter binding.
  *
- * @param {object} context - Shared runtime context.
- * @param {object} validators - Validation helper functions.
- * @returns {object} Binding helper functions.
+ * @param {import("../context.d.ts").Oo1Context} context - Shared runtime
+ * context.
+ * @param {import("./validation.d.ts").ValidationHelpers} validators -
+ * Validation helper functions.
+ * @returns {import("./binding.d.ts").BindingHelpers} Binding helper
+ * functions.
  */
 export function createBindingHelpers(context, validators) {
     const { sqlite3, capi, wasm, util, toss } = context;
