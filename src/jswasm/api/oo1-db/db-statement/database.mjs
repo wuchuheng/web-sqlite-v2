@@ -28,6 +28,8 @@ export function createDatabaseClass(
 
     /**
      * High-level database wrapper used by sqlite3.oo1.DB.
+     *
+     * @implements {import("../../../sqlite3.d.ts").DB}
      */
     class Database {
         /**
@@ -204,25 +206,31 @@ export function createDatabaseClass(
         /**
          * Executes SQL with optional callbacks, mirroring the original API.
          *
-         * @param {...import("./execution.d.ts").ExecInvocationArgument} execArgs
-         *        Flexible exec() argument set.
-         * @returns {unknown} Configured return value.
+         * @param {string|import("../../../sqlite3.d.ts").ExecOptions} sql - SQL text or options bag.
+         * @param {import("../../../sqlite3.d.ts").ExecOptions} [options] - Execution options.
+         * @returns {import("../../../sqlite3.d.ts").DB | import("../../../sqlite3.d.ts").ExecResult}
+         *     Configured return value.
          */
-        exec(...execArgs) {
+        exec(sql, options) {
             // 1. Input handling
             ensureDbOpen(this);
+            const execArgs =
+                arguments.length === 1 &&
+                sql &&
+                typeof sql === "object" &&
+                !Array.isArray(sql)
+                    ? [sql]
+                    : options === undefined
+                    ? [sql]
+                    : [sql, options];
             const plan = parseExecPlan(this, execArgs);
             if (!plan.sql) {
                 toss("exec() requires an SQL string.");
             }
             const opt = plan.opt;
             const callback = opt.callback;
-            const resultRows = Array.isArray(opt.resultRows)
-                ? opt.resultRows
-                : undefined;
-            const saveSql = Array.isArray(opt.saveSql)
-                ? opt.saveSql
-                : undefined;
+            const resultRows = plan.resultRows;
+            const saveSql = plan.saveSql;
             let statement = null;
             let bindSpec = opt.bind;
             let needFirstEval = Boolean(
@@ -310,7 +318,7 @@ export function createDatabaseClass(
                                 if (resultRows) resultRows.push(row);
                                 if (
                                     callback &&
-                                    callback.call(opt, row, statement) === false
+                                    callback.call(opt, row, statement)
                                 ) {
                                     break;
                                 }
@@ -326,6 +334,9 @@ export function createDatabaseClass(
 
                     statement.reset().finalize();
                     statement = null;
+                    if (plan.multi === false) {
+                        break;
+                    }
                 }
             } finally {
                 wasm.scopedAllocPop(stack);

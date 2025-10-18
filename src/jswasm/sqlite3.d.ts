@@ -1,4 +1,6 @@
 declare module '@wuchuheng/web-sqlite' {
+  /** Low-level sqlite3 database handle pointer. */
+  export type sqlite3 = number
   /**
    * SQLite3 Module Configuration
    */
@@ -303,21 +305,33 @@ declare module '@wuchuheng/web-sqlite' {
    * Exec options for DB.exec()
    */
   export interface ExecOptions {
-    /** SQL to execute */
-    sql?: string
-    /** Parameters to bind */
+    /** Bind values (array or named parameters) */
     bind?: BindValue[] | Record<string, BindValue>
-    /** Row mode: "array", "object", "stmt", column number, or "$columnName" */
+    /** Callback for each result row. Return truthy to stop iteration. */
+    callback?: (row: unknown, stmt: Stmt) => unknown
+    /** Row materialisation strategy */
     rowMode?: "array" | "object" | "stmt" | number | string
-    /** Result rows array (output) */
-    resultRows?: unknown[]
-    /** Column names array (output) */
+    /** Column name cache for object row mode */
     columnNames?: string[]
-    /** Callback function for each row */
-    callback?: (row: unknown, stmt: Stmt) => boolean | void
-    /** Return value: "this", "resultRows", or "saveSql" */
-    returnValue?: "this" | "resultRows" | "saveSql"
-    /** Save executed SQL statements */
+    /** Return all rows instead of the database reference */
+    returnValue?: "resultRows"
+    /** Multi-statement mode (set false to stop after first statement) */
+    multi?: boolean
+    /** @internal SQL payload (legacy object form) */
+    sql?: string
+    /** @internal Result rows accumulator */
+    resultRows?: unknown[]
+    /** @internal Captured SQL text for debugging */
+    saveSql?: string[]
+  }
+
+  /**
+   * Result returned by DB.exec() when configured to provide result rows.
+   */
+  export interface ExecResult {
+    /** Array of collected result rows. */
+    resultRows?: unknown[]
+    /** Internal helper for debugging to preserve executed SQL text. */
     saveSql?: string[]
   }
 
@@ -358,7 +372,7 @@ declare module '@wuchuheng/web-sqlite' {
     /** Database filename */
     readonly filename: string
     /** Database pointer */
-    readonly pointer: number
+    readonly pointer: sqlite3
     /** On-close callbacks */
     onclose?: {
       before?: (db: DB) => void
@@ -391,8 +405,8 @@ declare module '@wuchuheng/web-sqlite' {
     /** Prepare a statement */
     prepare(sql: string): Stmt
     /** Execute SQL */
-    exec(sql: string, options?: ExecOptions): this
-    exec(options: ExecOptions): this
+    exec(sql: string, options?: ExecOptions): this | ExecResult
+    exec(options: ExecOptions): this | ExecResult
     /** Create a scalar or aggregate function */
     createFunction(name: string, xFunc: (...args: unknown[]) => unknown, options?: CreateFunctionOptions): this
     createFunction(options: CreateFunctionOptions): this

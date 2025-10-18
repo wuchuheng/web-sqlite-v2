@@ -19,6 +19,12 @@ export interface NormalizedExecPlan {
     sql: string | Uint8Array | Int8Array | ArrayBuffer;
     /** Mutable exec options bag used during execution. */
     opt: ExecOptions;
+    /** Whether multi-statement execution remains enabled. */
+    multi: boolean;
+    /** Accumulator for collected result rows. */
+    resultRows?: unknown[];
+    /** Collected SQL text when requested. */
+    saveSql?: string[];
     /** Computes the exec() return value once processing completes. */
     returnVal(): unknown;
     /** Optional builder that materialises row callback arguments. */
