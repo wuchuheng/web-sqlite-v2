@@ -1,4 +1,4 @@
-import type { Stmt } from "@wuchuheng/web-sqlite";
+import type { BindValue, Stmt } from "@wuchuheng/web-sqlite";
 import type { Oo1Context } from "../context.d.ts";
 import type { StatementValidators } from "./validation.d.ts";
 
@@ -13,14 +13,20 @@ export interface BindTypeMap {
     readonly bigint?: number;
 }
 
+/** Value container accepted by statement binding helpers. */
+export type BindSpecification =
+    | BindValue
+    | BindValue[]
+    | Record<string, BindValue>;
+
 /** Binding helper collection returned by {@link createBindingHelpers}. */
 export interface BindHelpers {
     /** Enumeration of supported bind kinds. */
     readonly BindTypes: BindTypeMap;
     /** Classifies a value into a bind category or returns undefined. */
-    determineBindType(value: unknown): number | undefined;
+    determineBindType(value: BindValue): number | undefined;
     /** Validates a value can be bound and returns the bind category. */
-    ensureSupportedBindType(value: unknown): number;
+    ensureSupportedBindType(value: BindValue): number;
     /** Binds a UTF-8 string or blob to a prepared statement parameter. */
     bindString(
         statementPointer: number,
@@ -33,7 +39,7 @@ export interface BindHelpers {
         statement: Stmt,
         index: number | string,
         bindType: number,
-        value: unknown
+        value: BindValue
     ): Stmt;
 }
 

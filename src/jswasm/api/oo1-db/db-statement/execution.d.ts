@@ -1,10 +1,17 @@
-import type {
-    BindValue,
-    DB,
-    ExecOptions,
-    Stmt,
-} from "@wuchuheng/web-sqlite";
+import type { DB, ExecOptions, Stmt } from "@wuchuheng/web-sqlite";
 import type { Oo1Context } from "../context.d.ts";
+import type { BindSpecification } from "./binding.d.ts";
+
+/** SQL payloads accepted by {@link import("@wuchuheng/web-sqlite").DB.exec}. */
+export type ExecSqlSource =
+    | string
+    | Uint8Array
+    | Int8Array
+    | ArrayBuffer
+    | string[];
+
+/** Individual argument supported by {@link import("@wuchuheng/web-sqlite").DB.exec}. */
+export type ExecInvocationArgument = ExecSqlSource | ExecOptions;
 
 /** Normalised execution plan produced by {@link createExecHelpers}. */
 export interface NormalizedExecPlan {
@@ -24,18 +31,21 @@ export interface ExecHelpers {
     selectFirstRow(
         db: DB,
         sql: string,
-        bind?: BindValue[] | Record<string, BindValue>,
+        bind?: BindSpecification,
         ...getArgs: Parameters<Stmt["get"]>
     ): ReturnType<Stmt["get"]> | undefined;
     /** Executes SQL and collects all result rows. */
     selectAllRows(
         db: DB,
         sql: string,
-        bind: BindValue[] | Record<string, BindValue> | undefined,
+        bind: BindSpecification | undefined,
         rowMode: ExecOptions["rowMode"]
     ): unknown[];
     /** Parses exec() arguments into a normalised execution plan. */
-    parseExecPlan(db: DB, args: ReadonlyArray<unknown>): NormalizedExecPlan;
+    parseExecPlan(
+        db: DB,
+        args: ReadonlyArray<ExecInvocationArgument>
+    ): NormalizedExecPlan;
 }
 
 /**

@@ -34,7 +34,7 @@ export function createBindingHelpers(context, validators) {
     /**
      * Determines the bind type for a given value.
      *
-     * @param {any} value - Value to classify.
+     * @param {import("@wuchuheng/web-sqlite").BindValue} value - Value to classify.
      * @returns {number|undefined} BindTypes constant or undefined.
      */
     const determineBindType = (value) => {
@@ -62,7 +62,7 @@ export function createBindingHelpers(context, validators) {
     /**
      * Ensures a value can be bound, throwing if unsupported.
      *
-     * @param {any} value - Value to check.
+     * @param {import("@wuchuheng/web-sqlite").BindValue} value - Value to check.
      * @returns {number} BindTypes constant.
      */
     const ensureSupportedBindType = (value) => {
@@ -97,11 +97,11 @@ export function createBindingHelpers(context, validators) {
     /**
      * Binds a single value to a statement parameter.
      *
-     * @param {object} stmt - Statement instance.
+     * @param {import("@wuchuheng/web-sqlite").Stmt} stmt - Statement instance.
      * @param {number|string} index - Parameter index or name.
      * @param {number} bindType - BindTypes constant.
-     * @param {any} value - Value to bind.
-     * @returns {object} The statement for chaining.
+     * @param {import("@wuchuheng/web-sqlite").BindValue} value - Value to bind.
+     * @returns {import("@wuchuheng/web-sqlite").Stmt} The statement for chaining.
      */
     const bindSingleValue = (stmt, index, bindType, value) => {
         // 1. Input handling

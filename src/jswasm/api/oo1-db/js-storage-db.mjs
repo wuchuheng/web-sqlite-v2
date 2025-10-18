@@ -23,7 +23,8 @@ export function attachJsStorageDb(
         /**
          * Opens a kvvfs-backed storage database.
          *
-         * @param {...any} ctorArgs - Constructor arguments.
+         * @param {...Parameters<import("./db-ctor-helper.d.ts").DbCtorHelper>} ctorArgs
+         *        Constructor arguments accepted by the OO1 Database helper.
          */
         constructor(...ctorArgs) {
             const opt = dbCtorHelper.normalizeArgs(...ctorArgs);

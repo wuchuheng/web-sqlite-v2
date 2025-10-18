@@ -31,7 +31,7 @@ export function createStatementClass(
      */
     class Statement {
         /**
-         * @param {object} db - Owning database instance.
+         * @param {import("@wuchuheng/web-sqlite").DB} db - Owning database instance.
          * @param {number} pointer - Pointer to the native sqlite3_stmt.
          * @param {symbol} token - Guard to prevent external construction.
          */
@@ -98,7 +98,8 @@ export function createStatementClass(
         /**
          * Binds values to statement parameters.
          *
-         * @param {...any} bindArgs - Parameter index/name and value(s).
+         * @param {...(number|string|import("./binding.d.ts").BindSpecification)} bindArgs
+         *        Parameter index/name and value(s).
          * @returns {Statement} Fluent reference.
          */
         bind(...bindArgs) {
@@ -180,7 +181,7 @@ export function createStatementClass(
          * Forces a bind as BLOB regardless of inferred type.
          *
          * @param {number|string} index - Parameter index or name.
-         * @param {any} value - Value to bind.
+         * @param {string|Uint8Array|Int8Array|ArrayBuffer|null|undefined} value - Value to bind.
          * @returns {Statement} Fluent reference.
          */
         bindAsBlob(index, value) {
@@ -261,9 +262,9 @@ export function createStatementClass(
         /**
          * Retrieves column data in a variety of formats.
          *
-         * @param {number|Array|object} ndx - Column index or reusable container.
+         * @param {number|Array<unknown>|Record<string, unknown>} ndx - Column index or reusable container.
          * @param {number} [asType] - Optional explicit sqlite type.
-         * @returns {any} Column value.
+         * @returns {unknown} Column value.
          */
         get(ndx, asType) {
             // 1. Input handling
@@ -401,7 +402,7 @@ export function createStatementClass(
          * Retrieves column value and parses it as JSON.
          *
          * @param {number} ndx - Column index.
-         * @returns {any} Parsed JSON or null.
+         * @returns {unknown|null} Parsed JSON or null.
          */
         getJSON(ndx) {
             const textType = capi.SQLITE_STRING ?? capi.SQLITE_TEXT;

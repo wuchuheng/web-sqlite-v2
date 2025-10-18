@@ -33,7 +33,8 @@ export function createDatabaseClass(
         /**
          * Opens the database using the shared constructor helper.
          *
-         * @param {...any} ctorArgs - Database constructor arguments.
+         * @param {...Parameters<import("../db-ctor-helper.d.ts").DbCtorHelper>} ctorArgs
+         *        Database constructor arguments.
          */
         constructor(...ctorArgs) {
             dbCtorHelper.apply(this, ctorArgs);
@@ -203,8 +204,9 @@ export function createDatabaseClass(
         /**
          * Executes SQL with optional callbacks, mirroring the original API.
          *
-         * @param {...any} execArgs - Flexible exec() argument set.
-         * @returns {any} Configured return value.
+         * @param {...import("./execution.d.ts").ExecInvocationArgument} execArgs
+         *        Flexible exec() argument set.
+         * @returns {unknown} Configured return value.
          */
         exec(...execArgs) {
             // 1. Input handling
@@ -487,9 +489,11 @@ export function createDatabaseClass(
          * Executes a query returning a single value.
          *
          * @param {string} sql - SQL text.
-         * @param {any} bind - Bind specification.
+         * @param {import("./binding.d.ts").BindSpecification | undefined} bind
+         *        Bind specification.
          * @param {number} [asType] - Column type hint.
-         * @returns {any} Selected value.
+         * @returns {ReturnType<import("@wuchuheng/web-sqlite").Stmt["get"]> | undefined}
+         *          Selected value.
          */
         selectValue(sql, bind, asType) {
             return selectFirstRow(this, sql, bind, 0, asType);
@@ -499,9 +503,10 @@ export function createDatabaseClass(
          * Executes a query returning the first column across rows.
          *
          * @param {string} sql - SQL text.
-         * @param {any} bind - Bind specification.
+         * @param {import("./binding.d.ts").BindSpecification | undefined} bind
+         *        Bind specification.
          * @param {number} [asType] - Type hint.
-         * @returns {Array<any>} Values.
+         * @returns {Array<ReturnType<import("@wuchuheng/web-sqlite").Stmt["get"]>>} Values.
          */
         selectValues(sql, bind, asType) {
             const stmt = this.prepare(sql);
@@ -522,8 +527,9 @@ export function createDatabaseClass(
          * Returns the first row as an array.
          *
          * @param {string} sql - SQL text.
-         * @param {any} bind - Bind specification.
-         * @returns {Array<any>|undefined} Row.
+         * @param {import("./binding.d.ts").BindSpecification | undefined} bind
+         *        Bind specification.
+         * @returns {unknown[]|undefined} Row.
          */
         selectArray(sql, bind) {
             return selectFirstRow(this, sql, bind, []);
@@ -533,8 +539,9 @@ export function createDatabaseClass(
          * Returns the first row as an object.
          *
          * @param {string} sql - SQL text.
-         * @param {any} bind - Bind specification.
-         * @returns {object|undefined} Row.
+         * @param {import("./binding.d.ts").BindSpecification | undefined} bind
+         *        Bind specification.
+         * @returns {Record<string, unknown>|undefined} Row.
          */
         selectObject(sql, bind) {
             return selectFirstRow(this, sql, bind, {});
@@ -544,8 +551,9 @@ export function createDatabaseClass(
          * Collects all rows as arrays.
          *
          * @param {string} sql - SQL text.
-         * @param {any} bind - Bind specification.
-         * @returns {Array<Array<any>>} Rows.
+         * @param {import("./binding.d.ts").BindSpecification | undefined} bind
+         *        Bind specification.
+         * @returns {unknown[][]} Rows.
          */
         selectArrays(sql, bind) {
             return selectAllRows(this, sql, bind, "array");
@@ -555,8 +563,9 @@ export function createDatabaseClass(
          * Collects all rows as objects.
          *
          * @param {string} sql - SQL text.
-         * @param {any} bind - Bind specification.
-         * @returns {Array<object>} Rows.
+         * @param {import("./binding.d.ts").BindSpecification | undefined} bind
+         *        Bind specification.
+         * @returns {Array<Record<string, unknown>>} Rows.
          */
         selectObjects(sql, bind) {
             return selectAllRows(this, sql, bind, "object");
@@ -576,8 +585,8 @@ export function createDatabaseClass(
         /**
          * Executes a callback inside a transaction.
          *
-         * @param {Function} callback - Callback receiving the DB instance.
-         * @returns {any} Value returned by callback.
+         * @param {(db: import("@wuchuheng/web-sqlite").DB) => unknown} callback - Callback receiving the DB instance.
+         * @returns {unknown} Value returned by callback.
          */
         transaction(callback) {
             let opener = "BEGIN";
@@ -606,8 +615,8 @@ export function createDatabaseClass(
         /**
          * Executes a callback inside a savepoint transaction.
          *
-         * @param {Function} callback - Callback receiving the DB instance.
-         * @returns {any} Value returned by callback.
+         * @param {(db: import("@wuchuheng/web-sqlite").DB) => unknown} callback - Callback receiving the DB instance.
+         * @returns {unknown} Value returned by callback.
          */
         savepoint(callback) {
             this.exec("SAVEPOINT oo1");

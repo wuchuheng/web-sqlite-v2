@@ -7,7 +7,7 @@ import { assertAllocator } from "./utils.mjs";
 /**
  * Adds scoped allocation utilities (scopedAlloc, scopedAllocCString, etc.).
  *
- * @param {import("./installer-context.mjs").WhWasmInstallerContext} context
+ * @param {import("./installer-context.d.ts").WhWasmInstallerContext} context
  */
 export function attachScopedAllocators(context) {
     const { target, cache } = context;

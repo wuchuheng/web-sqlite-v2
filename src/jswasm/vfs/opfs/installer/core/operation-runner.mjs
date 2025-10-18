@@ -10,7 +10,8 @@ export function createOperationRunner(state, metrics, error, toss) {
     /**
      * Executes an OPFS operation through the async worker.
      * @param {string} op - Operation name
-     * @param {...any} args - Operation arguments
+     * @param {...import('../../../../../../shared/opfs-vfs-installer').SerializableValue} args
+     *        Operation arguments.
      * @returns {number} Result code from operation
      */
     return function opRun(op, ...args) {

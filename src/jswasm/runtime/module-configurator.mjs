@@ -113,7 +113,7 @@ export function createAbortFunction(Module, err, readyPromiseReject) {
     /**
      * Aborts the WebAssembly module with an error message.
      *
-     * @param {any} what - The error or reason for aborting
+     * @param {unknown} what - The error or reason for aborting
      * @throws {WebAssembly.RuntimeError} Always throws a runtime error
      */
     return function abort(what) {

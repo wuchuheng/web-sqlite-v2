@@ -110,7 +110,8 @@ export function createSerializer(state, toss) {
 
         /**
          * Serializes arguments into the shared buffer.
-         * @param {...any} args - Values to serialize
+         * @param {...import('../../../../shared/opfs-vfs-installer').SerializableValue} args
+         *        Values to serialize.
          */
         serialize(...args) {
             // 1. Input handling
