@@ -1,4 +1,4 @@
-import type { FSNode, FSStats, FSStream, StreamOps } from "../vfs/filesystem/types.d.ts";
+import type { FSNode, FSStats, FSStream, StreamOps } from "../vfs/filesystem/base-state.d.ts";
 import type { RuntimeFS } from "./runtime-types.d.ts";
 
 /**

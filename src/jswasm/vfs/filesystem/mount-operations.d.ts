@@ -3,7 +3,7 @@ import type {
     FileSystemMountType,
     FSNode,
     MutableFS,
-} from "./types.d.ts";
+} from "./base-state.d.ts";
 
 export interface MountOperationsOptions {
     err(message: string): void;

@@ -1,7 +1,7 @@
 import type {
     FSNode,
     MutableFS,
-} from "./types.d.ts";
+} from "./base-state.d.ts";
 
 export interface PathOperationsOptions {
     getPathFS(): {

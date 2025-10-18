@@ -45,7 +45,7 @@ const MMAP_FLAGS = {
 
 /**
  * Creates and returns the MEMFS file system implementation.
- * @param {import("./filesystem/types.d.ts").MutableFS & { chrdev_stream_ops: import("./filesystem/types.d.ts").StreamOps }} FS
+ * @param {import("./filesystem/base-state.d.ts").MutableFS & { chrdev_stream_ops: import("./filesystem/base-state.d.ts").StreamOps }} FS
  *        The file system module reference.
  * @param {Int8Array} HEAP8 WebAssembly heap reference for Int8Array.
  * @param {(size: number) => number} mmapAlloc Memory allocation function for mmap.

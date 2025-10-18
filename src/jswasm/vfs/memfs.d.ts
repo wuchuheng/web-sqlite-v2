@@ -4,7 +4,7 @@ import type {
     MutableFS,
     NodeOps,
     StreamOps,
-} from "./filesystem/types.d.ts";
+} from "./filesystem/base-state.d.ts";
 
 export interface MemfsNode extends FSNode {
     contents: Uint8Array | { [name: string]: MemfsNode } | null;

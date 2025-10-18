@@ -6,8 +6,8 @@
  * Builds a loader helper that mirrors the original yawl() helper while using
  * the refactored installer implementation under the hood.
  *
- * @param {import("./types.d.ts").WhWasmInstaller} install - Installer returned by createWhWasmUtilInstaller.
- * @returns {import("./types.d.ts").YawlLoaderFactory} Factory returning a function that loads and instantiates the WASM module.
+ * @param {import("./installer-context.d.ts").WhWasmInstaller} install - Installer returned by createWhWasmUtilInstaller.
+ * @returns {import("./yawl-loader.d.ts").YawlLoaderFactory} Factory returning a function that loads and instantiates the WASM module.
  */
 export function createYawlLoader(install) {
     return function yawl(config) {

@@ -215,7 +215,7 @@ export function createSyscallHelpers(
          * Syncs a memory-mapped region back to the underlying file
          *
          * @param {number} addr - Starting address in WASM memory
-     * @param {import("../vfs/filesystem/types.d.ts").FSStream} stream - File stream object
+     * @param {import("../vfs/filesystem/base-state.d.ts").FSStream} stream - File stream object
          * @param {number} len - Length of region to sync
          * @param {number} flags - Sync flags (MS_ASYNC, MS_SYNC, etc.)
          * @param {number} offset - Offset in the file

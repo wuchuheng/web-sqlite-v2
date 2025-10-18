@@ -4,7 +4,7 @@ import { MODE, OPEN_FLAGS, STREAM_STATE_MASK, PERMISSION } from "./constants.mjs
  * Creates the mutable filesystem state container that other helper modules
  * extend in order to expose POSIX-like filesystem behaviors.
  *
- * @returns {import("./types.d.ts").MutableFS}
+ * @returns {import("./base-state.d.ts").MutableFS}
  */
 export function createBaseState() {
     return {

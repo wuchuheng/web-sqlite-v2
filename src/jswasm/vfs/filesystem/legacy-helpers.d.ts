@@ -1,4 +1,4 @@
-import type { FSNode, MutableFS } from "./types.d.ts";
+import type { FSNode, MutableFS } from "./base-state.d.ts";
 
 export interface LegacyHelpersOptions {
     FS_getMode(canRead: boolean, canWrite: boolean): number;

@@ -10,42 +10,42 @@ const MAP_PRIVATE = 0x2;
  * Supplies stream-level helpers for interacting with file descriptors backed
  * by the filesystem implementation.
  *
- * @param {import("./types.d.ts").MutableFS} FS
+ * @param {import("./base-state.d.ts").MutableFS} FS
  * @returns {{
- *   close(stream: import("./types.d.ts").FSStream): void,
- *   isClosed(stream: import("./types.d.ts").FSStream): boolean,
- *   llseek(stream: import("./types.d.ts").FSStream, offset: number, whence: number): number,
+ *   close(stream: import("./base-state.d.ts").FSStream): void,
+ *   isClosed(stream: import("./base-state.d.ts").FSStream): boolean,
+ *   llseek(stream: import("./base-state.d.ts").FSStream, offset: number, whence: number): number,
  *   read(
- *     stream: import("./types.d.ts").FSStream,
+ *     stream: import("./base-state.d.ts").FSStream,
  *     buffer: Uint8Array,
  *     offset: number,
  *     length: number,
  *     position?: number
  *   ): number,
  *   write(
- *     stream: import("./types.d.ts").FSStream,
+ *     stream: import("./base-state.d.ts").FSStream,
  *     buffer: Uint8Array | ArrayLike<number>,
  *     offset: number,
  *     length: number,
  *     position?: number,
  *     canOwn?: boolean
  *   ): number,
- *   allocate(stream: import("./types.d.ts").FSStream, offset: number, length: number): void,
+ *   allocate(stream: import("./base-state.d.ts").FSStream, offset: number, length: number): void,
  *   mmap(
- *     stream: import("./types.d.ts").FSStream,
+ *     stream: import("./base-state.d.ts").FSStream,
  *     length: number,
  *     position: number,
  *     prot: number,
  *     flags: number
  *   ): { ptr: number, length: number },
  *   msync(
- *     stream: import("./types.d.ts").FSStream,
+ *     stream: import("./base-state.d.ts").FSStream,
  *     buffer: Uint8Array | ArrayLike<number>,
  *     offset: number,
  *     length: number,
  *     mmapFlags: number
  *   ): number,
- *   ioctl(stream: import("./types.d.ts").FSStream, cmd: number, arg: number): number,
+ *   ioctl(stream: import("./base-state.d.ts").FSStream, cmd: number, arg: number): number,
  *   readFile(
  *     path: string,
  *     opts?: { flags?: number, encoding?: "utf8" | "binary" }

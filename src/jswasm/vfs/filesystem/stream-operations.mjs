@@ -4,30 +4,30 @@ import { ERRNO_CODES, MAX_OPEN_FDS } from "./constants.mjs";
  * Exposes low-level stream bookkeeping utilities used to manage file
  * descriptor allocation and device registration.
  *
- * @param {import("./types.d.ts").MutableFS} FS
+ * @param {import("./base-state.d.ts").MutableFS} FS
  * @returns {{
  *   MAX_OPEN_FDS: number,
  *   nextfd(): number,
- *   getStreamChecked(fd: number): import("./types.d.ts").FSStream,
- *   getStream(fd: number): import("./types.d.ts").FSStream | null,
+ *   getStreamChecked(fd: number): import("./base-state.d.ts").FSStream,
+ *   getStream(fd: number): import("./base-state.d.ts").FSStream | null,
  *   createStream(
- *     stream: Partial<import("./types.d.ts").FSStream>,
+ *     stream: Partial<import("./base-state.d.ts").FSStream>,
  *     fd?: number
- *   ): import("./types.d.ts").FSStream,
+ *   ): import("./base-state.d.ts").FSStream,
  *   closeStream(fd: number): void,
  *   dupStream(
- *     origStream: import("./types.d.ts").FSStream,
+ *     origStream: import("./base-state.d.ts").FSStream,
  *     fd?: number
- *   ): import("./types.d.ts").FSStream,
+ *   ): import("./base-state.d.ts").FSStream,
  *   chrdev_stream_ops: {
- *     open(stream: import("./types.d.ts").FSStream): void,
+ *     open(stream: import("./base-state.d.ts").FSStream): void,
  *     llseek(): never,
  *   },
  *   major(dev: number): number,
  *   minor(dev: number): number,
  *   makedev(ma: number, mi: number): number,
- *   registerDevice(dev: number, ops: import("./types.d.ts").StreamOps): void,
- *   getDevice(dev: number): import("./types.d.ts").DeviceDefinition | undefined,
+ *   registerDevice(dev: number, ops: import("./base-state.d.ts").StreamOps): void,
+ *   getDevice(dev: number): import("./base-state.d.ts").DeviceDefinition | undefined,
  * }}
  */
 export function createStreamOperations(FS) {

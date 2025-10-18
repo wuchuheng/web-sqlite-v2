@@ -102,7 +102,7 @@ export function createTTY(out, err, FS) {
         stream_ops: {
             /**
              * Open a TTY stream.
-             * @param {import("../vfs/filesystem/types.d.ts").FSStream & { tty?: import("../shared/runtime-types.d.ts").TTYDevice }} stream - Stream to open
+             * @param {import("../vfs/filesystem/base-state.d.ts").FSStream & { tty?: import("../shared/runtime-types.d.ts").TTYDevice }} stream - Stream to open
              */
             open(stream) {
                 // 1. Input handling
@@ -118,7 +118,7 @@ export function createTTY(out, err, FS) {
 
             /**
              * Close a TTY stream.
-             * @param {import("../vfs/filesystem/types.d.ts").FSStream & { tty?: import("../shared/runtime-types.d.ts").TTYDevice }} stream - Stream to close
+             * @param {import("../vfs/filesystem/base-state.d.ts").FSStream & { tty?: import("../shared/runtime-types.d.ts").TTYDevice }} stream - Stream to close
              */
             close(stream) {
                 stream.tty.ops.fsync(stream.tty);
@@ -126,7 +126,7 @@ export function createTTY(out, err, FS) {
 
             /**
              * Sync a TTY stream.
-             * @param {import("../vfs/filesystem/types.d.ts").FSStream & { tty?: import("../shared/runtime-types.d.ts").TTYDevice }} stream - Stream to sync
+             * @param {import("../vfs/filesystem/base-state.d.ts").FSStream & { tty?: import("../shared/runtime-types.d.ts").TTYDevice }} stream - Stream to sync
              */
             fsync(stream) {
                 stream.tty.ops.fsync(stream.tty);
@@ -134,7 +134,7 @@ export function createTTY(out, err, FS) {
 
             /**
              * Read from a TTY stream.
-             * @param {import("../vfs/filesystem/types.d.ts").FSStream & { tty?: import("../shared/runtime-types.d.ts").TTYDevice }} stream - Stream to read from
+             * @param {import("../vfs/filesystem/base-state.d.ts").FSStream & { tty?: import("../shared/runtime-types.d.ts").TTYDevice }} stream - Stream to read from
              * @param {Uint8Array} buffer - Buffer to read into
              * @param {number} offset - Buffer offset
              * @param {number} length - Bytes to read
@@ -173,7 +173,7 @@ export function createTTY(out, err, FS) {
 
             /**
              * Write to a TTY stream.
-             * @param {import("../vfs/filesystem/types.d.ts").FSStream & { tty?: import("../shared/runtime-types.d.ts").TTYDevice }} stream - Stream to write to
+             * @param {import("../vfs/filesystem/base-state.d.ts").FSStream & { tty?: import("../shared/runtime-types.d.ts").TTYDevice }} stream - Stream to write to
              * @param {Uint8Array} buffer - Buffer to write from
              * @param {number} offset - Buffer offset
              * @param {number} length - Bytes to write

@@ -5,22 +5,22 @@ import { ERRNO_CODES } from "./constants.mjs";
  * Provides helpers for managing mount points and device nodes within the
  * virtual filesystem tree.
  *
- * @param {import("./types.d.ts").MutableFS} FS
+ * @param {import("./base-state.d.ts").MutableFS} FS
  * @param {{ err: (message: string) => void }} options
  * @returns {{
- *   getMounts(mount: import("./types.d.ts").FileSystemMount): import("./types.d.ts").FileSystemMount[],
+ *   getMounts(mount: import("./base-state.d.ts").FileSystemMount): import("./base-state.d.ts").FileSystemMount[],
  *   syncfs(
  *     populate: boolean | ((errCode: number | null) => void),
  *     callback?: (errCode: number | null) => void
  *   ): void,
  *   mount(
- *     type: import("./types.d.ts").FileSystemMountType,
+ *     type: import("./base-state.d.ts").FileSystemMountType,
  *     opts: Record<string, unknown>,
  *     mountpoint: string
- *   ): import("./types.d.ts").FSNode,
+ *   ): import("./base-state.d.ts").FSNode,
  *   unmount(mountpoint: string): void,
- *   lookup(parent: import("./types.d.ts").FSNode, name: string): import("./types.d.ts").FSNode,
- *   mknod(path: string, mode: number, dev: number): import("./types.d.ts").FSNode,
+ *   lookup(parent: import("./base-state.d.ts").FSNode, name: string): import("./base-state.d.ts").FSNode,
+ *   mknod(path: string, mode: number, dev: number): import("./base-state.d.ts").FSNode,
  * }}
  */
 export function createMountOperations(FS, { err }) {

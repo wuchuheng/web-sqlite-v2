@@ -1,4 +1,4 @@
-import type { FSStream, MutableFS, StreamOps } from "../vfs/filesystem/types.d.ts";
+import type { FSStream, MutableFS, StreamOps } from "../vfs/filesystem/base-state.d.ts";
 
 /**
  * Recursive value hierarchy representing additional module state stored on the

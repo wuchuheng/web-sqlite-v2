@@ -2,7 +2,7 @@ import type { PathFsUtilities } from "../utils/path.d.ts";
 import type {
     MutableFS,
     FSNode,
-} from "./filesystem/types.d.ts";
+} from "./filesystem/base-state.d.ts";
 import type { PathOperations, PathOperationsOptions } from "./filesystem/path-operations.d.ts";
 import type { ModeOperations } from "./filesystem/mode-operations.d.ts";
 import type { StreamOperations } from "./filesystem/stream-operations.d.ts";
