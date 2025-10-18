@@ -464,6 +464,10 @@ function setupCTypes(wasm, capi, util, sqlite3, toss) {
         }
     }
 
+    /**
+     * @param {import("../sqlite3.d.ts").SqliteResultCode} rc
+     * @returns {string | undefined}
+     */
     capi.sqlite3_js_rc_str = (rc) => __rcMap[rc];
 
     const notThese = Object.assign(Object.create(null), {
@@ -512,6 +516,10 @@ function setupCloseWrapper(wasm, capi, __dbCleanupMap) {
     };
 
     const __sqlite3CloseV2 = wasm.xWrap("sqlite3_close_v2", "int", "sqlite3*");
+    /**
+     * @param {import("../sqlite3.d.ts").sqlite3} pDb
+     * @returns {import("../sqlite3.d.ts").SqliteResultCode}
+     */
     capi.sqlite3_close_v2 = function (pDb) {
         if (1 !== arguments.length)
             return __dbArgcMismatch(pDb, "sqlite3_close_v2", 1);

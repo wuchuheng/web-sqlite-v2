@@ -115,7 +115,9 @@ export function createCoreBindings(wasm, capi) {
                 new wasm.xWrap.FuncPtrAdapter({
                     signature: "i(pipp)",
                     bindScope: "transient",
-                    callProxy: (callback) => {
+                    callProxy: (
+                        /** @type {import("../../sqlite3.d.ts").ExecCallback} */ callback
+                    ) => {
                         let aNames;
                         return (pVoid, nCols, pColVals, pColNames) => {
                             try {

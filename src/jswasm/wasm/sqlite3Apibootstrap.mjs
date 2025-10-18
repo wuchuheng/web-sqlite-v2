@@ -58,6 +58,7 @@ export function runSQLite3PostLoadInit(_EmscriptenModule) {
         delete globalThis.sqlite3ApiConfig;
         delete sqlite3ApiBootstrap.defaultConfig;
 
+        /** @type {import("../sqlite3.d.ts").Sqlite3CAPI} */
         const capi = Object.create(null);
         const wasm = Object.create(null);
 

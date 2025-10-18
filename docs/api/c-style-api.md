@@ -23,7 +23,7 @@ SQLite WASM offers two flavors of the C-Style API:
 
 ## Type Definitions
 
-### Core Types ⚫
+### Core Types 🟢
 
 ```typescript
 /**
@@ -122,7 +122,7 @@ enum SqliteOpenFlags {
 
 ## Database Connection Functions
 
-### sqlite3_open_v2() ⚫
+### sqlite3_open_v2() 🟢
 
 Opens a database connection with specified flags.
 
@@ -162,7 +162,7 @@ if (rc === sqlite3.capi.SQLITE_OK) {
 sqlite3.wasm.dealloc(pDb);
 ```
 
-### sqlite3_close_v2() ⚫
+### sqlite3_close_v2() 🟢
 
 Closes a database connection.
 
@@ -175,7 +175,7 @@ Closes a database connection.
 function sqlite3_close_v2(db: sqlite3): SqliteResultCode;
 ```
 
-### sqlite3_db_filename() ⚫
+### sqlite3_db_filename() 🟢
 
 Returns the filename of a database.
 
@@ -194,7 +194,7 @@ function sqlite3_db_filename(
 
 ## SQL Execution Functions
 
-### sqlite3_exec() ⚫
+### sqlite3_exec() 🟢
 
 Execute one or more SQL statements with optional callback.
 
@@ -263,7 +263,7 @@ rc = sqlite3.capi.sqlite3_exec(
 
 ## Prepared Statement Functions
 
-### sqlite3_prepare_v3() ⚫
+### sqlite3_prepare_v3() 🟢
 
 Compile an SQL statement into a prepared statement object.
 
@@ -309,7 +309,7 @@ if (rc === sqlite3.capi.SQLITE_OK) {
 sqlite3.wasm.dealloc(pStmt);
 ```
 
-### sqlite3_bind_*() ⚫
+### sqlite3_bind_*() 🟢
 
 Bind values to prepared statement parameters.
 
@@ -390,7 +390,7 @@ sqlite3.capi.sqlite3_bind_blob(stmt, 4, new Uint8Array([1, 2, 3]), 3, sqlite3.ca
 sqlite3.capi.sqlite3_bind_null(stmt, 5);
 ```
 
-### sqlite3_bind_parameter_index() ⚫
+### sqlite3_bind_parameter_index() 🟢
 
 Get the index of a named parameter.
 
@@ -407,7 +407,7 @@ function sqlite3_bind_parameter_index(
 ): number;
 ```
 
-### sqlite3_step() ⚫
+### sqlite3_step() 🟢
 
 Execute a prepared statement.
 
@@ -432,7 +432,7 @@ while (sqlite3.capi.sqlite3_step(stmt) === sqlite3.capi.SQLITE_ROW) {
 }
 ```
 
-### sqlite3_reset() ⚫
+### sqlite3_reset() 🟢
 
 Reset a prepared statement for re-execution.
 
@@ -445,7 +445,7 @@ Reset a prepared statement for re-execution.
 function sqlite3_reset(stmt: sqlite3_stmt): SqliteResultCode;
 ```
 
-### sqlite3_finalize() ⚫
+### sqlite3_finalize() 🟢
 
 Destroy a prepared statement.
 
@@ -460,7 +460,7 @@ function sqlite3_finalize(stmt: sqlite3_stmt): SqliteResultCode;
 
 ## Column Access Functions
 
-### sqlite3_column_*() ⚫
+### sqlite3_column_*() 🟢
 
 Retrieve column values from the current result row.
 
@@ -501,9 +501,9 @@ function sqlite3_column_double(stmt: sqlite3_stmt, index: number): number;
 function sqlite3_column_text(stmt: sqlite3_stmt, index: number): string;
 
 /**
- * Get blob value as Uint8Array
+ * Get blob value pointer
  */
-function sqlite3_column_blob(stmt: sqlite3_stmt, index: number): Uint8Array;
+function sqlite3_column_blob(stmt: sqlite3_stmt, index: number): WasmPointer;
 
 /**
  * Get byte length of column data
@@ -547,9 +547,12 @@ if (sqlite3.capi.sqlite3_step(stmt) === sqlite3.capi.SQLITE_ROW) {
 }
 ```
 
+> **Note:** Blob accessors return WASM pointers. Use `sqlite3.wasm.heap8u()` with
+> `sqlite3.capi.sqlite3_column_bytes()` to copy the data into a typed array.
+
 ## User-Defined Functions
 
-### sqlite3_create_function_v2() ⚫
+### sqlite3_create_function_v2() 🟢
 
 Register a custom SQL function.
 
@@ -580,7 +583,7 @@ type AggregateFinalFunction = (context: sqlite3_context) => void;
 /**
  * Function destructor
  */
-type FunctionDestructor = (userData: any) => void;
+type FunctionDestructor = (userData: unknown) => void;
 
 /**
  * Create a user-defined function
@@ -669,7 +672,7 @@ sqlite3.capi.sqlite3_create_function_v2(
 );
 ```
 
-### sqlite3_value_*() ⚫
+### sqlite3_value_*() 🟢
 
 Extract values from function arguments.
 
@@ -700,9 +703,9 @@ function sqlite3_value_double(value: sqlite3_value): number;
 function sqlite3_value_text(value: sqlite3_value): string;
 
 /**
- * Get blob value
+ * Get blob value pointer
  */
-function sqlite3_value_blob(value: sqlite3_value): Uint8Array;
+function sqlite3_value_blob(value: sqlite3_value): WasmPointer;
 
 /**
  * Convert SQLite value to JavaScript value
@@ -710,7 +713,7 @@ function sqlite3_value_blob(value: sqlite3_value): Uint8Array;
 function sqlite3_value_to_js(value: sqlite3_value): any;
 ```
 
-### sqlite3_result_*() ⚫
+### sqlite3_result_*() 🟢
 
 Set function return values.
 
@@ -767,7 +770,7 @@ function sqlite3_result_error(
 
 ## Utility Functions
 
-### sqlite3_changes() ⚫
+### sqlite3_changes() 🟢
 
 Get number of rows modified by the last statement.
 
@@ -780,7 +783,7 @@ Get number of rows modified by the last statement.
 function sqlite3_changes(db: sqlite3): number;
 ```
 
-### sqlite3_last_insert_rowid() ⚫
+### sqlite3_last_insert_rowid() 🟢
 
 Get the ROWID of the most recent INSERT.
 
@@ -793,7 +796,7 @@ Get the ROWID of the most recent INSERT.
 function sqlite3_last_insert_rowid(db: sqlite3): number | bigint;
 ```
 
-### sqlite3_errmsg() ⚫
+### sqlite3_errmsg() 🟢
 
 Get the error message for the most recent error.
 
@@ -806,7 +809,7 @@ Get the error message for the most recent error.
 function sqlite3_errmsg(db: sqlite3): string;
 ```
 
-### sqlite3_errstr() ⚫
+### sqlite3_errstr() 🟢
 
 Convert a result code to an error message.
 
@@ -819,7 +822,7 @@ Convert a result code to an error message.
 function sqlite3_errstr(resultCode: SqliteResultCode): string;
 ```
 
-### sqlite3_js_rc_str() ⚫
+### sqlite3_js_rc_str() 🟢
 
 **WASM-specific**: Convert result code to string representation.
 
@@ -832,7 +835,7 @@ function sqlite3_errstr(resultCode: SqliteResultCode): string;
 function sqlite3_js_rc_str(resultCode: SqliteResultCode): string;
 ```
 
-### sqlite3_randomness() ⚫
+### sqlite3_randomness() 🟢
 
 Generate random data.
 
@@ -869,7 +872,7 @@ sqlite3.capi.sqlite3_randomness(randomBytes);
 console.log(randomBytes);
 ```
 
-### sqlite3_js_db_export() ⚫
+### sqlite3_js_db_export() 🟢
 
 **WASM-specific**: Export database to Uint8Array.
 
@@ -900,7 +903,7 @@ const blob = new Blob([dbBytes], { type: 'application/x-sqlite3' });
 
 ## Transaction Functions
 
-### sqlite3_get_autocommit() ⚫
+### sqlite3_get_autocommit() 🟢
 
 Check if database is in autocommit mode.
 

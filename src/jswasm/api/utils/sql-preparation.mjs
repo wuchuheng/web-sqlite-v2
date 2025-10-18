@@ -100,6 +100,15 @@ export function createSqlPreparation(wasm, capi, util) {
      * @param {number} pzTail - Output pointer for remaining SQL
      * @returns {number} SQLite result code
      */
+    /**
+     * @param {import("../../sqlite3.d.ts").sqlite3} pDb
+     * @param {string | ArrayBufferView | ArrayBuffer | import("../../sqlite3.d.ts").WasmPointer} sql
+     * @param {number} sqlLen
+     * @param {number} prepFlags
+     * @param {import("../../sqlite3.d.ts").WasmPointer} ppStmt
+     * @param {import("../../sqlite3.d.ts").WasmPointer | null} pzTail
+     * @returns {import("../../sqlite3.d.ts").SqliteResultCode}
+     */
     const sqlite3_prepare_v3 = function f(pDb, sql, sqlLen, prepFlags, ppStmt, pzTail) {
         // 1. Validate argument count
         if (f.length !== arguments.length) {
@@ -169,6 +178,14 @@ export function createSqlPreparation(wasm, capi, util) {
      * @param {number} xDestroy - Destructor pointer
      * @returns {number} SQLite result code
      */
+    /**
+     * @param {import("../../sqlite3.d.ts").sqlite3_stmt} pStmt
+     * @param {number} iCol
+     * @param {import("../../sqlite3.d.ts").SqliteBindableText} text
+     * @param {number} nText
+     * @param {import("../../sqlite3.d.ts").SqliteDestructor | undefined} xDestroy
+     * @returns {import("../../sqlite3.d.ts").SqliteResultCode}
+     */
     const sqlite3_bind_text = function f(pStmt, iCol, text, nText, xDestroy) {
         // 1. Validate argument count
         if (f.length !== arguments.length) {
@@ -225,6 +242,14 @@ export function createSqlPreparation(wasm, capi, util) {
      * @param {number} nMem - Blob byte length
      * @param {number} xDestroy - Destructor pointer
      * @returns {number} SQLite result code
+     */
+    /**
+     * @param {import("../../sqlite3.d.ts").sqlite3_stmt} pStmt
+     * @param {number} iCol
+     * @param {import("../../sqlite3.d.ts").SqliteBindableBlob | import("../../sqlite3.d.ts").WasmPointer | null} pMem
+     * @param {number} nMem
+     * @param {import("../../sqlite3.d.ts").SqliteDestructor | undefined} xDestroy
+     * @returns {import("../../sqlite3.d.ts").SqliteResultCode}
      */
     const sqlite3_bind_blob = function f(pStmt, iCol, pMem, nMem, xDestroy) {
         // 1. Validate argument count
