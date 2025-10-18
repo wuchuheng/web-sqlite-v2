@@ -25,7 +25,7 @@ The OO1 API is accessed via `sqlite3.oo1` and includes:
 
 The DB class represents a database connection and provides methods for executing SQL, managing transactions, and creating prepared statements.
 
-### Constructor ⚫
+### Constructor 🟢
 
 ```typescript
 /**
@@ -97,7 +97,7 @@ readonly isOpen: boolean;
 
 ### SQL Execution Methods ⚫
 
-#### exec() ⚫
+#### exec() 🟢
 
 Execute one or more SQL statements with optional result handling.
 

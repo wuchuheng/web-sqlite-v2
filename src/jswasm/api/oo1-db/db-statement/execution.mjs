@@ -50,13 +50,15 @@ export function createExecHelpers(context) {
      * @param {string} rowMode - Row mode (array/object).
      * @returns {unknown[]} All result rows.
      */
-    const selectAllRows = (db, sql, bind, rowMode) =>
-        db.exec({
+    const selectAllRows = (db, sql, bind, rowMode) => {
+        const result = db.exec({
             sql,
             bind,
             rowMode,
             returnValue: "resultRows",
         });
+        return (result && result.resultRows) || [];
+    };
 
     /**
      * Parses and validates exec() arguments into a normalized plan.
@@ -70,6 +72,9 @@ export function createExecHelpers(context) {
         // 1. Input handling
         const plan = {
             opt: Object.create(null),
+            returnVal: () => db,
+            multi: true,
+            saveSql: undefined,
         };
 
         // 1.1 Parse arguments
@@ -103,33 +108,53 @@ export function createExecHelpers(context) {
 
         // 2. Core processing
         const opt = plan.opt;
+        plan.multi = opt.multi !== false;
+        plan.saveSql = Array.isArray(opt.saveSql) ? opt.saveSql : undefined;
+
+        const createExecResult = () => {
+            const result = {
+                resultRows: plan.resultRows || [],
+            };
+            if (plan.saveSql) {
+                result.saveSql = plan.saveSql;
+            }
+            return result;
+        };
+
+        const ensureResultCollector = () => {
+            if (!plan.resultRows) {
+                plan.resultRows = Array.isArray(opt.resultRows)
+                    ? opt.resultRows
+                    : [];
+            }
+        };
 
         // 2.1 Configure return value strategy
-        switch (opt.returnValue) {
-            case "resultRows":
-                if (!opt.resultRows) opt.resultRows = [];
-                plan.returnVal = () => opt.resultRows;
-                break;
-            case "saveSql":
-                if (!opt.saveSql) opt.saveSql = [];
-                plan.returnVal = () => opt.saveSql;
-                break;
-            case undefined:
-            case "this":
-                plan.returnVal = () => db;
-                break;
-            default:
+        if (Array.isArray(opt.resultRows)) {
+            ensureResultCollector();
+        }
+
+        if (opt.returnValue !== undefined) {
+            if (opt.returnValue === "resultRows") {
+                ensureResultCollector();
+                plan.returnVal = createExecResult;
+            } else {
                 toss("Invalid returnValue value:", opt.returnValue);
+            }
         }
 
         // 2.2 Auto-enable resultRows when rowMode is set without callback
-        if (!opt.callback && !opt.returnValue && opt.rowMode !== undefined) {
-            if (!opt.resultRows) opt.resultRows = [];
-            plan.returnVal = () => opt.resultRows;
+        if (
+            !opt.callback &&
+            opt.returnValue === undefined &&
+            opt.rowMode !== undefined
+        ) {
+            ensureResultCollector();
+            plan.returnVal = createExecResult;
         }
 
         // 2.3 Configure row callback argument builder
-        if (opt.callback || opt.resultRows) {
+        if (opt.callback || plan.resultRows) {
             const rowMode = opt.rowMode ?? "array";
             switch (rowMode) {
                 case "object":
@@ -149,7 +174,7 @@ export function createExecHelpers(context) {
                     plan.cbArg = (stmt) => stmt.get([]);
                     break;
                 case "stmt":
-                    if (Array.isArray(opt.resultRows)) {
+                    if (plan.resultRows) {
                         toss(
                             "exec(): invalid rowMode for a resultRows array: must",
                             "be one of 'array', 'object', a result column number,",
