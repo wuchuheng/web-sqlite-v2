@@ -1,4 +1,4 @@
-import type { FileSystemMountType, MutableFS, StreamOps } from "./types.d.ts";
+import type { FileSystemMountType, MutableFS, StreamOps } from "./base-state.d.ts";
 
 export interface InitializationHelpers {
     createDefaultDirectories(): void;

@@ -3,7 +3,7 @@ import type {
     FSStream,
     MutableFS,
     StreamOps,
-} from "./types.d.ts";
+} from "./base-state.d.ts";
 
 export interface StreamOperations {
     readonly MAX_OPEN_FDS: number;

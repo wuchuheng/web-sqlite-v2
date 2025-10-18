@@ -3,7 +3,7 @@ import type {
     FSStats,
     FSStream,
     MutableFS,
-} from "./types.d.ts";
+} from "./base-state.d.ts";
 
 export interface NodeActionsOptions {
     FS_modeStringToFlags(mode: string): number;

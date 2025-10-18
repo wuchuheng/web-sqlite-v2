@@ -1,4 +1,4 @@
-import type { FSStream, MutableFS } from "./types.d.ts";
+import type { FSStream, MutableFS } from "./base-state.d.ts";
 
 export interface StreamHelpers {
     close(stream: FSStream): void;

@@ -5,7 +5,7 @@ import { ERRNO_CODES } from "./constants.mjs";
  * Builds helpers for resolving and manipulating filesystem paths while keeping
  * the hash table that accelerates path lookups in sync.
  *
- * @param {import("./types.d.ts").MutableFS} FS
+ * @param {import("./base-state.d.ts").MutableFS} FS
  * @param {{
  *   getPathFS: () => {
  *     resolve: (...paths: string[]) => string,
@@ -21,21 +21,21 @@ import { ERRNO_CODES } from "./constants.mjs";
  *       parent?: boolean,
  *       follow?: boolean,
  *     }
- *   ): { path: string, node: import("./types.d.ts").FSNode | null },
- *   getPath(node: import("./types.d.ts").FSNode): string,
+ *   ): { path: string, node: import("./base-state.d.ts").FSNode | null },
+ *   getPath(node: import("./base-state.d.ts").FSNode): string,
  *   hashName(parentid: number, name: string): number,
- *   hashAddNode(node: import("./types.d.ts").FSNode): void,
- *   hashRemoveNode(node: import("./types.d.ts").FSNode): void,
- *   lookupNode(parent: import("./types.d.ts").FSNode, name: string): import("./types.d.ts").FSNode,
+ *   hashAddNode(node: import("./base-state.d.ts").FSNode): void,
+ *   hashRemoveNode(node: import("./base-state.d.ts").FSNode): void,
+ *   lookupNode(parent: import("./base-state.d.ts").FSNode, name: string): import("./base-state.d.ts").FSNode,
  *   createNode(
- *     parent: import("./types.d.ts").FSNode,
+ *     parent: import("./base-state.d.ts").FSNode,
  *     name: string,
  *     mode: number,
  *     rdev: number
- *   ): import("./types.d.ts").FSNode,
- *   destroyNode(node: import("./types.d.ts").FSNode): void,
- *   isRoot(node: import("./types.d.ts").FSNode): boolean,
- *   isMountpoint(node: import("./types.d.ts").FSNode): boolean,
+ *   ): import("./base-state.d.ts").FSNode,
+ *   destroyNode(node: import("./base-state.d.ts").FSNode): void,
+ *   isRoot(node: import("./base-state.d.ts").FSNode): boolean,
+ *   isMountpoint(node: import("./base-state.d.ts").FSNode): boolean,
  * }}
  */
 export function createPathOperations(FS, { getPathFS }) {
