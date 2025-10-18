@@ -251,6 +251,14 @@ export function attachXWrapAdapters(context) {
             ? resultConverters.get(type)(value)
             : undefined;
 
+    /**
+     * Wraps a wasm export with automatic argument and result conversions.
+     *
+     * @param {string | ((...args: unknown[]) => unknown)} fArg
+     * @param {string | undefined} [resultType]
+     * @param {...(string | import("../../wasm/bootstrap/runtime/sqlite3-facade-namespace.d.ts").Sqlite3FuncPtrAdapter | import("../../wasm/bootstrap/runtime/sqlite3-facade-namespace.d.ts").Sqlite3FuncPtrAdapterConstructor)} argTypes
+     * @returns {(...args: unknown[]) => unknown}
+     */
     target.xWrap = function xWrap(fArg, resultType, ...argTypes) {
         if (arguments.length === 3 && Array.isArray(arguments[2])) {
             argTypes = arguments[2];
@@ -349,6 +357,13 @@ export function attachXWrapAdapters(context) {
         context.toss("Invalid arguments to", modeName);
     };
 
+    /**
+     * Registers or retrieves a result adapter for xWrap.
+     *
+     * @param {string} typeName
+     * @param {(value: import("../../sqlite3.d.ts").WasmPointer) => unknown} [adapter]
+     * @returns {(value: import("../../sqlite3.d.ts").WasmPointer) => unknown}
+     */
     target.xWrap.resultAdapter = function resultAdapter(typeName, adapter) {
         return configureAdapter(
             target.xWrap.resultAdapter,
@@ -360,6 +375,13 @@ export function attachXWrapAdapters(context) {
         );
     };
 
+    /**
+     * Registers or retrieves an argument adapter for xWrap.
+     *
+     * @param {string} typeName
+     * @param {(value: unknown) => unknown} [adapter]
+     * @returns {(value: unknown) => unknown}
+     */
     target.xWrap.argAdapter = function argAdapter(typeName, adapter) {
         return configureAdapter(
             target.xWrap.argAdapter,

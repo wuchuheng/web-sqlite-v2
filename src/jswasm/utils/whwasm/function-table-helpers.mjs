@@ -86,12 +86,32 @@ export function attachFunctionTableUtilities(context) {
         return pointer;
     };
 
+    /**
+     * Installs a JavaScript function into the wasm indirect function table.
+     *
+     * @param {((...args: unknown[]) => unknown) | string} func
+     * @param {string} [sig]
+     * @returns {import("../../sqlite3.d.ts").WasmPointer}
+     */
     target.installFunction = (func, sig) =>
         context.installFunctionInternal(func, sig, false);
 
+    /**
+     * Installs a function into the wasm table whose lifetime is scope-bound.
+     *
+     * @param {((...args: unknown[]) => unknown) | string} func
+     * @param {string} [sig]
+     * @returns {import("../../sqlite3.d.ts").WasmPointer}
+     */
     target.scopedInstallFunction = (func, sig) =>
         context.installFunctionInternal(func, sig, true);
 
+    /**
+     * Removes a function pointer from the wasm indirect function table.
+     *
+     * @param {import("../../sqlite3.d.ts").WasmPointer | null | undefined} ptr
+     * @returns {((...args: unknown[]) => unknown) | null | undefined}
+     */
     target.uninstallFunction = (ptr) => {
         if (ptr == null && ptr !== 0) {
             return undefined;

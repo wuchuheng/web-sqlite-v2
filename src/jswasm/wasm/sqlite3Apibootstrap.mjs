@@ -83,8 +83,11 @@ export function runSQLite3PostLoadInit(_EmscriptenModule) {
 
         // Seed the wasm namespace with the low-level exports provided by the build.
         Object.assign(wasm, {
+            /** @type {import("../sqlite3.d.ts").SQLite3Wasm["ptrSizeof"]} */
             ptrSizeof: config.wasmPtrSizeof || 4,
+            /** @type {import("../sqlite3.d.ts").SQLite3Wasm["ptrIR"]} */
             ptrIR: config.wasmPtrIR || "i32",
+            /** @type {import("../sqlite3.d.ts").SQLite3Wasm["bigIntEnabled"]} */
             bigIntEnabled: !!config.bigIntEnabled,
             exports:
                 config.exports ||

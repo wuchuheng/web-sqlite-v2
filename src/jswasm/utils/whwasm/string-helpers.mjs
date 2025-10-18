@@ -20,6 +20,12 @@ export function attachStringUtilities(context) {
                 : view.subarray(begin, end)
         );
 
+    /**
+     * Calculates the byte length of a null-terminated C string.
+     *
+     * @param {import("../../sqlite3.d.ts").WasmPointer | null} ptr
+     * @returns {number | null}
+     */
     target.cstrlen = (ptr) => {
         if (!ptr || !target.isPtr(ptr)) {
             return null;
@@ -32,6 +38,12 @@ export function attachStringUtilities(context) {
         return position - ptr;
     };
 
+    /**
+     * Converts a pointer to a UTF-8 encoded C string into a JavaScript string.
+     *
+     * @param {import("../../sqlite3.d.ts").WasmPointer | null} ptr
+     * @returns {string | null}
+     */
     target.cstrToJs = (ptr) => {
         const length = target.cstrlen(ptr);
         if (length === null) {
@@ -44,6 +56,12 @@ export function attachStringUtilities(context) {
         return decodeUtf8(heap, ptr, ptr + length);
     };
 
+    /**
+     * Computes the UTF-8 encoded byte length of a JavaScript string.
+     *
+     * @param {string | null} str
+     * @returns {number | null}
+     */
     target.jstrlen = (str) => {
         if (typeof str !== "string") return null;
         let length = 0;
@@ -62,6 +80,16 @@ export function attachStringUtilities(context) {
         return length;
     };
 
+    /**
+     * Copies a JavaScript string into a target UTF-8 buffer.
+     *
+     * @param {string} jstr
+     * @param {Uint8Array | Int8Array | import("../../sqlite3.d.ts").WasmPointer} tgt
+     * @param {number} [offset=0]
+     * @param {number} [maxBytes=-1]
+     * @param {boolean} [addNul=true]
+     * @returns {number}
+     */
     target.jstrcpy = (
         jstr,
         tgt,
@@ -119,6 +147,14 @@ export function attachStringUtilities(context) {
         return offset - begin;
     };
 
+    /**
+     * Copies up to `n` bytes from one C string pointer to another.
+     *
+     * @param {import("../../sqlite3.d.ts").WasmPointer} tgtPtr
+     * @param {import("../../sqlite3.d.ts").WasmPointer} srcPtr
+     * @param {number} n
+     * @returns {number}
+     */
     target.cstrncpy = (tgtPtr, srcPtr, n) => {
         if (!tgtPtr || !srcPtr) {
             context.toss("cstrncpy() does not accept NULL strings.");
@@ -141,6 +177,13 @@ export function attachStringUtilities(context) {
         return i;
     };
 
+    /**
+     * Encodes a JavaScript string into a Uint8Array, optionally NUL-terminated.
+     *
+     * @param {string} str
+     * @param {boolean} [addNul=false]
+     * @returns {Uint8Array}
+     */
     target.jstrToUintArray = (str, addNul = false) =>
         cache.utf8Encoder.encode(addNul ? `${str}\0` : str);
 
@@ -164,6 +207,13 @@ export function attachStringUtilities(context) {
 
     context.allocCStringInternal = allocCStringInternal;
 
+    /**
+     * Allocates a UTF-8 encoded copy of a JavaScript string on the wasm heap.
+     *
+     * @param {string} jstr
+     * @param {boolean} [returnWithLength=false]
+     * @returns {import("../../sqlite3.d.ts").WasmPointer | [import("../../sqlite3.d.ts").WasmPointer, number] | null}
+     */
     target.allocCString = (jstr, returnWithLength = false) =>
         allocCStringInternal(
             jstr,
