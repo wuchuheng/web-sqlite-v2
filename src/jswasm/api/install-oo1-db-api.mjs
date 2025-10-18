@@ -14,7 +14,7 @@ import { attachJsStorageDb } from "./oo1-db/js-storage-db.mjs";
 /**
  * Creates the OO1 DB API installer.
  *
- * @returns {(sqlite3: import("../sqlite3.mjs").Module) => void}
+ * @returns {(sqlite3: import("@wuchuheng/web-sqlite").SQLite3API) => void}
  */
 export function createInstallOo1DbApiInitializer() {
     return function installOo1DbApi(sqlite3) {

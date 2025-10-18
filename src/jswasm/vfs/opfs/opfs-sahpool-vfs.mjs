@@ -1,3 +1,8 @@
+/**
+ * Creates the initializer that installs the OPFS SAH pool VFS helpers.
+ *
+ * @returns {(sqlite3: import("./opfs-sahpool-vfs.d.ts").Sqlite3WithOpfsInstaller) => void}
+ */
 export function createOpfsSahpoolInitializer() {
     return function initializeOpfsSahpool(sqlite3) {
         "use strict";

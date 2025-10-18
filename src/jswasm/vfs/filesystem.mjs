@@ -13,29 +13,9 @@ import { createLegacyHelpers } from "./filesystem/legacy-helpers.mjs";
  * Assembles the filesystem facade used by the SQLite WebAssembly bundle by
  * composing the individual helper modules together.
  *
- * @param {{
- *   FS_createPreloadedFile: (
- *     parent: string | import("./filesystem/types.d.ts").FSNode,
- *     name: string,
- *     url: string,
- *     canRead?: boolean,
- *     canWrite?: boolean,
- *     onload?: (() => void) | null,
- *     onerror?: ((err: Error) => void) | null,
- *     dontCreateFile?: boolean,
- *     canOwn?: boolean
- *   ) => void,
- *   FS_createDataFile?: (...args: any[]) => void,
- *   FS_modeStringToFlags: (mode: string) => number,
- *   FS_getMode: (canRead: boolean, canWrite: boolean) => number,
- *   Module?: Record<string, any>,
- *   out?: (message: string) => void,
- *   err?: (message: string) => void,
- * }} options
- * @returns {{
- *   FS: import("./filesystem/types.d.ts").MutableFS & ReturnType<typeof createPathOperations> & ReturnType<typeof createModeOperations> & ReturnType<typeof createStreamOperations> & ReturnType<typeof createMountOperations> & ReturnType<typeof createNodeActions> & ReturnType<typeof createStreamHelpers> & ReturnType<typeof createInitializationHelpers> & ReturnType<typeof createLegacyHelpers>,
- *   PATH_FS: ReturnType<typeof createPathFS>,
- * }}
+ * @param {import("./filesystem.d.ts").FilesystemOptions} options
+ *        Configuration for the assembled filesystem facade.
+ * @returns {import("./filesystem.d.ts").FilesystemBundle}
  */
 export function createFS({
     FS_createPreloadedFile,

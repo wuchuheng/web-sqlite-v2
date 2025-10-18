@@ -24,7 +24,8 @@ import { createSqlPreparation } from "./utils/sql-preparation.mjs";
 /**
  * Creates the OO1 initializer function.
  *
- * @returns {Function} The initializer function that installs the OO1 API
+ * @returns {(sqlite3: import("@wuchuheng/web-sqlite").SQLite3API) => void}
+ *     The initializer function that installs the OO1 API.
  */
 export function createInstallOo1Initializer() {
     const installWhWasmUtils = createWhWasmUtilInstaller();

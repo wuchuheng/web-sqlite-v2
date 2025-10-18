@@ -14,9 +14,10 @@ const INTERNAL_STATEMENT_TOKEN = Symbol("StatementConstructorGuard");
 /**
  * Builds the Database/Statement classes and supporting utilities.
  *
- * @param {object} context - Shared runtime context.
- * @param {Function} dbCtorHelper - Constructor helper to open DBs.
- * @returns {{Database: typeof Database, Statement: typeof Statement, ensureDbOpen: Function}}
+ * @param {import("../context.d.ts").Oo1Context} context Shared runtime context.
+ * @param {import("../db-ctor-helper.d.ts").DbCtorHelper} dbCtorHelper
+ *        Constructor helper to open DBs.
+ * @returns {import("./index.d.ts").DbClassBundle}
  */
 export function createDbClasses(context, dbCtorHelper) {
     // 1. Input handling
@@ -48,9 +49,9 @@ export function createDbClasses(context, dbCtorHelper) {
 /**
  * Defines the public `pointer` accessor on the database and statement classes.
  *
- * @param {object} context - Runtime context.
- * @param {typeof Database} Database - Database class.
- * @param {typeof Statement} Statement - Statement class.
+ * @param {import("../context.d.ts").Oo1Context} context Runtime context.
+ * @param {typeof import("@wuchuheng/web-sqlite").DB} Database Database class.
+ * @param {typeof import("@wuchuheng/web-sqlite").Stmt} Statement Statement class.
  */
 export function definePointerAccessors(context, Database, Statement) {
     const { ptrMap, toss } = context;
