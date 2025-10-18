@@ -2,6 +2,16 @@
 
 The Object-Oriented API (OO1) provides a high-level, JavaScript-friendly interface to SQLite WASM. It wraps the low-level C-style API with exception-based error handling, automatic resource management, and convenient methods for common database operations.
 
+## Verification Status Legend
+
+Each API item in this document has a verification status indicator:
+
+- ⚫ **Not Verified** - Type definitions and JSDoc have not been verified against source code
+- 🟡 **Partially Verified** - Type definitions verified, but JSDoc incomplete or inconsistent
+- 🟢 **Verified** - Type definitions and JSDoc fully verified and consistent with source code
+
+Last updated: 2025-10-18
+
 ## Overview
 
 The OO1 API is accessed via `sqlite3.oo1` and includes:
@@ -11,11 +21,11 @@ The OO1 API is accessed via `sqlite3.oo1` and includes:
 - **JsStorageDb class** - localStorage/sessionStorage database integration
 - **OpfsDb class** - Origin Private File System persistent databases
 
-## DB Class
+## DB Class ⚫
 
 The DB class represents a database connection and provides methods for executing SQL, managing transactions, and creating prepared statements.
 
-### Constructor
+### Constructor ⚫
 
 ```typescript
 /**
@@ -65,7 +75,7 @@ const db5 = new sqlite3.oo1.DB({
 });
 ```
 
-### Core Properties
+### Core Properties ⚫
 
 ```typescript
 /**
@@ -85,9 +95,9 @@ readonly pointer: sqlite3;
 readonly isOpen: boolean;
 ```
 
-### SQL Execution Methods
+### SQL Execution Methods ⚫
 
-#### exec()
+#### exec() ⚫
 
 Execute one or more SQL statements with optional result handling.
 
@@ -186,7 +196,7 @@ const result = db.exec("SELECT * FROM users WHERE age > ?", {
 console.log(result.resultRows);
 ```
 
-#### selectArray()
+#### selectArray() ⚫
 
 Execute a query and return first row as an array.
 
@@ -211,7 +221,7 @@ if (!user) {
 }
 ```
 
-#### selectArrays()
+#### selectArrays() ⚫
 
 Execute a query and return all rows as arrays.
 
@@ -232,7 +242,7 @@ const users = db.selectArrays("SELECT * FROM users WHERE age > ?", [25]);
 // users = [[1, 'Alice', 30], [3, 'Charlie', 35]]
 ```
 
-#### selectObject()
+#### selectObject() ⚫
 
 Execute a query and return first row as an object.
 
@@ -253,7 +263,7 @@ const user = db.selectObject("SELECT * FROM users WHERE id = ?", [1]);
 // user = { id: 1, name: 'Alice', age: 30 }
 ```
 
-#### selectObjects()
+#### selectObjects() ⚫
 
 Execute a query and return all rows as objects.
 
@@ -277,7 +287,7 @@ const users = db.selectObjects("SELECT * FROM users WHERE age > ?", [25]);
 // ]
 ```
 
-#### selectValue()
+#### selectValue() ⚫
 
 Execute a query and return a single value.
 
@@ -301,9 +311,9 @@ const name = db.selectValue("SELECT name FROM users WHERE id = ?", [1]);
 // name = 'Alice'
 ```
 
-### Prepared Statement Methods
+### Prepared Statement Methods ⚫
 
-#### prepare()
+#### prepare() ⚫
 
 Create a prepared statement for reuse.
 
@@ -329,9 +339,9 @@ try {
 }
 ```
 
-### Transaction Methods
+### Transaction Methods ⚫
 
-#### transaction()
+#### transaction() ⚫
 
 Execute a function within a transaction.
 
@@ -362,9 +372,9 @@ const newId = db.transaction(() => {
 console.log(`New user ID: ${newId}`);
 ```
 
-### Utility Methods
+### Utility Methods ⚫
 
-#### changes()
+#### changes() ⚫
 
 Get number of rows modified by last statement.
 
@@ -383,7 +393,7 @@ db.exec("UPDATE users SET age = age + 1 WHERE age > 30");
 console.log(`Updated ${db.changes()} rows`);
 ```
 
-#### close()
+#### close() ⚫
 
 Close the database connection.
 
@@ -403,7 +413,7 @@ const db = new sqlite3.oo1.DB(":memory:");
 db.close();
 ```
 
-#### export()
+#### export() ⚫
 
 Export database to a byte array.
 
@@ -432,11 +442,11 @@ fetch('/api/backup', {
 });
 ```
 
-## Stmt Class
+## Stmt Class ⚫
 
 The Stmt class represents a prepared statement. Statements are created via `DB.prepare()` and must be finalized when done.
 
-### Properties
+### Properties ⚫
 
 ```typescript
 /**
@@ -465,9 +475,9 @@ readonly columnCount: number;
 readonly parameterCount: number;
 ```
 
-### Binding Methods
+### Binding Methods ⚫
 
-#### bind()
+#### bind() ⚫
 
 Bind values to statement parameters.
 
@@ -501,9 +511,9 @@ stmt2.bind({ ":name": "Charlie", ":age": 35 });
 stmt2.bind({ name: "Diana", age: 28 });
 ```
 
-### Execution Methods
+### Execution Methods ⚫
 
-#### step()
+#### step() ⚫
 
 Execute the statement one step.
 
@@ -525,7 +535,7 @@ while (stmt.step()) {
 stmt.finalize();
 ```
 
-#### stepReset()
+#### stepReset() ⚫
 
 Execute and automatically reset.
 
@@ -547,7 +557,7 @@ stmt.bind("Frank", 29).stepReset();
 stmt.finalize();
 ```
 
-#### stepFinalize()
+#### stepFinalize() ⚫
 
 Execute and automatically finalize.
 
@@ -568,7 +578,7 @@ db.prepare("INSERT INTO users (name, age) VALUES (?, ?)")
     .stepFinalize();
 ```
 
-#### reset()
+#### reset() ⚫
 
 Reset statement for re-execution.
 
@@ -581,7 +591,7 @@ Reset statement for re-execution.
 reset(): this;
 ```
 
-#### finalize()
+#### finalize() ⚫
 
 Destroy statement and free resources.
 
@@ -593,9 +603,9 @@ Destroy statement and free resources.
 finalize(): void;
 ```
 
-### Column Access Methods
+### Column Access Methods ⚫
 
-#### get()
+#### get() ⚫
 
 Get column value(s) from current row.
 
@@ -639,7 +649,7 @@ if (stmt.step()) {
 stmt.finalize();
 ```
 
-#### getColumnName()
+#### getColumnName() ⚫
 
 Get column name by index.
 
@@ -652,7 +662,7 @@ Get column name by index.
 getColumnName(index: number): string;
 ```
 
-#### getColumnNames()
+#### getColumnNames() ⚫
 
 Get all column names.
 
@@ -674,7 +684,7 @@ const columns = stmt.getColumnNames();
 stmt.finalize();
 ```
 
-## JsStorageDb Class
+## JsStorageDb Class ⚫
 
 Extends DB class to integrate with browser's localStorage or sessionStorage.
 
@@ -719,7 +729,7 @@ const theme = db2.selectValue("SELECT value FROM settings WHERE key = ?", ["them
 // theme = "dark"
 ```
 
-## OpfsDb Class
+## OpfsDb Class ⚫
 
 Extends DB class to use Origin Private File System for persistent storage.
 
@@ -767,7 +777,7 @@ if (sqlite3.oo1.OpfsDb) {
 }
 ```
 
-## Error Handling
+## Error Handling ⚫
 
 The OO1 API uses exception-based error handling. All methods throw `sqlite3.SQLite3Error` on errors.
 

@@ -2,6 +2,16 @@
 
 The WASM utilities provide essential functions for memory management, type conversion, and bridging between JavaScript and WebAssembly. These utilities are accessed via `sqlite3.wasm` and are critical for working with the C-style API and managing WASM memory.
 
+## Verification Status Legend
+
+Each API item in this document has a verification status indicator:
+
+- ⚫ **Not Verified** - Type definitions and JSDoc have not been verified against source code
+- 🟡 **Partially Verified** - Type definitions verified, but JSDoc incomplete or inconsistent
+- 🟢 **Verified** - Type definitions and JSDoc fully verified and consistent with source code
+
+Last updated: 2025-10-18
+
 ## Overview
 
 WASM utilities fall into these categories:
@@ -13,9 +23,9 @@ WASM utilities fall into these categories:
 5. **Scope Utilities** - Automatic resource cleanup
 6. **Export Access** - Direct WASM function access
 
-## Memory Management
+## Memory Management ⚫
 
-### alloc()
+### alloc() ⚫
 
 Allocate memory from the WASM heap.
 
@@ -52,7 +62,7 @@ const ptrPtr = sqlite3.wasm.alloc(sqlite3.wasm.ptrSizeof);
 sqlite3.wasm.dealloc(ptr);
 ```
 
-### dealloc()
+### dealloc() ⚫
 
 Free previously allocated memory.
 
@@ -77,7 +87,7 @@ sqlite3.wasm.dealloc(undefined); // No-op
 sqlite3.wasm.dealloc(0); // No-op
 ```
 
-### realloc()
+### realloc() ⚫
 
 Resize allocated memory.
 
@@ -108,7 +118,7 @@ ptr = sqlite3.wasm.realloc(ptr, 0); // ptr becomes 0/null
 const newPtr = sqlite3.wasm.realloc(null, 50);
 ```
 
-### Memory Size Constants
+### Memory Size Constants ⚫
 
 ```typescript
 /**
@@ -133,9 +143,9 @@ if (sqlite3.wasm.bigIntEnabled) {
 }
 ```
 
-## Type Conversion Utilities
+## Type Conversion Utilities ⚫
 
-### peek() - Read from Memory
+### peek() - Read from Memory ⚫
 
 Read typed values from WASM memory.
 
@@ -224,7 +234,7 @@ const value = sqlite3.wasm.peek(ptr, 'i32');
 const floatValue = sqlite3.wasm.peek(ptr, 'f64');
 ```
 
-### poke() - Write to Memory
+### poke() - Write to Memory ⚫
 
 Write typed values to WASM memory.
 
@@ -298,7 +308,7 @@ sqlite3.wasm.poke(ptr + 4, 3.14, 'f64');
 sqlite3.wasm.poke32(ptr, 1).poke32(ptr + 4, 2).poke32(ptr + 8, 3);
 ```
 
-### Heap Access
+### Heap Access ⚫
 
 Direct access to WASM heap as TypedArrays.
 
@@ -367,9 +377,9 @@ const i32Heap = sqlite3.wasm.heap32();
 i32Heap[ptr >> 2] = 42; // Write 32-bit int at ptr
 ```
 
-## String Utilities
+## String Utilities ⚫
 
-### cstrToJs()
+### cstrToJs() ⚫
 
 Convert C-style null-terminated string to JavaScript string.
 
@@ -391,7 +401,7 @@ const errorMessage = sqlite3.wasm.cstrToJs(str);
 console.log(errorMessage);
 ```
 
-### allocCString()
+### allocCString() ⚫
 
 Allocate memory for a JavaScript string and convert to null-terminated C string.
 
@@ -419,7 +429,7 @@ try {
 }
 ```
 
-### jstrcpy()
+### jstrcpy() ⚫
 
 Copy JavaScript string to existing WASM buffer.
 
@@ -450,7 +460,7 @@ const bytesWritten = sqlite3.wasm.jstrcpy("Hello", buffer, 0, 100, true);
 console.log(`Wrote ${bytesWritten} bytes`);
 ```
 
-### String Length Utilities
+### String Length Utilities ⚫
 
 ```typescript
 /**
@@ -482,9 +492,9 @@ console.log(`C string length: ${len}`); // 4
 sqlite3.wasm.dealloc(cStr);
 ```
 
-## Pointer Utilities
+## Pointer Utilities ⚫
 
-### Pointer Arithmetic
+### Pointer Arithmetic ⚫
 
 ```typescript
 /**
@@ -516,7 +526,7 @@ if (sqlite3.wasm.isPtr(ptr) && sqlite3.wasm.isValidPtr(ptr)) {
 sqlite3.wasm.dealloc(ptr);
 ```
 
-### Pointer Size Handling
+### Pointer Size Handling ⚫
 
 ```typescript
 /**
@@ -540,11 +550,11 @@ const int64Sizeof: 8;
 const doubleSizeof: 8;
 ```
 
-## Scope Utilities
+## Scope Utilities ⚫
 
 Automatic resource cleanup using scope-based allocation.
 
-### scopedAlloc()
+### scopedAlloc() ⚫
 
 Allocate memory that is automatically freed when scope exits.
 
@@ -592,7 +602,7 @@ const result = sqlite3.wasm.scopedAllocCall(() => {
 });
 ```
 
-## WASM Exports Access
+## WASM Exports Access ⚫
 
 Direct access to WASM module exports.
 
@@ -626,9 +636,9 @@ const version = sqlite3.capi.sqlite3_libversion();
 console.log(`SQLite version: ${version}`);
 ```
 
-## Utility Functions
+## Utility Functions ⚫
 
-### xCall()
+### xCall() ⚫
 
 Safely call WASM functions with automatic type conversion.
 
@@ -647,7 +657,7 @@ function xCall(
 ): any;
 ```
 
-### xWrap()
+### xWrap() ⚫
 
 Create JavaScript wrapper for WASM function with automatic type conversion.
 
@@ -698,9 +708,9 @@ const ppDb = sqlite3.wasm.alloc(sqlite3.wasm.ptrSizeof);
 const rc = openDb(':memory:', ppDb, SQLITE_OPEN_READWRITE | SQLITE_OPEN_CREATE, null);
 ```
 
-## Memory Management Best Practices
+## Memory Management Best Practices ⚫
 
-### 1. Always Free Allocations
+### 1. Always Free Allocations ⚫
 
 ```typescript
 // Bad: Memory leak
@@ -731,7 +741,7 @@ function bestExample() {
 }
 ```
 
-### 2. Use Correct Type Sizes
+### 2. Use Correct Type Sizes ⚫
 
 ```typescript
 // Bad: Assuming pointer size
@@ -741,7 +751,7 @@ const ptr = sqlite3.wasm.alloc(4); // Wrong on 64-bit!
 const ptr = sqlite3.wasm.alloc(sqlite3.wasm.ptrSizeof);
 ```
 
-### 3. Validate Pointers
+### 3. Validate Pointers ⚫
 
 ```typescript
 function safeUse(ptr: WasmPointer) {
@@ -752,7 +762,7 @@ function safeUse(ptr: WasmPointer) {
 }
 ```
 
-### 4. Prefer High-Level APIs
+### 4. Prefer High-Level APIs ⚫
 
 ```typescript
 // Low-level: Manual memory management
@@ -767,9 +777,9 @@ try {
 db.exec("SELECT 1");
 ```
 
-## Common Patterns
+## Common Patterns ⚫
 
-### Pattern 1: Output Parameters
+### Pattern 1: Output Parameters ⚫
 
 ```typescript
 function getPointerOutput() {
@@ -787,7 +797,7 @@ function getPointerOutput() {
 }
 ```
 
-### Pattern 2: String Conversion
+### Pattern 2: String Conversion ⚫
 
 ```typescript
 function callWithString(db: sqlite3, sql: string) {
@@ -800,7 +810,7 @@ function callWithString(db: sqlite3, sql: string) {
 }
 ```
 
-### Pattern 3: Reading Arrays
+### Pattern 3: Reading Arrays ⚫
 
 ```typescript
 function readArray(ptr: WasmPointer, count: number): number[] {
@@ -810,7 +820,7 @@ function readArray(ptr: WasmPointer, count: number): number[] {
 }
 ```
 
-### Pattern 4: Writing Buffers
+### Pattern 4: Writing Buffers ⚫
 
 ```typescript
 function writeBuffer(ptr: WasmPointer, data: Uint8Array): void {
@@ -819,7 +829,7 @@ function writeBuffer(ptr: WasmPointer, data: Uint8Array): void {
 }
 ```
 
-## TypeScript Type Definitions
+## TypeScript Type Definitions ⚫
 
 ```typescript
 declare namespace sqlite3 {
@@ -896,7 +906,7 @@ declare namespace sqlite3 {
 }
 ```
 
-## See Also
+## See Also ⚫
 
 - [C-Style API Documentation](./c-style-api.md) - Low-level C API that uses these utilities
 - [OO1 API Documentation](./oo1-api.md) - High-level API (less need for manual memory management)

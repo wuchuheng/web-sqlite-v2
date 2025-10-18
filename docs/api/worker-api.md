@@ -2,7 +2,17 @@
 
 The Worker API enables running SQLite operations in a dedicated Web Worker thread, keeping database operations off the main thread to maintain UI responsiveness. This is particularly useful for computationally intensive queries or when working with large datasets.
 
-## Overview
+## Verification Status Legend
+
+Each API item in this document has a verification status indicator:
+
+- ⚫ **Not Verified** - Type definitions and JSDoc have not been verified against source code
+- 🟡 **Partially Verified** - Type definitions verified, but JSDoc incomplete or inconsistent
+- 🟢 **Verified** - Type definitions and JSDoc fully verified and consistent with source code
+
+Last updated: 2025-10-18
+
+## Overview ⚫
 
 SQLite WASM provides two Worker API variants:
 
@@ -11,7 +21,7 @@ SQLite WASM provides two Worker API variants:
 
 The Worker API is accessed via `sqlite3.initWorker1API()` and operates through message passing between the main thread and worker thread.
 
-## Architecture
+## Architecture ⚫
 
 ```
 Main Thread                Worker Thread
@@ -24,9 +34,9 @@ Main Thread                Worker Thread
 └──────────┘              └──────────────┘
 ```
 
-## Worker1 API (Message-Based)
+## Worker1 API (Message-Based) ⚫
 
-### Initialization
+### Initialization ⚫
 
 ```typescript
 /**
@@ -63,7 +73,7 @@ worker.postMessage({
 });
 ```
 
-### Message Types
+### Message Types ⚫
 
 All messages follow this structure:
 
@@ -140,9 +150,9 @@ interface WorkerError {
 }
 ```
 
-### Supported Operations
+### Supported Operations ⚫
 
-#### open
+#### open ⚫
 
 Open a database connection.
 
@@ -194,7 +204,7 @@ worker.postMessage({
 // }
 ```
 
-#### close
+#### close ⚫
 
 Close a database connection.
 
@@ -229,7 +239,7 @@ worker.postMessage({
 });
 ```
 
-#### exec
+#### exec ⚫
 
 Execute SQL statements.
 
@@ -333,7 +343,7 @@ worker.postMessage({
 // }
 ```
 
-#### export
+#### export ⚫
 
 Export database to byte array.
 
@@ -380,7 +390,7 @@ worker.postMessage({
 // Response includes Uint8Array of database
 ```
 
-#### config-get
+#### config-get ⚫
 
 Get worker configuration.
 
@@ -425,7 +435,7 @@ worker.postMessage({
 });
 ```
 
-### Error Handling
+### Error Handling ⚫
 
 Errors are returned as special error messages:
 
@@ -450,11 +460,11 @@ worker.onmessage = function(event) {
 };
 ```
 
-## Promiser API (Promise-Based)
+## Promiser API (Promise-Based) ⚫
 
 The Promiser API wraps the message-based Worker1 API with Promises for easier asynchronous programming.
 
-### Initialization
+### Initialization ⚫
 
 ```typescript
 /**
@@ -556,7 +566,7 @@ await promiser({
 });
 ```
 
-### Error Handling with Promiser
+### Error Handling with Promiser ⚫
 
 ```javascript
 try {
@@ -572,7 +582,7 @@ try {
 }
 ```
 
-### Complete Example
+### Complete Example ⚫
 
 ```javascript
 // main.js
@@ -658,7 +668,7 @@ async function main() {
 main();
 ```
 
-## Multi-Database Support
+## Multi-Database Support ⚫
 
 The Worker API supports multiple concurrent database connections using `dbId`:
 
@@ -692,9 +702,9 @@ await promiser({ type: 'close', dbId: db1.dbId });
 await promiser({ type: 'close', dbId: db2.dbId });
 ```
 
-## Limitations and Considerations
+## Limitations and Considerations ⚫
 
-### 1. Async Nature
+### 1. Async Nature ⚫
 
 Worker API operations are asynchronous, which complicates:
 
@@ -720,7 +730,7 @@ await promiser({
 });
 ```
 
-### 2. Data Transfer Overhead
+### 2. Data Transfer Overhead ⚫
 
 Large result sets incur message passing overhead. Consider:
 
@@ -751,15 +761,15 @@ const page = await promiser({
 });
 ```
 
-### 3. No Direct Statement Access
+### 3. No Direct Statement Access ⚫
 
 Cannot access `Stmt` objects directly. All operations must be message-based.
 
-### 4. Serialization Constraints
+### 4. Serialization Constraints ⚫
 
 Message data must be serializable (no functions, circular references, etc.).
 
-## Browser Compatibility
+## Browser Compatibility ⚫
 
 **Required Features**:
 - Web Workers support (all modern browsers)
@@ -776,9 +786,9 @@ if (typeof Worker === 'undefined') {
 }
 ```
 
-## Performance Considerations
+## Performance Considerations ⚫
 
-### When to Use Worker API
+### When to Use Worker API ⚫
 
 **Use Worker API when**:
 - Running computationally expensive queries
@@ -792,7 +802,7 @@ if (typeof Worker === 'undefined') {
 - Building Node.js applications
 - Working with small databases
 
-### Optimization Tips
+### Optimization Tips ⚫
 
 1. **Batch Operations**:
 ```javascript
@@ -852,7 +862,7 @@ const arrayResults = await promiser({
 });
 ```
 
-## TypeScript Type Definitions
+## TypeScript Type Definitions ⚫
 
 ```typescript
 declare namespace sqlite3 {
@@ -895,7 +905,7 @@ declare namespace sqlite3 {
 }
 ```
 
-## See Also
+## See Also ⚫
 
 - [OO1 API Documentation](./oo1-api.md) - Main thread object-oriented API
 - [C-Style API Documentation](./c-style-api.md) - Low-level C bindings
