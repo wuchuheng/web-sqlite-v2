@@ -9,7 +9,7 @@
  * @param {import("./validation.d.ts").StatementValidators} validators Validation helper functions.
  * @param {import("./binding.d.ts").BindHelpers} bindHelpers Binding helper functions.
  * @param {symbol} constructorToken Guard to prevent external construction.
- * @returns {typeof import("@wuchuheng/web-sqlite").Stmt} Statement class.
+ * @returns {typeof import("./statement.d.ts").Stmt} Statement class.
  */
 export function createStatementClass(
     context,
@@ -31,7 +31,7 @@ export function createStatementClass(
      */
     class Statement {
         /**
-         * @param {import("@wuchuheng/web-sqlite").DB} db - Owning database instance.
+         * @param {import("./database.d.ts").DB} db - Owning database instance.
          * @param {number} pointer - Pointer to the native sqlite3_stmt.
          * @param {symbol} token - Guard to prevent external construction.
          */
@@ -71,7 +71,7 @@ export function createStatementClass(
         /**
          * Clears all bindings on the statement.
          *
-         * @returns {Statement} Fluent reference.
+         * @returns {import("./statement.d.ts").Stmt} Fluent reference.
          */
         clearBindings() {
             ensureNotLockedByExec(ensureStmtOpen(this), "clearBindings()");
@@ -84,7 +84,7 @@ export function createStatementClass(
          * Resets the statement, optionally clearing bindings.
          *
          * @param {boolean} [alsoClearBinds=false] - Whether to clear bindings too.
-         * @returns {Statement} Fluent reference.
+         * @returns {import("./statement.d.ts").Stmt} Fluent reference.
          */
         reset(alsoClearBinds = false) {
             ensureNotLockedByExec(this, "reset()");
@@ -100,7 +100,7 @@ export function createStatementClass(
          *
          * @param {...(number|string|import("./binding.d.ts").BindSpecification)} bindArgs
          *        Parameter index/name and value(s).
-         * @returns {Statement} Fluent reference.
+         * @returns {import("./statement.d.ts").Stmt} Fluent reference.
          */
         bind(...bindArgs) {
             // 1. Input handling
@@ -182,7 +182,7 @@ export function createStatementClass(
          *
          * @param {number|string} index - Parameter index or name.
          * @param {string|Uint8Array|Int8Array|ArrayBuffer|null|undefined} value - Value to bind.
-         * @returns {Statement} Fluent reference.
+         * @returns {import("./statement.d.ts").Stmt} Fluent reference.
          */
         bindAsBlob(index, value) {
             ensureStmtOpen(this);
@@ -233,7 +233,7 @@ export function createStatementClass(
         /**
          * Convenience wrapper combining step and reset.
          *
-         * @returns {Statement} Fluent reference.
+         * @returns {import("./statement.d.ts").Stmt} Fluent reference.
          */
         stepReset() {
             this.step();
@@ -243,7 +243,7 @@ export function createStatementClass(
         /**
          * Convenience wrapper combining step, reset, and finalize.
          *
-         * @returns {number|undefined} sqlite result code.
+         * @returns {import("./statement.d.ts").Stmt} Fluent reference.
          */
         stepFinalize() {
             try {

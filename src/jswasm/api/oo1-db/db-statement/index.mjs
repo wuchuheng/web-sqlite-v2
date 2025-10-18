@@ -50,8 +50,8 @@ export function createDbClasses(context, dbCtorHelper) {
  * Defines the public `pointer` accessor on the database and statement classes.
  *
  * @param {import("../context.d.ts").Oo1Context} context Runtime context.
- * @param {typeof import("@wuchuheng/web-sqlite").DB} Database Database class.
- * @param {typeof import("@wuchuheng/web-sqlite").Stmt} Statement Statement class.
+ * @param {typeof import("./database.d.ts").DB} Database Database class.
+ * @param {typeof import("./statement.d.ts").Stmt} Statement Statement class.
  */
 export function definePointerAccessors(context, Database, Statement) {
     const { ptrMap, toss } = context;

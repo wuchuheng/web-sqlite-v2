@@ -1,4 +1,5 @@
-import type { DB, Stmt } from "@wuchuheng/web-sqlite";
+import type { DB } from "./database.d.ts";
+import type { Stmt } from "./statement.d.ts";
 import type { Oo1Context } from "../context.d.ts";
 import type { DbCtorHelper } from "../db-ctor-helper.d.ts";
 import type { ExecHelpers } from "./execution.d.ts";

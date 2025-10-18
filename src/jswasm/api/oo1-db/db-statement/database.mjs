@@ -10,9 +10,9 @@
  *        Constructor helper to open DBs.
  * @param {import("./validation.d.ts").StatementValidators} validators Validation helper functions.
  * @param {import("./execution.d.ts").ExecHelpers} execHelpers Execution helper functions.
- * @param {typeof import("@wuchuheng/web-sqlite").Stmt} Statement Statement class.
+ * @param {typeof import("./statement.d.ts").Stmt} Statement Statement class.
  * @param {symbol} statementToken Guard for Statement construction.
- * @returns {typeof import("@wuchuheng/web-sqlite").DB} Database class.
+ * @returns {typeof import("./database.d.ts").DB} Database class.
  */
 export function createDatabaseClass(
     context,
@@ -29,7 +29,7 @@ export function createDatabaseClass(
     /**
      * High-level database wrapper used by sqlite3.oo1.DB.
      *
-     * @implements {import("../../../sqlite3.d.ts").DB}
+     * @implements {import("./database.d.ts").DB}
      */
     class Database {
         /**
@@ -103,6 +103,16 @@ export function createDatabaseClass(
         }
 
         /**
+         * Serialises the database contents into a byte array.
+         *
+         * @returns {Uint8Array} Database snapshot.
+         */
+        export() {
+            const pointer = pointerOf(ensureDbOpen(this));
+            return capi.sqlite3_js_db_export(pointer);
+        }
+
+        /**
          * Reports the number of changes made by recent operations.
          *
          * @param {boolean} [total=false] - Whether to report total changes.
@@ -169,7 +179,7 @@ export function createDatabaseClass(
          * Prepares a statement for execution.
          *
          * @param {string} sql - SQL text.
-         * @returns {Statement} Prepared statement.
+         * @returns {import("./statement.d.ts").Stmt} Prepared statement.
          */
         prepare(sql) {
             // 1. Input handling
@@ -206,9 +216,9 @@ export function createDatabaseClass(
         /**
          * Executes SQL with optional callbacks, mirroring the original API.
          *
-         * @param {string|import("../../../sqlite3.d.ts").ExecOptions} sql - SQL text or options bag.
-         * @param {import("../../../sqlite3.d.ts").ExecOptions} [options] - Execution options.
-         * @returns {import("../../../sqlite3.d.ts").DB | import("../../../sqlite3.d.ts").ExecResult}
+         * @param {string|import("./database.d.ts").ExecOptions} sql - SQL text or options bag.
+         * @param {import("./database.d.ts").ExecOptions} [options] - Execution options.
+         * @returns {import("./database.d.ts").DB | import("./database.d.ts").ExecResult}
          *     Configured return value.
          */
         exec(sql, options) {
@@ -500,11 +510,10 @@ export function createDatabaseClass(
          * Executes a query returning a single value.
          *
          * @param {string} sql - SQL text.
-         * @param {import("./binding.d.ts").BindSpecification | undefined} bind
+         * @param {import("./database.d.ts").ExecOptions["bind"]} [bind]
          *        Bind specification.
          * @param {number} [asType] - Column type hint.
-         * @returns {ReturnType<import("@wuchuheng/web-sqlite").Stmt["get"]> | undefined}
-         *          Selected value.
+         * @returns {unknown} Selected value.
          */
         selectValue(sql, bind, asType) {
             return selectFirstRow(this, sql, bind, 0, asType);
@@ -514,10 +523,10 @@ export function createDatabaseClass(
          * Executes a query returning the first column across rows.
          *
          * @param {string} sql - SQL text.
-         * @param {import("./binding.d.ts").BindSpecification | undefined} bind
+         * @param {import("./database.d.ts").ExecOptions["bind"]} [bind]
          *        Bind specification.
          * @param {number} [asType] - Type hint.
-         * @returns {Array<ReturnType<import("@wuchuheng/web-sqlite").Stmt["get"]>>} Values.
+         * @returns {unknown[]} Values.
          */
         selectValues(sql, bind, asType) {
             const stmt = this.prepare(sql);
@@ -538,7 +547,7 @@ export function createDatabaseClass(
          * Returns the first row as an array.
          *
          * @param {string} sql - SQL text.
-         * @param {import("./binding.d.ts").BindSpecification | undefined} bind
+         * @param {import("./database.d.ts").ExecOptions["bind"]} [bind]
          *        Bind specification.
          * @returns {unknown[]|undefined} Row.
          */
@@ -550,7 +559,7 @@ export function createDatabaseClass(
          * Returns the first row as an object.
          *
          * @param {string} sql - SQL text.
-         * @param {import("./binding.d.ts").BindSpecification | undefined} bind
+         * @param {import("./database.d.ts").ExecOptions["bind"]} [bind]
          *        Bind specification.
          * @returns {Record<string, unknown>|undefined} Row.
          */
@@ -562,7 +571,7 @@ export function createDatabaseClass(
          * Collects all rows as arrays.
          *
          * @param {string} sql - SQL text.
-         * @param {import("./binding.d.ts").BindSpecification | undefined} bind
+         * @param {import("./database.d.ts").ExecOptions["bind"]} [bind]
          *        Bind specification.
          * @returns {unknown[][]} Rows.
          */
@@ -574,7 +583,7 @@ export function createDatabaseClass(
          * Collects all rows as objects.
          *
          * @param {string} sql - SQL text.
-         * @param {import("./binding.d.ts").BindSpecification | undefined} bind
+         * @param {import("./database.d.ts").ExecOptions["bind"]} [bind]
          *        Bind specification.
          * @returns {Array<Record<string, unknown>>} Rows.
          */
@@ -596,7 +605,7 @@ export function createDatabaseClass(
         /**
          * Executes a callback inside a transaction.
          *
-         * @param {(db: import("@wuchuheng/web-sqlite").DB) => unknown} callback - Callback receiving the DB instance.
+         * @param {() => unknown} callback - Callback receiving control within the transaction.
          * @returns {unknown} Value returned by callback.
          */
         transaction(callback) {
@@ -626,7 +635,7 @@ export function createDatabaseClass(
         /**
          * Executes a callback inside a savepoint transaction.
          *
-         * @param {(db: import("@wuchuheng/web-sqlite").DB) => unknown} callback - Callback receiving the DB instance.
+         * @param {() => unknown} callback - Callback receiving control within the savepoint.
          * @returns {unknown} Value returned by callback.
          */
         savepoint(callback) {

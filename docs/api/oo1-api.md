@@ -6,9 +6,9 @@ The Object-Oriented API (OO1) provides a high-level, JavaScript-friendly interfa
 
 Each API item in this document has a verification status indicator:
 
-- ⚫ **Not Verified** - Type definitions and JSDoc have not been verified against source code
-- 🟡 **Partially Verified** - Type definitions verified, but JSDoc incomplete or inconsistent
-- 🟢 **Verified** - Type definitions and JSDoc fully verified and consistent with source code
+-   ⚫ **Not Verified** - Type definitions and JSDoc have not been verified against source code
+-   🟡 **Partially Verified** - Type definitions verified, but JSDoc incomplete or inconsistent
+-   🟢 **Verified** - Type definitions and JSDoc fully verified and consistent with source code
 
 Last updated: 2025-10-18
 
@@ -16,12 +16,12 @@ Last updated: 2025-10-18
 
 The OO1 API is accessed via `sqlite3.oo1` and includes:
 
-- **DB class** - Main database connection class
-- **Stmt class** - Prepared statement wrapper
-- **JsStorageDb class** - localStorage/sessionStorage database integration
-- **OpfsDb class** - Origin Private File System persistent databases
+-   **DB class** - Main database connection class
+-   **Stmt class** - Prepared statement wrapper
+-   **JsStorageDb class** - localStorage/sessionStorage database integration
+-   **OpfsDb class** - Origin Private File System persistent databases
 
-## DB Class ⚫
+## DB Class 🟢
 
 The DB class represents a database connection and provides methods for executing SQL, managing transactions, and creating prepared statements.
 
@@ -47,10 +47,11 @@ constructor(config: {
 ```
 
 **Flags**: String containing one or more:
-- `"c"` - Create if doesn't exist (SQLITE_OPEN_CREATE)
-- `"r"` - Read-only (SQLITE_OPEN_READONLY)
-- `"w"` - Read-write (SQLITE_OPEN_READWRITE)
-- `"t"` - Trace mode (outputs SQL to console)
+
+-   `"c"` - Create if doesn't exist (SQLITE_OPEN_CREATE)
+-   `"r"` - Read-only (SQLITE_OPEN_READONLY)
+-   `"w"` - Read-write (SQLITE_OPEN_READWRITE)
+-   `"t"` - Trace mode (outputs SQL to console)
 
 **Default**: `"c"` (equivalent to `SQLITE_OPEN_CREATE | SQLITE_OPEN_READWRITE`)
 
@@ -71,11 +72,11 @@ const db4 = new sqlite3.oo1.DB("readonly.db", "r");
 const db5 = new sqlite3.oo1.DB({
     filename: "app.db",
     flags: "cw",
-    vfs: "opfs"
+    vfs: "opfs",
 });
 ```
 
-### Core Properties ⚫
+### Core Properties 🟢
 
 ```typescript
 /**
@@ -95,7 +96,7 @@ readonly pointer: sqlite3;
 readonly isOpen: boolean;
 ```
 
-### SQL Execution Methods ⚫
+### SQL Execution Methods 🟢
 
 #### exec() 🟢
 
@@ -164,19 +165,19 @@ db.exec(`
 
 // With bind parameters
 db.exec("INSERT INTO users (name, age) VALUES (?, ?)", {
-    bind: ["Charlie", 35]
+    bind: ["Charlie", 35],
 });
 
 // Named parameters
 db.exec("INSERT INTO users (name, age) VALUES (:name, :age)", {
-    bind: { ":name": "Diana", ":age": 28 }
+    bind: { ":name": "Diana", ":age": 28 },
 });
 
 // With callback (array mode)
 db.exec("SELECT * FROM users", {
     callback: (row) => {
         console.log(row); // [1, 'Alice', 30]
-    }
+    },
 });
 
 // With callback (object mode)
@@ -184,19 +185,19 @@ db.exec("SELECT * FROM users", {
     rowMode: "object",
     callback: (row) => {
         console.log(row); // { id: 1, name: 'Alice', age: 30 }
-    }
+    },
 });
 
 // Return all rows
 const result = db.exec("SELECT * FROM users WHERE age > ?", {
     bind: [25],
     rowMode: "object",
-    returnValue: "resultRows"
+    returnValue: "resultRows",
 });
 console.log(result.resultRows);
 ```
 
-#### selectArray() ⚫
+#### selectArray() 🟢
 
 Execute a query and return first row as an array.
 
@@ -221,7 +222,7 @@ if (!user) {
 }
 ```
 
-#### selectArrays() ⚫
+#### selectArrays() 🟢
 
 Execute a query and return all rows as arrays.
 
@@ -242,7 +243,7 @@ const users = db.selectArrays("SELECT * FROM users WHERE age > ?", [25]);
 // users = [[1, 'Alice', 30], [3, 'Charlie', 35]]
 ```
 
-#### selectObject() ⚫
+#### selectObject() 🟢
 
 Execute a query and return first row as an object.
 
@@ -263,7 +264,7 @@ const user = db.selectObject("SELECT * FROM users WHERE id = ?", [1]);
 // user = { id: 1, name: 'Alice', age: 30 }
 ```
 
-#### selectObjects() ⚫
+#### selectObjects() 🟢
 
 Execute a query and return all rows as objects.
 
@@ -287,7 +288,7 @@ const users = db.selectObjects("SELECT * FROM users WHERE age > ?", [25]);
 // ]
 ```
 
-#### selectValue() ⚫
+#### selectValue() 🟢
 
 Execute a query and return a single value.
 
@@ -311,9 +312,9 @@ const name = db.selectValue("SELECT name FROM users WHERE id = ?", [1]);
 // name = 'Alice'
 ```
 
-### Prepared Statement Methods ⚫
+### Prepared Statement Methods 🟢
 
-#### prepare() ⚫
+#### prepare() 🟢
 
 Create a prepared statement for reuse.
 
@@ -339,9 +340,9 @@ try {
 }
 ```
 
-### Transaction Methods ⚫
+### Transaction Methods 🟢
 
-#### transaction() ⚫
+#### transaction() 🟢
 
 Execute a function within a transaction.
 
@@ -359,22 +360,28 @@ transaction<T>(callback: () => T): T;
 
 ```typescript
 db.transaction(() => {
-    db.exec("INSERT INTO users (name, age) VALUES (?, ?)", { bind: ["Grace", 27] });
-    db.exec("UPDATE users SET age = age + 1 WHERE name = ?", { bind: ["Grace"] });
+    db.exec("INSERT INTO users (name, age) VALUES (?, ?)", {
+        bind: ["Grace", 27],
+    });
+    db.exec("UPDATE users SET age = age + 1 WHERE name = ?", {
+        bind: ["Grace"],
+    });
     // If any error occurs, entire transaction is rolled back
 });
 
 // With return value
 const newId = db.transaction(() => {
-    db.exec("INSERT INTO users (name, age) VALUES (?, ?)", { bind: ["Henry", 31] });
+    db.exec("INSERT INTO users (name, age) VALUES (?, ?)", {
+        bind: ["Henry", 31],
+    });
     return db.selectValue("SELECT last_insert_rowid()");
 });
 console.log(`New user ID: ${newId}`);
 ```
 
-### Utility Methods ⚫
+### Utility Methods 🟢
 
-#### changes() ⚫
+#### changes() 🟢
 
 Get number of rows modified by last statement.
 
@@ -393,7 +400,7 @@ db.exec("UPDATE users SET age = age + 1 WHERE age > 30");
 console.log(`Updated ${db.changes()} rows`);
 ```
 
-#### close() ⚫
+#### close() 🟢
 
 Close the database connection.
 
@@ -413,7 +420,7 @@ const db = new sqlite3.oo1.DB(":memory:");
 db.close();
 ```
 
-#### export() ⚫
+#### export() 🟢
 
 Export database to a byte array.
 
@@ -431,22 +438,22 @@ export(): Uint8Array;
 const dbBytes = db.export();
 
 // Save to file
-const blob = new Blob([dbBytes], { type: 'application/x-sqlite3' });
+const blob = new Blob([dbBytes], { type: "application/x-sqlite3" });
 const url = URL.createObjectURL(blob);
 // ... trigger download ...
 
 // Or send to server
-fetch('/api/backup', {
-    method: 'POST',
-    body: dbBytes
+fetch("/api/backup", {
+    method: "POST",
+    body: dbBytes,
 });
 ```
 
-## Stmt Class ⚫
+## Stmt Class 🟢
 
 The Stmt class represents a prepared statement. Statements are created via `DB.prepare()` and must be finalized when done.
 
-### Properties ⚫
+### Properties 🟢
 
 ```typescript
 /**
@@ -475,9 +482,9 @@ readonly columnCount: number;
 readonly parameterCount: number;
 ```
 
-### Binding Methods ⚫
+### Binding Methods 🟢
 
-#### bind() ⚫
+#### bind() 🟢
 
 Bind values to statement parameters.
 
@@ -511,9 +518,9 @@ stmt2.bind({ ":name": "Charlie", ":age": 35 });
 stmt2.bind({ name: "Diana", age: 28 });
 ```
 
-### Execution Methods ⚫
+### Execution Methods 🟢
 
-#### step() ⚫
+#### step() 🟢
 
 Execute the statement one step.
 
@@ -535,7 +542,7 @@ while (stmt.step()) {
 stmt.finalize();
 ```
 
-#### stepReset() ⚫
+#### stepReset() 🟢
 
 Execute and automatically reset.
 
@@ -557,7 +564,7 @@ stmt.bind("Frank", 29).stepReset();
 stmt.finalize();
 ```
 
-#### stepFinalize() ⚫
+#### stepFinalize() 🟢
 
 Execute and automatically finalize.
 
@@ -567,7 +574,7 @@ Execute and automatically finalize.
  * Useful for one-time statements
  * @returns this for chaining
  */
-stepFinalize(): this;
+stepFinalize(): boolean;
 ```
 
 **Usage Example**:
@@ -578,7 +585,7 @@ db.prepare("INSERT INTO users (name, age) VALUES (?, ?)")
     .stepFinalize();
 ```
 
-#### reset() ⚫
+#### reset() 🟢
 
 Reset statement for re-execution.
 
@@ -591,7 +598,7 @@ Reset statement for re-execution.
 reset(): this;
 ```
 
-#### finalize() ⚫
+#### finalize() 🟢
 
 Destroy statement and free resources.
 
@@ -603,9 +610,9 @@ Destroy statement and free resources.
 finalize(): void;
 ```
 
-### Column Access Methods ⚫
+### Column Access Methods 🟢
 
-#### get() ⚫
+#### get() 🟢
 
 Get column value(s) from current row.
 
@@ -649,7 +656,7 @@ if (stmt.step()) {
 stmt.finalize();
 ```
 
-#### getColumnName() ⚫
+#### getColumnName() 🟢
 
 Get column name by index.
 
@@ -662,7 +669,7 @@ Get column name by index.
 getColumnName(index: number): string;
 ```
 
-#### getColumnNames() ⚫
+#### getColumnNames() 🟢
 
 Get all column names.
 
@@ -684,9 +691,9 @@ const columns = stmt.getColumnNames();
 stmt.finalize();
 ```
 
-## JsStorageDb Class ⚫
+## JsStorageDb Class 🟢
 
-Extends DB class to integrate with browser's localStorage or sessionStorage.
+Extends DB class to integrate with the browser's kvvfs-backed `localStorage` or `sessionStorage` buckets.
 
 ```typescript
 /**
@@ -695,11 +702,10 @@ Extends DB class to integrate with browser's localStorage or sessionStorage.
  */
 class JsStorageDb extends DB {
     /**
-     * Create database from localStorage/sessionStorage
-     * @param storageName - Storage key name
-     * @param storageType - "local" for localStorage, "session" for sessionStorage
+     * Create database backed by localStorage or sessionStorage
+     * @param storageType - "local" for localStorage, "session" for sessionStorage (default "local")
      */
-    constructor(storageName: string, storageType?: "local" | "session");
+    constructor(storageType?: "local" | "session");
 
     /**
      * Persist current database to storage
@@ -712,24 +718,28 @@ class JsStorageDb extends DB {
 
 ```typescript
 // Create or load database from localStorage
-const db = new sqlite3.oo1.JsStorageDb("myapp-db", "local");
+const db = new sqlite3.oo1.JsStorageDb("local");
 
 // Use normally
-db.exec("CREATE TABLE IF NOT EXISTS settings (key TEXT PRIMARY KEY, value TEXT)");
+db.exec(
+    "CREATE TABLE IF NOT EXISTS settings (key TEXT PRIMARY KEY, value TEXT)"
+);
 db.exec("INSERT OR REPLACE INTO settings VALUES (?, ?)", {
-    bind: ["theme", "dark"]
+    bind: ["theme", "dark"],
 });
 
 // Manually flush to storage (also happens automatically)
 db.flush();
 
 // Later, reopening with same name loads existing database
-const db2 = new sqlite3.oo1.JsStorageDb("myapp-db", "local");
-const theme = db2.selectValue("SELECT value FROM settings WHERE key = ?", ["theme"]);
+const db2 = new sqlite3.oo1.JsStorageDb("local");
+const theme = db2.selectValue("SELECT value FROM settings WHERE key = ?", [
+    "theme",
+]);
 // theme = "dark"
 ```
 
-## OpfsDb Class ⚫
+## OpfsDb Class 🟢
 
 Extends DB class to use Origin Private File System for persistent storage.
 
@@ -777,7 +787,7 @@ if (sqlite3.oo1.OpfsDb) {
 }
 ```
 
-## Error Handling ⚫
+## Error Handling 🟢
 
 The OO1 API uses exception-based error handling. All methods throw `sqlite3.SQLite3Error` on errors.
 
@@ -803,7 +813,7 @@ class SQLite3Error extends Error {
 ```typescript
 try {
     db.exec("INSERT INTO users (id, name) VALUES (?, ?)", {
-        bind: [1, "Alice"]
+        bind: [1, "Alice"],
     });
 } catch (e) {
     if (e instanceof sqlite3.SQLite3Error) {
@@ -860,7 +870,7 @@ db.transaction(() => {
 // Bad: Prepare on each iteration
 for (const user of users) {
     db.exec("INSERT INTO users (name, age) VALUES (?, ?)", {
-        bind: [user.name, user.age]
+        bind: [user.name, user.age],
     });
 }
 
@@ -892,7 +902,7 @@ db.exec("SELECT * FROM large_table", {
     rowMode: "object",
     callback: (row) => {
         processRow(row);
-    }
+    },
 });
 ```
 
@@ -903,17 +913,33 @@ declare namespace sqlite3 {
     namespace oo1 {
         class DB {
             constructor(filename?: string, flags?: string, vfs?: string);
-            constructor(config: { filename?: string; flags?: string; vfs?: string });
+            constructor(config: {
+                filename?: string;
+                flags?: string;
+                vfs?: string;
+            });
 
             readonly filename: string;
             readonly pointer: number;
             readonly isOpen: boolean;
 
             exec(sql: string, options?: ExecOptions): this | ExecResult;
-            selectArray(sql: string, bind?: any[] | Record<string, any>): any[] | undefined;
-            selectArrays(sql: string, bind?: any[] | Record<string, any>): any[][];
-            selectObject(sql: string, bind?: any[] | Record<string, any>): Record<string, any> | undefined;
-            selectObjects(sql: string, bind?: any[] | Record<string, any>): Record<string, any>[];
+            selectArray(
+                sql: string,
+                bind?: any[] | Record<string, any>
+            ): any[] | undefined;
+            selectArrays(
+                sql: string,
+                bind?: any[] | Record<string, any>
+            ): any[][];
+            selectObject(
+                sql: string,
+                bind?: any[] | Record<string, any>
+            ): Record<string, any> | undefined;
+            selectObjects(
+                sql: string,
+                bind?: any[] | Record<string, any>
+            ): Record<string, any>[];
             selectValue(sql: string, bind?: any[] | Record<string, any>): any;
             prepare(sql: string): Stmt;
             transaction<T>(callback: () => T): T;
@@ -943,7 +969,7 @@ declare namespace sqlite3 {
         }
 
         class JsStorageDb extends DB {
-            constructor(storageName: string, storageType?: "local" | "session");
+            constructor(storageType?: "local" | "session");
             flush(): void;
         }
 
@@ -960,6 +986,6 @@ declare namespace sqlite3 {
 
 ## See Also
 
-- [C-Style API Documentation](./c-style-api.md) - Low-level C API bindings
-- [WASM Utilities Documentation](./wasm-utilities.md) - Memory management utilities
-- [Worker API Documentation](./worker-api.md) - Web Worker integration
+-   [C-Style API Documentation](./c-style-api.md) - Low-level C API bindings
+-   [WASM Utilities Documentation](./wasm-utilities.md) - Memory management utilities
+-   [Worker API Documentation](./worker-api.md) - Web Worker integration

@@ -19,7 +19,7 @@ export const databaseLifecycleTests: TestCase[] = [
       const db = TestUtils.createTestDb(sqlite3, LIFECYCLE_DB_FILE);
 
       try {
-        TestUtils.assert(db.isOpen(), "Database should be created and open");
+        TestUtils.assert(db.isOpen, "Database should be created and open");
       } finally {
         db.close();
       }
@@ -85,8 +85,8 @@ export const databaseLifecycleTests: TestCase[] = [
       const db2 = TestUtils.createTestDb(sqlite3, LIFECYCLE_DB_FILE);
 
       try {
-        TestUtils.assert(db1.isOpen(), "First database should be created");
-        TestUtils.assert(db2.isOpen(), "Second database should be created");
+        TestUtils.assert(db1.isOpen, "First database should be created");
+        TestUtils.assert(db2.isOpen, "Second database should be created");
       } finally {
         db1.close();
         db2.close();

@@ -232,6 +232,8 @@ declare module '@wuchuheng/web-sqlite' {
    * Prepared Statement Class
    */
   export class Stmt {
+    /** Original SQL text */
+    readonly sql: string
     /** Database reference */
     readonly db: DB
     /** Statement pointer */
@@ -242,13 +244,15 @@ declare module '@wuchuheng/web-sqlite' {
     readonly columnCount: number
 
     /** Finalize (close) the statement */
-    finalize(): number | undefined
+    finalize(): void
     /** Reset the statement for reuse */
     reset(alsoClearBinds?: boolean): this
     /** Clear all parameter bindings */
     clearBindings(): this
     /** Bind parameters to the statement */
-    bind(params: BindValue[] | Record<string, BindValue>): this
+    bind(...values: BindValue[]): this
+    bind(values: BindValue[]): this
+    bind(values: Record<string, BindValue>): this
     bind(index: number | string, value: BindValue): this
     /** Bind a value as a BLOB */
     bindAsBlob(value: Uint8Array | Int8Array | ArrayBuffer | string): this
@@ -258,7 +262,7 @@ declare module '@wuchuheng/web-sqlite' {
     /** Step and reset */
     stepReset(): this
     /** Step, reset, and finalize */
-    stepFinalize(): boolean
+    stepFinalize(): this
     /** Get column value(s) */
     get<T = unknown>(index: number, asType?: number): T
     get<T = Record<string, unknown>>(target: Record<string, unknown>): T
@@ -389,11 +393,13 @@ declare module '@wuchuheng/web-sqlite' {
     constructor(options: { filename?: string; flags?: string; vfs?: string | null })
 
     /** Check if database is open */
-    isOpen(): boolean
+    readonly isOpen: boolean
     /** Affirm database is open (throws if not) */
     affirmOpen(): this
     /** Close the database */
     close(): void
+    /** Export the database as a Uint8Array */
+    export(): Uint8Array
     /** Get number of changes */
     changes(total?: boolean, sixtyFour?: boolean): number | bigint
     /** Get database filename */
@@ -425,10 +431,10 @@ declare module '@wuchuheng/web-sqlite' {
     /** Get count of open statements */
     openStatementCount(): number
     /** Execute in a transaction */
-    transaction<T = unknown>(callback: (db: this) => T): T
-    transaction<T = unknown>(qualifier: string, callback: (db: this) => T): T
+    transaction<T = unknown>(callback: () => T): T
+    transaction<T = unknown>(qualifier: string, callback: () => T): T
     /** Execute in a savepoint */
-    savepoint<T = unknown>(callback: (db: this) => T): T
+    savepoint<T = unknown>(callback: () => T): T
     /** Check result code */
     checkRc(resultCode: number): this
 
@@ -446,21 +452,34 @@ declare module '@wuchuheng/web-sqlite' {
     Stmt: typeof Stmt
     /** JsStorageDb class (browser only) */
     JsStorageDb?: typeof JsStorageDb
+    /** OpfsDb class (browser only) */
+    OpfsDb?: typeof OpfsDb
   }
 
   /**
    * JsStorageDb for localStorage/sessionStorage persistence
    */
   export class JsStorageDb extends DB {
-    constructor(storageName?: "session" | "local")
+    constructor(storageType?: "local" | "session")
+    /** Flush current database state to storage */
+    flush(): void
     /** Clear storage for this database */
-    clearStorage(): unknown
+    clearStorage(): number
     /** Get storage size */
     storageSize(): number
     /** Static method to clear storage */
-    static clearStorage(filename: string): unknown
+    static clearStorage(storageType?: "local" | "session"): number
     /** Static method to get storage size */
-    static storageSize(filename: string): number
+    static storageSize(storageType?: "local" | "session"): number
+  }
+
+  /**
+   * OpfsDb for persistent OPFS-backed databases
+   */
+  export class OpfsDb extends DB {
+    constructor(filename: string)
+    /** Import a database image into OPFS */
+    static importDb(filename: string, bytes: Uint8Array | ArrayBuffer): Promise<number>
   }
 
   /**
