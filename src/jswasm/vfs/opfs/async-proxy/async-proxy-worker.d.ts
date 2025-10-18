@@ -8,6 +8,9 @@ import type {
     OperationIds,
 } from "./state.d.ts";
 
+/**
+ * Enumerates the operation identifiers handled by the async proxy worker.
+ */
 export type AsyncProxyOperationName =
     | "opfs-async-shutdown"
     | "mkdir"
@@ -24,14 +27,20 @@ export type AsyncProxyOperationName =
     | "xUnlock"
     | "xWrite";
 
+/** Possible argument types routed to async operation handlers. */
 export type AsyncOperationArgument = number | bigint | string | boolean;
 
+/** Result types produced by async operation handlers. */
 export type AsyncOperationResult = void | number;
 
+/** Function signature implemented by async operation handlers. */
 export type AsyncOperationImplementation = (
     ...args: ReadonlyArray<AsyncOperationArgument>
 ) => AsyncOperationResult | Promise<AsyncOperationResult>;
 
+/**
+ * Metadata tracked for each open OPFS file within the worker.
+ */
 export interface AsyncFileRecord {
     readonly fid: number;
     readonly filenameAbs: string;
@@ -46,6 +55,9 @@ export interface AsyncFileRecord {
     xLock?: number;
 }
 
+/**
+ * Initialization payload delivered to the worker on startup.
+ */
 export interface WorkerInitOptions {
     readonly verbose?: number;
     readonly sabOP: SharedArrayBuffer;
@@ -60,11 +72,28 @@ export interface WorkerInitOptions {
     readonly sabS11nSize: number;
 }
 
+/**
+ * Entry describing the mapping between operation ids and handler callbacks.
+ */
 export interface OperationHandlerEntry {
     readonly name: AsyncProxyOperationName;
     readonly handler: AsyncOperationImplementation;
 }
 
+/** Control message dispatched from the controller thread. */
+export interface WorkerControlMessage {
+    readonly type?: string;
+    readonly args?: WorkerInitOptions;
+}
+
+/** Event delivered to {@link AsyncProxyWorker.onMessage}. */
+export interface WorkerMessageEvent {
+    readonly data?: WorkerControlMessage;
+}
+
+/**
+ * Worker implementation responsible for handling OPFS async proxy requests.
+ */
 export declare class AsyncProxyWorker {
     constructor(postFn: WorkerPostFn);
     readonly postMessage: WorkerPostFn;
@@ -81,7 +110,7 @@ export declare class AsyncProxyWorker {
     isShutdownRequested: boolean;
     waitLoopActive: boolean;
     start(): Promise<void>;
-    onMessage(event: { readonly data?: { readonly type?: string; readonly args?: WorkerInitOptions } }): void;
+    onMessage(event: WorkerMessageEvent): void;
     handleInit(options: WorkerInitOptions | undefined): void;
     handleRestart(): void;
     handleShutdown(): void;

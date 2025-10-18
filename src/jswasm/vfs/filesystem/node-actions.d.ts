@@ -4,16 +4,24 @@ import type {
     FSStream,
     MutableFS,
 } from "./base-state.d.ts";
+import type { PathFsUtilities } from "../../utils/path.d.ts";
+import type { RuntimeModule } from "../../shared/runtime-types.d.ts";
 
+/**
+ * Configuration surface required to construct the node manipulation helpers.
+ */
 export interface NodeActionsOptions {
+    /** Converts POSIX mode strings into flag bitmasks. */
     FS_modeStringToFlags(mode: string): number;
-    getPathFS(): {
-        resolve(...paths: string[]): string;
-        relative(from: string, to: string): string;
-    };
-    Module: Record<string, unknown>;
+    /** Lazily retrieves the PATH_FS helper used for symlink resolution. */
+    getPathFS(): PathFsUtilities;
+    /** Reference to the runtime module for interacting with FS helpers. */
+    Module: RuntimeModule;
 }
 
+/**
+ * High-level filesystem operations that operate on node paths or descriptors.
+ */
 export interface NodeActions {
     create(path: string, mode?: number): FSNode;
     mkdir(path: string, mode?: number): FSNode;
@@ -39,6 +47,9 @@ export interface NodeActions {
     open(path: string | FSNode, flags: number | string, mode?: number): FSStream;
 }
 
+/**
+ * Creates the node helper facade for the supplied filesystem implementation.
+ */
 export function createNodeActions(
     FS: MutableFS,
     options: NodeActionsOptions

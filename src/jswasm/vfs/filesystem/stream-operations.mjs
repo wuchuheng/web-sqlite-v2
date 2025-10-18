@@ -5,30 +5,7 @@ import { ERRNO_CODES, MAX_OPEN_FDS } from "./constants.mjs";
  * descriptor allocation and device registration.
  *
  * @param {import("./base-state.d.ts").MutableFS} FS
- * @returns {{
- *   MAX_OPEN_FDS: number,
- *   nextfd(): number,
- *   getStreamChecked(fd: number): import("./base-state.d.ts").FSStream,
- *   getStream(fd: number): import("./base-state.d.ts").FSStream | null,
- *   createStream(
- *     stream: Partial<import("./base-state.d.ts").FSStream>,
- *     fd?: number
- *   ): import("./base-state.d.ts").FSStream,
- *   closeStream(fd: number): void,
- *   dupStream(
- *     origStream: import("./base-state.d.ts").FSStream,
- *     fd?: number
- *   ): import("./base-state.d.ts").FSStream,
- *   chrdev_stream_ops: {
- *     open(stream: import("./base-state.d.ts").FSStream): void,
- *     llseek(): never,
- *   },
- *   major(dev: number): number,
- *   minor(dev: number): number,
- *   makedev(ma: number, mi: number): number,
- *   registerDevice(dev: number, ops: import("./base-state.d.ts").StreamOps): void,
- *   getDevice(dev: number): import("./base-state.d.ts").DeviceDefinition | undefined,
- * }}
+ * @returns {import("./stream-operations.d.ts").StreamOperations}
  */
 export function createStreamOperations(FS) {
     return {

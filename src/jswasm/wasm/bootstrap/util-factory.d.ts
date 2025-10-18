@@ -1,3 +1,7 @@
+/**
+ * Shared utility surface used throughout the bootstrapper for validation and
+ * error handling.
+ */
 export interface BootstrapUtility {
     affirmBindableTypedArray(value: unknown): Uint8Array | Int8Array | ArrayBuffer;
     flexibleString(value: unknown): unknown;
@@ -18,11 +22,30 @@ export interface BootstrapUtility {
     affirmIsDb(bytes: ArrayBuffer | Uint8Array): void;
 }
 
+/** Structured return type produced by the bootstrap utility factory. */
 export interface BootstrapUtilFactoryResult {
     util: BootstrapUtility;
 }
 
+/**
+ * Minimal error helper functions required by the bootstrap utilities.
+ */
+export interface BootstrapErrorFunctions {
+    toss3(...args: unknown[]): never;
+}
+
+/**
+ * Optional WASM bindings injected into the utility factory.
+ */
+export interface BootstrapWasmBindings {
+    isPtr?(value: unknown): boolean;
+    cstrToJs?(ptr: number): string;
+}
+
+/**
+ * Creates the set of reusable bootstrap utilities shared across modules.
+ */
 export function createBootstrapUtil(
-    errorFns: { toss3: (...args: unknown[]) => never },
-    wasm: { isPtr?: (value: unknown) => boolean; cstrToJs?: (ptr: number) => string }
+    errorFns: BootstrapErrorFunctions,
+    wasm: BootstrapWasmBindings
 ): BootstrapUtilFactoryResult;

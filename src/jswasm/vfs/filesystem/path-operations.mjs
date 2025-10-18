@@ -6,37 +6,8 @@ import { ERRNO_CODES } from "./constants.mjs";
  * the hash table that accelerates path lookups in sync.
  *
  * @param {import("./base-state.d.ts").MutableFS} FS
- * @param {{
- *   getPathFS: () => {
- *     resolve: (...paths: string[]) => string,
- *     relative: (from: string, to: string) => string,
- *   },
- * }} options
- * @returns {{
- *   lookupPath(
- *     path: string,
- *     opts?: {
- *       follow_mount?: boolean,
- *       recurse_count?: number,
- *       parent?: boolean,
- *       follow?: boolean,
- *     }
- *   ): { path: string, node: import("./base-state.d.ts").FSNode | null },
- *   getPath(node: import("./base-state.d.ts").FSNode): string,
- *   hashName(parentid: number, name: string): number,
- *   hashAddNode(node: import("./base-state.d.ts").FSNode): void,
- *   hashRemoveNode(node: import("./base-state.d.ts").FSNode): void,
- *   lookupNode(parent: import("./base-state.d.ts").FSNode, name: string): import("./base-state.d.ts").FSNode,
- *   createNode(
- *     parent: import("./base-state.d.ts").FSNode,
- *     name: string,
- *     mode: number,
- *     rdev: number
- *   ): import("./base-state.d.ts").FSNode,
- *   destroyNode(node: import("./base-state.d.ts").FSNode): void,
- *   isRoot(node: import("./base-state.d.ts").FSNode): boolean,
- *   isMountpoint(node: import("./base-state.d.ts").FSNode): boolean,
- * }}
+ * @param {import("./path-operations.d.ts").PathOperationsOptions} options
+ * @returns {import("./path-operations.d.ts").PathOperations}
  */
 export function createPathOperations(FS, { getPathFS }) {
     return {

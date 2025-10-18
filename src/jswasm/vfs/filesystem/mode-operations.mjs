@@ -5,21 +5,7 @@ import { ERRNO_CODES, MODE, OPEN_FLAGS } from "./constants.mjs";
  * permissions for filesystem nodes.
  *
  * @param {import("./base-state.d.ts").MutableFS} FS
- * @returns {{
- *   isFile(mode: number): boolean,
- *   isDir(mode: number): boolean,
- *   isLink(mode: number): boolean,
- *   isChrdev(mode: number): boolean,
- *   isBlkdev(mode: number): boolean,
- *   isFIFO(mode: number): boolean,
- *   isSocket(mode: number): boolean,
- *   flagsToPermissionString(flag: number): string,
- *   nodePermissions(node: import("./base-state.d.ts").FSNode, perms: string): number,
- *   mayLookup(dir: import("./base-state.d.ts").FSNode): number,
- *   mayCreate(dir: import("./base-state.d.ts").FSNode, name: string): number,
- *   mayDelete(dir: import("./base-state.d.ts").FSNode, name: string, isdir: boolean): number,
- *   mayOpen(node: import("./base-state.d.ts").FSNode | null, flags: number): number,
- * }}
+ * @returns {import("./mode-operations.d.ts").ModeOperations}
  */
 export function createModeOperations(FS) {
     return {

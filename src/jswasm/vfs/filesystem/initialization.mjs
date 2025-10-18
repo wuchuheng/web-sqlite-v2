@@ -5,31 +5,8 @@ import { ERRNO_CODES, MODE, OPEN_FLAGS, MAX_OPEN_FDS } from "./constants.mjs";
  * devices, directories, and streams for the runtime.
  *
  * @param {import("./base-state.d.ts").MutableFS} FS
- * @param {{ Module: Record<string, any> }} options
- * @returns {{
- *   createDefaultDirectories(): void,
- *   createDefaultDevices(
- *     TTY: {
- *       register(dev: number, ops: import("./base-state.d.ts").StreamOps): void,
- *       default_tty_ops: import("./base-state.d.ts").StreamOps,
- *       default_tty1_ops: import("./base-state.d.ts").StreamOps,
- *     },
- *     randomFill: (buffer: Uint8Array) => Uint8Array
- *   ): void,
- *   createSpecialDirectories(): void,
- *   createStandardStreams(
- *     input?: (() => number) | null,
- *     output?: ((value: number) => void) | null,
- *     error?: ((value: number) => void) | null
- *   ): void,
- *   staticInit(MEMFS: import("./base-state.d.ts").FileSystemMountType): void,
- *   init(
- *     input?: (() => number) | null,
- *     output?: ((value: number) => void) | null,
- *     error?: ((value: number) => void) | null
- *   ): void,
- *   quit(): void,
- * }}
+ * @param {import("./initialization.d.ts").InitializationOptions} options
+ * @returns {import("./initialization.d.ts").InitializationHelpers}
  */
 export function createInitializationHelpers(FS, { Module }) {
     return {
