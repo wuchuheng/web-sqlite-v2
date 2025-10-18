@@ -45,11 +45,12 @@ const MMAP_FLAGS = {
 
 /**
  * Creates and returns the MEMFS file system implementation.
- * @param {Object} FS - The file system module reference
- * @param {Object} HEAP8 - WebAssembly heap reference for Int8Array
- * @param {Function} mmapAlloc - Memory allocation function for mmap
- * @param {Function} _zeroMemory - Function to zero memory regions (unused)
- * @returns {Object} MEMFS implementation object
+ * @param {import("./filesystem/types.d.ts").MutableFS & { chrdev_stream_ops: import("./filesystem/types.d.ts").StreamOps }} FS
+ *        The file system module reference.
+ * @param {Int8Array} HEAP8 WebAssembly heap reference for Int8Array.
+ * @param {(size: number) => number} mmapAlloc Memory allocation function for mmap.
+ * @param {(pointer: number, byteCount: number) => void} _zeroMemory Function to zero memory regions (unused).
+ * @returns {import("./memfs.d.ts").MemfsInstance} MEMFS implementation object.
  */
 export function createMEMFS(FS, HEAP8, mmapAlloc, _zeroMemory) {
     const MEMFS = {

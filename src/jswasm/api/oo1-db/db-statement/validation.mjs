@@ -5,8 +5,8 @@
 /**
  * Creates validation and resolver utilities for DB/Statement operations.
  *
- * @param {object} context - Shared runtime context.
- * @returns {object} Validation helper functions.
+ * @param {import("../context.d.ts").Oo1Context} context Shared runtime context.
+ * @returns {import("./validation.d.ts").StatementValidators} Validation helper functions.
  */
 export function createValidationHelpers(context) {
     const { capi, util, ptrMap, toss } = context;

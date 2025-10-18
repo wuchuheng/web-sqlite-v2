@@ -11,9 +11,11 @@
 /**
  * Creates the core binding signatures for SQLite3 C API functions.
  *
- * @param {Object} wasm - The WASM utilities object with xWrap.FuncPtrAdapter
- * @param {Object} capi - The C API object for accessing constants
- * @returns {Array<Array>} Array of binding signatures
+ * @param {import("../../wasm/bootstrap/runtime/sqlite3-facade-namespace.d.ts").Sqlite3WasmNamespace} wasm
+ *        Wasm helper namespace exposing xWrap.
+ * @param {import("@wuchuheng/web-sqlite").SQLite3CAPI} capi C API namespace.
+ * @returns {import("../../wasm/bootstrap/runtime/sqlite3-facade-namespace.d.ts").Sqlite3BindingSignatureCollection}
+ *     Array of binding signature descriptors.
  */
 export function createCoreBindings(wasm, capi) {
     return [
@@ -309,9 +311,11 @@ export function createCoreBindings(wasm, capi) {
 /**
  * Creates optional binding signatures that depend on specific compile-time features.
  *
- * @param {Object} wasm - The WASM utilities object
- * @param {Object} capi - The C API object
- * @returns {Object} Object with optional binding arrays
+ * @param {import("../../wasm/bootstrap/runtime/sqlite3-facade-namespace.d.ts").Sqlite3WasmNamespace} wasm
+ *        Wasm helper namespace exposing optional exports.
+ * @param {import("@wuchuheng/web-sqlite").SQLite3CAPI} capi C API namespace.
+ * @returns {import("./core-bindings.d.ts").OptionalBindingGroups}
+ *     Optional binding collections keyed by feature.
  */
 export function createOptionalBindings(wasm, capi) {
     const optional = {};
@@ -379,7 +383,8 @@ export function createOptionalBindings(wasm, capi) {
 /**
  * Creates WASM-internal binding signatures.
  *
- * @returns {Array<Array>} Array of internal binding signatures
+ * @returns {import("../../wasm/bootstrap/runtime/sqlite3-facade-namespace.d.ts").Sqlite3BindingSignatureCollection}
+ *     Array of internal binding signatures.
  */
 export function createWasmInternalBindings() {
     return [

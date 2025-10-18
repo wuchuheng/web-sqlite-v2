@@ -5,8 +5,8 @@
 /**
  * Creates execution and query helper functions.
  *
- * @param {object} context - Shared runtime context.
- * @returns {object} Execution helper functions.
+ * @param {import("../context.d.ts").Oo1Context} context Shared runtime context.
+ * @returns {import("./execution.d.ts").ExecHelpers} Execution helper functions.
  */
 export function createExecHelpers(context) {
     const { capi, util, toss } = context;

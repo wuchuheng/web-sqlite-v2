@@ -14,10 +14,11 @@
 /**
  * Creates UDF factory utilities.
  *
- * @param {Object} wasm - The WASM utilities object
- * @param {Object} capi - The C API object
- * @param {Function} __dbCleanupMap - Database cleanup map function
- * @returns {Object} Object containing UDF creation functions
+ * @param {import("../../wasm/bootstrap/runtime/sqlite3-facade-namespace.d.ts").Sqlite3WasmNamespace} wasm
+ *        Wasm helper namespace.
+ * @param {import("../oo1-db/context.d.ts").SQLite3CapiWithHelpers} capi C API namespace with helpers.
+ * @param {import("./db-cleanup.d.ts").DbCleanupMap} __dbCleanupMap Database cleanup map function.
+ * @returns {import("./udf-factory.d.ts").UdfFactoryResult} Object containing UDF creation functions.
  */
 export function createUdfFactory(wasm, capi, __dbCleanupMap) {
     /**

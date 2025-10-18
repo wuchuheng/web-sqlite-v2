@@ -295,6 +295,14 @@ const createLazyLocalBinding = (wasmExports, exportName) => {
     };
 };
 
+/**
+ * Lazily wires module-level bindings onto the supplied Emscripten Module instance.
+ *
+ * @param {Record<string, unknown>} Module Target module.
+ * @param {import("./bootstrap/runtime/capi-helpers.d.ts").WasmExports & WebAssembly.Exports} wasmExports
+ *        Wasm export table.
+ * @returns {import("./sqlite3-wasm-exports.d.ts").WasmExportBindings}
+ */
 export const attachSqlite3WasmExports = (Module, wasmExports) => {
     const localBindings = LOCAL_EXPORTS.reduce((acc, exportName) => {
         acc[exportName] = createLazyLocalBinding(wasmExports, exportName);

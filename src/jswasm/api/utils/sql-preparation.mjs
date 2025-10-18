@@ -14,10 +14,12 @@
 /**
  * Creates SQL preparation and binding utilities.
  *
- * @param {Object} wasm - The WASM utilities object
- * @param {Object} capi - The C API object
- * @param {Object} util - Utility functions
- * @returns {Object} Object containing preparation and binding functions
+ * @param {import("../../wasm/bootstrap/runtime/sqlite3-facade-namespace.d.ts").Sqlite3WasmNamespace} wasm
+ *        Wasm helper namespace.
+ * @param {import("../oo1-db/context.d.ts").SQLite3CapiWithHelpers} capi C API namespace with helpers.
+ * @param {import("../oo1-db/context.d.ts").Oo1Util} util Utility helpers.
+ * @returns {import("./sql-preparation.d.ts").SqlPreparationHelpers}
+ *     Object containing preparation and binding functions.
  */
 export function createSqlPreparation(wasm, capi, util) {
     /**
