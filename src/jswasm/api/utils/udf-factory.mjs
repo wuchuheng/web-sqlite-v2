@@ -239,16 +239,16 @@ export function createUdfFactory(wasm, capi, __dbCleanupMap) {
     /**
      * Creates a user-defined function (scalar, aggregate, or both).
      *
-     * @param {number} pDb - Database pointer
+     * @param {import("../../sqlite3.d.ts").sqlite3} pDb - Database pointer
      * @param {string} funcName - Function name
      * @param {number} nArg - Number of arguments (-1 for variadic)
      * @param {number} eTextRep - Text encoding flags
-     * @param {*} pApp - Application data pointer
-     * @param {Function} xFunc - Scalar function callback
-     * @param {Function} xStep - Aggregate step callback
-     * @param {Function} xFinal - Aggregate finalize callback
-     * @param {Function} xDestroy - Cleanup callback
-     * @returns {number} SQLite result code
+     * @param {unknown} pApp - Application data pointer
+     * @param {import("../../sqlite3.d.ts").ScalarFunction | null} xFunc - Scalar function callback
+     * @param {import("../../sqlite3.d.ts").AggregateStepFunction | null} xStep - Aggregate step callback
+     * @param {import("../../sqlite3.d.ts").AggregateFinalFunction | null} xFinal - Aggregate finalize callback
+     * @param {import("../../sqlite3.d.ts").FunctionDestructor | null} xDestroy - Cleanup callback
+     * @returns {import("../../sqlite3.d.ts").SqliteResultCode} SQLite result code
      */
     const sqlite3_create_function_v2 = function f(
         pDb,

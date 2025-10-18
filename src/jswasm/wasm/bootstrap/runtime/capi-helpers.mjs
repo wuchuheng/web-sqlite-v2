@@ -18,6 +18,11 @@ export function createCapiHelpers(options) {
 
     const helpers = Object.create(null);
 
+    /**
+     * @param {number | import("../../../sqlite3.d.ts").SqliteRandomTypedArray} arg0
+     * @param {import("../../../sqlite3.d.ts").WasmPointer} [outputPtr]
+     * @returns {import("../../../sqlite3.d.ts").SqliteRandomTypedArray | void}
+     */
     helpers.sqlite3_randomness = (...args) => {
         if (
             args.length === 1 &&
@@ -125,6 +130,11 @@ export function createCapiHelpers(options) {
         return result;
     };
 
+    /**
+     * @param {import("../../../sqlite3.d.ts").sqlite3} pDb
+     * @param {string | number} [schema]
+     * @returns {Uint8Array}
+     */
     helpers.sqlite3_js_db_export = (pDb, schema = 0) => {
         const dbPointer = wasm.xWrap.testConvertArg("sqlite3*", pDb);
         if (!dbPointer) {
