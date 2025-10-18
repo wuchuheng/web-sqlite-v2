@@ -32,13 +32,15 @@ export function createWasmRuntime(options) {
         return fn;
     };
 
-    const allocImpl = /** @type {(bytes: number) => number} */ (
+    const allocImpl = /** @type {(bytes: number) => import("./wasm-runtime.d.ts").WasmPointer} */ (
         requireExport(allocExportName)
     );
-    const deallocImpl = /** @type {(ptr: number) => void} */ (
+    const deallocImpl = /** @type {(ptr: import("./wasm-runtime.d.ts").WasmPointer) => void} */ (
         requireExport(deallocExportName)
     );
-    const reallocImpl = /** @type {(ptr: number, bytes: number) => number} */ (
+    const reallocImpl = /** @type {
+        (ptr: import("./wasm-runtime.d.ts").WasmPointer, bytes: number) => import("./wasm-runtime.d.ts").WasmPointer
+    } */ (
         requireExport(reallocExportName)
     );
 
@@ -56,14 +58,21 @@ export function createWasmRuntime(options) {
     };
 
     /**
-     * @type {(bytes: number) => number}
+     * Allocates `bytes` of wasm memory using the configured allocator.
+     *
+     * @param {number} bytes
+     * @returns {import("./wasm-runtime.d.ts").WasmPointer}
      */
     const alloc = (bytes) =>
         allocImpl(bytes) ||
         WasmAllocError.toss("Failed to allocate", bytes, "bytes.");
 
     /**
-     * @type {(ptr: number, bytes: number) => number}
+     * Resizes an existing allocation or frees it when `bytes` is zero.
+     *
+     * @param {import("./wasm-runtime.d.ts").WasmPointer | null} ptr
+     * @param {number} bytes
+     * @returns {import("./wasm-runtime.d.ts").WasmPointer}
      */
     const realloc = (ptr, bytes) => {
         const result = reallocImpl(ptr, bytes);
@@ -77,11 +86,10 @@ export function createWasmRuntime(options) {
     };
 
     /**
-     * Mirrors the upstream helper that copies TypedArray data into WASM memory.
-     * The helper supports ArrayBuffer inputs for convenience in the higher
-     * layers.
+     * Copies typed-array data into wasm memory, allocating a destination buffer.
      *
-     * @type {(source: ArrayBufferView | ArrayBuffer) => number}
+     * @param {ArrayBufferView | ArrayBuffer} source
+     * @returns {import("./wasm-runtime.d.ts").WasmPointer}
      */
     const allocFromTypedArray = (source) => {
         let typedArray = source;
@@ -177,6 +185,12 @@ export function createWasmRuntime(options) {
 
     const pstack = Object.assign(Object.create(null), {
         restore: pstackRestore,
+        /**
+         * Allocates bytes from the temporary stack, accepting IR signatures.
+         *
+         * @param {number | string} byteCount
+         * @returns {import("./wasm-runtime.d.ts").WasmPointer}
+         */
         alloc(byteCount) {
             let size = byteCount;
             if (typeof size === "string") {
@@ -199,6 +213,13 @@ export function createWasmRuntime(options) {
             }
             return pointer;
         },
+        /**
+         * Allocates `chunkCount` contiguous chunks from the pstack.
+         *
+         * @param {number} chunkCount
+         * @param {number | string} chunkSize
+         * @returns {import("./wasm-runtime.d.ts").WasmPointer[]}
+         */
         allocChunks(chunkCount, chunkSize) {
             let size = chunkSize;
             if (typeof size === "string") {
@@ -225,12 +246,26 @@ export function createWasmRuntime(options) {
             }
             return result;
         },
+        /**
+         * Allocates pointer slots using the pstack allocator.
+         *
+         * @param {number} [count=1]
+         * @param {boolean} [safePtrSize=true]
+         * @returns {import("./wasm-runtime.d.ts").WasmPointer | import("./wasm-runtime.d.ts").WasmPointer[]}
+         */
         allocPtr(count = 1, safePtrSize = true) {
             const bytes = safePtrSize ? 8 : wasm.ptrSizeof;
             return count === 1
                 ? pstackAlloc(bytes)
                 : this.allocChunks(count, bytes);
         },
+        /**
+         * Executes a callback while automatically restoring the pstack.
+         *
+         * @template T
+         * @param {(sqlite3: import("./sqlite3-facade-namespace.d.ts").Sqlite3Facade) => T} callback
+         * @returns {T}
+         */
         call(callback) {
             const stackPos = pstackPointer();
             try {

@@ -1,4 +1,29 @@
 export type WasmPointer = number
+
+export type PeekType =
+  | "i1"
+  | "i8"
+  | "i16"
+  | "i32"
+  | "i64"
+  | "f32"
+  | "f64"
+  | "float"
+  | "double"
+  | "ptr"
+  | "*"
+
+export type PokeType = PeekType
+
+export type TypedArray =
+  | Int8Array
+  | Uint8Array
+  | Int16Array
+  | Uint16Array
+  | Int32Array
+  | Uint32Array
+  | Float32Array
+  | Float64Array
 export type sqlite3 = WasmPointer
 export type sqlite3_stmt = WasmPointer
 export type sqlite3_value = WasmPointer
@@ -681,6 +706,225 @@ export class SQLite3Error extends Error {
 /**
  * Main SQLite3 API Object
  */
+export interface SQLite3Wasm
+  extends import("./wasm/bootstrap/runtime/sqlite3-facade-namespace.d.ts").Sqlite3WasmNamespace {
+  /** Indicates whether BigInt-backed heap views are available. */
+  bigIntEnabled: boolean
+  /** Pointer size in bytes for the active build. */
+  ptrSizeof: number
+  /** Intermediate representation used for pointers ("i32" or "i64"). */
+  ptrIR: "i32" | "i64"
+  /** Returns a signed 8-bit heap view. */
+  heap8(): Int8Array
+  /** Returns an unsigned 8-bit heap view. */
+  heap8u(): Uint8Array
+  /** Returns a signed 16-bit heap view. */
+  heap16(): Int16Array
+  /** Returns an unsigned 16-bit heap view. */
+  heap16u(): Uint16Array
+  /** Returns a signed 32-bit heap view. */
+  heap32(): Int32Array
+  /** Returns an unsigned 32-bit heap view. */
+  heap32u(): Uint32Array
+  /**
+   * Resolves a heap view for the requested element size or constructor.
+   */
+  heapForSize(
+    indicator:
+      | number
+      | (new (
+          buffer: ArrayBuffer,
+          byteOffset?: number,
+          length?: number
+        ) => ArrayBufferView),
+    unsigned?: boolean
+  ):
+    | Int8Array
+    | Uint8Array
+    | Int16Array
+    | Uint16Array
+    | Int32Array
+    | Uint32Array
+    | Float32Array
+    | Float64Array
+    | BigInt64Array
+    | BigUint64Array
+  /** Computes the size in bytes for the provided IR signature. */
+  sizeofIR(signature: string): number | undefined
+  /** Returns the indirect function table exported by the wasm module. */
+  functionTable(): WebAssembly.Table
+  /** Resolves a function entry from the indirect function table. */
+  functionEntry(pointer: WasmPointer): ((...args: unknown[]) => unknown) | undefined
+  /** Creates a wasm-compatible wrapper for a JavaScript function. */
+  jsFuncToWasm(
+    func: ((...args: unknown[]) => unknown) | string,
+    signature: string
+  ): (...args: unknown[]) => unknown
+  /** Installs a function into the wasm indirect table and returns its index. */
+  installFunction(
+    func: ((...args: unknown[]) => unknown) | string,
+    signature?: string
+  ): WasmPointer
+  /** Installs a function whose lifetime is bound to the current scoped allocator. */
+  scopedInstallFunction(
+    func: ((...args: unknown[]) => unknown) | string,
+    signature?: string
+  ): WasmPointer
+  /** Removes a function from the wasm indirect table and returns the previous entry. */
+  uninstallFunction(
+    pointer: WasmPointer | null | undefined
+  ): ((...args: unknown[]) => unknown) | null | undefined
+  /** Allocates a block of memory on the WASM heap. */
+  alloc(byteCount: number): WasmPointer
+  /** Resizes or frees a WASM allocation. */
+  realloc(pointer: WasmPointer | null, byteCount: number): WasmPointer
+  /** Releases memory previously allocated from the WASM heap. */
+  dealloc(pointer: WasmPointer | null | undefined): void
+  /** Copies typed array data into WASM memory and returns its pointer. */
+  allocFromTypedArray(source: ArrayBufferView | ArrayBuffer): WasmPointer
+  /** Converts a C string pointer to a JavaScript string. */
+  cstrToJs(pointer: WasmPointer | null): string | null
+  /** Calculates the byte length of a C string in WASM memory. */
+  cstrlen(pointer: WasmPointer | null): number | null
+  /** Calculates the UTF-8 encoded byte length of a JavaScript string. */
+  jstrlen(value: string | null): number | null
+  /** Copies a JavaScript string into a target buffer or pointer. */
+  jstrcpy(
+    value: string,
+    target: Uint8Array | WasmPointer,
+    offset?: number,
+    maxBytes?: number,
+    addNul?: boolean
+  ): number
+  /** Copies a C string into a target pointer, mirroring `strncpy`. */
+  cstrncpy(targetPointer: WasmPointer, sourcePointer: WasmPointer, n: number): number
+  /**
+   * Encodes a JavaScript string into a new Uint8Array, optionally adding a NUL terminator.
+   */
+  jstrToUintArray(value: string, addNul?: boolean): Uint8Array
+  /** Allocates a UTF-8 encoded copy of a JavaScript string. */
+  allocCString(
+    value: string,
+    returnWithLength?: boolean
+  ): WasmPointer | [WasmPointer, number] | null
+  /**
+   * Reads values from WASM memory using an IR signature.
+   */
+  peek(
+    pointer: WasmPointer | WasmPointer[],
+    signature?: PeekType
+  ): number | bigint | (number | bigint)[]
+  /** Writes values into WASM memory using an IR signature. */
+  poke(
+    pointer: WasmPointer | WasmPointer[],
+    value: number | bigint,
+    signature?: PokeType
+  ): this
+  /** Reads a pointer-sized value from WASM memory. */
+  peekPtr(pointer: WasmPointer): WasmPointer
+  /** Writes a pointer-sized value into WASM memory. */
+  pokePtr(pointer: WasmPointer | WasmPointer[], value?: WasmPointer): this
+  /** Reads an 8-bit value from WASM memory. */
+  peek8(pointer: WasmPointer | WasmPointer[]): number | number[]
+  /** Writes an 8-bit value into WASM memory. */
+  poke8(pointer: WasmPointer | WasmPointer[], value: number): this
+  /** Reads a 16-bit value from WASM memory. */
+  peek16(pointer: WasmPointer | WasmPointer[]): number | number[]
+  /** Writes a 16-bit value into WASM memory. */
+  poke16(pointer: WasmPointer | WasmPointer[], value: number): this
+  /** Reads a 32-bit value from WASM memory. */
+  peek32(pointer: WasmPointer | WasmPointer[]): number | number[]
+  /** Writes a 32-bit value into WASM memory. */
+  poke32(pointer: WasmPointer | WasmPointer[], value: number): this
+  /** Reads a 64-bit value from WASM memory. */
+  peek64(pointer: WasmPointer | WasmPointer[]): bigint | (bigint | number)[]
+  /** Writes a 64-bit value into WASM memory. */
+  poke64(pointer: WasmPointer | WasmPointer[], value: number | bigint): this
+  /** Reads a 32-bit floating-point value from WASM memory. */
+  peek32f(pointer: WasmPointer | WasmPointer[]): number | number[]
+  /** Writes a 32-bit floating-point value into WASM memory. */
+  poke32f(pointer: WasmPointer | WasmPointer[], value: number): this
+  /** Reads a 64-bit floating-point value from WASM memory. */
+  peek64f(pointer: WasmPointer | WasmPointer[]): number | number[]
+  /** Writes a 64-bit floating-point value into WASM memory. */
+  poke64f(pointer: WasmPointer | WasmPointer[], value: number): this
+  /** Legacy alias for {@link peek}. */
+  getMemValue(
+    pointer: WasmPointer | WasmPointer[],
+    signature?: PeekType
+  ): number | bigint | (number | bigint)[]
+  /** Legacy alias for {@link poke}. */
+  setMemValue(
+    pointer: WasmPointer | WasmPointer[],
+    value: number | bigint,
+    signature?: PokeType
+  ): this
+  /** Reads a pointer value and returns it as a numeric pointer. */
+  getPtrValue(pointer: WasmPointer): WasmPointer
+  /** Writes a pointer value to memory and returns the bridge for chaining. */
+  setPtrValue(pointer: WasmPointer, value: WasmPointer): this
+  /**
+   * Returns true when the provided candidate is a pointer value for the active build.
+   */
+  isPtr(candidate: unknown): candidate is WasmPointer
+  /** Checks whether the provided pointer is a 32-bit integer. */
+  isPtr32(candidate: unknown): candidate is WasmPointer
+  /** Pushes a new allocation scope onto the scoped allocator stack. */
+  scopedAllocPush(): number[]
+  /** Pops a scoped allocation stack and frees owned resources. */
+  scopedAllocPop(state?: number[] | null): void
+  /** Allocates memory tracked by the active scoped allocation stack. */
+  scopedAlloc(byteCount: number): WasmPointer
+  /** Allocates a pointer (or pointer array) tracked by the scoped allocator. */
+  scopedAllocPtr(
+    count?: number,
+    safePtrSize?: boolean
+  ): WasmPointer | WasmPointer[]
+  /** Allocates a pointer (or pointer array) using the standard allocator. */
+  allocPtr(count?: number, safePtrSize?: boolean): WasmPointer | WasmPointer[]
+  /** Allocates a scoped CString, optionally returning its length. */
+  scopedAllocCString(
+    value: string,
+    returnWithLength?: boolean
+  ): WasmPointer | [WasmPointer, number] | null
+  /** Converts argc/argv data into a JavaScript string array. */
+  cArgvToJs(argc: number, argvPointer: WasmPointer): (string | null)[]
+  /** Allocates argv-style argument blocks using the scoped allocator. */
+  scopedAllocMainArgv(values: unknown[]): WasmPointer
+  /** Allocates argv-style argument blocks using the general allocator. */
+  allocMainArgv(values: unknown[]): WasmPointer
+  /** Executes a callback with automatic scoped-allocation cleanup. */
+  scopedAllocCall<T>(callback: () => T): T
+  /**
+   * Provides direct access to exported wasm functions, performing basic argument checks.
+   */
+  xCall(
+    fn: string | ((...args: unknown[]) => unknown),
+    ...args: unknown[]
+  ): unknown
+  /** Looks up an exported function by name. */
+  xGet(name: string): (...args: unknown[]) => unknown
+  /**
+   * Wraps a wasm export with argument/result conversions.
+   */
+  xWrap(
+    fnName: string,
+    resultType?: string,
+    argTypes?: (string | unknown)[]
+  ): (...args: unknown[]) => unknown
+  /** Stack helper mirroring the legacy pstack API. */
+  pstack: {
+    readonly pointer: WasmPointer
+    readonly quota: number
+    readonly remaining: number
+    restore(pointer: WasmPointer): void
+    alloc(byteCount: number | string): WasmPointer
+    allocChunks(chunkCount: number, chunkSize: number | string): WasmPointer[]
+    allocPtr(count?: number, safePtrSize?: boolean): WasmPointer | WasmPointer[]
+    call<T>(callback: (sqlite3: SQLite3API) => T): T
+  }
+}
+
 export interface SQLite3API {
   /** Version information */
   version: SQLite3Version
@@ -691,34 +935,7 @@ export interface SQLite3API {
   /** SQLite3 Error class */
   SQLite3Error: typeof SQLite3Error
   /** WASM utilities */
-  wasm: {
-    bigIntEnabled: boolean
-    ptrSizeof: number
-    heap8(): Int8Array
-    heap8u(): Uint8Array
-    allocCString(str: string, addNul?: boolean): [number, number]
-    cstrToJs(ptr: number): string
-    jstrlen(str: string): number
-    jstrcpy(str: string, tgt: Int8Array | Uint8Array, offset: number, maxBytes: number, addNul: boolean): number
-    alloc(size: number): number
-    realloc(ptr: number, size: number): number
-    dealloc(ptr: number): void
-    allocFromTypedArray(data: ArrayBufferView | ArrayBuffer): number
-    pstack: {
-      pointer: number
-      alloc(size: number): number
-      allocPtr(): number
-      restore(ptr: number): void
-    }
-    peekPtr(ptr: number): number
-    pokePtr(ptr: number | number[], value: number): void
-    peek(ptr: number, type: string): number
-    poke(ptr: number, value: number, type?: string): void
-    scopedAlloc(size: number): number
-    scopedAllocPush(): number
-    scopedAllocPop(ptr: number): void
-    installFunction(signature: string, func: (...args: unknown[]) => unknown): number
-  }
+  wasm: SQLite3Wasm
   /** Utilities */
   util: {
     isInt32(value: unknown): boolean

@@ -12,6 +12,11 @@ import { assertAllocator } from "./utils.mjs";
 export function attachScopedAllocators(context) {
     const { target, cache } = context;
 
+    /**
+     * Pushes a new scoped allocation frame onto the stack.
+     *
+     * @returns {number[]}
+     */
     target.scopedAllocPush = () => {
         assertAllocator(context, "scopedAllocPush");
         const scope = [];
@@ -19,6 +24,12 @@ export function attachScopedAllocators(context) {
         return scope;
     };
 
+    /**
+     * Pops a scoped allocation frame and frees any resources owned by it.
+     *
+     * @param {number[] | undefined} [state]
+     * @returns {void}
+     */
     target.scopedAllocPop = (state) => {
         assertAllocator(context, "scopedAllocPop");
         const index =
@@ -38,6 +49,12 @@ export function attachScopedAllocators(context) {
         }
     };
 
+    /**
+     * Allocates memory that will be freed when the current scope is popped.
+     *
+     * @param {number} n
+     * @returns {import("../../sqlite3.d.ts").WasmPointer}
+     */
     target.scopedAlloc = (n) => {
         if (!cache.scopedAlloc.length) {
             context.toss("No scopedAllocPush() scope is active.");
@@ -56,6 +73,13 @@ export function attachScopedAllocators(context) {
         },
     });
 
+    /**
+     * Allocates a scoped CString using the current allocation frame.
+     *
+     * @param {string} jstr
+     * @param {boolean} [returnWithLength=false]
+     * @returns {import("../../sqlite3.d.ts").WasmPointer | [import("../../sqlite3.d.ts").WasmPointer, number] | null}
+     */
     target.scopedAllocCString = (jstr, returnWithLength = false) =>
         context.allocCStringInternal(
             jstr,
@@ -83,9 +107,28 @@ export function attachScopedAllocators(context) {
         return ptr;
     };
 
+    /**
+     * Allocates an argv-style pointer array bound to the scoped allocator.
+     *
+     * @param {unknown[]} list
+     * @returns {import("../../sqlite3.d.ts").WasmPointer}
+     */
     target.scopedAllocMainArgv = (list) => allocMainArgv(true, list);
+    /**
+     * Allocates an argv-style pointer array using the general allocator.
+     *
+     * @param {unknown[]} list
+     * @returns {import("../../sqlite3.d.ts").WasmPointer}
+     */
     target.allocMainArgv = (list) => allocMainArgv(false, list);
 
+    /**
+     * Converts argc/argv data into a JavaScript array of strings.
+     *
+     * @param {number} argc
+     * @param {import("../../sqlite3.d.ts").WasmPointer} argvPtr
+     * @returns {(string | null)[]}
+     */
     target.cArgvToJs = (argc, argvPtr) => {
         const args = [];
         for (let i = 0; i < argc; ++i) {
@@ -95,6 +138,13 @@ export function attachScopedAllocators(context) {
         return args;
     };
 
+    /**
+     * Executes the callback while automatically unwinding scoped allocations.
+     *
+     * @template T
+     * @param {() => T} fn
+     * @returns {T}
+     */
     target.scopedAllocCall = (fn) => {
         const scope = target.scopedAllocPush();
         try {
@@ -122,15 +172,42 @@ export function attachScopedAllocators(context) {
         return pointers;
     };
 
+    /**
+     * Allocates pointer slots using the general allocator.
+     *
+     * @param {number} [howMany=1]
+     * @param {boolean} [safePtrSize=true]
+     * @returns {import("../../sqlite3.d.ts").WasmPointer | import("../../sqlite3.d.ts").WasmPointer[]}
+     */
     target.allocPtr = (howMany = 1, safePtrSize = true) =>
         allocPtr(howMany, safePtrSize, "alloc");
+    /**
+     * Allocates pointer slots tracked by the scoped allocator.
+     *
+     * @param {number} [howMany=1]
+     * @param {boolean} [safePtrSize=true]
+     * @returns {import("../../sqlite3.d.ts").WasmPointer | import("../../sqlite3.d.ts").WasmPointer[]}
+     */
     target.scopedAllocPtr = (howMany = 1, safePtrSize = true) =>
         allocPtr(howMany, safePtrSize, "scopedAlloc");
 
+    /**
+     * Looks up an exported wasm symbol by name.
+     *
+     * @param {string} name
+     * @returns {(...args: unknown[]) => unknown}
+     */
     target.xGet = (name) =>
         target.exports[name] ||
         context.toss("Cannot find exported symbol:", name);
 
+    /**
+     * Invokes an exported wasm function by name.
+     *
+     * @param {string | ((...args: unknown[]) => unknown)} fname
+     * @param {...unknown} args
+     * @returns {unknown}
+     */
     target.xCall = (fname, ...args) => {
         const fn =
             fname instanceof Function ? fname : target.xGet(fname);
