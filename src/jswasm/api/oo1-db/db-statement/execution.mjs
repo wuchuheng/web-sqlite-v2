@@ -14,11 +14,14 @@ export function createExecHelpers(context) {
     /**
      * Executes a query and returns the first row.
      *
-     * @param {object} db - Database instance.
+     * @param {import("@wuchuheng/web-sqlite").DB} db - Database instance.
      * @param {string} sql - SQL text.
-     * @param {any} bind - Bind specification.
-     * @param {...any} getArgs - Arguments to pass to stmt.get().
-     * @returns {any} First row or undefined.
+     * @param {import("./binding.d.ts").BindSpecification | undefined} bind
+     *        Bind specification.
+     * @param {...Parameters<import("@wuchuheng/web-sqlite").Stmt["get"]>} getArgs
+     *        Arguments to pass to stmt.get().
+     * @returns {ReturnType<import("@wuchuheng/web-sqlite").Stmt["get"]> | undefined}
+     *          First row or undefined.
      */
     const selectFirstRow = (db, sql, bind, ...getArgs) => {
         // 1. Input handling
@@ -40,11 +43,12 @@ export function createExecHelpers(context) {
     /**
      * Executes a query and collects all rows.
      *
-     * @param {object} db - Database instance.
+     * @param {import("@wuchuheng/web-sqlite").DB} db - Database instance.
      * @param {string} sql - SQL text.
-     * @param {any} bind - Bind specification.
+     * @param {import("./binding.d.ts").BindSpecification | undefined} bind
+     *        Bind specification.
      * @param {string} rowMode - Row mode (array/object).
-     * @returns {Array<any>} All result rows.
+     * @returns {unknown[]} All result rows.
      */
     const selectAllRows = (db, sql, bind, rowMode) =>
         db.exec({
@@ -57,9 +61,10 @@ export function createExecHelpers(context) {
     /**
      * Parses and validates exec() arguments into a normalized plan.
      *
-     * @param {object} db - Database instance.
-     * @param {Array<any>} args - Arguments passed to exec().
-     * @returns {object} Normalized execution plan.
+     * @param {import("@wuchuheng/web-sqlite").DB} db - Database instance.
+     * @param {ReadonlyArray<import("./execution.d.ts").ExecInvocationArgument>} args
+     *        Arguments passed to exec().
+     * @returns {import("./execution.d.ts").NormalizedExecPlan} Normalized execution plan.
      */
     const parseExecPlan = (db, args) => {
         // 1. Input handling

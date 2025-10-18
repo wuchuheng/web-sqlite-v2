@@ -9,26 +9,18 @@
  */
 export class WhWasmInstallerContext {
     /**
-     * @param {object} target - The mutable WASM helper target.
+     * @param {import("./installer-context.d.ts").WhWasmHelperTarget} target - The mutable WASM helper target.
      */
     constructor(target) {
         /**
          * Mutable object that exposes the public API for the WASM helpers.
-         * @type {object}
+         * @type {import("./installer-context.d.ts").WhWasmHelperTarget}
          */
         this.target = target;
 
         /**
          * Bookkeeping cache reused across helper modules.
-         * @type {{
-         *   heapSize: number,
-         *   memory: WebAssembly.Memory|null,
-         *   freeFuncIndexes: Array<number>,
-         *   scopedAlloc: Array<Array<number>>,
-         *   utf8Decoder: TextDecoder,
-         *   utf8Encoder: TextEncoder,
-         *   xWrap: { convert: { arg: Map<*,*>, result: Map<*,*> } }
-         * }}
+         * @type {import("./installer-context.d.ts").WhWasmInstallerCache}
          */
         this.cache = {
             heapSize: 0,
@@ -62,20 +54,27 @@ export class WhWasmInstallerContext {
 
         /**
          * Internal function used by the function-table helpers.
-         * @type {((f: Function|string, sig: string, scoped: boolean) => number)|null}
+         * @type {((fn: (...args: import("./installer-context.d.ts").WhWasmValue[]) => import("./installer-context.d.ts").WhWasmValue, sig: string, scoped: boolean) => number) | null}
          */
         this.installFunctionInternal = null;
 
         /**
          * Shared CString allocator helper defined by the string helpers.
-         * @type {((string, boolean, Function, string) => number|[number, number]|null)|null}
+         * @type {(
+         *   (
+         *       value: string,
+         *       nulTerminate: boolean,
+         *       stackAlloc: (size: number) => number,
+         *       signature: string
+         *   ) => number | [number, number] | null
+         * ) | null}
          */
         this.allocCStringInternal = null;
     }
 
     /**
      * Throws a consistent Error with a joined message.
-     * @param {...any} args - Message parts to join.
+     * @param {...unknown} args - Message parts to join.
      * @throws {Error} Always throws.
      */
     toss(...args) {
@@ -101,7 +100,7 @@ export class WhWasmInstallerContext {
     /**
      * Lazily constructs typed-array views over the underlying WASM heap.
      *
-     * @returns {object} Cache enriched with up-to-date typed arrays.
+     * @returns {import("./installer-context.d.ts").WhWasmInstallerCache} Cache enriched with up-to-date typed arrays.
      */
     getHeapViews() {
         const { cache, target } = this;
