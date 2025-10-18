@@ -9,7 +9,8 @@
     "preview": "vite preview",
     "test": "vite --open",
     "lint": "eslint . --ext .ts,.js,.mjs --fix; pnpm run typeCheck",
-    "typeCheck": "tsc --noEmit --pretty"
+    "typeCheck": "tsc --noEmit --pretty",
+    "serve:static": "npx http-server ./dist -c-1"
   },
   "keywords": [
     "sqlite",
