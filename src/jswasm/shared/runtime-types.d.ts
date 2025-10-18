@@ -115,6 +115,22 @@ export interface RuntimeLifecycleManager {
  * Callback interface supplied by the TTY helpers to process terminal input
  * and output events.
  */
+/**
+ * Collection of POSIX termios settings tracked for each TTY instance.
+ */
+export interface TTYTermiosSettings {
+    /** Input mode flags controlling canonical processing. */
+    c_iflag: number;
+    /** Output mode flags configuring post-processing behaviour. */
+    c_oflag: number;
+    /** Control mode flags toggling character size and parity. */
+    c_cflag: number;
+    /** Local mode flags managing echo and signal handling. */
+    c_lflag: number;
+    /** Control character values mirrored from the kernel structure. */
+    c_cc: number[];
+}
+
 export interface TTYDeviceOperations {
     /** Reads the next available character from the device. */
     get_char?(device: TTYDevice): number | null | undefined;
@@ -123,21 +139,9 @@ export interface TTYDeviceOperations {
     /** Flushes buffered output to the configured sink. */
     fsync(device: TTYDevice): void;
     /** Retrieves terminal settings for tcgets requests. */
-    ioctl_tcgets?(device: TTYDevice | FSStream): {
-        c_iflag?: number;
-        c_oflag?: number;
-        c_cflag?: number;
-        c_lflag?: number;
-        c_cc: number[];
-    };
+    ioctl_tcgets?(device: TTYDevice | FSStream): TTYTermiosSettings;
     /** Applies terminal settings for tcsets requests. */
-    ioctl_tcsets?(device: TTYDevice, op: number, data: {
-        c_iflag: number;
-        c_oflag: number;
-        c_cflag: number;
-        c_lflag: number;
-        c_cc: number[];
-    }): number;
+    ioctl_tcsets?(device: TTYDevice, op: number, data: TTYTermiosSettings): number;
     /** Provides the terminal window dimensions. */
     ioctl_tiocgwinsz?(device: TTYDevice): [number, number];
 }

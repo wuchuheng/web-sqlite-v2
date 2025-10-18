@@ -11,53 +11,7 @@ const MAP_PRIVATE = 0x2;
  * by the filesystem implementation.
  *
  * @param {import("./base-state.d.ts").MutableFS} FS
- * @returns {{
- *   close(stream: import("./base-state.d.ts").FSStream): void,
- *   isClosed(stream: import("./base-state.d.ts").FSStream): boolean,
- *   llseek(stream: import("./base-state.d.ts").FSStream, offset: number, whence: number): number,
- *   read(
- *     stream: import("./base-state.d.ts").FSStream,
- *     buffer: Uint8Array,
- *     offset: number,
- *     length: number,
- *     position?: number
- *   ): number,
- *   write(
- *     stream: import("./base-state.d.ts").FSStream,
- *     buffer: Uint8Array | ArrayLike<number>,
- *     offset: number,
- *     length: number,
- *     position?: number,
- *     canOwn?: boolean
- *   ): number,
- *   allocate(stream: import("./base-state.d.ts").FSStream, offset: number, length: number): void,
- *   mmap(
- *     stream: import("./base-state.d.ts").FSStream,
- *     length: number,
- *     position: number,
- *     prot: number,
- *     flags: number
- *   ): { ptr: number, length: number },
- *   msync(
- *     stream: import("./base-state.d.ts").FSStream,
- *     buffer: Uint8Array | ArrayLike<number>,
- *     offset: number,
- *     length: number,
- *     mmapFlags: number
- *   ): number,
- *   ioctl(stream: import("./base-state.d.ts").FSStream, cmd: number, arg: number): number,
- *   readFile(
- *     path: string,
- *     opts?: { flags?: number, encoding?: "utf8" | "binary" }
- *   ): Uint8Array | string,
- *   writeFile(
- *     path: string,
- *     data: string | ArrayBufferView,
- *     opts?: { flags?: number, mode?: number, canOwn?: boolean }
- *   ): void,
- *   cwd(): string,
- *   chdir(path: string): void,
- * }}
+ * @returns {import("./stream-helpers.d.ts").StreamHelpers}
  */
 export function createStreamHelpers(FS) {
     return {

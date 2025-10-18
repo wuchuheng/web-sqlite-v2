@@ -3,29 +3,9 @@
  * helpers centralize TypedArray validation, BigInt boundary checks, and common
  * error-reporting helpers used by higher-level abstractions.
  *
- * @param {{ toss3: (...args: any[]) => never }} errorFns
- * @param {{ isPtr?: (value: unknown) => boolean, cstrToJs?: (ptr: number) => string }} wasm
- * @returns {{
- *   util: {
- *     affirmBindableTypedArray: (value: unknown) => Uint8Array | Int8Array | ArrayBuffer,
- *     flexibleString: (value: unknown) => unknown,
- *     bigIntFits32: (value: bigint) => boolean,
- *     bigIntFits64: (value: bigint) => boolean,
- *     bigIntFitsDouble: (value: bigint | number) => boolean,
- *     isBindableTypedArray: (value: unknown) => boolean,
- *     isInt32: (value: unknown) => boolean,
- *     isSQLableTypedArray: (value: unknown) => boolean,
- *     isTypedArray: (value: unknown) => false | ArrayBufferView,
- *     typedArrayToString: (value: Uint8Array, begin?: number, end?: number) => string,
- *     isUIThread: () => boolean,
- *     isSharedTypedArray: (value: any) => boolean,
- *     toss: (...args: any[]) => never,
- *     toss3: (...args: any[]) => never,
- *     typedArrayPart: (array: Uint8Array, begin?: number, end?: number) => Uint8Array,
- *     affirmDbHeader: (bytes: ArrayBuffer | Uint8Array) => void,
- *     affirmIsDb: (bytes: ArrayBuffer | Uint8Array) => void,
- *   }
- * }}
+ * @param {import("./util-factory.d.ts").BootstrapErrorFunctions} errorFns
+ * @param {import("./util-factory.d.ts").BootstrapWasmBindings} wasm
+ * @returns {import("./util-factory.d.ts").BootstrapUtilFactoryResult}
  */
 export function createBootstrapUtil(errorFns, wasm) {
     const { toss3 } = errorFns;

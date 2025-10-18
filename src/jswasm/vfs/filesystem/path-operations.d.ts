@@ -2,26 +2,41 @@ import type {
     FSNode,
     MutableFS,
 } from "./base-state.d.ts";
+import type { PathFsUtilities } from "../../utils/path.d.ts";
 
+/**
+ * Factory hooks required for building the path helper facade.
+ */
 export interface PathOperationsOptions {
-    getPathFS(): {
-        resolve(...paths: string[]): string;
-        relative(from: string, to: string): string;
-    };
+    /** Lazily retrieves the PATH_FS helpers used for resolution. */
+    getPathFS(): PathFsUtilities;
 }
 
+/**
+ * Optional flags that control how lookupPath traverses the filesystem tree.
+ */
+export interface LookupPathOptions {
+    /** Follow mount points when encountered during traversal. */
+    follow_mount?: boolean;
+    /** Guard against excessive symlink recursion. */
+    recurse_count?: number;
+    /** Resolve the parent directory instead of the final entry. */
+    parent?: boolean;
+    /** Force resolution of symbolic links on the final segment. */
+    follow?: boolean;
+}
+
+/** Result structure produced by lookupPath. */
 export interface PathLookupResult {
     path: string;
     node: FSNode | null;
 }
 
+/**
+ * Helper facade for maintaining the filesystem path hash table.
+ */
 export interface PathOperations {
-    lookupPath(path: string, opts?: {
-        follow_mount?: boolean;
-        recurse_count?: number;
-        parent?: boolean;
-        follow?: boolean;
-    }): PathLookupResult;
+    lookupPath(path: string, opts?: LookupPathOptions): PathLookupResult;
     getPath(node: FSNode): string;
     hashName(parentId: number, name: string): number;
     hashAddNode(node: FSNode): void;
@@ -33,6 +48,9 @@ export interface PathOperations {
     isMountpoint(node: FSNode): boolean;
 }
 
+/**
+ * Creates the path helper facade for the supplied filesystem state.
+ */
 export function createPathOperations(
     FS: MutableFS,
     options: PathOperationsOptions

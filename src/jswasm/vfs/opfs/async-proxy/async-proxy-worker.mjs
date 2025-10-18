@@ -81,7 +81,7 @@ class AsyncProxyWorker {
     /**
      * Receives control messages from the main thread.
      *
-     * @param {{data?: {type?: string, args?: WorkerInitOptions}}} event - Structured worker message.
+     * @param {import("./async-proxy-worker.d.ts").WorkerMessageEvent} event - Structured worker message.
      */
     onMessage({ data }) {
         switch (data?.type) {
@@ -99,7 +99,7 @@ class AsyncProxyWorker {
     /**
      * Applies the initial configuration sent by the main thread.
      *
-     * @param {WorkerInitOptions | undefined} options - Shared buffers and metadata required by the worker.
+     * @param {import("./async-proxy-worker.d.ts").WorkerInitOptions | undefined} options - Shared buffers and metadata required by the worker.
      */
     handleInit(options) {
         if (!options) {

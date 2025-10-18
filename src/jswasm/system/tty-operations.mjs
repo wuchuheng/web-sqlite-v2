@@ -254,7 +254,7 @@ export function createTTY(out, err, FS) {
             /**
              * Get terminal settings (tcgets ioctl).
              * @param {import("../shared/runtime-types.d.ts").TTYDevice} _tty - TTY device (unused)
-             * @returns {{ c_iflag: number; c_oflag: number; c_cflag: number; c_lflag: number; c_cc: number[] }} Terminal settings
+             * @returns {import("../shared/runtime-types.d.ts").TTYTermiosSettings} Terminal settings
              */
             ioctl_tcgets(_tty) {
                 return {
@@ -275,7 +275,7 @@ export function createTTY(out, err, FS) {
              * Set terminal settings (tcsets ioctl).
              * @param {import("../shared/runtime-types.d.ts").TTYDevice} _tty - TTY device (unused)
              * @param {number} _optional_actions - Actions (unused)
-             * @param {{ c_iflag: number; c_oflag: number; c_cflag: number; c_lflag: number; c_cc: number[] }} _data - Settings data (unused)
+             * @param {import("../shared/runtime-types.d.ts").TTYTermiosSettings} _data - Settings data (unused)
              * @returns {number} Success code
              */
             ioctl_tcsets(_tty, _optional_actions, _data) {

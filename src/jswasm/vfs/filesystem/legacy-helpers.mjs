@@ -11,53 +11,8 @@ import {
  * older Emscripten callers while delegating work to the modern helpers.
  *
  * @param {import("./base-state.d.ts").MutableFS} FS
- * @param {{ FS_getMode: (canRead: boolean, canWrite: boolean) => number }} options
- * @returns {{
- *   findObject(path: string, dontResolveLastLink?: boolean): import("./base-state.d.ts").FSNode | null,
- *   analyzePath(
- *     path: string,
- *     dontResolveLastLink?: boolean
- *   ): {
- *     isRoot: boolean,
- *     exists: boolean,
- *     error: number,
- *     name: string | null,
- *     path: string | null,
- *     object: import("./base-state.d.ts").FSNode | null,
- *     parentExists: boolean,
- *     parentPath: string | null,
- *     parentObject: import("./base-state.d.ts").FSNode | null,
- *   },
- *   createPath(
- *     parent: string | import("./base-state.d.ts").FSNode,
- *     path: string,
- *     _canRead?: boolean,
- *     _canWrite?: boolean
- *   ): string,
- *   createFile(
- *     parent: string | import("./base-state.d.ts").FSNode,
- *     name: string,
- *     _properties: unknown,
- *     canRead: boolean,
- *     canWrite: boolean
- *   ): import("./base-state.d.ts").FSNode,
- *   createDataFile(
- *     parent: string | import("./base-state.d.ts").FSNode | null,
- *     name: string,
- *     data: string | ArrayLike<number> | null,
- *     canRead: boolean,
- *     canWrite: boolean,
- *     canOwn?: boolean
- *   ): void,
- *   createDevice(
- *     parent: string | import("./base-state.d.ts").FSNode,
- *     name: string,
- *     input?: (() => number | null | undefined) | null,
- *     output?: ((value: number) => void) | null
- *   ): import("./base-state.d.ts").FSNode,
- *   forceLoadFile(obj: import("./base-state.d.ts").FSNode): boolean,
- *   createLazyFile(): never,
- * }}
+ * @param {import("./legacy-helpers.d.ts").LegacyHelpersOptions} options
+ * @returns {import("./legacy-helpers.d.ts").LegacyHelpers}
  */
 export function createLegacyHelpers(FS, { FS_getMode }) {
     return {

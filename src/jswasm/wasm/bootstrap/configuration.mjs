@@ -1,31 +1,13 @@
 /**
- * @typedef {object} BootstrapConfig
- * @property {WebAssembly.Exports | undefined} exports
- * @property {WebAssembly.Memory | undefined} memory
- * @property {boolean} bigIntEnabled
- * @property {(message?: any, ...optionalParams: any[]) => void} debug
- * @property {(message?: any, ...optionalParams: any[]) => void} warn
- * @property {(message?: any, ...optionalParams: any[]) => void} error
- * @property {(message?: any, ...optionalParams: any[]) => void} log
- * @property {string | undefined} wasmfsOpfsDir
- * @property {boolean} useStdAlloc
- * @property {string} allocExportName
- * @property {string} deallocExportName
- * @property {string} reallocExportName
- * @property {number | undefined} wasmPtrSizeof
- * @property {"i32" | "i64" | undefined} wasmPtrIR
- */
-
-/**
  * Derives the effective bootstrap configuration by merging user overrides with
  * library defaults and post-processing functional values.
  *
- * @param {Partial<BootstrapConfig> | undefined} apiConfig Configuration provided
+ * @param {Partial<import("./configuration.d.ts").BootstrapConfig> | undefined} apiConfig Configuration provided
  * by the embedding application or a cached global.
- * @param {{ moduleRef?: any, globalObject?: typeof globalThis }} [options] Optional
+ * @param {import("./configuration.d.ts").ResolveBootstrapConfigOptions | undefined} [options] Optional
  * handles to the Emscripten module and global scope. The module reference is
  * only inspected for available typed-array views during BigInt detection.
- * @returns {BootstrapConfig}
+ * @returns {import("./configuration.d.ts").BootstrapConfig}
  */
 export function resolveBootstrapConfig(apiConfig, options = {}) {
     const { moduleRef = undefined, globalObject = globalThis } = options;

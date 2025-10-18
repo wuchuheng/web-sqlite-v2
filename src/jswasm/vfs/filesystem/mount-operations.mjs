@@ -6,22 +6,8 @@ import { ERRNO_CODES } from "./constants.mjs";
  * virtual filesystem tree.
  *
  * @param {import("./base-state.d.ts").MutableFS} FS
- * @param {{ err: (message: string) => void }} options
- * @returns {{
- *   getMounts(mount: import("./base-state.d.ts").FileSystemMount): import("./base-state.d.ts").FileSystemMount[],
- *   syncfs(
- *     populate: boolean | ((errCode: number | null) => void),
- *     callback?: (errCode: number | null) => void
- *   ): void,
- *   mount(
- *     type: import("./base-state.d.ts").FileSystemMountType,
- *     opts: Record<string, unknown>,
- *     mountpoint: string
- *   ): import("./base-state.d.ts").FSNode,
- *   unmount(mountpoint: string): void,
- *   lookup(parent: import("./base-state.d.ts").FSNode, name: string): import("./base-state.d.ts").FSNode,
- *   mknod(path: string, mode: number, dev: number): import("./base-state.d.ts").FSNode,
- * }}
+ * @param {import("./mount-operations.d.ts").MountOperationsOptions} options
+ * @returns {import("./mount-operations.d.ts").MountOperations}
  */
 export function createMountOperations(FS, { err }) {
     return {

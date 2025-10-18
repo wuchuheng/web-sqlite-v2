@@ -2,7 +2,7 @@
  * Creates a result-code to string resolver that falls back to a generic message
  * when the C API cannot provide a textual representation.
  *
- * @param {{ sqlite3_js_rc_str?: (rc: number) => string | undefined }} capi
+ * @param {import("./error-utils.d.ts").ResultCodeApi} capi
  * @returns {(rc: number) => string}
  */
 export function createResultCodeStringifier(capi) {
@@ -15,9 +15,9 @@ export function createResultCodeStringifier(capi) {
  * Creates the canonical SQLite error type used throughout the bootstrapper to
  * provide consistent error messaging and result-code capture.
  *
- * @param {{ SQLITE_ERROR: number }} capi
+ * @param {import("./error-utils.d.ts").SqliteErrorCodeApi} capi
  * @param {(rc: number) => string} rcToString
- * @returns {typeof Error & { toss: (...args: any[]) => never }}
+ * @returns {import("./error-utils.d.ts").Sqlite3ErrorConstructor}
  */
 export function createSQLite3Error(capi, rcToString) {
     // Keep the integer test intentionally lightweight. Tight loops pass result
@@ -66,8 +66,8 @@ export function createSQLite3Error(capi, rcToString) {
 /**
  * Factory for the error type thrown when WebAssembly memory allocations fail.
  *
- * @param {{ SQLITE_NOMEM: number }} capi
- * @returns {typeof Error & { toss: (...args: any[]) => never }}
+ * @param {import("./error-utils.d.ts").SqliteNomemCodeApi} capi
+ * @returns {import("./error-utils.d.ts").WasmAllocErrorConstructor}
  */
 export function createWasmAllocError(capi) {
     class WasmAllocError extends Error {
