@@ -9,8 +9,8 @@ import type {
 export interface SanityCheckDeps {
   /** WASM utilities */
   wasm: {
-    scopedAllocPush: () => number;
-    scopedAllocPop: (scope: number) => void;
+    scopedAllocPush: () => unknown;
+    scopedAllocPop: (scope: unknown) => void;
     scopedAllocCString: (str: string) => number;
     scopedAlloc: (size: number) => number;
     peek: (ptr: number, type: string) => number | bigint;

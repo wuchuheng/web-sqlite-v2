@@ -1,4 +1,4 @@
-type WasmPointer = number;
+type WasmPointer = number | bigint;
 
 export type SqliteCallback = (...args: WasmPointer[]) => WasmPointer | void;
 

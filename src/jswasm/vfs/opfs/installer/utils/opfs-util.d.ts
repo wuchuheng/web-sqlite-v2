@@ -51,12 +51,12 @@ export interface OpfsUtilDeps {
       SQLITE_OPEN_READONLY: number;
     };
     wasm: {
-      scopedAllocPush: () => number;
-      scopedAllocPop: (scope: number) => void;
+      scopedAllocPush: () => unknown;
+      scopedAllocPop: (scope: unknown) => void;
       scopedAllocCString: (str: string) => number;
       scopedAlloc: (size: number) => number;
-      peek: (ptr: number, type: string) => number;
-      poke: (ptr: number, value: number, type?: string) => void;
+      peek: (ptr: number, type: string) => number | bigint;
+      poke: (ptr: number, value: number | bigint, type?: string) => void;
     };
   };
 }

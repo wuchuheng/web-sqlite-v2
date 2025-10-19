@@ -232,8 +232,8 @@ export interface SQLite3WASM {
   cstrncpy(dest: number, src: number, max: number): number;
   poke(ptr: number, value: number | bigint, type: string): void;
   peek(ptr: number, type: string): number | bigint;
-  scopedAllocPush(): number;
-  scopedAllocPop(marker: number): void;
+  scopedAllocPush(): unknown;
+  scopedAllocPop(marker: unknown): void;
   scopedAlloc(size: number): number;
   scopedAllocCString(str: string): number;
 }

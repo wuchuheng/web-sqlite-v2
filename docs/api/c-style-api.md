@@ -29,32 +29,32 @@ SQLite WASM offers two flavors of the C-Style API:
 /**
  * SQLite database handle (pointer type)
  */
-type sqlite3 = number;
+type sqlite3 = number | bigint;
 
 /**
  * SQLite prepared statement handle (pointer type)
  */
-type sqlite3_stmt = number;
+type sqlite3_stmt = number | bigint;
 
 /**
  * SQLite value object (pointer type)
  */
-type sqlite3_value = number;
+type sqlite3_value = number | bigint;
 
 /**
  * SQLite context object (pointer type)
  */
-type sqlite3_context = number;
+type sqlite3_context = number | bigint;
 
 /**
  * SQLite blob handle (pointer type)
  */
-type sqlite3_blob = number;
+type sqlite3_blob = number | bigint;
 
 /**
- * WASM pointer type (32-bit or 64-bit depending on build)
+ * WASM pointer type (32-bit numbers or 64-bit bigints)
  */
-type WasmPointer = number;
+type WasmPointer = number | bigint;
 
 /**
  * SQLite result codes
@@ -146,7 +146,7 @@ function sqlite3_open_v2(
 **Usage Example**:
 
 ```typescript
-const pDb = sqlite3.wasm.alloc(8); // Allocate space for db pointer
+const pDb = sqlite3.wasm.alloc(sqlite3.wasm.ptrSizeof); // Allocate space for db pointer
 const rc = sqlite3.capi.sqlite3_open_v2(
     ":memory:",
     pDb,
@@ -201,33 +201,29 @@ Execute one or more SQL statements with optional callback.
 ```typescript
 /**
  * Callback function for sqlite3_exec
- * @param context - User data passed to sqlite3_exec
- * @param columnCount - Number of columns in result
  * @param columnValues - Array of column values as strings
  * @param columnNames - Array of column names
- * @returns 0 to continue, non-zero to abort
+ * @returns `false` to stop stepping, any other value (including undefined) to continue
  */
 type ExecCallback = (
-    context: any,
-    columnCount: number,
     columnValues: (string | null)[],
     columnNames: string[]
-) => number;
+) => number | boolean | void;
 
 /**
  * Execute SQL statements
  * @param db - Database handle
  * @param sql - SQL statements to execute
- * @param callback - Optional callback for each result row
- * @param callbackArg - User data passed to callback
+ * @param callback - Optional callback for each result row (JS function or WASM pointer)
+ * @param callbackArg - User data pointer (use 0 when passing a JS function)
  * @param errMsg - Output pointer for error message
  * @returns Result code (SQLITE_OK on success)
  */
 function sqlite3_exec(
     db: sqlite3,
     sql: string,
-    callback?: ExecCallback | null,
-    callbackArg?: any,
+    callback?: ExecCallback | WasmPointer | null,
+    callbackArg?: WasmPointer,
     errMsg?: WasmPointer
 ): SqliteResultCode;
 ```
@@ -241,24 +237,27 @@ const db = /* ... get database handle ... */;
 let rc = sqlite3.capi.sqlite3_exec(
     db,
     "CREATE TABLE users (id INTEGER PRIMARY KEY, name TEXT)",
-    null,
-    null,
-    null
+    0,
+    0,
+    0
 );
 
 // Execution with callback
 rc = sqlite3.capi.sqlite3_exec(
     db,
     "SELECT * FROM users",
-    (ctx, count, values, names) => {
+    (values, names) => {
         console.log("Row:", Object.fromEntries(
             names.map((name, i) => [name, values[i]])
         ));
-        return 0; // Continue
+        // Return false to stop iteration early, any other value continues
     },
-    null,
-    null
+    0,
+    0
 );
+
+// sqlite3_exec always expects five arguments; pass 0 when you do not need
+// the user-data pointer or error-message pointer.
 ```
 
 ## Prepared Statement Functions
@@ -288,10 +287,12 @@ function sqlite3_prepare_v3(
 ): SqliteResultCode;
 ```
 
+When `sql` is a JS string, array, or typed array the binding performs its own UTF‑8 conversion: pass `-1` for `nByte` and omit `pzTail` because the native tail pointer would refer to transient memory. Supply `nByte`/`pzTail` only when `sql` is an explicit WASM pointer to a NUL-terminated buffer.
+
 **Usage Example**:
 
 ```typescript
-const pStmt = sqlite3.wasm.alloc(8);
+const pStmt = sqlite3.wasm.alloc(sqlite3.wasm.ptrSizeof);
 const rc = sqlite3.capi.sqlite3_prepare_v3(
     db,
     "INSERT INTO users (name) VALUES (?)",
@@ -376,6 +377,9 @@ function sqlite3_bind_blob(
 **Destructor Constants**:
 - `SQLITE_STATIC` (0) - Data is static, no need to free
 - `SQLITE_TRANSIENT` (-1) - SQLite makes a copy of the data
+
+> **Note**  
+> When you supply JS strings, arrays, or typed arrays, the WASM wrapper copies the data and ignores both `nByte` and the `destructor` argument, internally using `SQLITE_WASM_DEALLOC`. Provide explicit lengths/destructors only when you pass a WASM pointer yourself.
 
 **Usage Example**:
 
@@ -937,7 +941,7 @@ console.log(`Result: ${sqlite3.capi.sqlite3_js_rc_str(rc)}`);
 
 3. **Clean up resources in finally blocks**:
 ```typescript
-const pStmt = sqlite3.wasm.alloc(8);
+const pStmt = sqlite3.wasm.alloc(sqlite3.wasm.ptrSizeof);
 try {
     const rc = sqlite3.capi.sqlite3_prepare_v3(db, sql, -1, 0, pStmt, null);
     if (rc === sqlite3.capi.SQLITE_OK) {

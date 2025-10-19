@@ -193,9 +193,10 @@ type PeekType = 'i1' | 'i8' | 'i16' | 'i32' | 'i64' | 'f32' | 'f64' | 'float' | 
 ```typescript
 // Read different types
 const int8 = sqlite3.wasm.peek8(ptr);
-const int32 = sqlite3.wasm.peek32(ptr + 4);
-const float64 = sqlite3.wasm.peek64f(ptr + 8);
-const pointer = sqlite3.wasm.peekPtr(ptr + 16);
+const add = sqlite3.wasm.ptr.add;
+const int32 = sqlite3.wasm.peek32(add(ptr, 4));
+const float64 = sqlite3.wasm.peek64f(add(ptr, 8));
+const pointer = sqlite3.wasm.peekPtr(add(ptr, 16));
 
 // Generic peek
 const value = sqlite3.wasm.peek(ptr, 'i32');
@@ -254,19 +255,20 @@ type PokeType = PeekType;
 
 ```typescript
 const ptr = sqlite3.wasm.alloc(32);
+const add = sqlite3.wasm.ptr.add;
 
 // Write different types
 sqlite3.wasm.poke8(ptr, 127);
-sqlite3.wasm.poke16(ptr + 1, 32767);
-sqlite3.wasm.poke32(ptr + 4, 2147483647);
-sqlite3.wasm.poke64f(ptr + 8, 3.14159);
-sqlite3.wasm.pokePtr(ptr + 16, somePointer);
+sqlite3.wasm.poke16(add(ptr, 1), 32767);
+sqlite3.wasm.poke32(add(ptr, 4), 2147483647);
+sqlite3.wasm.poke64f(add(ptr, 8), 3.14159);
+sqlite3.wasm.pokePtr(add(ptr, 16), somePointer);
 
 // Generic poke with chaining support
 sqlite3.wasm
     .poke(ptr, 42, 'i32')
-    .poke(ptr + 4, 3.14, 'f64')
-    .poke32(ptr + 8, 3);
+    .poke(add(ptr, 4), 3.14, 'f64')
+    .poke32(add(ptr, 8), 3);
 ```
 
 `SQLite3Wasm` in the signatures above refers to the `sqlite3.wasm` helper object and indicates that the function returns the bridge for chaining additional calls.
@@ -332,11 +334,13 @@ function heapForSize(
 // Copy data from WASM memory
 const ptr = sqlite3.wasm.alloc(100);
 const heap = sqlite3.wasm.heap8u();
-const data = heap.slice(ptr, ptr + 100);
+const start = Number(ptr);
+const data = heap.slice(start, start + 100);
 
 // Direct manipulation
 const i32Heap = sqlite3.wasm.heap32();
-i32Heap[ptr >> 2] = 42; // Write 32-bit int at ptr
+const index = Number(ptr) >>> 2;
+i32Heap[index] = 42; // Write 32-bit int at ptr
 ```
 
 ## String Utilities 🟢
@@ -531,12 +535,12 @@ Automatic resource cleanup using scope-based allocation.
 Allocate memory that is automatically freed when scope exits.
 
 ```typescript
-/**
- * Execute function with scoped allocations
- * All allocations made via scopedAlloc are freed after function returns
- */
-function scopedAllocPush(): number[];
-function scopedAllocPop(state?: number[]): void;
+    /**
+     * Execute function with scoped allocations
+     * All allocations made via scopedAlloc are freed after function returns
+     */
+    function scopedAllocPush(): unknown;
+    function scopedAllocPop(state: unknown): void;
 
 /**
  * Scoped allocation
@@ -585,13 +589,13 @@ function cArgvToJs(argc: number, argvPtr: WasmPointer): (string | null)[];
 
 ```typescript
 // Manual scope management
-sqlite3.wasm.scopedAllocPush();
+const scope = sqlite3.wasm.scopedAllocPush();
 try {
     const ptr1 = sqlite3.wasm.scopedAlloc(100);
     const ptr2 = sqlite3.wasm.scopedAlloc(200);
     // Use pointers...
 } finally {
-    sqlite3.wasm.scopedAllocPop(); // Frees ptr1 and ptr2
+    sqlite3.wasm.scopedAllocPop(scope); // Frees ptr1 and ptr2
 }
 
 // Automatic scope management (recommended)
@@ -840,7 +844,7 @@ function callWithString(db: sqlite3, sql: string) {
 ```typescript
 function readArray(ptr: WasmPointer, count: number): number[] {
     const heap = sqlite3.wasm.heap32();
-    const offset = ptr >> 2; // Divide by 4 for 32-bit alignment
+    const offset = Number(ptr) >>> 2; // Pointers stay within Number's safe range
     return Array.from(heap.slice(offset, offset + count));
 }
 ```
@@ -850,7 +854,7 @@ function readArray(ptr: WasmPointer, count: number): number[] {
 ```typescript
 function writeBuffer(ptr: WasmPointer, data: Uint8Array): void {
     const heap = sqlite3.wasm.heap8u();
-    heap.set(data, ptr);
+    heap.set(data, Number(ptr));
 }
 ```
 
@@ -859,7 +863,7 @@ function writeBuffer(ptr: WasmPointer, data: Uint8Array): void {
 ```typescript
 declare namespace sqlite3 {
     namespace wasm {
-        type WasmPointer = number;
+        type WasmPointer = number | bigint;
 
         // Memory management
         function alloc(n: number | TypedArray): WasmPointer;
@@ -905,8 +909,8 @@ declare namespace sqlite3 {
         function cstrlen(str: string | WasmPointer): number;
 
         // Scoped allocation
-        function scopedAllocPush(): void;
-        function scopedAllocPop(): void;
+        function scopedAllocPush(): unknown;
+        function scopedAllocPop(state?: unknown): void;
         function scopedAlloc(size: number): WasmPointer;
         function scopedAllocCall<T>(callback: () => T): T;
 

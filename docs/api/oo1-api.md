@@ -118,15 +118,16 @@ interface ExecOptions {
     bind?: any[] | Record<string, any>;
 
     /**
-     * Callback for each result row
-     * Return truthy to stop iteration
+     * Callback for each result row.
+     * Return literal false to stop iteration; all other values continue.
      */
     callback?: (row: any, stmt: Stmt) => any;
 
     /**
-     * Row mode: "array" (default), "object", or "stmt"
+     * Row mode for the first callback argument.
+     * Accepts "array" (default), "object", "stmt", a zero-based column index, or "$columnName".
      */
-    rowMode?: "array" | "object" | "stmt";
+    rowMode?: "array" | "object" | "stmt" | number | `$${string}`;
 
     /**
      * Column names for object mode
@@ -134,14 +135,19 @@ interface ExecOptions {
     columnNames?: string[];
 
     /**
-     * Return array of all rows
+     * Controls the value returned from exec().
      */
-    returnValue?: "resultRows";
+    returnValue?: "this" | "resultRows" | "saveSql";
 
     /**
-     * Multi-statement mode (default: true)
+     * Array used to collect result rows when returnValue is "resultRows".
      */
-    multi?: boolean;
+    resultRows?: any[]; // Not valid when rowMode is "stmt"
+
+    /**
+     * Array used to collect the SQL text of each executed statement.
+     */
+    saveSql?: string[];
 }
 
 interface ExecResult {
@@ -149,8 +155,15 @@ interface ExecResult {
      * Array of result rows (if returnValue: "resultRows")
      */
     resultRows?: any[];
+
+    /**
+     * Captured SQL text (if returnValue: "saveSql")
+     */
+    saveSql?: string[];
 }
 ```
+
+By default `exec()` returns the database instance (`"this"`). If you specify a `rowMode` without a callback or explicit `returnValue`, the helper promotes `returnValue` to `"resultRows"` so you receive the fetched rows.
 
 **Usage Examples**:
 
@@ -175,8 +188,9 @@ db.exec("INSERT INTO users (name, age) VALUES (:name, :age)", {
 
 // With callback (array mode)
 db.exec("SELECT * FROM users", {
-    callback: (row) => {
+    callback: (row, stmt) => {
         console.log(row); // [1, 'Alice', 30]
+        console.log(stmt.getColumnNames()); // access metadata from stmt
     },
 });
 
@@ -184,8 +198,23 @@ db.exec("SELECT * FROM users", {
 db.exec("SELECT * FROM users", {
     rowMode: "object",
     callback: (row) => {
+        if (row.id === 2) {
+            return false; // stop iteration after this row
+        }
         console.log(row); // { id: 1, name: 'Alice', age: 30 }
     },
+});
+
+// Extract a single column by index
+db.exec("SELECT id, name FROM users", {
+    rowMode: 1, // pass the second column only
+    callback: (name) => console.log(name),
+});
+
+// Extract a single column by name
+db.exec("SELECT id, name AS displayName FROM users", {
+    rowMode: "$displayName",
+    callback: (name) => console.log(name),
 });
 
 // Return all rows
@@ -195,6 +224,13 @@ const result = db.exec("SELECT * FROM users WHERE age > ?", {
     returnValue: "resultRows",
 });
 console.log(result.resultRows);
+
+// Capture the SQL text evaluated by exec()
+const statements = db.exec(`
+    CREATE TABLE log (msg TEXT);
+    INSERT INTO log VALUES ('hi');
+`, { returnValue: "saveSql" });
+console.log(statements.saveSql); // ["CREATE TABLE log (msg TEXT)", "INSERT INTO log VALUES ('hi')"]
 ```
 
 #### selectArray() 🟢
@@ -348,35 +384,42 @@ Execute a function within a transaction.
 
 ```typescript
 /**
- * Run function in a transaction
- * Automatically commits on success, rolls back on exception
- * @param callback - Function to run in transaction
+ * Run function in a transaction.
+ * Automatically commits on success and rolls back on exception.
+ * @param beginQualifier - Optional BEGIN keyword such as "IMMEDIATE" or "EXCLUSIVE"
+ * @param callback - Function that receives the current DB instance
  * @returns Result of callback function
  */
-transaction<T>(callback: () => T): T;
+transaction<T>(callback: (db: DB) => T): T;
+transaction<T>(beginQualifier: string, callback: (db: DB) => T): T;
 ```
 
 **Usage Example**:
 
 ```typescript
-db.transaction(() => {
-    db.exec("INSERT INTO users (name, age) VALUES (?, ?)", {
+db.transaction((tx) => {
+    tx.exec("INSERT INTO users (name, age) VALUES (?, ?)", {
         bind: ["Grace", 27],
     });
-    db.exec("UPDATE users SET age = age + 1 WHERE name = ?", {
+    tx.exec("UPDATE users SET age = age + 1 WHERE name = ?", {
         bind: ["Grace"],
     });
     // If any error occurs, entire transaction is rolled back
 });
 
 // With return value
-const newId = db.transaction(() => {
-    db.exec("INSERT INTO users (name, age) VALUES (?, ?)", {
+const newId = db.transaction((tx) => {
+    tx.exec("INSERT INTO users (name, age) VALUES (?, ?)", {
         bind: ["Henry", 31],
     });
-    return db.selectValue("SELECT last_insert_rowid()");
+    return tx.selectValue("SELECT last_insert_rowid()");
 });
 console.log(`New user ID: ${newId}`);
+
+// Explicit BEGIN IMMEDIATE
+db.transaction("IMMEDIATE", (tx) => {
+    tx.exec("UPDATE users SET age = age + 1");
+});
 ```
 
 ### Utility Methods 🟢
@@ -857,9 +900,9 @@ for (const user of users) {
 }
 
 // Good: Single transaction
-db.transaction(() => {
+db.transaction((tx) => {
     for (const user of users) {
-        db.exec("INSERT INTO users (name) VALUES (?)", { bind: [user.name] });
+        tx.exec("INSERT INTO users (name) VALUES (?)", { bind: [user.name] });
     }
 });
 ```
@@ -920,7 +963,7 @@ declare namespace sqlite3 {
             });
 
             readonly filename: string;
-            readonly pointer: number;
+            readonly pointer: number | bigint;
             readonly isOpen: boolean;
 
             exec(sql: string, options?: ExecOptions): this | ExecResult;
@@ -942,7 +985,8 @@ declare namespace sqlite3 {
             ): Record<string, any>[];
             selectValue(sql: string, bind?: any[] | Record<string, any>): any;
             prepare(sql: string): Stmt;
-            transaction<T>(callback: () => T): T;
+            transaction<T>(callback: (db: DB) => T): T;
+            transaction<T>(beginQualifier: string, callback: (db: DB) => T): T;
             changes(): number;
             close(): void;
             export(): Uint8Array;
@@ -950,7 +994,7 @@ declare namespace sqlite3 {
 
         class Stmt {
             readonly sql: string;
-            readonly pointer: number;
+            readonly pointer: number | bigint;
             readonly db: DB;
             readonly columnCount: number;
             readonly parameterCount: number;

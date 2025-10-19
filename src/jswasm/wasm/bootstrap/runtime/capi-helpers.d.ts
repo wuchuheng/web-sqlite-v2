@@ -4,7 +4,7 @@ import type {
     WasmAllocErrorConstructor,
 } from "../error-utils.d.ts";
 
-type WasmPointer = number;
+type WasmPointer = number | bigint;
 
 export interface Sqlite3VfsInstance {
     $zName: WasmPointer;
@@ -132,8 +132,8 @@ export interface WasmBridge {
     allocFromTypedArray(buffer: Uint8Array | ArrayBufferView): WasmPointer;
     dealloc(pointer: WasmPointer): void;
     scopedAlloc(byteCount: number): WasmPointer;
-    scopedAllocPush(): WasmPointer;
-    scopedAllocPop(scope: WasmPointer): void;
+    scopedAllocPush(): unknown;
+    scopedAllocPop(scope?: unknown): void;
     scopedAllocCString(value: string): WasmPointer;
     peek(pointer: WasmPointer, signature: "i64"): bigint;
     peekPtr(pointer: WasmPointer): WasmPointer;

@@ -1,7 +1,7 @@
 import type { BootstrapConfig } from "../configuration.d.ts";
 import type { WasmAllocErrorConstructor } from "../error-utils.d.ts";
 
-type WasmPointer = number;
+type WasmPointer = number | bigint;
 
 export type NumericTypedArray =
     | Uint8Array

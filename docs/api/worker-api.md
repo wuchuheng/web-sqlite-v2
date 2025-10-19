@@ -177,8 +177,12 @@ interface OpenResponse {
     type: "open";
     messageId?: string | number;
     dbId: string;
-    filename: string;
-    vfs: string;
+    result: {
+        filename: string;
+        dbId: string;
+        persistent: boolean;
+        vfs: string;
+    };
 }
 ```
 
@@ -199,9 +203,16 @@ worker.postMessage({
 //   type: 'open',
 //   messageId: 'open-1',
 //   dbId: 'db-1',
-//   filename: 'mydb.sqlite3',
-//   vfs: 'opfs'
+//   result: {
+//     filename: 'mydb.sqlite3',
+//     dbId: 'db-1',
+//     persistent: true,
+//     vfs: 'opfs'
+//   }
 // }
+
+// The worker repeats the database identifier both in the envelope and the result.
+// `persistent` indicates whether the VFS stores data across sessions (e.g. OPFS).
 ```
 
 #### close ⚫
@@ -224,7 +235,9 @@ interface CloseMessage {
 interface CloseResponse {
     type: "close";
     messageId?: string | number;
-    filename: string;
+    result?: {
+        filename?: string;
+    };
 }
 ```
 
@@ -237,6 +250,8 @@ worker.postMessage({
     dbId: 'db-1',
     args: { unlink: false }
 });
+
+// Response result.filename echoes the path of the closed database when available.
 ```
 
 #### exec ⚫
@@ -248,48 +263,46 @@ interface ExecMessage {
     type: "exec";
     messageId?: string | number;
     dbId?: string;
-    args: {
-        /**
-         * SQL statement(s) to execute
-         */
-        sql: string;
+    args: WorkerExecArgs;
+}
 
-        /**
-         * Bind parameters (array or object)
-         */
-        bind?: any[] | Record<string, any>;
-
-        /**
-         * Row mode: "array", "object", or "stmt"
-         */
-        rowMode?: "array" | "object" | "stmt";
-
-        /**
-         * Return result rows
-         */
-        returnValue?: "resultRows";
-
-        /**
-         * Save column names in result
-         */
-        columnNames?: string[];
-    };
+interface WorkerExecArgs {
+    /** SQL statement(s) to execute */
+    sql: string;
+    /** Bind parameters (array or object) */
+    bind?: any[] | Record<string, any>;
+    /**
+     * Row mode for row results. Supports "array", "object", "stmt",
+     * zero-based column indices, or "$columnName" lookups.
+     */
+    rowMode?: "array" | "object" | "stmt" | number | `$${string}`;
+    /** Controls what exec() returns. Defaults to "this". */
+    returnValue?: "this" | "resultRows" | "saveSql";
+    /**
+     * Collect result rows (not valid when rowMode is "stmt").
+     */
+    resultRows?: any[];
+    /** Collect column names. */
+    columnNames?: string[];
+    /** Collect executed SQL statements. */
+    saveSql?: string[];
+    /**
+     * Request change counts (true for 32-bit, 64 for bigint).
+     */
+    countChanges?: boolean | 64;
+    /**
+     * When set to a string, rows are streamed back as separate messages
+     * using that string as the message type.
+     */
+    callback?: string;
 }
 
 interface ExecResponse {
     type: "exec";
     messageId?: string | number;
     dbId: string;
-    result: {
-        /**
-         * Array of result rows (if returnValue: "resultRows")
-         */
-        resultRows?: any[];
-
-        /**
-         * Column names (if requested)
-         */
-        columnNames?: string[];
+    result: WorkerExecArgs & {
+        changeCount?: number | bigint;
     };
 }
 ```
@@ -326,7 +339,8 @@ worker.postMessage({
     args: {
         sql: 'SELECT * FROM users',
         rowMode: 'object',
-        returnValue: 'resultRows'
+        returnValue: 'resultRows',
+        columnNames: []
     }
 });
 
@@ -338,9 +352,41 @@ worker.postMessage({
 //   result: {
 //     resultRows: [
 //       { id: 1, name: 'Alice' }
-//     ]
+//     ],
+//     columnNames: ['id', 'name']
 //   }
 // }
+
+// Change counts
+worker.postMessage({
+    type: 'exec',
+    messageId: 'exec-5',
+    dbId: 'db-1',
+    args: {
+        sql: 'UPDATE users SET name = name || "!"',
+        countChanges: true
+    }
+});
+// Response result.changeCount contains the number of affected rows
+
+// Stream rows via callback messages
+worker.postMessage({
+    type: 'exec',
+    messageId: 'exec-4',
+    dbId: 'db-1',
+    args: {
+        sql: 'SELECT name FROM users',
+        rowMode: '$name',
+        callback: 'users-row'
+    }
+});
+
+// The worker will post messages like:
+// { type: 'users-row', rowNumber: 1, row: 'Alice', columnNames: ['name'] }
+// ... and finally { type: 'users-row', rowNumber: null, row: undefined, columnNames: ['name'] }
+
+// The exec response echoes the args object. After this call completes,
+// the result field contains the same shape plus any derived data (e.g. changeCount).
 ```
 
 #### export ⚫
@@ -460,111 +506,89 @@ worker.onmessage = function(event) {
 };
 ```
 
-## Promiser API (Promise-Based) ⚫
+## Promiser API ⚫
 
-The Promiser API wraps the message-based Worker1 API with Promises for easier asynchronous programming.
+The Promiser helpers wrap the Worker1 message protocol in a convenience function that returns promises for each request.
 
-### Initialization ⚫
+### Factory Signatures ⚫
 
 ```typescript
-/**
- * Initialize SQLite Worker with Promiser API
- * @param config - Configuration object
- * @returns Promise that resolves to promiser instance
- */
-function sqlite3Worker1Promiser(config: {
-    /**
-     * Worker instance or path to worker script
-     */
-    worker?: Worker | string;
-
-    /**
-     * Callback when worker is ready
-     */
-    onready?: (promiser: Promiser) => void;
-
-    /**
-     * Callback for unhandled messages
-     */
-    onunhandled?: (event: MessageEvent) => void;
-
-    /**
-     * Callback for errors
-     */
-    onerror?: (error: Error) => void;
-
-    /**
-     * Debug mode
-     */
-    debug?: boolean;
-}): Promise<Promiser>;
-
-interface Promiser {
-    /**
-     * Send message and wait for response
-     */
-    (message: WorkerMessage): Promise<WorkerResponse>;
-
-    /**
-     * Close worker and cleanup
-     */
+type Promiser = ((message: WorkerMessage) => Promise<WorkerResponse>) & {
     close(): void;
+};
+
+interface PromiserConfig {
+    worker?: Worker | string;
+    onready?: (promiser: Promiser) => void;
+    onunhandled?: (event: MessageEvent) => void;
+    onerror?: (error: Error) => void;
+    debug?: boolean;
+}
+
+function sqlite3Worker1Promiser(
+    config?: PromiserConfig | ((promiser: Promiser) => void)
+): Promiser;
+
+declare namespace sqlite3Worker1Promiser {
+    function v2(config?: PromiserConfig): Promise<Promiser>;
 }
 ```
 
-**Usage Example**:
+### Usage Patterns ⚫
+
+**Promiser v1 (callback driven)**
 
 ```javascript
-// Initialize
-const promiser = await sqlite3Worker1Promiser({
+const promiser = sqlite3Worker1Promiser({
     worker: new Worker('sqlite-worker.js'),
-    debug: true
+    onready: async (factory) => {
+        const { result } = await factory({
+            type: 'open',
+            args: { filename: ':memory:' }
+        });
+        const dbId = result.dbId;
+
+        await factory({
+            type: 'exec',
+            dbId,
+            args: { sql: 'CREATE TABLE users (id INTEGER, name TEXT)' }
+        });
+
+        const query = await factory({
+            type: 'exec',
+            dbId,
+            args: {
+                sql: 'SELECT * FROM users',
+                rowMode: 'object',
+                returnValue: 'resultRows'
+            }
+        });
+        console.log('Rows:', query.result.resultRows);
+    }
+});
+```
+
+`sqlite3Worker1Promiser()` returns the factory immediately; use the `onready` callback (or pass a function as the only argument) to know when the worker has finished bootstrapping.
+
+**Promiser v2 (Promise based)**
+
+```javascript
+const promiser = await sqlite3Worker1Promiser.v2({
+    worker: new Worker('sqlite-worker.js')
 });
 
-// Open database
-const openResult = await promiser({
+const { result } = await promiser({
     type: 'open',
     args: { filename: ':memory:' }
 });
-console.log('Opened database:', openResult.dbId);
 
-// Create table
-await promiser({
-    type: 'exec',
-    dbId: openResult.dbId,
-    args: {
-        sql: 'CREATE TABLE users (id INTEGER PRIMARY KEY, name TEXT)'
-    }
-});
-
-// Insert data
-await promiser({
-    type: 'exec',
-    dbId: openResult.dbId,
-    args: {
-        sql: 'INSERT INTO users (name) VALUES (?)',
-        bind: ['Alice']
-    }
-});
-
-// Query data
-const queryResult = await promiser({
-    type: 'exec',
-    dbId: openResult.dbId,
-    args: {
-        sql: 'SELECT * FROM users',
-        rowMode: 'object',
-        returnValue: 'resultRows'
-    }
-});
-console.log('Users:', queryResult.result.resultRows);
-
-// Close database
 await promiser({
     type: 'close',
-    dbId: openResult.dbId
+    dbId: result.dbId
 });
 ```
+
+> When using the ESM build (`sqlite3-worker1-promiser.mjs`), the default export already exposes the v2 factory.
 
 ### Error Handling with Promiser ⚫
 
@@ -586,11 +610,11 @@ try {
 
 ```javascript
 // main.js
-import sqlite3Worker1Promiser from './sqlite3-worker1-promiser.mjs';
+import promiserFactory from './sqlite3-worker1-promiser.mjs';
 
 async function main() {
     // Initialize worker with promiser
-    const promiser = await sqlite3Worker1Promiser({
+    const promiser = await promiserFactory({
         worker: new Worker('sqlite-worker.js'),
         onready: () => console.log('Worker ready')
     });

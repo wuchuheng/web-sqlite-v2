@@ -25,7 +25,7 @@ import type {
 /**
  * Numeric pointer value exposed by the compiled sqlite3 WebAssembly module.
  */
-export type WasmPointer = number;
+export type WasmPointer = number | bigint;
 
 /**
  * Primitive scalar types supported by the sqlite3 facade APIs.
@@ -394,8 +394,8 @@ export interface Sqlite3WasmNamespace
     functionEntry(exportIndex: number): number;
     cArgvToJs(argc: number, argvPointer: WasmPointer): (string | number)[];
     scopedAlloc(size: number): WasmPointer;
-    scopedAllocPush(): WasmPointer;
-    scopedAllocPop(scope: WasmPointer): void;
+    scopedAllocPush(): unknown;
+    scopedAllocPop(scope?: unknown): void;
     allocCString(source: string, retain?: boolean): [WasmPointer, number];
     allocFromTypedArray(buffer: Uint8Array | ArrayBufferView | ArrayBuffer): WasmPointer;
     dealloc(pointer: WasmPointer): void;
