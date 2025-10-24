@@ -1,3 +1,13 @@
+---
+id: DOC-API-WORKER
+title: Worker API Reference
+summary: Capture the message-based and promise-based worker interfaces for executing SQLite queries off the main thread.
+audience: ["engineering","ops"]
+status: in-progress
+owner: API Documentation Maintainer
+updated: 2025-02-14
+---
+
 # Worker API Documentation
 
 The Worker API enables running SQLite operations in a dedicated Web Worker thread, keeping database operations off the main thread to maintain UI responsiveness. This is particularly useful for computationally intensive queries or when working with large datasets.

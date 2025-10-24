@@ -1,3 +1,13 @@
+---
+id: DOC-API-OO1
+title: Object-Oriented API Reference
+summary: Document the OO1 convenience layer for SQLite WASM, including classes, usage guidance, and verification notes.
+audience: ["engineering"]
+status: in-progress
+owner: API Documentation Maintainer
+updated: 2025-02-14
+---
+
 # Object-Oriented API (OO1) Documentation
 
 The Object-Oriented API (OO1) provides a high-level, JavaScript-friendly interface to SQLite WASM. It wraps the low-level C-style API with exception-based error handling, automatic resource management, and convenient methods for common database operations.

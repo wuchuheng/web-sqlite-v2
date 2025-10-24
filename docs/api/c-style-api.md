@@ -1,3 +1,13 @@
+---
+id: DOC-API-C-STYLE
+title: C-Style API Reference
+summary: Detail the low-level SQLite3 bindings exposed through the wasm package, including verification status and usage notes.
+audience: ["engineering"]
+status: in-progress
+owner: API Documentation Maintainer
+updated: 2025-02-14
+---
+
 # C-Style API Documentation
 
 The C-Style API provides low-level bindings that mirror the native SQLite C API, enabling direct access to SQLite functionality from JavaScript/TypeScript with WASM.

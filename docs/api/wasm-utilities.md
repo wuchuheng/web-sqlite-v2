@@ -1,3 +1,13 @@
+---
+id: DOC-API-WASM-UTILS
+title: WASM Utilities Reference
+summary: Summarize the helper utilities under sqlite3.wasm that manage memory, type bridging, and module lifecycle.
+audience: ["engineering"]
+status: in-progress
+owner: API Documentation Maintainer
+updated: 2025-02-14
+---
+
 # WASM Utilities Documentation
 
 The WASM utilities provide essential functions for memory management, type conversion, and bridging between JavaScript and WebAssembly. These utilities are accessed via `sqlite3.wasm` and are critical for working with the C-style API and managing WASM memory.

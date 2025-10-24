@@ -14,7 +14,8 @@
   "scripts": {
     "test": "pnpm -w --filter @wuchuheng/web-sqlite-tests dev",
     "lint": "eslint . --ext .ts,.js,.mjs --fix; pnpm run test:lint",
-    "test:lint": "cd tests && pnpm run lint"
+    "test:lint": "cd tests && pnpm run lint",
+    "docs:dev": "vitepress dev docs"
   },
   "keywords": [
     "sqlite",
@@ -35,6 +36,8 @@
     "globals": "^16.4.0",
     "jiti": "^2.6.1",
     "tsx": "^4.20.6",
-    "typescript-eslint": "^8.46.0"
+    "typescript": "^5.6.3",
+    "typescript-eslint": "^8.46.0",
+    "vitepress": "^1.5.0"
   }
 }

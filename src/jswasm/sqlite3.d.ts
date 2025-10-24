@@ -1,3 +1,5 @@
+import type { Sqlite3WasmNamespace } from "./wasm/bootstrap/runtime/sqlite3-facade-namespace.d.ts";
+
 export type WasmPointer = number | bigint;
 
 export type PeekType =
@@ -716,9 +718,7 @@ export class SQLite3Error extends Error {
 /**
  * Main SQLite3 API Object
  */
-export interface SQLite3Wasm
-  extends import("./wasm/bootstrap/runtime/sqlite3-facade-namespace.d.ts")
-    .Sqlite3WasmNamespace {
+export interface SQLite3Wasm extends Sqlite3WasmNamespace {
   /** Indicates whether BigInt-backed heap views are available. */
   bigIntEnabled: boolean;
   /** Pointer size in bytes for the active build. */

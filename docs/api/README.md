@@ -1,3 +1,13 @@
+---
+id: DOC-API-OVERVIEW
+title: SQLite WASM API Overview
+summary: Describe the documentation set that explains the SQLite WASM APIs exposed by the toolkit and how they relate to one another.
+audience: ["engineering","architecture"]
+status: in-progress
+owner: API Documentation Maintainer
+updated: 2025-02-14
+---
+
 # SQLite WASM API Documentation
 
 This comprehensive API documentation provides detailed information about SQLite WASM APIs, organized for TypeScript development. The documentation is based on the official SQLite WASM documentation and provides type definitions, usage patterns, and examples for each API.
@@ -43,8 +53,9 @@ sqlite3
 
 ```typescript
 // Object-Oriented API (Recommended)
-import { sqlite3 } from "./sqlite3.js";
+import sqlite3InitModule from "@wuchuheng/web-sqlite";
 
+const sqlite3 = await sqlite3InitModule();
 const db = new sqlite3.oo1.DB(":memory:");
 
 // Create table and insert data
@@ -60,9 +71,14 @@ console.log(users); // [[1, 'Alice'], [2, 'Bob']]
 db.close();
 ```
 
+The package default export resolves to `sqlite3InitModule`, matching the distribution entry recorded in `package.json`.【F:src/jswasm/sqlite3.mjs†L70-L155】【F:src/jswasm/sqlite3.mjs†L473-L479】【F:package.json†L2-L18】 The worker harness in this repository uses the same initialization flow before registering its suites.【F:tests/src/worker.ts†L1-L56】
+
 ### Using Prepared Statements
 
 ```typescript
+import sqlite3InitModule from "@wuchuheng/web-sqlite";
+
+const sqlite3 = await sqlite3InitModule();
 const db = new sqlite3.oo1.DB(":memory:");
 const stmt = db.prepare("INSERT INTO users (name) VALUES (?)");
 
@@ -107,8 +123,6 @@ Each API documentation includes:
 
 -   [Official SQLite WASM Documentation](https://sqlite.org/wasm/doc/trunk/api-index.md)
 -   [Building SQLite WASM](https://sqlite.org/wasm/doc/trunk/building.md)
--   [Performance Tips](./performance.md)
--   [Migration Guide JS to TS](./migration-guide.md)
 
 ## Contributing
 
