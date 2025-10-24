@@ -19,3 +19,14 @@ Follow the existing `<type>: <description>` convention (`refactory:`, `docs:`). 
 
 ## Security & Configuration Tips
 Serve assets through `scripts/http-server.ts` or an equivalent COOP/COEP-compliant server to preserve `SharedArrayBuffer` support. If you change port or base path, document the new command in the PR and validate that `sqlite3.wasm` loads from the expected origin.
+
+## AI Agent Rules (Mandatory)
+The rules in `.clinerules/base_rules.md` apply to the entire repository. Any AI agent (Codex/LLM) working in this repo must:
+
+- Read `.clinerules/base_rules.md` at the start of every task and conform to it.
+- Prioritize readability, then stability, then robustness, as defined by the base rules.
+- Use the Three‑Phase Processing Pattern and numeric comments only inside function/method bodies when helpful.
+- Keep functions small, extract complex or repeated logic, and respect the 120‑char line length.
+- After making changes, self‑check compliance and note any deviations in the final message.
+
+If any instruction conflicts arise, follow this precedence: direct system/developer/user instructions > this AGENTS.md > `.clinerules/base_rules.md` > other files. When a conflict occurs, call it out explicitly in your final message.
