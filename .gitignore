@@ -2,3 +2,4 @@ node_modules/
 tmp.md
 tsconfig.tsbuildinfo
 dist
+docs/.vitepress/cache/
