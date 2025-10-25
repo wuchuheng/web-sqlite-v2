@@ -2,6 +2,11 @@ import js from "@eslint/js";
 import globals from "globals";
 import tseslint from "typescript-eslint";
 import { defineConfig } from "eslint/config";
+import { dirname } from "node:path";
+import { fileURLToPath } from "node:url";
+
+// Resolve repository root for tsconfigRootDir
+const __dirname = dirname(fileURLToPath(import.meta.url));
 
 export default defineConfig([
     {
@@ -42,6 +47,10 @@ export default defineConfig([
     {
         files: ["**/*.{ts,mts,cts}"],
         languageOptions: {
+            parserOptions: {
+                // Disambiguate between root and tests tsconfig directories
+                tsconfigRootDir: __dirname,
+            },
             globals: {
                 ...globals.browser,
                 ...globals.node,
