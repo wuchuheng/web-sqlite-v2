@@ -20,7 +20,7 @@ export function createDatabaseClass(
     validators,
     execHelpers,
     Statement,
-    statementToken
+    statementToken,
 ) {
     const { capi, wasm, util, ptrMap, stmtMap, toss } = context;
     const { pointerOf, ensureDbOpen } = validators;
@@ -140,7 +140,7 @@ export function createDatabaseClass(
         dbFilename(dbName = "main") {
             return capi.sqlite3_db_filename(
                 pointerOf(ensureDbOpen(this)),
-                dbName
+                dbName,
             );
         }
 
@@ -153,7 +153,7 @@ export function createDatabaseClass(
         dbName(dbNumber = 0) {
             return capi.sqlite3_db_name(
                 pointerOf(ensureDbOpen(this)),
-                dbNumber
+                dbNumber,
             );
         }
 
@@ -197,8 +197,8 @@ export function createDatabaseClass(
                         sql,
                         -1,
                         stmtSlot,
-                        null
-                    )
+                        null,
+                    ),
                 );
                 stmtPointer = wasm.peekPtr(stmtSlot);
             } finally {
@@ -231,8 +231,8 @@ export function createDatabaseClass(
                 !Array.isArray(sql)
                     ? [sql]
                     : options === undefined
-                    ? [sql]
-                    : [sql, options];
+                      ? [sql]
+                      : [sql, options];
             const plan = parseExecPlan(this, execArgs);
             if (!plan.sql) {
                 toss("exec() requires an SQL string.");
@@ -244,7 +244,7 @@ export function createDatabaseClass(
             let statement = null;
             let bindSpec = opt.bind;
             let needFirstEval = Boolean(
-                plan.cbArg || opt.columnNames || resultRows
+                plan.cbArg || opt.columnNames || resultRows,
             );
             const stack = wasm.scopedAllocPush();
 
@@ -255,7 +255,7 @@ export function createDatabaseClass(
                     ? plan.sql.byteLength
                     : wasm.jstrlen(plan.sql);
                 const ppStmt = wasm.scopedAlloc(
-                    2 * wasm.ptrSizeof + (sqlByteLength + 1)
+                    2 * wasm.ptrSizeof + (sqlByteLength + 1),
                 );
                 const pzTail = ppStmt + wasm.ptrSizeof;
                 let pSql = pzTail + wasm.ptrSizeof;
@@ -269,7 +269,7 @@ export function createDatabaseClass(
                         wasm.heap8(),
                         pSql,
                         sqlByteLength,
-                        false
+                        false,
                     );
                 }
 
@@ -285,8 +285,8 @@ export function createDatabaseClass(
                             sqlByteLength,
                             0,
                             ppStmt,
-                            pzTail
-                        )
+                            pzTail,
+                        ),
                     );
 
                     const pStmt = wasm.peekPtr(ppStmt);
@@ -320,7 +320,7 @@ export function createDatabaseClass(
                                 if (columnNamesCaptured++ === 0) {
                                     statement.getColumnNames(
                                         (cbCache.columnNames =
-                                            opt.columnNames || [])
+                                            opt.columnNames || []),
                                     );
                                 }
                                 statement._lockedByExec = true;
@@ -408,7 +408,7 @@ export function createDatabaseClass(
             } else if (isFunction(xStep)) {
                 if (!isFunction(xFinal)) {
                     toss(
-                        "Missing xFinal() callback for aggregate or window UDF."
+                        "Missing xFinal() callback for aggregate or window UDF.",
                     );
                 }
                 xFunc = null;
@@ -421,7 +421,7 @@ export function createDatabaseClass(
             if (isWindow === false) {
                 if (isFunction(xValue) || isFunction(xInverse)) {
                     toss(
-                        "xValue and xInverse are not permitted for non-window UDFs."
+                        "xValue and xInverse are not permitted for non-window UDFs.",
                     );
                 }
             } else if (isFunction(xValue)) {
@@ -441,7 +441,7 @@ export function createDatabaseClass(
                 (typeof pApp !== "number" || !util.isInt32(pApp))
             ) {
                 toss(
-                    "Invalid value for pApp property. Must be a legal WASM pointer value."
+                    "Invalid value for pApp property. Must be a legal WASM pointer value.",
                 );
             }
 
@@ -466,8 +466,8 @@ export function createDatabaseClass(
             const arity = Object.prototype.hasOwnProperty.call(opt, "arity")
                 ? opt.arity
                 : aritySource.length
-                ? aritySource.length - 1
-                : 0;
+                  ? aritySource.length - 1
+                  : 0;
 
             // 2. Core processing
             let rc;
@@ -484,7 +484,7 @@ export function createDatabaseClass(
                     xFinal,
                     xValue,
                     xInverse,
-                    xDestroy
+                    xDestroy,
                 );
             } else {
                 rc = capi.sqlite3_create_function_v2(
@@ -496,7 +496,7 @@ export function createDatabaseClass(
                     xFunc,
                     xStep,
                     xFinal,
-                    xDestroy
+                    xDestroy,
                 );
             }
 
@@ -614,7 +614,7 @@ export function createDatabaseClass(
                 if (/[^a-zA-Z]/.test(arguments[0])) {
                     toss(
                         capi.SQLITE_MISUSE,
-                        "Invalid argument for BEGIN qualifier."
+                        "Invalid argument for BEGIN qualifier.",
                     );
                 }
                 opener += ` ${arguments[0]}`;

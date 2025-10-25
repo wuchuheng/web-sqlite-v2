@@ -14,7 +14,13 @@
  * @module file-syscalls
  */
 
-import { ERRNO, FCNTL_CMD, ACCESS_MODE, SPECIAL_FLAGS, UTIME_VALUES } from './errno-constants.mjs';
+import {
+    ERRNO,
+    FCNTL_CMD,
+    ACCESS_MODE,
+    SPECIAL_FLAGS,
+    UTIME_VALUES,
+} from "./errno-constants.mjs";
 
 /**
  * Creates file operation syscall implementations
@@ -45,7 +51,7 @@ export function createFileSyscalls(
     lengthBytesUTF8,
     HEAP8,
     HEAP16,
-    HEAP32
+    HEAP32,
 ) {
     /**
      * chmod - Change file mode (permissions)
@@ -70,7 +76,7 @@ export function createFileSyscalls(
             // 3. Return success
             return 0;
         } catch (e) {
-            if (typeof FS === 'undefined' || !(e.name === 'ErrnoError')) {
+            if (typeof FS === "undefined" || !(e.name === "ErrnoError")) {
                 throw e;
             }
             return -e.errno;
@@ -97,7 +103,7 @@ export function createFileSyscalls(
             // 2. Return success
             return 0;
         } catch (e) {
-            if (typeof FS === 'undefined' || !(e.name === 'ErrnoError')) {
+            if (typeof FS === "undefined" || !(e.name === "ErrnoError")) {
                 throw e;
             }
             return -e.errno;
@@ -125,7 +131,7 @@ export function createFileSyscalls(
             // 2. Return success
             return 0;
         } catch (e) {
-            if (typeof FS === 'undefined' || !(e.name === 'ErrnoError')) {
+            if (typeof FS === "undefined" || !(e.name === "ErrnoError")) {
                 throw e;
             }
             return -e.errno;
@@ -167,10 +173,10 @@ export function createFileSyscalls(
             }
 
             // 4. Build permission string and check
-            let perms = '';
-            if (amode & ACCESS_MODE.R_OK) perms += 'r';
-            if (amode & ACCESS_MODE.W_OK) perms += 'w';
-            if (amode & ACCESS_MODE.X_OK) perms += 'x';
+            let perms = "";
+            if (amode & ACCESS_MODE.R_OK) perms += "r";
+            if (amode & ACCESS_MODE.W_OK) perms += "w";
+            if (amode & ACCESS_MODE.X_OK) perms += "x";
 
             if (perms && FS.nodePermissions(node, perms)) {
                 return -ERRNO.ENOENT;
@@ -179,7 +185,7 @@ export function createFileSyscalls(
             // 5. Return success
             return 0;
         } catch (e) {
-            if (typeof FS === 'undefined' || !(e.name === 'ErrnoError')) {
+            if (typeof FS === "undefined" || !(e.name === "ErrnoError")) {
                 throw e;
             }
             return -e.errno;
@@ -264,7 +270,7 @@ export function createFileSyscalls(
                     return -ERRNO.EINVAL;
             }
         } catch (e) {
-            if (typeof FS === 'undefined' || !(e.name === 'ErrnoError')) {
+            if (typeof FS === "undefined" || !(e.name === "ErrnoError")) {
                 throw e;
             }
             return -e.errno;
@@ -300,7 +306,7 @@ export function createFileSyscalls(
             // 3. Return success
             return 0;
         } catch (e) {
-            if (typeof FS === 'undefined' || !(e.name === 'ErrnoError')) {
+            if (typeof FS === "undefined" || !(e.name === "ErrnoError")) {
                 throw e;
             }
             return -e.errno;
@@ -343,7 +349,7 @@ export function createFileSyscalls(
             // 5. Return length
             return cwdLengthInBytes;
         } catch (e) {
-            if (typeof FS === 'undefined' || !(e.name === 'ErrnoError')) {
+            if (typeof FS === "undefined" || !(e.name === "ErrnoError")) {
                 throw e;
             }
             return -e.errno;
@@ -372,7 +378,7 @@ export function createFileSyscalls(
 
             // 2. Normalize path and remove trailing slash
             path = PATH.normalize(path);
-            if (path[path.length - 1] === '/') {
+            if (path[path.length - 1] === "/") {
                 path = path.substr(0, path.length - 1);
             }
 
@@ -382,7 +388,7 @@ export function createFileSyscalls(
             // 4. Return success
             return 0;
         } catch (e) {
-            if (typeof FS === 'undefined' || !(e.name === 'ErrnoError')) {
+            if (typeof FS === "undefined" || !(e.name === "ErrnoError")) {
                 throw e;
             }
             return -e.errno;
@@ -418,7 +424,7 @@ export function createFileSyscalls(
             // 3. Open file and return descriptor
             return FS.open(path, flags, mode).fd;
         } catch (e) {
-            if (typeof FS === 'undefined' || !(e.name === 'ErrnoError')) {
+            if (typeof FS === "undefined" || !(e.name === "ErrnoError")) {
                 throw e;
             }
             return -e.errno;
@@ -470,7 +476,7 @@ export function createFileSyscalls(
             // 8. Return length
             return len;
         } catch (e) {
-            if (typeof FS === 'undefined' || !(e.name === 'ErrnoError')) {
+            if (typeof FS === "undefined" || !(e.name === "ErrnoError")) {
                 throw e;
             }
             return -e.errno;
@@ -500,7 +506,7 @@ export function createFileSyscalls(
             // 3. Return success
             return 0;
         } catch (e) {
-            if (typeof FS === 'undefined' || !(e.name === 'ErrnoError')) {
+            if (typeof FS === "undefined" || !(e.name === "ErrnoError")) {
                 throw e;
             }
             return -e.errno;
@@ -536,13 +542,13 @@ export function createFileSyscalls(
                 FS.rmdir(path);
             } else {
                 // Invalid flags
-                throw new Error('Invalid flags passed to unlinkat');
+                throw new Error("Invalid flags passed to unlinkat");
             }
 
             // 3. Return success
             return 0;
         } catch (e) {
-            if (typeof FS === 'undefined' || !(e.name === 'ErrnoError')) {
+            if (typeof FS === "undefined" || !(e.name === "ErrnoError")) {
                 throw e;
             }
             return -e.errno;
@@ -616,7 +622,7 @@ export function createFileSyscalls(
             // 4. Return success
             return 0;
         } catch (e) {
-            if (typeof FS === 'undefined' || !(e.name === 'ErrnoError')) {
+            if (typeof FS === "undefined" || !(e.name === "ErrnoError")) {
                 throw e;
             }
             return -e.errno;

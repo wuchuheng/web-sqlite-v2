@@ -34,7 +34,7 @@ export function createUdfFactory(wasm, capi, __dbCleanupMap) {
         return util.sqlite3__wasm_db_error(
             pDb,
             capi.SQLITE_MISUSE,
-            f + "() requires " + n + " argument" + (1 === n ? "" : "s") + "."
+            f + "() requires " + n + " argument" + (1 === n ? "" : "s") + ".",
         );
     };
 
@@ -49,7 +49,7 @@ export function createUdfFactory(wasm, capi, __dbCleanupMap) {
         return util.sqlite3__wasm_db_error(
             pDb,
             capi.SQLITE_FORMAT,
-            "SQLITE_UTF8 is the only supported encoding."
+            "SQLITE_UTF8 is the only supported encoding.",
         );
     };
 
@@ -79,7 +79,7 @@ export function createUdfFactory(wasm, capi, __dbCleanupMap) {
                     try {
                         callback(
                             pCtx,
-                            ...capi.sqlite3_values_to_js(argc, pArgv)
+                            ...capi.sqlite3_values_to_js(argc, pArgv),
                         );
                     } catch (e) {
                         capi.sqlite3_result_error_js(pCtx, e);
@@ -138,8 +138,8 @@ export function createUdfFactory(wasm, capi, __dbCleanupMap) {
                             pCtx,
                             callback(
                                 pCtx,
-                                ...capi.sqlite3_values_to_js(argc, pArgv)
-                            )
+                                ...capi.sqlite3_values_to_js(argc, pArgv),
+                            ),
                         );
                     } catch (e) {
                         capi.sqlite3_result_error_js(pCtx, e);
@@ -179,34 +179,39 @@ export function createUdfFactory(wasm, capi, __dbCleanupMap) {
     /**
      * Native sqlite3_create_function_v2 wrapper.
      */
-    const __sqlite3CreateFunction = wasm.xWrap("sqlite3_create_function_v2", "int", [
-        "sqlite3*",
-        "string",
+    const __sqlite3CreateFunction = wasm.xWrap(
+        "sqlite3_create_function_v2",
         "int",
-        "int",
-        "*",
-        new wasm.xWrap.FuncPtrAdapter({
-            name: "xFunc",
-            ...__cfProxy.xFunc,
-        }),
-        new wasm.xWrap.FuncPtrAdapter({
-            name: "xStep",
-            ...__cfProxy.xInverseAndStep,
-        }),
-        new wasm.xWrap.FuncPtrAdapter({
-            name: "xFinal",
-            ...__cfProxy.xFinalAndValue,
-        }),
-        new wasm.xWrap.FuncPtrAdapter({
-            name: "xDestroy",
-            ...__cfProxy.xDestroy,
-        }),
-    ]);
+        [
+            "sqlite3*",
+            "string",
+            "int",
+            "int",
+            "*",
+            new wasm.xWrap.FuncPtrAdapter({
+                name: "xFunc",
+                ...__cfProxy.xFunc,
+            }),
+            new wasm.xWrap.FuncPtrAdapter({
+                name: "xStep",
+                ...__cfProxy.xInverseAndStep,
+            }),
+            new wasm.xWrap.FuncPtrAdapter({
+                name: "xFinal",
+                ...__cfProxy.xFinalAndValue,
+            }),
+            new wasm.xWrap.FuncPtrAdapter({
+                name: "xDestroy",
+                ...__cfProxy.xDestroy,
+            }),
+        ],
+    );
 
     /**
      * Native sqlite3_create_window_function wrapper (if available).
      */
-    const __sqlite3CreateWindowFunction = wasm.exports.sqlite3_create_window_function
+    const __sqlite3CreateWindowFunction = wasm.exports
+        .sqlite3_create_window_function
         ? wasm.xWrap("sqlite3_create_window_function", "int", [
               "sqlite3*",
               "string",
@@ -259,11 +264,15 @@ export function createUdfFactory(wasm, capi, __dbCleanupMap) {
         xFunc,
         xStep,
         xFinal,
-        xDestroy
+        xDestroy,
     ) {
         // 1. Validate argument count
         if (f.length !== arguments.length) {
-            return __dbArgcMismatch(pDb, "sqlite3_create_function_v2", f.length);
+            return __dbArgcMismatch(
+                pDb,
+                "sqlite3_create_function_v2",
+                f.length,
+            );
         }
 
         // 2. Ensure UTF-8 encoding
@@ -284,7 +293,7 @@ export function createUdfFactory(wasm, capi, __dbCleanupMap) {
                 xFunc,
                 xStep,
                 xFinal,
-                xDestroy
+                xDestroy,
             );
 
             // 4. Track for cleanup if successful
@@ -301,11 +310,13 @@ export function createUdfFactory(wasm, capi, __dbCleanupMap) {
             return rc;
         } catch (e) {
             console.error("sqlite3_create_function_v2() setup threw:", e);
-            const util = { sqlite3__wasm_db_error: capi.sqlite3__wasm_db_error };
+            const util = {
+                sqlite3__wasm_db_error: capi.sqlite3__wasm_db_error,
+            };
             return util.sqlite3__wasm_db_error(
                 pDb,
                 e,
-                "Creation of UDF threw: " + e
+                "Creation of UDF threw: " + e,
             );
         }
     };
@@ -331,7 +342,7 @@ export function createUdfFactory(wasm, capi, __dbCleanupMap) {
         pApp,
         xFunc,
         xStep,
-        xFinal
+        xFinal,
     ) {
         return f.length === arguments.length
             ? sqlite3_create_function_v2(
@@ -343,7 +354,7 @@ export function createUdfFactory(wasm, capi, __dbCleanupMap) {
                   xFunc,
                   xStep,
                   xFinal,
-                  0
+                  0,
               )
             : __dbArgcMismatch(pDb, "sqlite3_create_function", f.length);
     };
@@ -374,14 +385,14 @@ export function createUdfFactory(wasm, capi, __dbCleanupMap) {
               xFinal,
               xValue,
               xInverse,
-              xDestroy
+              xDestroy,
           ) {
               // 1. Validate argument count
               if (f.length !== arguments.length) {
                   return __dbArgcMismatch(
                       pDb,
                       "sqlite3_create_window_function",
-                      f.length
+                      f.length,
                   );
               }
 
@@ -404,7 +415,7 @@ export function createUdfFactory(wasm, capi, __dbCleanupMap) {
                       xFinal,
                       xValue,
                       xInverse,
-                      xDestroy
+                      xDestroy,
                   );
 
                   // 4. Track for cleanup if successful
@@ -421,14 +432,17 @@ export function createUdfFactory(wasm, capi, __dbCleanupMap) {
 
                   return rc;
               } catch (e) {
-                  console.error("sqlite3_create_window_function() setup threw:", e);
+                  console.error(
+                      "sqlite3_create_window_function() setup threw:",
+                      e,
+                  );
                   const util = {
                       sqlite3__wasm_db_error: capi.sqlite3__wasm_db_error,
                   };
                   return util.sqlite3__wasm_db_error(
                       pDb,
                       e,
-                      "Creation of UDF threw: " + e
+                      "Creation of UDF threw: " + e,
                   );
               }
           }
@@ -449,8 +463,10 @@ export function createUdfFactory(wasm, capi, __dbCleanupMap) {
 
     if (sqlite3_create_window_function) {
         sqlite3_create_window_function.udfSetResult = capi.sqlite3_result_js;
-        sqlite3_create_window_function.udfConvertArgs = capi.sqlite3_values_to_js;
-        sqlite3_create_window_function.udfSetError = capi.sqlite3_result_error_js;
+        sqlite3_create_window_function.udfConvertArgs =
+            capi.sqlite3_values_to_js;
+        sqlite3_create_window_function.udfSetError =
+            capi.sqlite3_result_error_js;
     }
 
     return {

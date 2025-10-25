@@ -68,6 +68,6 @@ export function integrateWithOo1(deps) {
         opfsVfs.pointer,
         function (oo1Db, sqlite3Ref) {
             sqlite3Ref.capi.sqlite3_busy_timeout(oo1Db, 10000);
-        }
+        },
     );
 }

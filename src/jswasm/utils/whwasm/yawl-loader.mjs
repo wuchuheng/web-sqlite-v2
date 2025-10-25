@@ -55,13 +55,13 @@ export function createYawlLoader(install) {
             ) {
                 return WebAssembly.instantiateStreaming(
                     fetchWasm(),
-                    options.imports || {}
+                    options.imports || {},
                 ).then(finalize);
             }
             return fetchWasm()
                 .then((response) => response.arrayBuffer())
                 .then((bytes) =>
-                    WebAssembly.instantiate(bytes, options.imports || {})
+                    WebAssembly.instantiate(bytes, options.imports || {}),
                 )
                 .then(finalize);
         };

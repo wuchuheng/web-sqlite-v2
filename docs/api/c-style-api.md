@@ -100,7 +100,7 @@ enum SqliteResultCode {
     SQLITE_NOTICE = 27,
     SQLITE_WARNING = 28,
     SQLITE_ROW = 100,
-    SQLITE_DONE = 101
+    SQLITE_DONE = 101,
 }
 
 /**
@@ -111,7 +111,7 @@ enum SqliteDataType {
     SQLITE_FLOAT = 2,
     SQLITE_TEXT = 3,
     SQLITE_BLOB = 4,
-    SQLITE_NULL = 5
+    SQLITE_NULL = 5,
 }
 
 /**
@@ -126,7 +126,7 @@ enum SqliteOpenFlags {
     SQLITE_OPEN_NOMUTEX = 0x00008000,
     SQLITE_OPEN_FULLMUTEX = 0x00010000,
     SQLITE_OPEN_SHAREDCACHE = 0x00020000,
-    SQLITE_OPEN_PRIVATECACHE = 0x00040000
+    SQLITE_OPEN_PRIVATECACHE = 0x00040000,
 }
 ```
 
@@ -149,7 +149,7 @@ function sqlite3_open_v2(
     filename: string,
     ppDb: WasmPointer,
     flags: number,
-    vfsName: string | null
+    vfsName: string | null,
 ): SqliteResultCode;
 ```
 
@@ -161,7 +161,7 @@ const rc = sqlite3.capi.sqlite3_open_v2(
     ":memory:",
     pDb,
     sqlite3.capi.SQLITE_OPEN_READWRITE | sqlite3.capi.SQLITE_OPEN_CREATE,
-    null
+    null,
 );
 
 if (rc === sqlite3.capi.SQLITE_OK) {
@@ -196,10 +196,7 @@ Returns the filename of a database.
  * @param dbName - Database name ("main", "temp", or attached name)
  * @returns Database filename or null
  */
-function sqlite3_db_filename(
-    db: sqlite3,
-    dbName: string
-): string | null;
+function sqlite3_db_filename(db: sqlite3, dbName: string): string | null;
 ```
 
 ## SQL Execution Functions
@@ -217,7 +214,7 @@ Execute one or more SQL statements with optional callback.
  */
 type ExecCallback = (
     columnValues: (string | null)[],
-    columnNames: string[]
+    columnNames: string[],
 ) => number | boolean | void;
 
 /**
@@ -234,7 +231,7 @@ function sqlite3_exec(
     sql: string,
     callback?: ExecCallback | WasmPointer | null,
     callbackArg?: WasmPointer,
-    errMsg?: WasmPointer
+    errMsg?: WasmPointer,
 ): SqliteResultCode;
 ```
 
@@ -293,7 +290,7 @@ function sqlite3_prepare_v3(
     nByte: number,
     prepFlags: number,
     ppStmt: WasmPointer,
-    pzTail?: WasmPointer
+    pzTail?: WasmPointer,
 ): SqliteResultCode;
 ```
 
@@ -309,7 +306,7 @@ const rc = sqlite3.capi.sqlite3_prepare_v3(
     -1,
     0,
     pStmt,
-    null
+    null,
 );
 
 if (rc === sqlite3.capi.SQLITE_OK) {
@@ -320,7 +317,7 @@ if (rc === sqlite3.capi.SQLITE_OK) {
 sqlite3.wasm.dealloc(pStmt);
 ```
 
-### sqlite3_bind_*() 🟢
+### sqlite3*bind*\*() 🟢
 
 Bind values to prepared statement parameters.
 
@@ -328,10 +325,7 @@ Bind values to prepared statement parameters.
 /**
  * Bind null value to parameter
  */
-function sqlite3_bind_null(
-    stmt: sqlite3_stmt,
-    index: number
-): SqliteResultCode;
+function sqlite3_bind_null(stmt: sqlite3_stmt, index: number): SqliteResultCode;
 
 /**
  * Bind integer value to parameter
@@ -339,7 +333,7 @@ function sqlite3_bind_null(
 function sqlite3_bind_int(
     stmt: sqlite3_stmt,
     index: number,
-    value: number
+    value: number,
 ): SqliteResultCode;
 
 /**
@@ -348,7 +342,7 @@ function sqlite3_bind_int(
 function sqlite3_bind_int64(
     stmt: sqlite3_stmt,
     index: number,
-    value: number | bigint
+    value: number | bigint,
 ): SqliteResultCode;
 
 /**
@@ -357,7 +351,7 @@ function sqlite3_bind_int64(
 function sqlite3_bind_double(
     stmt: sqlite3_stmt,
     index: number,
-    value: number
+    value: number,
 ): SqliteResultCode;
 
 /**
@@ -368,7 +362,7 @@ function sqlite3_bind_text(
     index: number,
     text: string,
     nByte: number,
-    destructor?: number | ((ptr: WasmPointer) => void)
+    destructor?: number | ((ptr: WasmPointer) => void),
 ): SqliteResultCode;
 
 /**
@@ -380,11 +374,12 @@ function sqlite3_bind_blob(
     index: number,
     blob: string | number[] | Uint8Array | Int8Array,
     nByte: number,
-    destructor?: number | ((ptr: WasmPointer) => void)
+    destructor?: number | ((ptr: WasmPointer) => void),
 ): SqliteResultCode;
 ```
 
 **Destructor Constants**:
+
 - `SQLITE_STATIC` (0) - Data is static, no need to free
 - `SQLITE_TRANSIENT` (-1) - SQLite makes a copy of the data
 
@@ -415,10 +410,7 @@ Get the index of a named parameter.
  * @param name - Parameter name (with : or $ prefix)
  * @returns Parameter index (1-based) or 0 if not found
  */
-function sqlite3_bind_parameter_index(
-    stmt: sqlite3_stmt,
-    name: string
-): number;
+function sqlite3_bind_parameter_index(stmt: sqlite3_stmt, name: string): number;
 ```
 
 ### sqlite3_step() 🟢
@@ -474,7 +466,7 @@ function sqlite3_finalize(stmt: sqlite3_stmt): SqliteResultCode;
 
 ## Column Access Functions
 
-### sqlite3_column_*() 🟢
+### sqlite3*column*\*() 🟢
 
 Retrieve column values from the current result row.
 
@@ -502,7 +494,10 @@ function sqlite3_column_int(stmt: sqlite3_stmt, index: number): number;
 /**
  * Get 64-bit integer value
  */
-function sqlite3_column_int64(stmt: sqlite3_stmt, index: number): number | bigint;
+function sqlite3_column_int64(
+    stmt: sqlite3_stmt,
+    index: number,
+): number | bigint;
 
 /**
  * Get double value
@@ -577,7 +572,7 @@ Register a custom SQL function.
 type ScalarFunction = (
     context: sqlite3_context,
     argc: number,
-    argv: sqlite3_value[]
+    argv: sqlite3_value[],
 ) => void;
 
 /**
@@ -586,7 +581,7 @@ type ScalarFunction = (
 type AggregateStepFunction = (
     context: sqlite3_context,
     argc: number,
-    argv: sqlite3_value[]
+    argv: sqlite3_value[],
 ) => void;
 
 /**
@@ -621,11 +616,12 @@ function sqlite3_create_function_v2(
     xFunc?: ScalarFunction,
     xStep?: AggregateStepFunction,
     xFinal?: AggregateFinalFunction,
-    xDestroy?: FunctionDestructor
+    xDestroy?: FunctionDestructor,
 ): SqliteResultCode;
 ```
 
 **Text Encoding Constants**:
+
 ```typescript
 const SQLITE_UTF8 = 1;
 const SQLITE_UTF16LE = 2;
@@ -674,19 +670,19 @@ sqlite3.capi.sqlite3_create_function_v2(
     (ctx, argc, argv) => {
         const current = sqlite3.capi.sqlite3_aggregate_context(ctx, 8);
         const value = sqlite3.capi.sqlite3_value_double(argv[0]);
-        const sum = sqlite3.wasm.peek(current, 'double') + value;
-        sqlite3.wasm.poke(current, sum, 'double');
+        const sum = sqlite3.wasm.peek(current, "double") + value;
+        sqlite3.wasm.poke(current, sum, "double");
     },
     // xFinal
     (ctx) => {
         const current = sqlite3.capi.sqlite3_aggregate_context(ctx, 8);
-        const sum = sqlite3.wasm.peek(current, 'double');
+        const sum = sqlite3.wasm.peek(current, "double");
         sqlite3.capi.sqlite3_result_double(ctx, sum);
-    }
+    },
 );
 ```
 
-### sqlite3_value_*() 🟢
+### sqlite3*value*\*() 🟢
 
 Extract values from function arguments.
 
@@ -727,7 +723,7 @@ function sqlite3_value_blob(value: sqlite3_value): WasmPointer;
 function sqlite3_value_to_js(value: sqlite3_value): any;
 ```
 
-### sqlite3_result_*() 🟢
+### sqlite3*result*\*() 🟢
 
 Set function return values.
 
@@ -745,7 +741,10 @@ function sqlite3_result_int(ctx: sqlite3_context, value: number): void;
 /**
  * Return 64-bit integer
  */
-function sqlite3_result_int64(ctx: sqlite3_context, value: number | bigint): void;
+function sqlite3_result_int64(
+    ctx: sqlite3_context,
+    value: number | bigint,
+): void;
 
 /**
  * Return double
@@ -759,7 +758,7 @@ function sqlite3_result_text(
     ctx: sqlite3_context,
     text: string,
     nByte: number,
-    destructor?: number | ((ptr: WasmPointer) => void)
+    destructor?: number | ((ptr: WasmPointer) => void),
 ): void;
 
 /**
@@ -769,7 +768,7 @@ function sqlite3_result_blob(
     ctx: sqlite3_context,
     blob: Uint8Array | number[],
     nByte: number,
-    destructor?: number | ((ptr: WasmPointer) => void)
+    destructor?: number | ((ptr: WasmPointer) => void),
 ): void;
 
 /**
@@ -778,7 +777,7 @@ function sqlite3_result_blob(
 function sqlite3_result_error(
     ctx: sqlite3_context,
     msg: string,
-    nByte: number
+    nByte: number,
 ): void;
 ```
 
@@ -866,9 +865,7 @@ function sqlite3_randomness(n: number, outputPtr: WasmPointer): void;
  * @param typedArray - Output buffer
  * @returns The same typed array (for chaining)
  */
-function sqlite3_randomness<T extends Uint8Array | Int8Array>(
-    typedArray: T
-): T;
+function sqlite3_randomness<T extends Uint8Array | Int8Array>(typedArray: T): T;
 ```
 
 **Usage Example**:
@@ -897,10 +894,7 @@ console.log(randomBytes);
  * @param schema - Schema name ("main", "temp", etc.)
  * @returns Database as Uint8Array
  */
-function sqlite3_js_db_export(
-    db: sqlite3,
-    schema?: string
-): Uint8Array;
+function sqlite3_js_db_export(db: sqlite3, schema?: string): Uint8Array;
 ```
 
 **Usage Example**:
@@ -935,6 +929,7 @@ function sqlite3_get_autocommit(db: sqlite3): number;
 ### Best Practices
 
 1. **Always check result codes**:
+
 ```typescript
 const rc = sqlite3.capi.sqlite3_exec(db, sql, null, null, null);
 if (rc !== sqlite3.capi.SQLITE_OK) {
@@ -944,12 +939,14 @@ if (rc !== sqlite3.capi.SQLITE_OK) {
 ```
 
 2. **Use sqlite3_js_rc_str() for debugging**:
+
 ```typescript
 const rc = sqlite3.capi.sqlite3_prepare_v3(db, sql, -1, 0, pStmt, null);
 console.log(`Result: ${sqlite3.capi.sqlite3_js_rc_str(rc)}`);
 ```
 
 3. **Clean up resources in finally blocks**:
+
 ```typescript
 const pStmt = sqlite3.wasm.alloc(sqlite3.wasm.ptrSizeof);
 try {
@@ -969,19 +966,33 @@ try {
 ### Allocation Rules
 
 1. **Match allocation/deallocation methods**:
-   - Use `sqlite3_malloc()` with `sqlite3_free()`
-   - Use `sqlite3.wasm.alloc()` with `sqlite3.wasm.dealloc()`
+    - Use `sqlite3_malloc()` with `sqlite3_free()`
+    - Use `sqlite3.wasm.alloc()` with `sqlite3.wasm.dealloc()`
 
 2. **SQLITE_TRANSIENT for temporary data**:
+
 ```typescript
 // SQLite will make a copy
-sqlite3.capi.sqlite3_bind_text(stmt, 1, text, -1, sqlite3.capi.SQLITE_TRANSIENT);
+sqlite3.capi.sqlite3_bind_text(
+    stmt,
+    1,
+    text,
+    -1,
+    sqlite3.capi.SQLITE_TRANSIENT,
+);
 ```
 
 3. **SQLITE_STATIC for persistent data**:
+
 ```typescript
 // Data must remain valid until statement is finalized
-sqlite3.capi.sqlite3_bind_text(stmt, 1, staticText, -1, sqlite3.capi.SQLITE_STATIC);
+sqlite3.capi.sqlite3_bind_text(
+    stmt,
+    1,
+    staticText,
+    -1,
+    sqlite3.capi.SQLITE_STATIC,
+);
 ```
 
 ### TypeScript Migration Tips
@@ -989,21 +1000,26 @@ sqlite3.capi.sqlite3_bind_text(stmt, 1, staticText, -1, sqlite3.capi.SQLITE_STAT
 When converting C-Style API code to TypeScript:
 
 1. **Use proper pointer types**:
+
 ```typescript
 let db: sqlite3 = 0;
 let stmt: sqlite3_stmt = 0;
 ```
 
 2. **Type guard for result codes**:
+
 ```typescript
 function isError(rc: SqliteResultCode): boolean {
-    return rc !== SqliteResultCode.SQLITE_OK &&
-           rc !== SqliteResultCode.SQLITE_ROW &&
-           rc !== SqliteResultCode.SQLITE_DONE;
+    return (
+        rc !== SqliteResultCode.SQLITE_OK &&
+        rc !== SqliteResultCode.SQLITE_ROW &&
+        rc !== SqliteResultCode.SQLITE_DONE
+    );
 }
 ```
 
 3. **Wrap C API in type-safe functions**:
+
 ```typescript
 function executeSQL(db: sqlite3, sql: string): void {
     const rc = sqlite3.capi.sqlite3_exec(db, sql, null, null, null);

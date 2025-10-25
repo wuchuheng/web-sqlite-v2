@@ -32,17 +32,17 @@ export function createWasmRuntime(options) {
         return fn;
     };
 
-    const allocImpl = /** @type {(bytes: number) => import("./wasm-runtime.d.ts").WasmPointer} */ (
-        requireExport(allocExportName)
-    );
-    const deallocImpl = /** @type {(ptr: import("./wasm-runtime.d.ts").WasmPointer) => void} */ (
-        requireExport(deallocExportName)
-    );
+    const allocImpl =
+        /** @type {(bytes: number) => import("./wasm-runtime.d.ts").WasmPointer} */ (
+            requireExport(allocExportName)
+        );
+    const deallocImpl =
+        /** @type {(ptr: import("./wasm-runtime.d.ts").WasmPointer) => void} */ (
+            requireExport(deallocExportName)
+        );
     const reallocImpl = /** @type {
         (ptr: import("./wasm-runtime.d.ts").WasmPointer, bytes: number) => import("./wasm-runtime.d.ts").WasmPointer
-    } */ (
-        requireExport(reallocExportName)
-    );
+    } */ (requireExport(reallocExportName));
 
     /**
      * Ensures we bind the sqlite3 facade only once the object exists. The lazy
@@ -98,16 +98,14 @@ export function createWasmRuntime(options) {
         }
         util.affirmBindableTypedArray(typedArray);
         const destination = alloc(typedArray.byteLength || 1);
-        wasm
-            .heapForSize(
-                /** @type {ArrayBufferView} */ (typedArray).constructor
-            )
-            .set(
-                typedArray.byteLength
-                    ? /** @type {ArrayBufferView} */ (typedArray)
-                    : [0],
-                destination
-            );
+        wasm.heapForSize(
+            /** @type {ArrayBufferView} */ (typedArray).constructor,
+        ).set(
+            typedArray.byteLength
+                ? /** @type {ArrayBufferView} */ (typedArray)
+                : [0],
+            destination,
+        );
         return destination;
     };
 
@@ -199,7 +197,7 @@ export function createWasmRuntime(options) {
                     WasmAllocError.toss(
                         "Invalid value for pstack.alloc(",
                         byteCount,
-                        ")"
+                        ")",
                     );
                 }
             }
@@ -208,7 +206,7 @@ export function createWasmRuntime(options) {
                 WasmAllocError.toss(
                     "Could not allocate",
                     size,
-                    "bytes from the pstack."
+                    "bytes from the pstack.",
                 );
             }
             return pointer;
@@ -228,7 +226,7 @@ export function createWasmRuntime(options) {
                     WasmAllocError.toss(
                         "Invalid size value for allocChunks(",
                         chunkSize,
-                        ")"
+                        ")",
                     );
                 }
             }
@@ -237,7 +235,7 @@ export function createWasmRuntime(options) {
                 WasmAllocError.toss(
                     "Could not allocate",
                     chunkCount * size,
-                    "bytes from the pstack."
+                    "bytes from the pstack.",
                 );
             }
             const result = [];

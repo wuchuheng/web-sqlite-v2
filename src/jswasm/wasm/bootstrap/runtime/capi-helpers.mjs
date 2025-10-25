@@ -38,16 +38,18 @@ export function createCapiHelpers(options) {
             try {
                 const randomFn = wasm.exports.sqlite3_randomness;
                 const heap = wasm.heap8u();
-                const chunkSize = target.byteLength < 512 ? target.byteLength : 512;
+                const chunkSize =
+                    target.byteLength < 512 ? target.byteLength : 512;
                 const tempPtr = wasm.pstack.alloc(chunkSize);
                 let remaining = target.byteLength;
                 let offset = 0;
                 while (remaining > 0) {
-                    const request = remaining > chunkSize ? chunkSize : remaining;
+                    const request =
+                        remaining > chunkSize ? chunkSize : remaining;
                     randomFn(request, tempPtr);
                     target.set(
                         util.typedArrayPart(heap, tempPtr, tempPtr + request),
-                        offset
+                        offset,
                     );
                     remaining -= request;
                     offset += request;
@@ -55,7 +57,7 @@ export function createCapiHelpers(options) {
             } catch (error) {
                 console.error(
                     "Unexpected exception in sqlite3_randomness():",
-                    error
+                    error,
                 );
             } finally {
                 wasm.pstack.restore(stackPointer);
@@ -87,7 +89,7 @@ export function createCapiHelpers(options) {
                 "sqlite3__wasm_init_wasmfs",
                 "i32",
                 ["string"],
-                configuredDir
+                configuredDir,
             );
             wasmfsOpfsDirCache =
                 configuredDir && initResult === 0 ? configuredDir : "";
@@ -108,7 +110,9 @@ export function createCapiHelpers(options) {
             const vfsPointer = capi.sqlite3_vfs_find(vfsName);
             if (!vfsPointer) return false;
             if (!pDb) {
-                return vfsPointer === capi.sqlite3_vfs_find(0) ? vfsPointer : false;
+                return vfsPointer === capi.sqlite3_vfs_find(0)
+                    ? vfsPointer
+                    : false;
             }
             return vfsPointer === capi.sqlite3_js_db_vfs(pDb, dbName)
                 ? vfsPointer
@@ -158,12 +162,12 @@ export function createCapiHelpers(options) {
                 schemaPointer,
                 ppOut,
                 pSize,
-                0
+                0,
             );
             if (rc) {
                 toss3(
                     "Database serialization failed with code",
-                    capi.sqlite3_js_rc_str(rc)
+                    capi.sqlite3_js_rc_str(rc),
                 );
             }
             pOut = wasm.peekPtr(ppOut);
@@ -186,7 +190,7 @@ export function createCapiHelpers(options) {
             ? WasmAllocError.toss(
                   "Cannot allocate",
                   n,
-                  "bytes for sqlite3_aggregate_context()"
+                  "bytes for sqlite3_aggregate_context()",
               )
             : 0);
 
@@ -198,33 +202,29 @@ export function createCapiHelpers(options) {
             const buffer =
                 data instanceof ArrayBuffer ? new Uint8Array(data) : data;
             pData = wasm.allocFromTypedArray(buffer);
-            if (
-                arguments.length < 3 ||
-                !util.isInt32(dataLen) ||
-                dataLen < 0
-            ) {
+            if (arguments.length < 3 || !util.isInt32(dataLen) || dataLen < 0) {
                 dataLen = buffer.byteLength;
             }
         } else {
             SQLite3Error.toss(
-                "Invalid 2nd argument for sqlite3_js_posix_create_file()."
+                "Invalid 2nd argument for sqlite3_js_posix_create_file().",
             );
         }
         try {
             if (!util.isInt32(dataLen) || dataLen < 0) {
                 SQLite3Error.toss(
-                    "Invalid 3rd argument for sqlite3_js_posix_create_file()."
+                    "Invalid 3rd argument for sqlite3_js_posix_create_file().",
                 );
             }
             const rc = util.sqlite3__wasm_posix_create_file(
                 filename,
                 pData,
-                dataLen
+                dataLen,
             );
             if (rc) {
                 SQLite3Error.toss(
                     "Creation of file failed with sqlite3 result code",
-                    capi.sqlite3_js_rc_str(rc)
+                    capi.sqlite3_js_rc_str(rc),
                 );
             }
         } finally {
@@ -237,7 +237,7 @@ export function createCapiHelpers(options) {
     helpers.sqlite3_js_vfs_create_file = (vfs, filename, data, dataLen) => {
         config.warn(
             "sqlite3_js_vfs_create_file() is deprecated and should be avoided.",
-            "See its documentation for alternative options."
+            "See its documentation for alternative options.",
         );
         let pData = 0;
         if (data) {
@@ -258,14 +258,14 @@ export function createCapiHelpers(options) {
                 }
             } else {
                 SQLite3Error.toss(
-                    "Invalid 3rd argument type for sqlite3_js_vfs_create_file()."
+                    "Invalid 3rd argument type for sqlite3_js_vfs_create_file().",
                 );
             }
         }
         if (!util.isInt32(dataLen) || dataLen < 0) {
             if (pData) wasm.dealloc(pData);
             SQLite3Error.toss(
-                "Invalid 4th argument for sqlite3_js_vfs_create_file()."
+                "Invalid 4th argument for sqlite3_js_vfs_create_file().",
             );
         }
         try {
@@ -273,12 +273,12 @@ export function createCapiHelpers(options) {
                 vfs,
                 filename,
                 pData,
-                dataLen
+                dataLen,
             );
             if (rc) {
                 SQLite3Error.toss(
                     "Creation of file failed with sqlite3 result code",
-                    capi.sqlite3_js_rc_str(rc)
+                    capi.sqlite3_js_rc_str(rc),
                 );
             }
         } finally {
@@ -365,11 +365,12 @@ export function createCapiHelpers(options) {
             case capi.SQLITE_DBCONFIG_ENABLE_ATTACH_WRITE:
             case capi.SQLITE_DBCONFIG_ENABLE_COMMENTS:
                 if (!this.ip) {
-                    this.ip = wasm.xWrap(
-                        "sqlite3__wasm_db_config_ip",
+                    this.ip = wasm.xWrap("sqlite3__wasm_db_config_ip", "int", [
+                        "sqlite3*",
                         "int",
-                        ["sqlite3*", "int", "int", "*"]
-                    );
+                        "int",
+                        "*",
+                    ]);
                 }
                 return this.ip(pDb, op, args[0], args[1] || 0);
             case capi.SQLITE_DBCONFIG_LOOKASIDE:
@@ -377,17 +378,17 @@ export function createCapiHelpers(options) {
                     this.pii = wasm.xWrap(
                         "sqlite3__wasm_db_config_pii",
                         "int",
-                        ["sqlite3*", "int", "*", "int", "int"]
+                        ["sqlite3*", "int", "*", "int", "int"],
                     );
                 }
                 return this.pii(pDb, op, args[0], args[1], args[2]);
             case capi.SQLITE_DBCONFIG_MAINDBNAME:
                 if (!this.s) {
-                    this.s = wasm.xWrap(
-                        "sqlite3__wasm_db_config_s",
+                    this.s = wasm.xWrap("sqlite3__wasm_db_config_s", "int", [
+                        "sqlite3*",
                         "int",
-                        ["sqlite3*", "int", "string:static"]
-                    );
+                        "string:static",
+                    ]);
                 }
                 return this.s(pDb, op, args[0]);
             default:
@@ -422,7 +423,7 @@ export function createCapiHelpers(options) {
                     WasmAllocError.toss(
                         "Cannot allocate memory for blob argument of",
                         n,
-                        "byte(s)"
+                        "byte(s)",
                     );
                 }
                 result =
@@ -439,7 +440,7 @@ export function createCapiHelpers(options) {
                     toss3(
                         capi.SQLITE_MISMATCH,
                         "Unhandled sqlite3_value_type():",
-                        valType
+                        valType,
                     );
                 }
                 result = undefined;
@@ -451,8 +452,8 @@ export function createCapiHelpers(options) {
         Array.from({ length: argc }, (_v, idx) =>
             helpers.sqlite3_value_to_js(
                 wasm.peekPtr(pArgv + wasm.ptrSizeof * idx),
-                throwIfCannotConvert
-            )
+                throwIfCannotConvert,
+            ),
         );
 
     helpers.sqlite3_result_error_js = (pCtx, error) => {
@@ -487,14 +488,14 @@ export function createCapiHelpers(options) {
                             toss3(
                                 "BigInt value",
                                 value.toString(),
-                                "is too large for int64."
+                                "is too large for int64.",
                             );
                         }
                     } else {
                         toss3(
                             "BigInt value",
                             value.toString(),
-                            "is too large."
+                            "is too large.",
                         );
                     }
                     break;
@@ -518,7 +519,7 @@ export function createCapiHelpers(options) {
                         pCtx,
                         ptr,
                         len,
-                        capi.SQLITE_WASM_DEALLOC
+                        capi.SQLITE_WASM_DEALLOC,
                     );
                     break;
                 }
@@ -531,7 +532,7 @@ export function createCapiHelpers(options) {
                             pCtx,
                             pBlob,
                             value.byteLength,
-                            capi.SQLITE_WASM_DEALLOC
+                            capi.SQLITE_WASM_DEALLOC,
                         );
                     }
                     break;
@@ -539,7 +540,7 @@ export function createCapiHelpers(options) {
                     toss3(
                         "Do not know how to handle this UDF result value:",
                         typeof value,
-                        value
+                        value,
                     );
             }
         } catch (error) {
@@ -565,7 +566,7 @@ export function createCapiHelpers(options) {
         if (rc) {
             return SQLite3Error.toss(
                 rc,
-                implName + "() failed with code " + rc
+                implName + "() failed with code " + rc,
             );
         }
         const valuePtr = wasm.peekPtr(this.ptr);

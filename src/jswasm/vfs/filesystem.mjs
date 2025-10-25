@@ -44,7 +44,7 @@ export function createFS({
         createNodeActions(FS, { FS_modeStringToFlags, getPathFS, Module }),
         createStreamHelpers(FS),
         createInitializationHelpers(FS, { Module }),
-        createLegacyHelpers(FS, { FS_getMode })
+        createLegacyHelpers(FS, { FS_getMode }),
     );
 
     FS.createPreloadedFile = FS_createPreloadedFile;

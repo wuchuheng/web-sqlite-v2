@@ -274,7 +274,7 @@ const createLazyModuleBinding = (
     Module,
     wasmExports,
     moduleKey,
-    exportName
+    exportName,
 ) => {
     const lazy = (...args) => {
         const fn = ensureFunctionExport(exportName, wasmExports[exportName]);
@@ -316,7 +316,7 @@ export const attachSqlite3WasmExports = (Module, wasmExports) => {
             Module,
             wasmExports,
             moduleKey,
-            exportName
+            exportName,
         );
         if (exportName === "emscripten_builtin_memalign") {
             emscriptenBuiltinMemalign = binding;

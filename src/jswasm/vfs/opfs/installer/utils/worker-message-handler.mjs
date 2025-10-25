@@ -73,18 +73,18 @@ export function createWorkerMessageHandler(deps) {
                     state.sabFileBufView = new Uint8Array(
                         state.sabIO,
                         0,
-                        state.fileBufferSize
+                        state.fileBufferSize,
                     );
                     state.sabS11nView = new Uint8Array(
                         state.sabIO,
                         state.sabS11nOffset,
-                        state.sabS11nSize
+                        state.sabS11nSize,
                     );
 
                     // 2.3 Run sanity checks if requested
                     if (options.sanityChecks) {
                         warn(
-                            "Running sanity checks because of opfs-sanity-check URL arg..."
+                            "Running sanity checks because of opfs-sanity-check URL arg...",
                         );
                         runSanityCheck();
                     }

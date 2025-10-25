@@ -81,7 +81,7 @@ export function attachMemoryAccessors(context) {
         const requests = Array.isArray(ptr) ? ptr : [ptr];
         const resolvedType = type.endsWith("*") ? ptrIR : type;
         const results = requests.map((address) =>
-            readValue(address, resolvedType)
+            readValue(address, resolvedType),
         );
         return Array.isArray(ptr) ? results : results[0];
     };

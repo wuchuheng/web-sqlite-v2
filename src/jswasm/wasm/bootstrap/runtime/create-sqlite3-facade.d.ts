@@ -9,20 +9,20 @@
  */
 
 import type {
-    Sqlite3Facade,
-    Sqlite3Initializer,
-    Sqlite3AsyncInitializer,
-    Sqlite3BootstrapFunction,
-    CreateSqlite3FacadeOptions,
+  Sqlite3Facade,
+  Sqlite3Initializer,
+  Sqlite3AsyncInitializer,
+  Sqlite3BootstrapFunction,
+  CreateSqlite3FacadeOptions,
 } from "./sqlite3-facade-namespace.d.ts";
 
 // Re-export the comprehensive types from sqlite3-facade-namespace.d.ts
 export type {
-    Sqlite3Facade,
-    Sqlite3Initializer,
-    Sqlite3AsyncInitializer,
-    Sqlite3BootstrapFunction,
-    CreateSqlite3FacadeOptions,
+  Sqlite3Facade,
+  Sqlite3Initializer,
+  Sqlite3AsyncInitializer,
+  Sqlite3BootstrapFunction,
+  CreateSqlite3FacadeOptions,
 };
 
 /**
@@ -76,5 +76,5 @@ export type {
  * ```
  */
 export function createSqlite3Facade(
-    options: CreateSqlite3FacadeOptions
+  options: CreateSqlite3FacadeOptions,
 ): Sqlite3Facade;

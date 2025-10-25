@@ -196,7 +196,7 @@ export function createTTY(out, err, FS) {
                     ) {
                         stream.tty.ops.put_char(
                             stream.tty,
-                            buffer[offset + bytesWritten]
+                            buffer[offset + bytesWritten],
                         );
                     }
                 } catch (_e) {
@@ -285,7 +285,7 @@ export function createTTY(out, err, FS) {
             /**
              * Get terminal window size.
              * @param {import("../shared/runtime-types.d.ts").TTYDevice} _tty - TTY device (unused)
-            * @returns {number[]} Window size [rows, cols]
+             * @returns {number[]} Window size [rows, cols]
              */
             ioctl_tiocgwinsz(_tty) {
                 return [

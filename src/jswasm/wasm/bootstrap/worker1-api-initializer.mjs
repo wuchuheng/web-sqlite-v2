@@ -36,7 +36,8 @@ export function createWorker1ApiInitializer() {
             if (!(globalThis.WorkerGlobalScope instanceof Function)) {
                 toss("initWorker1API() must be run from a Worker thread.");
             }
-            const sqlite3Instance = this.sqlite3 || toss("Missing this.sqlite3 object.");
+            const sqlite3Instance =
+                this.sqlite3 || toss("Missing this.sqlite3 object.");
             const runtime = new Worker1Runtime(sqlite3Instance, toss);
             runtime.install();
         }.bind({ sqlite3 });
@@ -110,7 +111,8 @@ class Worker1Runtime {
             }
         };
         state.getDb = (id, require = true) =>
-            state.dbs[id] || (require ? this.toss("Unknown (or closed) DB ID:", id) : undefined);
+            state.dbs[id] ||
+            (require ? this.toss("Unknown (or closed) DB ID:", id) : undefined);
         return state;
     }
 
@@ -148,7 +150,8 @@ class Worker1Runtime {
      * @returns {Sqlite3DatabaseHandle|undefined}
      */
     getMessageDb(msgData, affirmExists = true) {
-        const db = this.state.getDb(msgData.dbId, false) || this.state.dbList[0];
+        const db =
+            this.state.getDb(msgData.dbId, false) || this.state.dbList[0];
         return affirmExists ? this.affirmDbOpen(db) : db;
     }
 
@@ -194,7 +197,10 @@ class Worker1Runtime {
         oargs.filename = args.filename || "";
         const db = this.state.open(oargs);
         rc.filename = db.filename;
-        rc.persistent = !!this.sqlite3.capi.sqlite3_js_db_uses_vfs(db.pointer, "opfs");
+        rc.persistent = !!this.sqlite3.capi.sqlite3_js_db_uses_vfs(
+            db.pointer,
+            "opfs",
+        );
         rc.dbId = this.getDbId(db);
         rc.vfs = db.dbVfsName();
         return rc;
@@ -213,7 +219,9 @@ class Worker1Runtime {
         };
         if (db) {
             const doUnlink =
-                ev.args && "object" === typeof ev.args ? !!ev.args.unlink : false;
+                ev.args && "object" === typeof ev.args
+                    ? !!ev.args.unlink
+                    : false;
             this.state.close(db, doUnlink);
         }
         return response;
@@ -227,9 +235,13 @@ class Worker1Runtime {
      */
     exec(ev) {
         const rc =
-            "string" === typeof ev.args ? { sql: ev.args } : ev.args || Object.create(null);
+            "string" === typeof ev.args
+                ? { sql: ev.args }
+                : ev.args || Object.create(null);
         if ("stmt" === rc.rowMode) {
-            this.toss("Invalid rowMode for 'exec': stmt mode does not work in the Worker API.");
+            this.toss(
+                "Invalid rowMode for 'exec': stmt mode does not work in the Worker API.",
+            );
         } else if (!rc.sql) {
             this.toss("'exec' requires input SQL.");
         }
@@ -250,7 +262,7 @@ class Worker1Runtime {
                         rowNumber: ++rowNumber,
                         row: row,
                     },
-                    this.state.xfer
+                    this.state.xfer,
                 );
             };
         }
@@ -260,7 +272,8 @@ class Worker1Runtime {
                 : undefined;
             db.exec(rc);
             if (undefined !== changeCount) {
-                rc.changeCount = db.changes(true, 64 === rc.countChanges) - changeCount;
+                rc.changeCount =
+                    db.changes(true, 64 === rc.countChanges) - changeCount;
             }
         } finally {
             if ("string" === typeof theCallback) {
@@ -297,7 +310,8 @@ class Worker1Runtime {
             rc = this.sqlite3.SQLite3Error.toss(e).resultCode;
         }
         if (!rc) rc = { result: 0 };
-        if (!rc.message) rc.message = this.sqlite3.capi.sqlite3_js_rc_str(rc.result);
+        if (!rc.message)
+            rc.message = this.sqlite3.capi.sqlite3_js_rc_str(rc.result);
         return rc;
     }
 
@@ -369,22 +383,28 @@ class Worker1Runtime {
             if (ev.converters) {
                 if (ev.converters.args) {
                     if (!Array.isArray(ev.converters.args)) {
-                        this.toss("Invalid message: converters.args must be an array.");
+                        this.toss(
+                            "Invalid message: converters.args must be an array.",
+                        );
                     }
                     if (ev.converters.args.length !== ev.args.length) {
-                        this.toss("Invalid message: converters.args length must match args length.");
+                        this.toss(
+                            "Invalid message: converters.args length must match args length.",
+                        );
                     }
                     for (let i = 0; i < ev.args.length; ++i) {
                         const c = ev.converters.args[i];
                         if (!c) xArg[i] = ev.args[i];
                         else if (true === c) xArg[i] = cvt(ev.args[i]);
-                        else if ("string" === typeof c) xArg[i] = cvt(ev.args[i], c);
-                        else if (Array.isArray(c)) xArg[i] = cvt(ev.args[i], ...c);
+                        else if ("string" === typeof c)
+                            xArg[i] = cvt(ev.args[i], c);
+                        else if (Array.isArray(c))
+                            xArg[i] = cvt(ev.args[i], ...c);
                         else {
                             this.toss(
                                 "Invalid message: converters.args entries",
                                 "must be truthy or array",
-                                "or true"
+                                "or true",
                             );
                         }
                     }
@@ -394,22 +414,34 @@ class Worker1Runtime {
                     if (true === c) {
                         ev.converters.result = "i32";
                     } else if (!Array.isArray(c)) {
-                        this.toss("Invalid message: converters.result must be an array.");
+                        this.toss(
+                            "Invalid message: converters.result must be an array.",
+                        );
                     }
                 }
             }
             let rc;
             if (ev.xCall === "flex") {
                 if (!Array.isArray(ev.flexResult)) {
-                    this.toss("Invalid message: xCall='flex' requires flexResult array");
+                    this.toss(
+                        "Invalid message: xCall='flex' requires flexResult array",
+                    );
                 }
-                const callRc = this.sqlite3.wasm.xCall.flex(ev.fn, ev.flexResult, ...ev.args);
+                const callRc = this.sqlite3.wasm.xCall.flex(
+                    ev.fn,
+                    ev.flexResult,
+                    ...ev.args,
+                );
                 rc = Array.isArray(callRc) ? callRc.slice() : callRc;
                 if (Array.isArray(rc) && rc.length === 2) {
                     rc[1] = this.util.typedArrayToArray(rc[1]);
                 }
             } else if (ev.xCall === "wrapped") {
-                rc = this.sqlite3.wasm.xWrap(ev.fn, ev.resultType, ev.argTypes)(...ev.args);
+                rc = this.sqlite3.wasm.xWrap(
+                    ev.fn,
+                    ev.resultType,
+                    ev.argTypes,
+                )(...ev.args);
             } else {
                 rc = f(...ev.args);
                 if (ev.converters && ev.converters.result) {
@@ -420,18 +452,22 @@ class Worker1Runtime {
                             return this.util.typedArrayPart(
                                 heap,
                                 rc / heap.BYTES_PER_ELEMENT,
-                                rc / heap.BYTES_PER_ELEMENT + ev.resultSize
+                                rc / heap.BYTES_PER_ELEMENT + ev.resultSize,
                             );
                         };
                         if (ev.resultSize > 0) {
                             rc = getTypedArray(ev.resultSize).slice();
                         }
-                        if (ev.resultType && ev.resultType.endsWith("*") && ev.resultSize) {
+                        if (
+                            ev.resultType &&
+                            ev.resultType.endsWith("*") &&
+                            ev.resultSize
+                        ) {
                             const heap = this.sqlite3.wasm.heapForSize(ptrsize);
                             const resultPtr = this.util.typedArrayPart(
                                 heap,
                                 rc / heap.BYTES_PER_ELEMENT,
-                                rc / heap.BYTES_PER_ELEMENT + ptrN
+                                rc / heap.BYTES_PER_ELEMENT + ptrN,
                             );
                             rc = [];
                             for (let i = 0; i < ptrN; ++i) {
@@ -478,7 +514,9 @@ class Worker1Runtime {
             };
             if (err.stack) {
                 result.stack =
-                    "string" === typeof err.stack ? err.stack.split(/\n\s*/) : err.stack;
+                    "string" === typeof err.stack
+                        ? err.stack.split(/\n\s*/)
+                        : err.stack;
             }
         }
         if (!dbId) {
@@ -494,7 +532,7 @@ class Worker1Runtime {
                 departureTime: wMsg.departureTime,
                 result: result,
             },
-            this.state.xfer
+            this.state.xfer,
         );
     }
 

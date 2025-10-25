@@ -113,12 +113,12 @@ class AsyncProxyWorker {
         this.state.sabFileBufView = new Uint8Array(
             this.state.sabIO,
             0,
-            this.state.fileBufferSize
+            this.state.fileBufferSize,
         );
         this.state.sabS11nView = new Uint8Array(
             this.state.sabIO,
             this.state.sabS11nOffset,
-            this.state.sabS11nSize
+            this.state.sabS11nSize,
         );
 
         this.serialization = new SerializationBuffer({
@@ -190,7 +190,7 @@ class AsyncProxyWorker {
                     sabOPView,
                     opIds.whichOp,
                     0,
-                    asyncIdleWaitTime
+                    asyncIdleWaitTime,
                 );
                 if (waitResult !== "not-equal") {
                     await this.releaseImplicitLocks();
@@ -217,7 +217,7 @@ class AsyncProxyWorker {
     handleRestart() {
         if (this.isShutdownRequested) {
             this.logger.warn(
-                "Restarting after opfs-async-shutdown. Might or might not work."
+                "Restarting after opfs-async-shutdown. Might or might not work.",
             );
             this.startWaitLoop();
         }
@@ -255,7 +255,8 @@ class AsyncProxyWorker {
     async handleXAccess(filename) {
         let rc = 0;
         try {
-            const [directory, part] = await this.getDirectoryForFilename(filename);
+            const [directory, part] =
+                await this.getDirectoryForFilename(filename);
             await directory.getFileHandle(part);
         } catch (error) {
             this.serialization.storeException(2, error);
@@ -283,7 +284,7 @@ class AsyncProxyWorker {
                     this.logger.warn(
                         "Ignoring dirHandle.removeEntry() failure of",
                         file,
-                        error
+                        error,
                     );
                 }
             }
@@ -323,7 +324,7 @@ class AsyncProxyWorker {
             while (target) {
                 const [dirHandle, part] = await this.getDirectoryForFilename(
                     target,
-                    false
+                    false,
                 );
                 if (!part) break;
                 await dirHandle.removeEntry(part, { recursive: shouldRecurse });
@@ -357,7 +358,7 @@ class AsyncProxyWorker {
             rc = GetSyncHandleError.toSQLiteCode(
                 error,
                 this.state.sq3Codes.SQLITE_IOERR,
-                this.state.sq3Codes
+                this.state.sq3Codes,
             );
         }
         await this.releaseImplicitLock(file);
@@ -388,7 +389,7 @@ class AsyncProxyWorker {
                 rc = GetSyncHandleError.toSQLiteCode(
                     error,
                     this.state.sq3Codes.SQLITE_IOERR_LOCK,
-                    this.state.sq3Codes
+                    this.state.sq3Codes,
                 );
                 file.xLock = previous;
             }
@@ -412,11 +413,14 @@ class AsyncProxyWorker {
             try {
                 [dirHandle, filenamePart] = await this.getDirectoryForFilename(
                     filename,
-                    !!create
+                    !!create,
                 );
             } catch (error) {
                 this.serialization.storeException(1, error);
-                this.storeAndNotify("xOpen", this.state.sq3Codes.SQLITE_NOTFOUND);
+                this.storeAndNotify(
+                    "xOpen",
+                    this.state.sq3Codes.SQLITE_NOTFOUND,
+                );
                 return;
             }
 
@@ -428,7 +432,9 @@ class AsyncProxyWorker {
                 }
             }
 
-            const fileHandle = await dirHandle.getFileHandle(filenamePart, { create });
+            const fileHandle = await dirHandle.getFileHandle(filenamePart, {
+                create,
+            });
 
             const fileRecord = {
                 fid,
@@ -438,12 +444,13 @@ class AsyncProxyWorker {
                 fileHandle,
                 sabView: this.state.sabFileBufView,
                 readOnly:
-                    !create && !!(this.state.sq3Codes.SQLITE_OPEN_READONLY & flags),
+                    !create &&
+                    !!(this.state.sq3Codes.SQLITE_OPEN_READONLY & flags),
                 deleteOnClose: !!(
                     this.state.sq3Codes.SQLITE_OPEN_DELETEONCLOSE & flags
                 ),
                 releaseImplicitLocks:
-                    (opfsFlags & this.state.opfsFlags.OPFS_UNLOCK_ASAP) ||
+                    opfsFlags & this.state.opfsFlags.OPFS_UNLOCK_ASAP ||
                     this.state.opfsFlags.defaultUnlockAsap,
             };
             this.openFiles.set(fid, fileRecord);
@@ -481,7 +488,7 @@ class AsyncProxyWorker {
             rc = GetSyncHandleError.toSQLiteCode(
                 error,
                 this.state.sq3Codes.SQLITE_IOERR_READ,
-                this.state.sq3Codes
+                this.state.sq3Codes,
             );
         }
         await this.releaseImplicitLock(file);
@@ -527,7 +534,7 @@ class AsyncProxyWorker {
             rc = GetSyncHandleError.toSQLiteCode(
                 error,
                 this.state.sq3Codes.SQLITE_IOERR_TRUNCATE,
-                this.state.sq3Codes
+                this.state.sq3Codes,
             );
         }
         await this.releaseImplicitLock(file);
@@ -543,7 +550,10 @@ class AsyncProxyWorker {
     async handleXUnlock(fid, lockType) {
         const file = this.openFiles.get(fid);
         let rc = 0;
-        if (file?.syncHandle && this.state.sq3Codes.SQLITE_LOCK_NONE === lockType) {
+        if (
+            file?.syncHandle &&
+            this.state.sq3Codes.SQLITE_LOCK_NONE === lockType
+        ) {
             try {
                 await this.closeSyncHandle(file);
             } catch (error) {
@@ -567,9 +577,12 @@ class AsyncProxyWorker {
         try {
             this.affirmWritable("xWrite", file);
             const handle = await this.getSyncHandle(file, "xWrite");
-            const bytesWritten = handle.write(file.sabView.subarray(0, length), {
-                at: Number(offset64),
-            });
+            const bytesWritten = handle.write(
+                file.sabView.subarray(0, length),
+                {
+                    at: Number(offset64),
+                },
+            );
             rc =
                 bytesWritten === length
                     ? 0
@@ -580,7 +593,7 @@ class AsyncProxyWorker {
             rc = GetSyncHandleError.toSQLiteCode(
                 error,
                 this.state.sq3Codes.SQLITE_IOERR_WRITE,
-                this.state.sq3Codes
+                this.state.sq3Codes,
             );
         }
         await this.releaseImplicitLock(file);
@@ -596,7 +609,9 @@ class AsyncProxyWorker {
      */
     async getDirectoryForFilename(absFilename, createDirs = false) {
         if (!this.rootDirectory) {
-            toss("getDirectoryForFilename() called before rootDirectory assigned.");
+            toss(
+                "getDirectoryForFilename() called before rootDirectory assigned.",
+            );
         }
         const pathParts = getResolvedPath(absFilename);
         const filename = pathParts.pop() ?? "";
@@ -656,7 +671,8 @@ class AsyncProxyWorker {
         const baseDelay = this.state.asyncIdleWaitTime * 2;
         for (let attempt = 1; attempt <= maxAttempts; attempt++) {
             try {
-                file.syncHandle = await file.fileHandle.createSyncAccessHandle();
+                file.syncHandle =
+                    await file.fileHandle.createSyncAccessHandle();
                 break;
             } catch (error) {
                 if (attempt === maxAttempts) {
@@ -665,7 +681,7 @@ class AsyncProxyWorker {
                         "Error getting sync handle for",
                         `${opName}().`,
                         maxAttempts + " attempts failed.",
-                        file.filenameAbs
+                        file.filenameAbs,
                     );
                 }
                 const delay = baseDelay * attempt;
@@ -675,9 +691,14 @@ class AsyncProxyWorker {
                     delay,
                     "ms and trying again.",
                     file.filenameAbs,
-                    error
+                    error,
                 );
-                Atomics.wait(this.state.sabOPView, this.state.opIds.retry, 0, delay);
+                Atomics.wait(
+                    this.state.sabOPView,
+                    this.state.opIds.retry,
+                    0,
+                    delay,
+                );
             }
         }
         this.logger.log(
@@ -686,7 +707,7 @@ class AsyncProxyWorker {
             file.filenameAbs,
             "in",
             performance.now() - startTime,
-            "ms"
+            "ms",
         );
         if (!file.xLock) {
             this.implicitLocks.add(file.fid);
@@ -694,7 +715,7 @@ class AsyncProxyWorker {
                 "Acquired implicit lock for",
                 `${opName}()`,
                 file.fid,
-                file.filenameAbs
+                file.filenameAbs,
             );
         }
         return file.syncHandle;

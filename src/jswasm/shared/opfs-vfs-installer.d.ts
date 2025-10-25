@@ -129,7 +129,7 @@ export interface SQLite3CAPI {
   sqlite3_uri_boolean(
     filename: number,
     param: string,
-    defaultValue: number
+    defaultValue: number,
   ): number;
   sqlite3_busy_timeout(db: number, ms: number): number;
 
@@ -299,7 +299,7 @@ export interface SQLite3DBClass {
     call(context: SQLite3DBInstance, options: DBConstructorOptions): void;
     setVfsPostOpenCallback(
       vfsPointer: number,
-      callback: (db: number, sqlite3: SQLite3Module) => void
+      callback: (db: number, sqlite3: SQLite3Module) => void,
     ): void;
   };
 }
@@ -514,7 +514,7 @@ export interface IoSyncWrappers {
     pFile: number,
     pDest: number,
     n: number,
-    offset64: number | bigint
+    offset64: number | bigint,
   ): number;
   xSync(pFile: number, flags: number): number;
   xTruncate(pFile: number, sz64: number | bigint): number;
@@ -523,7 +523,7 @@ export interface IoSyncWrappers {
     pFile: number,
     pSrc: number,
     n: number,
-    offset64: number | bigint
+    offset64: number | bigint,
   ): number;
 }
 
@@ -539,7 +539,7 @@ export interface VfsSyncWrappers {
     pVfs: number,
     zName: number,
     nOut: number,
-    pOut: number
+    pOut: number,
   ): number;
   xGetLastError(pVfs: number, nOut: number, pOut: number): number;
   xOpen(
@@ -547,7 +547,7 @@ export interface VfsSyncWrappers {
     zName: number,
     pFile: number,
     flags: number,
-    pOutFlags: number
+    pOutFlags: number,
   ): number;
   xRandomness?(pVfs: number, nOut: number, pOut: number): number;
   xSleep?(pVfs: number, ms: number): number;
@@ -569,7 +569,7 @@ export interface OpfsUtilInterface {
   getResolvedPath(filename: string, splitIt?: boolean): string | string[];
   getDirForFilename(
     absFilename: string,
-    createDirs?: boolean
+    createDirs?: boolean,
   ): Promise<[FileSystemDirectoryHandle, string]>;
   mkdir(absDirName: string): Promise<boolean>;
   entryExists(fsEntryName: string): Promise<boolean>;
@@ -579,12 +579,12 @@ export interface OpfsUtilInterface {
   unlink(
     fsEntryName: string,
     recursive?: boolean,
-    throwOnError?: boolean
+    throwOnError?: boolean,
   ): Promise<boolean>;
   traverse(opt: TraverseOptions | TraverseCallback): Promise<void>;
   importDb(
     filename: string,
-    bytes: Uint8Array | ArrayBuffer | ChunkedImportCallback
+    bytes: Uint8Array | ArrayBuffer | ChunkedImportCallback,
   ): Promise<number>;
 }
 
@@ -612,7 +612,7 @@ export interface TraverseOptions {
 export type TraverseCallback = (
   handle: FileSystemHandle,
   dirHandle: FileSystemDirectoryHandle,
-  depth: number
+  depth: number,
 ) => boolean | void;
 
 /**
@@ -703,7 +703,7 @@ export type InstallOpfsVfs = {
  * Install OPFS VFS initializer function
  */
 export type InstallOpfsVfsInitializer = (
-  sqlite3Ref: SQLite3Module
+  sqlite3Ref: SQLite3Module,
 ) => Promise<void | SQLite3Module>;
 
 /**

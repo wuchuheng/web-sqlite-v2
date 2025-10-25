@@ -116,7 +116,7 @@ export function createCoreBindings(wasm, capi) {
                     signature: "i(pipp)",
                     bindScope: "transient",
                     callProxy: (
-                        /** @type {import("../../sqlite3.d.ts").ExecCallback} */ callback
+                        /** @type {import("../../sqlite3.d.ts").ExecCallback} */ callback,
                     ) => {
                         let aNames;
                         return (pVoid, nCols, pColVals, pColNames) => {
@@ -169,14 +169,7 @@ export function createCoreBindings(wasm, capi) {
         ["sqlite3_reset", "int", "sqlite3_stmt*"],
 
         // Result functions
-        [
-            "sqlite3_result_blob",
-            undefined,
-            "sqlite3_context*",
-            "*",
-            "int",
-            "*",
-        ],
+        ["sqlite3_result_blob", undefined, "sqlite3_context*", "*", "int", "*"],
         ["sqlite3_result_double", undefined, "sqlite3_context*", "f64"],
         [
             "sqlite3_result_error",

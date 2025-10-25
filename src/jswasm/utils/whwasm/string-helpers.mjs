@@ -12,12 +12,14 @@ import { assertAllocator } from "./utils.mjs";
 export function attachStringUtilities(context) {
     const { target, cache } = context;
     const sabCtor =
-        typeof SharedArrayBuffer === "undefined" ? undefined : SharedArrayBuffer;
+        typeof SharedArrayBuffer === "undefined"
+            ? undefined
+            : SharedArrayBuffer;
     const decodeUtf8 = (view, begin, end) =>
         cache.utf8Decoder.decode(
             view.buffer instanceof sabCtor
                 ? view.slice(begin, end)
-                : view.subarray(begin, end)
+                : view.subarray(begin, end),
         );
 
     /**
@@ -90,19 +92,13 @@ export function attachStringUtilities(context) {
      * @param {boolean} [addNul=true]
      * @returns {number}
      */
-    target.jstrcpy = (
-        jstr,
-        tgt,
-        offset = 0,
-        maxBytes = -1,
-        addNul = true
-    ) => {
+    target.jstrcpy = (jstr, tgt, offset = 0, maxBytes = -1, addNul = true) => {
         if (
             !tgt ||
             (!(tgt instanceof Int8Array) && !(tgt instanceof Uint8Array))
         ) {
             context.toss(
-                "jstrcpy() target must be an Int8Array or Uint8Array."
+                "jstrcpy() target must be an Int8Array or Uint8Array.",
             );
         }
         if (maxBytes < 0) {
@@ -191,7 +187,7 @@ export function attachStringUtilities(context) {
         jstr,
         returnWithLength,
         allocator,
-        funcName
+        funcName,
     ) => {
         assertAllocator(context, funcName);
         if (typeof jstr !== "string") {
@@ -219,6 +215,6 @@ export function attachStringUtilities(context) {
             jstr,
             returnWithLength,
             target.alloc,
-            "allocCString()"
+            "allocCString()",
         );
 }

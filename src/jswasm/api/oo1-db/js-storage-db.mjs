@@ -15,7 +15,7 @@ export function attachJsStorageDb(
     context,
     Database,
     dbCtorHelper,
-    ensureDbOpen
+    ensureDbOpen,
 ) {
     const { sqlite3, capi, toss } = context;
 
@@ -31,7 +31,7 @@ export function attachJsStorageDb(
             const storageName = opt.filename;
             if (storageName !== "session" && storageName !== "local") {
                 toss(
-                    "JsStorageDb db name must be one of 'session' or 'local'."
+                    "JsStorageDb db name must be one of 'session' or 'local'.",
                 );
             }
             opt.vfs = "kvvfs";

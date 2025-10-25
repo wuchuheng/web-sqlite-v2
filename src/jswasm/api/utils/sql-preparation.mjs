@@ -34,7 +34,7 @@ export function createSqlPreparation(wasm, capi, util) {
         return util.sqlite3__wasm_db_error(
             pDb,
             capi.SQLITE_MISUSE,
-            f + "() requires " + n + " argument" + (1 === n ? "" : "s") + "."
+            f + "() requires " + n + " argument" + (1 === n ? "" : "s") + ".",
         );
     };
 
@@ -53,7 +53,9 @@ export function createSqlPreparation(wasm, capi, util) {
         // 2. Handle TypedArray input
         else if (util.isSQLableTypedArray(v)) {
             n = v.byteLength;
-            v = util.typedArrayToString(v instanceof ArrayBuffer ? new Uint8Array(v) : v);
+            v = util.typedArrayToString(
+                v instanceof ArrayBuffer ? new Uint8Array(v) : v,
+            );
         }
         // 3. Handle array input
         else if (Array.isArray(v)) {
@@ -109,7 +111,14 @@ export function createSqlPreparation(wasm, capi, util) {
      * @param {import("../../sqlite3.d.ts").WasmPointer | null} pzTail
      * @returns {import("../../sqlite3.d.ts").SqliteResultCode}
      */
-    const sqlite3_prepare_v3 = function f(pDb, sql, sqlLen, prepFlags, ppStmt, pzTail) {
+    const sqlite3_prepare_v3 = function f(
+        pDb,
+        sql,
+        sqlLen,
+        prepFlags,
+        ppStmt,
+        pzTail,
+    ) {
         // 1. Validate argument count
         if (f.length !== arguments.length) {
             return __dbArgcMismatch(pDb, "sqlite3_prepare_v3", f.length);
@@ -121,14 +130,28 @@ export function createSqlPreparation(wasm, capi, util) {
         // 3. Call appropriate native function
         switch (typeof xSql) {
             case "string":
-                return __prepare.basic(pDb, xSql, xSqlLen, prepFlags, ppStmt, null);
+                return __prepare.basic(
+                    pDb,
+                    xSql,
+                    xSqlLen,
+                    prepFlags,
+                    ppStmt,
+                    null,
+                );
             case "number":
-                return __prepare.full(pDb, xSql, xSqlLen, prepFlags, ppStmt, pzTail);
+                return __prepare.full(
+                    pDb,
+                    xSql,
+                    xSqlLen,
+                    prepFlags,
+                    ppStmt,
+                    pzTail,
+                );
             default:
                 return util.sqlite3__wasm_db_error(
                     pDb,
                     capi.SQLITE_MISUSE,
-                    "Invalid SQL argument type for sqlite3_prepare_v2/v3()."
+                    "Invalid SQL argument type for sqlite3_prepare_v2/v3().",
                 );
         }
     };
@@ -192,7 +215,7 @@ export function createSqlPreparation(wasm, capi, util) {
             return __dbArgcMismatch(
                 capi.sqlite3_db_handle(pStmt),
                 "sqlite3_bind_text",
-                f.length
+                f.length,
             );
         }
 
@@ -222,14 +245,17 @@ export function createSqlPreparation(wasm, capi, util) {
                 return util.sqlite3__wasm_db_error(
                     capi.sqlite3_db_handle(pStmt),
                     capi.SQLITE_MISUSE,
-                    "Invalid 3rd argument type for sqlite3_bind_text()."
+                    "Invalid 3rd argument type for sqlite3_bind_text().",
                 );
             }
 
             return __bindText(pStmt, iCol, p, n, capi.SQLITE_WASM_DEALLOC);
         } catch (e) {
             wasm.dealloc(p);
-            return util.sqlite3__wasm_db_error(capi.sqlite3_db_handle(pStmt), e);
+            return util.sqlite3__wasm_db_error(
+                capi.sqlite3_db_handle(pStmt),
+                e,
+            );
         }
     };
 
@@ -257,7 +283,7 @@ export function createSqlPreparation(wasm, capi, util) {
             return __dbArgcMismatch(
                 capi.sqlite3_db_handle(pStmt),
                 "sqlite3_bind_blob",
-                f.length
+                f.length,
             );
         }
 
@@ -287,14 +313,17 @@ export function createSqlPreparation(wasm, capi, util) {
                 return util.sqlite3__wasm_db_error(
                     capi.sqlite3_db_handle(pStmt),
                     capi.SQLITE_MISUSE,
-                    "Invalid 3rd argument type for sqlite3_bind_blob()."
+                    "Invalid 3rd argument type for sqlite3_bind_blob().",
                 );
             }
 
             return __bindBlob(pStmt, iCol, p, n, capi.SQLITE_WASM_DEALLOC);
         } catch (e) {
             wasm.dealloc(p);
-            return util.sqlite3__wasm_db_error(capi.sqlite3_db_handle(pStmt), e);
+            return util.sqlite3__wasm_db_error(
+                capi.sqlite3_db_handle(pStmt),
+                e,
+            );
         }
     };
 

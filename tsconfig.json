@@ -10,6 +10,6 @@
         "allowArbitraryExtensions": true,
         "verbatimModuleSyntax": true
     },
-    "include": ["src/**/*.mts"],
+    "include": ["src/**/*.mts", "src/**/*.ts"],
     "exclude": ["node_modules"]
 }

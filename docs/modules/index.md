@@ -2,7 +2,7 @@
 id: DOC-MOD-PORTFOLIO
 title: Module Portfolio
 summary: Lists the verified runtime capabilities shipped in the repository and their implementation entry points.
-audience: ["engineering","architecture"]
+audience: ["engineering", "architecture"]
 status: verified
 owner: Maintainers
 updated: 2025-10-18

@@ -26,16 +26,11 @@ export const crudOperationsTests: TestCase[] = [
 
       try {
         db.exec(
-          `CREATE TABLE ${tableName} (id INTEGER PRIMARY KEY, name TEXT)`
+          `CREATE TABLE ${tableName} (id INTEGER PRIMARY KEY, name TEXT)`,
         );
-        db.exec(
-          `INSERT INTO ${tableName} (id, name) VALUES (1, 'Alice')`
-        );
+        db.exec(`INSERT INTO ${tableName} (id, name) VALUES (1, 'Alice')`);
 
-        const result = TestUtils.execQuery(
-          db,
-          `SELECT * FROM ${tableName}`
-        );
+        const result = TestUtils.execQuery(db, `SELECT * FROM ${tableName}`);
         TestUtils.assertEqual(result.length, 1, "Should have one row");
         TestUtils.assertEqual(result[0].name, "Alice", "Name should match");
       } finally {
@@ -58,10 +53,7 @@ export const crudOperationsTests: TestCase[] = [
             (3, 'Charlie')
         `);
 
-        const result = TestUtils.execQuery(
-          db,
-          `SELECT * FROM ${tableName}`
-        );
+        const result = TestUtils.execQuery(db, `SELECT * FROM ${tableName}`);
         TestUtils.assertEqual(result.length, 3, "Should have three rows");
       } finally {
         db.close();
@@ -76,13 +68,11 @@ export const crudOperationsTests: TestCase[] = [
 
       try {
         db.exec(`CREATE TABLE ${tableName} (id INTEGER, age INTEGER)`);
-        db.exec(
-          `INSERT INTO ${tableName} VALUES (1, 25), (2, 30), (3, 25)`
-        );
+        db.exec(`INSERT INTO ${tableName} VALUES (1, 25), (2, 30), (3, 25)`);
 
         const result = TestUtils.execQuery(
           db,
-          `SELECT * FROM ${tableName} WHERE age = 25`
+          `SELECT * FROM ${tableName} WHERE age = 25`,
         );
         TestUtils.assertEqual(result.length, 2, "Should find two rows");
       } finally {
@@ -99,19 +89,17 @@ export const crudOperationsTests: TestCase[] = [
       try {
         db.exec(`CREATE TABLE ${tableName} (id INTEGER, status TEXT)`);
         db.exec(
-          `INSERT INTO ${tableName} VALUES (1, 'pending'), (2, 'pending')`
+          `INSERT INTO ${tableName} VALUES (1, 'pending'), (2, 'pending')`,
         );
-        db.exec(
-          `UPDATE ${tableName} SET status = 'completed' WHERE id = 1`
-        );
+        db.exec(`UPDATE ${tableName} SET status = 'completed' WHERE id = 1`);
 
         const completed = TestUtils.execQuery(
           db,
-          `SELECT * FROM ${tableName} WHERE status = 'completed'`
+          `SELECT * FROM ${tableName} WHERE status = 'completed'`,
         );
         const pending = TestUtils.execQuery(
           db,
-          `SELECT * FROM ${tableName} WHERE status = 'pending'`
+          `SELECT * FROM ${tableName} WHERE status = 'pending'`,
         );
 
         TestUtils.assertEqual(completed.length, 1, "Should have one completed");
@@ -132,10 +120,7 @@ export const crudOperationsTests: TestCase[] = [
         db.exec(`INSERT INTO ${tableName} VALUES (1), (2), (3)`);
         db.exec(`DELETE FROM ${tableName} WHERE id = 2`);
 
-        const result = TestUtils.execQuery(
-          db,
-          `SELECT * FROM ${tableName}`
-        );
+        const result = TestUtils.execQuery(db, `SELECT * FROM ${tableName}`);
         TestUtils.assertEqual(result.length, 2, "Should have two rows left");
       } finally {
         db.close();
@@ -150,12 +135,10 @@ export const crudOperationsTests: TestCase[] = [
 
       try {
         db.exec(
-          `CREATE TABLE ${tableName} (id INTEGER PRIMARY KEY, value TEXT)`
+          `CREATE TABLE ${tableName} (id INTEGER PRIMARY KEY, value TEXT)`,
         );
         db.exec("BEGIN TRANSACTION");
-        const stmt = db.prepare(
-          `INSERT INTO ${tableName} VALUES (?, ?)`
-        );
+        const stmt = db.prepare(`INSERT INTO ${tableName} VALUES (?, ?)`);
 
         try {
           for (let i = 0; i < 100; i++) {
@@ -177,20 +160,17 @@ export const crudOperationsTests: TestCase[] = [
         db.close();
       }
 
-      const reopened = TestUtils.createTestDb(
-        sqlite3,
-        CRUD_DB_FILE
-      );
+      const reopened = TestUtils.createTestDb(sqlite3, CRUD_DB_FILE);
 
       try {
         const result = TestUtils.execQuery(
           reopened,
-          `SELECT COUNT(*) as cnt FROM ${tableName}`
+          `SELECT COUNT(*) as cnt FROM ${tableName}`,
         );
         TestUtils.assertEqual(
           result[0].cnt,
           100,
-          "Should persist 100 rows in OPFS database"
+          "Should persist 100 rows in OPFS database",
         );
       } finally {
         reopened.close();

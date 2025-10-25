@@ -79,7 +79,7 @@ export const constraintsTests: TestCase[] = [
 
       try {
         db.exec(
-          `CREATE TABLE ${tableName} (age INTEGER CHECK(age >= 0 AND age <= 150))`
+          `CREATE TABLE ${tableName} (age INTEGER CHECK(age >= 0 AND age <= 150))`,
         );
         db.exec(`INSERT INTO ${tableName} VALUES (25)`);
 
@@ -102,7 +102,7 @@ export const constraintsTests: TestCase[] = [
         db.exec("PRAGMA foreign_keys = ON");
         db.exec(`CREATE TABLE ${parentTable} (id INTEGER PRIMARY KEY)`);
         db.exec(
-          `CREATE TABLE ${childTable} (id INTEGER, parent_id INTEGER, FOREIGN KEY(parent_id) REFERENCES ${parentTable}(id))`
+          `CREATE TABLE ${childTable} (id INTEGER, parent_id INTEGER, FOREIGN KEY(parent_id) REFERENCES ${parentTable}(id))`,
         );
 
         db.exec(`INSERT INTO ${parentTable} VALUES (1)`);

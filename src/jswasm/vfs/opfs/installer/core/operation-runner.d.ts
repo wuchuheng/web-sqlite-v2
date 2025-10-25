@@ -22,7 +22,7 @@ export function createOperationRunner(
   state: OpfsState,
   metrics: OpfsMetrics,
   error: (...args: unknown[]) => void,
-  toss: (...args: unknown[]) => never
+  toss: (...args: unknown[]) => never,
 ): OperationRunner;
 
 /**

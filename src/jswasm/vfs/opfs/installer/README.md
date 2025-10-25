@@ -8,18 +8,18 @@
 
 ## 📑 Table of Contents
 
--   [Overview](#-overview)
--   [Verification Status](#-verification-status)
--   [Directory Structure](#-directory-structure)
--   [What Changed](#-what-changed)
--   [Quick Start](#-quick-start)
--   [Module Descriptions](#-module-descriptions)
--   [Troubleshooting](#-troubleshooting)
--   [Benefits](#-benefits)
--   [Quality Metrics](#-quality-metrics)
--   [Architecture](#-architecture)
--   [Development Guide](#-development-guide)
--   [Migration Guide](#-migration-guide)
+- [Overview](#-overview)
+- [Verification Status](#-verification-status)
+- [Directory Structure](#-directory-structure)
+- [What Changed](#-what-changed)
+- [Quick Start](#-quick-start)
+- [Module Descriptions](#-module-descriptions)
+- [Troubleshooting](#-troubleshooting)
+- [Benefits](#-benefits)
+- [Quality Metrics](#-quality-metrics)
+- [Architecture](#-architecture)
+- [Development Guide](#-development-guide)
+- [Migration Guide](#-migration-guide)
 
 ---
 
@@ -36,9 +36,9 @@ This directory contains a **refactored and organized** implementation of the OPF
 
 ### What This Provides
 
--   **core/** - Environment validation, configuration, state management, serialization
--   **wrappers/** - SQLite I/O and VFS method implementations
--   **utils/** - Filesystem utilities, testing, worker communication
+- **core/** - Environment validation, configuration, state management, serialization
+- **wrappers/** - SQLite I/O and VFS method implementations
+- **utils/** - Filesystem utilities, testing, worker communication
 
 ---
 
@@ -48,11 +48,11 @@ This directory contains a **refactored and organized** implementation of the OPF
 
 After comprehensive line-by-line comparison with the original 1164-line monolithic file:
 
--   ✅ **All 50+ functions migrated** - Every function from the original file has been extracted and placed in the appropriate module
--   ✅ **All algorithms preserved** - Serialization, atomic operations, locking, metrics tracking all maintained
--   ✅ **All data structures verified** - state, metrics, opIds, sq3Codes, opfsFlags, \_\_openFiles all present
--   ✅ **All integration points maintained** - Worker communication, VFS registration, OO1 API integration
--   ✅ **Zero logic missing** - Complete functional equivalence confirmed
+- ✅ **All 50+ functions migrated** - Every function from the original file has been extracted and placed in the appropriate module
+- ✅ **All algorithms preserved** - Serialization, atomic operations, locking, metrics tracking all maintained
+- ✅ **All data structures verified** - state, metrics, opIds, sq3Codes, opfsFlags, \_\_openFiles all present
+- ✅ **All integration points maintained** - Worker communication, VFS registration, OO1 API integration
+- ✅ **Zero logic missing** - Complete functional equivalence confirmed
 
 ### Issues Fixed
 
@@ -88,8 +88,8 @@ installOpfsVfs.defaultProxyUri = "../sqlite3-opfs-async-proxy.js";
 
 Comprehensive analysis documents available:
 
--   📄 **CODE_COMPARISON_ANALYSIS.md** - Detailed 18-section comparison with original
--   📄 **VERIFICATION_COMPLETE.md** - Executive summary with metrics and findings
+- 📄 **CODE_COMPARISON_ANALYSIS.md** - Detailed 18-section comparison with original
+- 📄 **VERIFICATION_COMPLETE.md** - Executive summary with metrics and findings
 
 ---
 
@@ -148,11 +148,11 @@ src/jswasm/vfs/opfs/
 
 ### File Organization
 
--   ✅ Created `installer/` directory with logical subdirectories
--   ✅ Moved 12 modules into organized structure
--   ✅ Updated all import paths internally
--   ✅ Updated bootstrap file to use new entry point
--   ✅ All files pass linting with 0 errors
+- ✅ Created `installer/` directory with logical subdirectories
+- ✅ Moved 12 modules into organized structure
+- ✅ Updated all import paths internally
+- ✅ Updated bootstrap file to use new entry point
+- ✅ All files pass linting with 0 errors
 
 ### Import Path Update
 
@@ -204,11 +204,11 @@ await installOpfsVfs({
 
 This refactored implementation maintains **100% API compatibility** with the original:
 
--   ✅ Same function signatures
--   ✅ Same options object
--   ✅ Same return values
--   ✅ Same error handling
--   ✅ Drop-in replacement
+- ✅ Same function signatures
+- ✅ Same options object
+- ✅ Same return values
+- ✅ Same error handling
+- ✅ Drop-in replacement
 
 ### Testing
 
@@ -226,34 +226,34 @@ pnpm test
 
 #### `environment-validation.mjs`
 
--   Validates browser OPFS support
--   Checks for SharedArrayBuffer, Atomics, Worker APIs
--   Runtime environment detection
+- Validates browser OPFS support
+- Checks for SharedArrayBuffer, Atomics, Worker APIs
+- Runtime environment detection
 
 #### `config-setup.mjs`
 
--   Normalizes user configuration options
--   Parses URL parameters (opfs-verbose, opfs-sanity-check, etc.)
--   Applies defaults
+- Normalizes user configuration options
+- Parses URL parameters (opfs-verbose, opfs-sanity-check, etc.)
+- Applies defaults
 
 #### `serialization.mjs`
 
--   SharedArrayBuffer serialization/deserialization
--   Type-safe data transfer between main thread and worker
--   Supports: number, bigint, boolean, string
+- SharedArrayBuffer serialization/deserialization
+- Type-safe data transfer between main thread and worker
+- Supports: number, bigint, boolean, string
 
 #### `state-initialization.mjs`
 
--   Initializes shared buffers (sabIO, sabOP)
--   Defines operation IDs for atomic communication
--   Maps SQLite constants
--   Sets up metrics tracking
+- Initializes shared buffers (sabIO, sabOP)
+- Defines operation IDs for atomic communication
+- Maps SQLite constants
+- Sets up metrics tracking
 
 #### `operation-runner.mjs`
 
--   Executes operations through async worker
--   Atomic wait/notify coordination
--   Performance timing and metrics
+- Executes operations through async worker
+- Atomic wait/notify coordination
+- Performance timing and metrics
 
 ### Wrapper Modules (`wrappers/`)
 
@@ -261,24 +261,24 @@ pnpm test
 
 File I/O method implementations:
 
--   `xRead`, `xWrite`, `xClose`
--   `xSync`, `xTruncate`
--   `xLock`, `xUnlock`
--   `xFileSize`, `xFileControl`
+- `xRead`, `xWrite`, `xClose`
+- `xSync`, `xTruncate`
+- `xLock`, `xUnlock`
+- `xFileSize`, `xFileControl`
 
 #### `vfs-sync-wrappers.mjs`
 
 VFS method implementations:
 
--   `xOpen`, `xAccess`, `xDelete`
--   `xFullPathname`
--   `xCurrentTime`, `xCurrentTimeInt64`
+- `xOpen`, `xAccess`, `xDelete`
+- `xFullPathname`
+- `xCurrentTime`, `xCurrentTimeInt64`
 
 #### `vfs-integration.mjs`
 
--   Optional VFS methods (xRandomness, xSleep)
--   OO1 API integration (OpfsDb class)
--   Post-open callbacks
+- Optional VFS methods (xRandomness, xSleep)
+- OO1 API integration (OpfsDb class)
+- Post-open callbacks
 
 ### Utility Modules (`utils/`)
 
@@ -286,27 +286,27 @@ VFS method implementations:
 
 Filesystem utilities:
 
--   `mkdir`, `unlink`, `traverse`
--   `importDb`, `treeList`
--   `getResolvedPath`, `getDirForFilename`
--   Metrics and debug utilities
+- `mkdir`, `unlink`, `traverse`
+- `importDb`, `treeList`
+- `getResolvedPath`, `getDirForFilename`
+- Metrics and debug utilities
 
 #### `sanity-check.mjs`
 
 Comprehensive VFS validation:
 
--   Serialization tests
--   File operations (open, read, write, close)
--   VFS operations (access, delete)
--   Ensures system integrity
+- Serialization tests
+- File operations (open, read, write, close)
+- VFS operations (access, delete)
+- Ensures system integrity
 
 #### `worker-message-handler.mjs`
 
 Worker communication protocol:
 
--   Handles `opfs-unavailable`, `opfs-async-loaded`, `opfs-async-inited`
--   Coordinates initialization sequence
--   Error handling and recovery
+- Handles `opfs-unavailable`, `opfs-async-loaded`, `opfs-async-inited`
+- Coordinates initialization sequence
+- Error handling and recovery
 
 ### Finding Code
 
@@ -410,12 +410,12 @@ assert.equal(rc, 0);
 
 All modules follow project standards:
 
--   ✅ JSDoc comments on classes, properties, functions
--   ✅ 1/2/3 phase pattern (Input → Core → Output)
--   ✅ ≤ 120 characters per line
--   ✅ ESM modules (.mjs)
--   ✅ camelCase for functions/variables
--   ✅ Explicit error handling
+- ✅ JSDoc comments on classes, properties, functions
+- ✅ 1/2/3 phase pattern (Input → Core → Output)
+- ✅ ≤ 120 characters per line
+- ✅ ESM modules (.mjs)
+- ✅ camelCase for functions/variables
+- ✅ Explicit error handling
 
 ---
 
@@ -442,24 +442,24 @@ pnpm test  # Should run successfully
 
 **Step 3: Verify**
 
--   ✅ Application starts without errors
--   ✅ OPFS VFS initializes successfully
--   ✅ Database operations work
--   ✅ Worker communication functions
--   ✅ No console errors
+- ✅ Application starts without errors
+- ✅ OPFS VFS initializes successfully
+- ✅ Database operations work
+- ✅ Worker communication functions
+- ✅ No console errors
 
 **That's it!** The API is 100% compatible, so no code changes needed.
 
 ### Verification Checklist
 
--   [ ] Import path updated
--   [ ] Linting passes (`pnpm lint`)
--   [ ] Tests pass (`pnpm test`)
--   [ ] Application starts successfully
--   [ ] OPFS operations work
--   [ ] No console errors
--   [ ] Worker communicates properly
--   [ ] Database CRUD operations functional
+- [ ] Import path updated
+- [ ] Linting passes (`pnpm lint`)
+- [ ] Tests pass (`pnpm test`)
+- [ ] Application starts successfully
+- [ ] OPFS operations work
+- [ ] No console errors
+- [ ] Worker communicates properly
+- [ ] Database CRUD operations functional
 
 ### Rollback Plan
 
@@ -492,8 +492,8 @@ DataCloneError: Failed to execute 'postMessage' on 'Worker':
 
 **Solution:** ✅ Already fixed in `worker-message-handler.mjs`
 
--   The code now creates a `stateForWorker` object that excludes non-serializable functions
--   Only primitives and SharedArrayBuffers are sent to the worker
+- The code now creates a `stateForWorker` object that excludes non-serializable functions
+- Only primitives and SharedArrayBuffers are sent to the worker
 
 **Verification:** Check `utils/worker-message-handler.mjs` lines 36-51 for the sanitized state object
 
@@ -512,8 +512,8 @@ because its MIME type ('text/html') is not executable.
 
 **Solution:** ✅ Already fixed in `index.mjs`
 
--   Changed `defaultProxyUri` from `"sqlite3-opfs-async-proxy.js"` to `"../async-proxy/index.mjs"`
--   The path is now correctly relative to the `installer/` directory
+- Changed `defaultProxyUri` from `"sqlite3-opfs-async-proxy.js"` to `"../async-proxy/index.mjs"`
+- The path is now correctly relative to the `installer/` directory
 
 **Verification:** Check `index.mjs` line 331 for the correct relative path
 
@@ -563,8 +563,8 @@ Cannot install OPFS: Missing SharedArrayBuffer and/or Atomics.
 
 **Solution:** ✅ Verified - `state.verbose` is assigned on line 208 of `index.mjs`
 
--   All state properties are properly initialized in the correct order
--   See `CODE_COMPARISON_ANALYSIS.md` for full verification
+- All state properties are properly initialized in the correct order
+- See `CODE_COMPARISON_ANALYSIS.md` for full verification
 
 ---
 
@@ -581,9 +581,9 @@ await installOpfsVfs({
 
 ### Verification Resources
 
--   📄 **CODE_COMPARISON_ANALYSIS.md** - Detailed comparison showing all logic is present
--   📄 **VERIFICATION_COMPLETE.md** - Summary of verification results
--   📄 **REFACTORING_COMPLETE.md** - Overview of changes made
+- 📄 **CODE_COMPARISON_ANALYSIS.md** - Detailed comparison showing all logic is present
+- 📄 **VERIFICATION_COMPLETE.md** - Summary of verification results
+- 📄 **REFACTORING_COMPLETE.md** - Overview of changes made
 
 ---
 
@@ -593,75 +593,75 @@ await installOpfsVfs({
 
 ✅ **Clear Structure**
 
--   Logical directory hierarchy
--   Related code grouped together
--   Self-documenting file names
+- Logical directory hierarchy
+- Related code grouped together
+- Self-documenting file names
 
 ✅ **Easy Navigation**
 
--   Find code in seconds
--   Directory names describe purpose
--   Module boundaries clear
+- Find code in seconds
+- Directory names describe purpose
+- Module boundaries clear
 
 ✅ **Maintainable**
 
--   Small, focused files (~125 lines avg)
--   Single responsibility per module
--   Easy to modify safely
+- Small, focused files (~125 lines avg)
+- Single responsibility per module
+- Easy to modify safely
 
 ✅ **Scalable**
 
--   Clear where new code belongs
--   Easy to extend functionality
--   Module pattern repeatable
+- Clear where new code belongs
+- Easy to extend functionality
+- Module pattern repeatable
 
 ### Developer Experience
 
 ✅ **Fast Location** (10x faster)
 
--   Before: Search 1164 lines
--   After: Check directory name
+- Before: Search 1164 lines
+- After: Check directory name
 
 ✅ **Easy Understanding** (6x faster)
 
--   Before: Read entire file
--   After: Read one module
+- Before: Read entire file
+- After: Read one module
 
 ✅ **Safe Changes** (4x faster)
 
--   Before: Edit monolith, hope nothing breaks
--   After: Edit module, test independently
+- Before: Edit monolith, hope nothing breaks
+- After: Edit module, test independently
 
 ✅ **Simple Testing**
 
--   Before: Mock everything, hard to isolate
--   After: Test one module with clear deps
+- Before: Mock everything, hard to isolate
+- After: Test one module with clear deps
 
 ### Code Quality
 
 ✅ **Zero Lint Errors**
 
--   All modules pass ESLint
--   Consistent code style
--   Best practices followed
+- All modules pass ESLint
+- Consistent code style
+- Best practices followed
 
 ✅ **100% Documentation**
 
--   Comprehensive JSDoc
--   Clear function purposes
--   Parameter descriptions
+- Comprehensive JSDoc
+- Clear function purposes
+- Parameter descriptions
 
 ✅ **Best Practices**
 
--   1/2/3 phase pattern
--   Dependency injection
--   Clear interfaces
+- 1/2/3 phase pattern
+- Dependency injection
+- Clear interfaces
 
 ✅ **API Compatible**
 
--   No breaking changes
--   Same function signatures
--   Drop-in replacement
+- No breaking changes
+- Same function signatures
+- Drop-in replacement
 
 ### Statistics
 
@@ -683,10 +683,10 @@ await installOpfsVfs({
 
 Each module has comprehensive JSDoc:
 
--   Function purpose and behavior
--   Parameter descriptions and types
--   Return value types
--   Usage examples via 1/2/3 phases
+- Function purpose and behavior
+- Parameter descriptions and types
+- Return value types
+- Usage examples via 1/2/3 phases
 
 ### Quick Reference
 
@@ -703,11 +703,11 @@ Each module has comprehensive JSDoc:
 
 ### Architecture Highlights
 
--   **Modular Design** - 12 focused modules vs 1 monolith
--   **Clear Separation** - Infrastructure / Implementation / Utilities
--   **Dependency Injection** - Testable, mockable
--   **1/2/3 Phases** - Input → Core → Output pattern
--   **100% Compatible** - Drop-in replacement
+- **Modular Design** - 12 focused modules vs 1 monolith
+- **Clear Separation** - Infrastructure / Implementation / Utilities
+- **Dependency Injection** - Testable, mockable
+- **1/2/3 Phases** - Input → Core → Output pattern
+- **100% Compatible** - Drop-in replacement
 
 ---
 
@@ -715,14 +715,14 @@ Each module has comprehensive JSDoc:
 
 Your OPFS VFS code is now:
 
--   📁 **Well organized** - Clear directory structure with core/wrappers/utils
--   🔍 **Easy to navigate** - Logical grouping by responsibility
--   📚 **Well documented** - README + 3 verification docs + comprehensive JSDoc
--   ✅ **100% verified** - Line-by-line comparison confirms completeness
--   🐛 **Bug-free** - 2 critical issues found and fixed (DataCloneError, proxy path)
--   🧪 **Easy to test** - Independent modules with dependency injection
--   🎯 **Maintainable** - Small focused files (avg 125 lines vs 1164)
--   ✨ **Production ready** - 0 lint errors, 100% API compatible
+- 📁 **Well organized** - Clear directory structure with core/wrappers/utils
+- 🔍 **Easy to navigate** - Logical grouping by responsibility
+- 📚 **Well documented** - README + 3 verification docs + comprehensive JSDoc
+- ✅ **100% verified** - Line-by-line comparison confirms completeness
+- 🐛 **Bug-free** - 2 critical issues found and fixed (DataCloneError, proxy path)
+- 🧪 **Easy to test** - Independent modules with dependency injection
+- 🎯 **Maintainable** - Small focused files (avg 125 lines vs 1164)
+- ✨ **Production ready** - 0 lint errors, 100% API compatible
 
 **Built with ❤️ following the 1/2/3 phase pattern (Input → Core → Output)**
 
@@ -730,13 +730,13 @@ Your OPFS VFS code is now:
 
 **Verified refactoring impact:**
 
--   **Time to find code:** 10x faster (125 vs 1164 lines per search)
--   **Time to understand:** 6x faster (clear module boundaries)
--   **Time to modify:** 4x faster (isolated changes)
--   **Code coverage:** 100% (all logic verified present)
--   **Code quality:** ⭐⭐⭐⭐⭐ (was ⭐⭐)
--   **Developer confidence:** 100% (comprehensive verification)
--   **Developer happiness:** 📈 Way up!
+- **Time to find code:** 10x faster (125 vs 1164 lines per search)
+- **Time to understand:** 6x faster (clear module boundaries)
+- **Time to modify:** 4x faster (isolated changes)
+- **Code coverage:** 100% (all logic verified present)
+- **Code quality:** ⭐⭐⭐⭐⭐ (was ⭐⭐)
+- **Developer confidence:** 100% (comprehensive verification)
+- **Developer happiness:** 📈 Way up!
 
 ---
 
@@ -744,27 +744,27 @@ Your OPFS VFS code is now:
 
 ### Code Organization
 
--   **Total modules:** 12 (vs 1 monolithic file)
--   **Average lines/module:** 125 (vs 1164)
--   **Max nesting depth:** 3 levels (vs 6+)
--   **Cyclomatic complexity:** Low (focused functions)
+- **Total modules:** 12 (vs 1 monolithic file)
+- **Average lines/module:** 125 (vs 1164)
+- **Max nesting depth:** 3 levels (vs 6+)
+- **Cyclomatic complexity:** Low (focused functions)
 
 ### Verification
 
--   **Functions verified:** 50+ (100% migrated)
--   **Algorithms verified:** All preserved
--   **Data structures verified:** All present
--   **Integration points verified:** All maintained
--   **Issues found:** 2 critical (both fixed)
--   **Confidence level:** 100%
+- **Functions verified:** 50+ (100% migrated)
+- **Algorithms verified:** All preserved
+- **Data structures verified:** All present
+- **Integration points verified:** All maintained
+- **Issues found:** 2 critical (both fixed)
+- **Confidence level:** 100%
 
 ### Documentation
 
--   **README.md:** This comprehensive guide
--   **CODE_COMPARISON_ANALYSIS.md:** 18-section detailed comparison
--   **VERIFICATION_COMPLETE.md:** Executive summary with metrics
--   **REFACTORING_COMPLETE.md:** Refactoring completion report
--   **JSDoc coverage:** 100% of public APIs
+- **README.md:** This comprehensive guide
+- **CODE_COMPARISON_ANALYSIS.md:** 18-section detailed comparison
+- **VERIFICATION_COMPLETE.md:** Executive summary with metrics
+- **REFACTORING_COMPLETE.md:** Refactoring completion report
+- **JSDoc coverage:** 100% of public APIs
 
 ## 🎓 Architecture
 

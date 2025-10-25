@@ -15,7 +15,7 @@ export function createStatementClass(
     context,
     validators,
     bindHelpers,
-    constructorToken
+    constructorToken,
 ) {
     const { capi, wasm, util, ptrMap, stmtMap, toss } = context;
     const {
@@ -39,7 +39,7 @@ export function createStatementClass(
             if (token !== constructorToken) {
                 toss(
                     capi.SQLITE_MISUSE,
-                    "Do not call the Stmt constructor directly. Use DB.prepare()."
+                    "Do not call the Stmt constructor directly. Use DB.prepare().",
                 );
             }
             this.db = db;
@@ -132,7 +132,7 @@ export function createStatementClass(
             if (Array.isArray(value)) {
                 if (bindArgs.length !== 1) {
                     toss(
-                        "When binding an array, an index argument is not permitted."
+                        "When binding an array, an index argument is not permitted.",
                     );
                 }
                 value.forEach((entry, i) =>
@@ -140,8 +140,8 @@ export function createStatementClass(
                         this,
                         i + 1,
                         ensureSupportedBindType(entry),
-                        entry
-                    )
+                        entry,
+                    ),
                 );
                 return this;
             }
@@ -154,7 +154,7 @@ export function createStatementClass(
             ) {
                 if (bindArgs.length !== 1) {
                     toss(
-                        "When binding an object, an index argument is not permitted."
+                        "When binding an object, an index argument is not permitted.",
                     );
                 }
                 Object.keys(value).forEach((key) =>
@@ -162,8 +162,8 @@ export function createStatementClass(
                         this,
                         key,
                         ensureSupportedBindType(value[key]),
-                        value[key]
-                    )
+                        value[key],
+                    ),
                 );
                 return this;
             }
@@ -173,7 +173,7 @@ export function createStatementClass(
                 this,
                 index,
                 ensureSupportedBindType(value),
-                value
+                value,
             );
         }
 
@@ -223,7 +223,7 @@ export function createStatementClass(
                         rc,
                         capi.sqlite3_js_rc_str(rc),
                         "SQL =",
-                        capi.sqlite3_sql(pointerOf(this))
+                        capi.sqlite3_sql(pointerOf(this)),
                     );
                     context.checkRc(this.db, rc);
             }
@@ -302,7 +302,7 @@ export function createStatementClass(
                     if (wasm.bigIntEnabled) {
                         const rc = capi.sqlite3_column_int64(
                             stmtPointer,
-                            index
+                            index,
                         );
                         if (
                             rc >= Number.MIN_SAFE_INTEGER &&
@@ -319,7 +319,7 @@ export function createStatementClass(
                     ) {
                         toss(
                             "Integer is out of range for JS integer range:",
-                            rc
+                            rc,
                         );
                     }
                     return util.isInt32(rc) ? rc | 0 : rc;
@@ -331,17 +331,17 @@ export function createStatementClass(
                 case capi.SQLITE_BLOB: {
                     const length = capi.sqlite3_column_bytes(
                         stmtPointer,
-                        index
+                        index,
                     );
                     const blobPtr = capi.sqlite3_column_blob(
                         stmtPointer,
-                        index
+                        index,
                     );
                     const result = new Uint8Array(length);
                     if (length) {
                         result.set(
                             wasm.heap8u().slice(blobPtr, blobPtr + length),
-                            0
+                            0,
                         );
                     }
                     if (length && Array.isArray(this.db._blobXfer)) {
@@ -353,7 +353,7 @@ export function createStatementClass(
                     toss(
                         "Don't know how to translate type of result column #",
                         index,
-                        "."
+                        ".",
                     );
             }
         }
@@ -419,7 +419,7 @@ export function createStatementClass(
         getColumnName(ndx) {
             return capi.sqlite3_column_name(
                 pointerOf(this),
-                resolveColumnIndex(this, ndx)
+                resolveColumnIndex(this, ndx),
             );
         }
 

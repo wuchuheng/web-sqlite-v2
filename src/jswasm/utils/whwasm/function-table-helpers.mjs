@@ -33,7 +33,7 @@ export function attachFunctionTableUtilities(context) {
 
         if (typeof sig !== "string" || !(func instanceof Function)) {
             context.toss(
-                "Invalid arguments: expecting (function,signature) or (signature,function)."
+                "Invalid arguments: expecting (function,signature) or (signature,function).",
             );
         }
 
@@ -169,7 +169,7 @@ function createJsFuncToWasm(context) {
                 },
                 pushSigType(dest, letter) {
                     dest.push(
-                        fn._cache.typeCodes[fn._cache.letterType(letter)]
+                        fn._cache.typeCodes[fn._cache.letterType(letter)],
                     );
                 },
             };
@@ -194,17 +194,7 @@ function createJsFuncToWasm(context) {
             fn._cache.pushSigType(wasmCode, sig[0]);
         }
         fn._cache.uleb128Encode(wasmCode, "unshift", wasmCode.length);
-        wasmCode.unshift(
-            0x00,
-            0x61,
-            0x73,
-            0x6d,
-            0x01,
-            0x00,
-            0x00,
-            0x00,
-            0x01
-        );
+        wasmCode.unshift(0x00, 0x61, 0x73, 0x6d, 0x01, 0x00, 0x00, 0x00, 0x01);
         wasmCode.push(
             0x02,
             0x07,
@@ -221,11 +211,11 @@ function createJsFuncToWasm(context) {
             0x01,
             0x66,
             0x00,
-            0x00
+            0x00,
         );
         return new WebAssembly.Instance(
             new WebAssembly.Module(new Uint8Array(wasmCode)),
-            { e: { f: func } }
+            { e: { f: func } },
         ).exports.f;
     };
 }

@@ -27,8 +27,7 @@ const defineReadonly = (target, key, value) =>
         value,
     });
 
-const describeMember = (structName, memberKey) =>
-    `${structName}::${memberKey}`;
+const describeMember = (structName, memberKey) => `${structName}::${memberKey}`;
 
 const isNumericValue = (value) =>
     typeof value === "number"
@@ -64,17 +63,26 @@ const ensureDebugFlagFactories = (SBF) => {
             const flags = Object.create(parent || null);
             const controller = function (mask) {
                 if (mask === undefined) return controller.__flags;
-                if (typeof mask !== "number") toss("Debug flag mask must be numeric.");
+                if (typeof mask !== "number")
+                    toss("Debug flag mask must be numeric.");
                 if (mask < 0) {
                     delete controller.__flags.getter;
                     delete controller.__flags.setter;
                     delete controller.__flags.alloc;
                     delete controller.__flags.dealloc;
                 } else {
-                    controller.__flags.getter = Boolean(mask & DEBUG_FLAG_MASK.getter);
-                    controller.__flags.setter = Boolean(mask & DEBUG_FLAG_MASK.setter);
-                    controller.__flags.alloc = Boolean(mask & DEBUG_FLAG_MASK.alloc);
-                    controller.__flags.dealloc = Boolean(mask & DEBUG_FLAG_MASK.dealloc);
+                    controller.__flags.getter = Boolean(
+                        mask & DEBUG_FLAG_MASK.getter,
+                    );
+                    controller.__flags.setter = Boolean(
+                        mask & DEBUG_FLAG_MASK.setter,
+                    );
+                    controller.__flags.alloc = Boolean(
+                        mask & DEBUG_FLAG_MASK.alloc,
+                    );
+                    controller.__flags.dealloc = Boolean(
+                        mask & DEBUG_FLAG_MASK.dealloc,
+                    );
                 }
                 return controller.__flags;
             };
@@ -100,8 +108,8 @@ const createSignatureHelpers = ({ ptrSizeof, ptrIR, bigIntEnabled }) => {
         signature && signature.length > 1 && signature[1] === "("
             ? "p"
             : signature
-            ? signature[0]
-            : undefined;
+              ? signature[0]
+              : undefined;
 
     return {
         glyphFor,
@@ -254,11 +262,7 @@ const createContext = (config) => {
         externalPointers.get(instance) === true;
 
     const validateExternalPointer = (structName, value) => {
-        if (
-            typeof value !== "number" ||
-            value !== (value | 0) ||
-            value <= 0
-        ) {
+        if (typeof value !== "number" || value !== (value | 0) || value <= 0) {
             toss("Invalid pointer value for", structName, "constructor.");
         }
         return value;
@@ -278,15 +282,11 @@ const createContext = (config) => {
                     structCtor.structName,
                     "instance:",
                     structCtor.structInfo.sizeof,
-                    "bytes @" + addr
+                    "bytes @" + addr,
                 );
             }
             if (!external) {
-                viewHeap().fill(
-                    0,
-                    addr,
-                    addr + structCtor.structInfo.sizeof
-                );
+                viewHeap().fill(0, addr, addr + structCtor.structInfo.sizeof);
             }
             pointerMap.set(instance, addr);
             if (external) externalPointers.set(instance, true);
@@ -314,7 +314,7 @@ const createContext = (config) => {
                 "@",
                 pointerOf(instance),
                 "threw. NOT propagating it.",
-                error
+                error,
             );
         }
     };
@@ -344,7 +344,7 @@ const createContext = (config) => {
                 structCtor.structName,
                 "instance:",
                 structCtor.structInfo.sizeof,
-                "bytes @" + addr
+                "bytes @" + addr,
             );
         }
         if (!external) dealloc(addr);
@@ -389,8 +389,11 @@ const createContext = (config) => {
         }
         if (!member && tossIfNotFound) {
             toss(
-                describeMember(structInfo.name || "anonymous struct", memberName),
-                "is not a mapped struct member."
+                describeMember(
+                    structInfo.name || "anonymous struct",
+                    memberName,
+                ),
+                "is not a mapped struct member.",
             );
         }
         return member;
@@ -400,7 +403,7 @@ const createContext = (config) => {
         if (member.signature === "s") return;
         toss(
             "Invalid member type signature for C-string value:",
-            JSON.stringify(member)
+            JSON.stringify(member),
         );
     };
 
@@ -416,7 +419,7 @@ const createContext = (config) => {
         memberKey: (name) => memberPrefix + name + memberSuffix,
         memberKeys: (structInfo) =>
             Object.keys(structInfo.members).map(
-                (name) => memberPrefix + name + memberSuffix
+                (name) => memberPrefix + name + memberSuffix,
             ),
         lookupMember,
         assertCStringSignature,
@@ -437,7 +440,7 @@ const createContext = (config) => {
             const member = lookupMember(
                 instance.structInfo,
                 memberName,
-                tossIfNotFound
+                tossIfNotFound,
             );
             return !!(
                 member &&
@@ -462,7 +465,8 @@ const createContext = (config) => {
         },
         pointerIsWritable(instance) {
             const pointer = pointerOf(instance);
-            if (!pointer) toss("Cannot set struct property on disposed instance.");
+            if (!pointer)
+                toss("Cannot set struct property on disposed instance.");
             return pointer;
         },
         coerceSetterValue(descriptor, value, debugFlags, propertyLabel) {
@@ -489,7 +493,7 @@ const createStructType = (context) => {
         constructor(structName, structInfo, token) {
             if (token !== INTERNAL_STRUCT_TOKEN) {
                 toss(
-                    "Do not call the StructType constructor from client-level code."
+                    "Do not call the StructType constructor from client-level code.",
                 );
             }
             defineReadonly(this, "structName", structName);
@@ -504,7 +508,7 @@ const createStructType = (context) => {
             return context.lookupMember(
                 this.structInfo,
                 memberName,
-                tossIfNotFound
+                tossIfNotFound,
             );
         }
 
@@ -525,11 +529,7 @@ const createStructType = (context) => {
         }
 
         memberSignature(memberName, emscriptenFormat = false) {
-            return context.memberSignature(
-                this,
-                memberName,
-                emscriptenFormat
-            );
+            return context.memberSignature(this, memberName, emscriptenFormat);
         }
 
         memoryDump() {
@@ -537,7 +537,7 @@ const createStructType = (context) => {
             if (!pointer) return null;
             const size = this.structInfo.sizeof;
             return new Uint8Array(
-                context.heap().slice(pointer, pointer + size)
+                context.heap().slice(pointer, pointer + size),
             );
         }
 
@@ -564,16 +564,17 @@ const createStructType = (context) => {
     });
 
     defineReadonly(StructType, "allocCString", (value) =>
-        context.allocCString(value)
+        context.allocCString(value),
     );
     defineReadonly(StructType, "isA", (value) => value instanceof StructType);
-    defineReadonly(StructType, "hasExternalPointer", (value) =>
-        value instanceof StructType && context.hasExternalPointer(value)
-    );
     defineReadonly(
         StructType,
-        "memberKey",
-        (memberName) => context.memberKey(memberName)
+        "hasExternalPointer",
+        (value) =>
+            value instanceof StructType && context.hasExternalPointer(value),
+    );
+    defineReadonly(StructType, "memberKey", (memberName) =>
+        context.memberKey(memberName),
     );
 
     context.setStructType(StructType);
@@ -599,7 +600,7 @@ const validateStructDefinition = (structName, structInfo) => {
                     "Unexpected sizeof==1 member",
                     describeMember(structInfo.name || structName, key),
                     "with signature",
-                    member.signature
+                    member.signature,
                 );
             }
         } else {
@@ -608,13 +609,13 @@ const validateStructDefinition = (structName, structInfo) => {
                     "Invalid struct member description =",
                     member,
                     "from",
-                    structInfo
+                    structInfo,
                 );
                 toss(
                     structName,
                     "member",
                     key,
-                    "sizeof is not aligned. sizeof=" + member.sizeof
+                    "sizeof is not aligned. sizeof=" + member.sizeof,
                 );
             }
             if (member.offset % 4 !== 0) {
@@ -622,13 +623,13 @@ const validateStructDefinition = (structName, structInfo) => {
                     "Invalid struct member description =",
                     member,
                     "from",
-                    structInfo
+                    structInfo,
                 );
                 toss(
                     structName,
                     "member",
                     key,
-                    "offset is not aligned. offset=" + member.offset
+                    "offset is not aligned. offset=" + member.offset,
                 );
             }
         }
@@ -639,32 +640,25 @@ const validateStructDefinition = (structName, structInfo) => {
 
     if (!lastMember) {
         toss("No member property descriptions found.");
-    } else if (
-        structInfo.sizeof <
-        lastMember.offset + lastMember.sizeof
-    ) {
+    } else if (structInfo.sizeof < lastMember.offset + lastMember.sizeof) {
         toss(
             "Invalid struct config:",
             structName,
             "max member offset (" + lastMember.offset + ") ",
-            "extends past end of struct (sizeof=" + structInfo.sizeof + ")."
+            "extends past end of struct (sizeof=" + structInfo.sizeof + ").",
         );
     }
 };
 
 const validateMemberSignature = (structCtor, memberName, key, signature) => {
     if (Object.prototype.hasOwnProperty.call(structCtor.prototype, key)) {
-        toss(
-            structCtor.structName,
-            "already has a property named",
-            key + "."
-        );
+        toss(structCtor.structName, "already has a property named", key + ".");
     }
     if (!RX_SIG_SIMPLE.test(signature) && !RX_SIG_FUNCTION.test(signature)) {
         toss(
             "Malformed signature for",
             describeMember(structCtor.structName, memberName) + ":",
-            signature
+            signature,
         );
     }
 };
@@ -703,13 +697,13 @@ const defineMemberAccessors = (structCtor, memberName, descriptor, context) => {
                     "+",
                     descriptor.offset,
                     "sz",
-                    descriptor.sizeof
+                    descriptor.sizeof,
                 );
             }
             const view = new DataView(
                 context.heap().buffer,
                 pointer + descriptor.offset,
-                descriptor.sizeof
+                descriptor.sizeof,
             );
             const result = view[getterName](0, context.littleEndian);
             if (debugFlags.getter) {
@@ -736,7 +730,7 @@ const defineMemberAccessors = (structCtor, memberName, descriptor, context) => {
                               descriptor.offset,
                               "sz",
                               descriptor.sizeof,
-                              value
+                              value,
                           );
                       }
                       const pointer = context.pointerIsWritable(this);
@@ -744,17 +738,17 @@ const defineMemberAccessors = (structCtor, memberName, descriptor, context) => {
                           descriptor,
                           value,
                           debugFlags,
-                          propertyLabel
+                          propertyLabel,
                       );
                       const view = new DataView(
                           context.heap().buffer,
                           pointer + descriptor.offset,
-                          descriptor.sizeof
+                          descriptor.sizeof,
                       );
                       view[setterName](
                           0,
                           wrapValue(resolvedValue),
-                          context.littleEndian
+                          context.littleEndian,
                       );
                   },
     });
@@ -780,12 +774,12 @@ export function StructBinderFactory(config) {
     function StructBinder(structNameOrInfo, structInfo) {
         const { name, info } = normalizeStructArgs(
             structNameOrInfo,
-            structInfo
+            structInfo,
         );
         validateStructDefinition(name, info);
 
         const debugFlags = StructBinderFactory.__makeDebugFlags(
-            StructBinder.debugFlags
+            StructBinder.debugFlags,
         );
 
         class StructCtor extends StructType {
@@ -803,17 +797,13 @@ export function StructBinderFactory(config) {
         defineReadonly(
             StructCtor,
             "isA",
-            (value) => value instanceof StructCtor
+            (value) => value instanceof StructCtor,
         );
-        defineReadonly(
-            StructCtor,
-            "memberKey",
-            (memberName) => context.memberKey(memberName)
+        defineReadonly(StructCtor, "memberKey", (memberName) =>
+            context.memberKey(memberName),
         );
-        defineReadonly(
-            StructCtor,
-            "memberKeys",
-            () => context.memberKeys(info)
+        defineReadonly(StructCtor, "memberKeys", () =>
+            context.memberKeys(info),
         );
         defineReadonly(StructCtor, "methodInfoForKey", () => undefined);
         defineReadonly(StructCtor, "structInfo", info);
@@ -832,7 +822,7 @@ export function StructBinderFactory(config) {
     StructBinder.allocCString = (value) => context.allocCString(value);
     if (!StructBinder.debugFlags) {
         StructBinder.debugFlags = StructBinderFactory.__makeDebugFlags(
-            StructBinderFactory.debugFlags
+            StructBinderFactory.debugFlags,
         );
     }
     return StructBinder;

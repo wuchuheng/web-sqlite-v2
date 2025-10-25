@@ -41,12 +41,12 @@ export const performanceTests: TestCase[] = [
 
         const count = TestUtils.execQuery(
           db,
-          `SELECT COUNT(*) as cnt FROM ${tableName}`
+          `SELECT COUNT(*) as cnt FROM ${tableName}`,
         );
         TestUtils.assertEqual(count[0].cnt, 1000, "Should insert 1000 rows");
         TestUtils.assertTrue(
           duration < 1000,
-          `Bulk insert should be fast (took ${duration}ms)`
+          `Bulk insert should be fast (took ${duration}ms)`,
         );
       } finally {
         db.close();
@@ -74,24 +74,18 @@ export const performanceTests: TestCase[] = [
         db.exec("COMMIT");
 
         const start1 = performance.now();
-        TestUtils.execQuery(
-          db,
-          `SELECT * FROM ${tableName} WHERE id = 500`
-        );
+        TestUtils.execQuery(db, `SELECT * FROM ${tableName} WHERE id = 500`);
         const time1 = performance.now() - start1;
 
         db.exec(`CREATE INDEX idx_${tableName}_id ON ${tableName}(id)`);
 
         const start2 = performance.now();
-        TestUtils.execQuery(
-          db,
-          `SELECT * FROM ${tableName} WHERE id = 500`
-        );
+        TestUtils.execQuery(db, `SELECT * FROM ${tableName} WHERE id = 500`);
         const time2 = performance.now() - start2;
 
         TestUtils.assertTrue(
           time2 <= time1 * 1.5,
-          "Indexed query should be as fast or faster"
+          "Indexed query should be as fast or faster",
         );
       } finally {
         db.close();
@@ -118,14 +112,11 @@ export const performanceTests: TestCase[] = [
         }
         db.exec("COMMIT");
 
-        const result = TestUtils.execQuery(
-          db,
-          `SELECT * FROM ${tableName}`
-        );
+        const result = TestUtils.execQuery(db, `SELECT * FROM ${tableName}`);
         TestUtils.assertEqual(
           result.length,
           5000,
-          "Should retrieve all 5000 rows"
+          "Should retrieve all 5000 rows",
         );
       } finally {
         db.close();

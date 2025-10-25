@@ -15,7 +15,7 @@
  * @see https://man7.org/linux/man-pages/man3/termios.3.html
  */
 
-import { ERRNO, IOCTL_OPS } from './errno-constants.mjs';
+import { ERRNO, IOCTL_OPS } from "./errno-constants.mjs";
 
 /**
  * Creates ioctl syscall implementation
@@ -28,7 +28,14 @@ import { ERRNO, IOCTL_OPS } from './errno-constants.mjs';
  * @param {Int32Array} HEAP32 - Signed 32-bit heap view
  * @returns {import("../shared/system-types.d.ts").IoctlSyscalls} Object containing ioctl syscall function
  */
-export function createIoctlSyscalls(FS, SYSCALLS, syscallGetVarargP, HEAP8, HEAP16, HEAP32) {
+export function createIoctlSyscalls(
+    FS,
+    SYSCALLS,
+    syscallGetVarargP,
+    HEAP8,
+    HEAP16,
+    HEAP32,
+) {
     /**
      * ioctl - Device control operations
      *
@@ -171,7 +178,9 @@ export function createIoctlSyscalls(FS, SYSCALLS, syscallGetVarargP, HEAP8, HEAP
                     }
 
                     if (stream.tty.ops.ioctl_tiocgwinsz) {
-                        const winsize = stream.tty.ops.ioctl_tiocgwinsz(stream.tty);
+                        const winsize = stream.tty.ops.ioctl_tiocgwinsz(
+                            stream.tty,
+                        );
                         argp = syscallGetVarargP();
 
                         // Write window size structure (rows, cols)
@@ -202,7 +211,7 @@ export function createIoctlSyscalls(FS, SYSCALLS, syscallGetVarargP, HEAP8, HEAP
                     return -ERRNO.EINVAL;
             }
         } catch (e) {
-            if (typeof FS === 'undefined' || !(e.name === 'ErrnoError')) {
+            if (typeof FS === "undefined" || !(e.name === "ErrnoError")) {
                 throw e;
             }
             return -e.errno;

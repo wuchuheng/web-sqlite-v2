@@ -22,7 +22,7 @@ export function createInstallOo1DbApiInitializer() {
         const dbCtorHelper = createDbCtorHelper(context);
         const { Database, Statement, ensureDbOpen } = createDbClasses(
             context,
-            dbCtorHelper
+            dbCtorHelper,
         );
 
         definePointerAccessors(context, Database, Statement);

@@ -50,12 +50,12 @@ export function setupModuleLocateFile(Module, importMetaUrl) {
     // 3. Debug log location
     sqlite3InitModuleState.debugModule(
         "globalThis.location =",
-        globalThis.location
+        globalThis.location,
     );
 
     // 4. Set up Module's locateFile function
     Module["locateFile"] = createLocateFile(importMetaUrl).bind(
-        sqlite3InitModuleState
+        sqlite3InitModuleState,
     );
 }
 

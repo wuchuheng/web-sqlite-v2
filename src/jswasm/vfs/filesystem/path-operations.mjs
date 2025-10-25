@@ -44,7 +44,7 @@ export function createPathOperations(FS, { getPathFS }) {
                         const link = FS.readlink(currentPath);
                         currentPath = PATH_FS.resolve(
                             PATH.dirname(currentPath),
-                            link
+                            link,
                         );
                         const lookup = FS.lookupPath(currentPath, {
                             recurse_count: opts.recurse_count + 1,

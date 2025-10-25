@@ -15,12 +15,12 @@ export const versionInfoTests: TestCase[] = [
       TestUtils.assertEqual(
         sqlite3.version.libVersion,
         capiVersion,
-        "libVersion should match sqlite3_libversion()"
+        "libVersion should match sqlite3_libversion()",
       );
       TestUtils.assertEqual(
         sqlite3.version.libVersionNumber,
         capiVersionNumber,
-        "libVersionNumber should match sqlite3_libversion_number()"
+        "libVersionNumber should match sqlite3_libversion_number()",
       );
     },
   },
@@ -31,12 +31,12 @@ export const versionInfoTests: TestCase[] = [
 
       TestUtils.assert(
         typeof capiSourceId === "string" && capiSourceId.length > 0,
-        "sqlite3_sourceid() should return a non-empty string"
+        "sqlite3_sourceid() should return a non-empty string",
       );
       TestUtils.assertEqual(
         sqlite3.version.sourceId,
         capiSourceId,
-        "Version sourceId should match sqlite3_sourceid()"
+        "Version sourceId should match sqlite3_sourceid()",
       );
     },
   },
@@ -45,19 +45,19 @@ export const versionInfoTests: TestCase[] = [
     fn: async (sqlite3) => {
       TestUtils.assert(
         /^\d+\.\d+\.\d+$/.test(sqlite3.version.libVersion),
-        "libVersion should be in semantic version format"
+        "libVersion should be in semantic version format",
       );
       TestUtils.assert(
         Number.isInteger(sqlite3.version.libVersionNumber),
-        "libVersionNumber should be an integer"
+        "libVersionNumber should be an integer",
       );
       TestUtils.assert(
         Number.isInteger(sqlite3.version.downloadVersion),
-        "downloadVersion should be an integer"
+        "downloadVersion should be an integer",
       );
       TestUtils.assert(
         sqlite3.version.downloadVersion >= sqlite3.version.libVersionNumber,
-        "downloadVersion should not be less than libVersionNumber"
+        "downloadVersion should not be less than libVersionNumber",
       );
     },
   },

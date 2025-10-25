@@ -23,7 +23,7 @@ export function createLegacyCapiStubs() {
             _xFunc,
             _xStep,
             _xFinal,
-            _xDestroy
+            _xDestroy,
         ) => {},
         sqlite3_create_function: (
             _pDb,
@@ -33,7 +33,7 @@ export function createLegacyCapiStubs() {
             _pApp,
             _xFunc,
             _xStep,
-            _xFinal
+            _xFinal,
         ) => {},
         sqlite3_create_window_function: (
             _pDb,
@@ -45,7 +45,7 @@ export function createLegacyCapiStubs() {
             _xFinal,
             _xValue,
             _xInverse,
-            _xDestroy
+            _xDestroy,
         ) => {},
         sqlite3_prepare_v3: (
             _dbPtr,
@@ -53,14 +53,14 @@ export function createLegacyCapiStubs() {
             _sqlByteLen,
             _prepFlags,
             _stmtPtrPtr,
-            _strPtrPtr
+            _strPtrPtr,
         ) => {},
         sqlite3_prepare_v2: (
             _dbPtr,
             _sql,
             _sqlByteLen,
             _stmtPtrPtr,
-            _strPtrPtr
+            _strPtrPtr,
         ) => {},
         sqlite3_exec: (_pDb, _sql, _callback, _pVoid, _pErrMsg) => {},
         sqlite3_randomness: (_n, _outPtr) => {},

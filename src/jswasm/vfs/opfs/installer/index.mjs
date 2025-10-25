@@ -120,7 +120,7 @@ export function createInstallOpfsVfsContext(sqlite3) {
         // 2. Core processing
         const thePromise = new Promise(function (
             promiseResolve_,
-            promiseReject_
+            promiseReject_,
         ) {
             // 2.1 Set up logging
             const loggers = [
@@ -144,7 +144,7 @@ export function createInstallOpfsVfsContext(sqlite3) {
             // 2.2 Create VFS structures
             const opfsIoMethods = new sqlite3_io_methods();
             const opfsVfs = new sqlite3_vfs().addOnDispose(() =>
-                opfsIoMethods.dispose()
+                opfsIoMethods.dispose(),
             );
 
             // 2.3 Set up promise state tracking
@@ -165,8 +165,8 @@ export function createInstallOpfsVfsContext(sqlite3) {
                 if (undefined === promiseWasRejected.value) {
                     promiseReject(
                         new Error(
-                            "Timeout while waiting for OPFS async proxy worker."
-                        )
+                            "Timeout while waiting for OPFS async proxy worker.",
+                        ),
                     );
                 }
             }, 4000);
@@ -176,8 +176,8 @@ export function createInstallOpfsVfsContext(sqlite3) {
                 error("Error initializing OPFS asyncer:", err);
                 promiseReject(
                     new Error(
-                        "Loading OPFS async Worker failed for unknown reasons."
-                    )
+                        "Loading OPFS async Worker failed for unknown reasons.",
+                    ),
                 );
             };
 
@@ -200,7 +200,7 @@ export function createInstallOpfsVfsContext(sqlite3) {
                 "$zName",
                 opfsVfs.$zName,
                 "cleanup default VFS wrapper",
-                () => (dVfs ? dVfs.dispose() : null)
+                () => (dVfs ? dVfs.dispose() : null),
             );
 
             // 2.7 Initialize state and metrics
@@ -348,7 +348,7 @@ export function createInstallOpfsVfsContext(sqlite3) {
             return installOpfsVfs().catch((e) => {
                 sqlite3Ref.config.warn(
                     "Ignoring inability to install OPFS sqlite3_vfs:",
-                    e.message
+                    e.message,
                 );
             });
         } catch (e) {

@@ -76,7 +76,7 @@ export const PATH = {
         // 2.1 Split, filter, and normalize path
         path = PATH.normalizeArray(
             path.split("/").filter((p) => !!p),
-            !isAbsolute
+            !isAbsolute,
         ).join("/");
 
         // 2.2 Handle empty path
@@ -182,7 +182,7 @@ export const createPathFS = (FS = null) => ({
             // 2.1.1 Validate path type
             if (typeof path != "string") {
                 throw new TypeError(
-                    "Arguments to path.resolve must be strings"
+                    "Arguments to path.resolve must be strings",
                 );
             } else if (!path) {
                 return "";
@@ -196,7 +196,7 @@ export const createPathFS = (FS = null) => ({
         // 2.2 Normalize resolved path
         resolvedPath = PATH.normalizeArray(
             resolvedPath.split("/").filter((p) => !!p),
-            !resolvedAbsolute
+            !resolvedAbsolute,
         ).join("/");
 
         // 3. Output handling

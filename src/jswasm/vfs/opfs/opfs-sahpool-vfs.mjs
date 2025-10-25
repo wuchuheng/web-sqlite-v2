@@ -123,7 +123,7 @@ export function createOpfsSahpoolInitializer() {
                 try {
                     const nRead = file.sah.read(
                         wasm.heap8u().subarray(pDest, pDest + n),
-                        { at: HEADER_OFFSET_DATA + Number(offset64) }
+                        { at: HEADER_OFFSET_DATA + Number(offset64) },
                     );
                     if (nRead < n) {
                         wasm.heap8u().fill(0, pDest + nRead, pDest + n);
@@ -178,7 +178,7 @@ export function createOpfsSahpoolInitializer() {
                 try {
                     const nBytes = file.sah.write(
                         wasm.heap8u().subarray(pSrc, pSrc + n),
-                        { at: HEADER_OFFSET_DATA + Number(offset64) }
+                        { at: HEADER_OFFSET_DATA + Number(offset64) },
                     );
                     return n === nBytes ? 0 : toss("Unknown write() failure.");
                 } catch (e) {
@@ -209,7 +209,7 @@ export function createOpfsSahpoolInitializer() {
                 wasm.poke(
                     pOut,
                     2440587.5 + new Date().getTime() / 86400000,
-                    "double"
+                    "double",
                 );
                 return 0;
             },
@@ -217,7 +217,7 @@ export function createOpfsSahpoolInitializer() {
                 wasm.poke(
                     pOut,
                     2440587.5 * 86400000 + new Date().getTime(),
-                    "i64"
+                    "i64",
                 );
                 return 0;
             },
@@ -246,7 +246,7 @@ export function createOpfsSahpoolInitializer() {
                     try {
                         const [cMsg, n] = wasm.scopedAllocCString(
                             e.message,
-                            true
+                            true,
                         );
                         wasm.cstrncpy(pOut, cMsg, nOut);
                         if (n > nOut) wasm.poke8(pOut + nOut - 1, 0);
@@ -310,7 +310,7 @@ export function createOpfsSahpoolInitializer() {
             opfsVfs.$mxPathname = HEADER_MAX_PATH_SIZE;
             opfsVfs.addOnDispose(
                 (opfsVfs.$zName = wasm.allocCString(vfsName)),
-                () => setPoolForVfs(opfsVfs.pointer, 0)
+                () => setPoolForVfs(opfsVfs.pointer, 0),
             );
 
             if (dVfs) {
@@ -369,17 +369,17 @@ export function createOpfsSahpoolInitializer() {
                 this.vfsDir = options.directory || "." + this.vfsName;
                 this.#dvBody = new DataView(
                     this.#apBody.buffer,
-                    this.#apBody.byteOffset
+                    this.#apBody.byteOffset,
                 );
                 this.isReady = this.reset(
-                    !!(options.clearOnInit ?? optionDefaults.clearOnInit)
+                    !!(options.clearOnInit ?? optionDefaults.clearOnInit),
                 ).then(() => {
                     if (this.$error) throw this.$error;
                     return this.getCapacity()
                         ? Promise.resolve(undefined)
                         : this.addCapacity(
                               options.initialCapacity ||
-                                  optionDefaults.initialCapacity
+                                  optionDefaults.initialCapacity,
                           );
                 });
             }
@@ -484,7 +484,7 @@ export function createOpfsSahpoolInitializer() {
                             this.releaseAccessHandles();
                             throw e;
                         }
-                    })
+                    }),
                 );
             }
 
@@ -499,9 +499,9 @@ export function createOpfsSahpoolInitializer() {
                 ) {
                     warn(
                         `Removing file with unexpected flags ${flags.toString(
-                            16
+                            16,
                         )}`,
-                        this.#apBody
+                        this.#apBody,
                     );
                     this.setAssociatedPath(sah, "", 0);
                     return "";
@@ -519,7 +519,7 @@ export function createOpfsSahpoolInitializer() {
 
                     return pathBytes
                         ? textDecoder.decode(
-                              this.#apBody.subarray(0, pathBytes)
+                              this.#apBody.subarray(0, pathBytes),
                           )
                         : "";
                 } else {
@@ -584,7 +584,7 @@ export function createOpfsSahpoolInitializer() {
                 this.#dhVfsParent = prev;
                 this.#dhOpaque = await this.#dhVfsRoot.getDirectoryHandle(
                     OPAQUE_DIR_NAME,
-                    { create: true }
+                    { create: true },
                 );
                 this.releaseAccessHandles();
                 return this.acquireAccessHandles(clearFiles);
@@ -667,7 +667,7 @@ export function createOpfsSahpoolInitializer() {
                     sqlite3.config.error(
                         this.vfsName,
                         "removeVfs() failed with no recovery strategy:",
-                        e
+                        e,
                     );
                 }
                 return true;
@@ -679,7 +679,7 @@ export function createOpfsSahpoolInitializer() {
                         capi.SQLITE_MISUSE,
                         "Cannot pause VFS",
                         this.vfsName,
-                        "because it has opened files."
+                        "because it has opened files.",
                     );
                 }
                 if (this.#mapSAHToName.size > 0) {
@@ -697,7 +697,7 @@ export function createOpfsSahpoolInitializer() {
                 if (0 === this.#mapSAHToName.size) {
                     return this.acquireAccessHandles(false).then(
                         () => capi.sqlite3_vfs_register(this.#cVfs, 0),
-                        this
+                        this,
                     );
                 }
                 return this;
@@ -719,7 +719,7 @@ export function createOpfsSahpoolInitializer() {
                                 n +
                                 " bytes but read " +
                                 nRead +
-                                "."
+                                ".",
                         );
                     }
                 }
@@ -752,7 +752,7 @@ export function createOpfsSahpoolInitializer() {
                         toss(
                             "Input size",
                             nWrote,
-                            "is not correct for an SQLite database."
+                            "is not correct for an SQLite database.",
                         );
                     }
                     if (!checkedHeader) {
@@ -787,7 +787,7 @@ export function createOpfsSahpoolInitializer() {
                 for (let i = 0; i < header.length; ++i) {
                     if (header.charCodeAt(i) !== bytes[i]) {
                         toss(
-                            "Input does not contain an SQLite database header."
+                            "Input does not contain an SQLite database header.",
                         );
                     }
                 }
@@ -801,7 +801,7 @@ export function createOpfsSahpoolInitializer() {
                             n +
                             " bytes but wrote " +
                             nWrote +
-                            "."
+                            ".",
                     );
                 } else {
                     sah.write(new Uint8Array([1, 1]), {
@@ -888,19 +888,19 @@ export function createOpfsSahpoolInitializer() {
             if (close?.then) {
                 toss(
                     "The local OPFS API is too old for opfs-sahpool:",
-                    "it has an async FileSystemSyncAccessHandle.close() method."
+                    "it has an async FileSystemSyncAccessHandle.close() method.",
                 );
             }
             return true;
         };
 
         sqlite3.installOpfsSAHPoolVfs = async function (
-            options = Object.create(null)
+            options = Object.create(null),
         ) {
             options = Object.assign(
                 Object.create(null),
                 optionDefaults,
-                options || {}
+                options || {},
             );
             const vfsName = options.name;
             if (options.$testThrowPhase1) {
@@ -928,7 +928,7 @@ export function createOpfsSahpoolInitializer() {
                 !navigator?.storage?.getDirectory
             ) {
                 return (initPromises[vfsName] = Promise.reject(
-                    new Error("Missing required OPFS APIs.")
+                    new Error("Missing required OPFS APIs."),
                 ));
             }
 
@@ -947,13 +947,13 @@ export function createOpfsSahpoolInitializer() {
                                 const OpfsSAHPoolDb = function (...args) {
                                     const opt =
                                         oo1.DB.dbCtorHelper.normalizeArgs(
-                                            ...args
+                                            ...args,
                                         );
                                     opt.vfs = theVfs.$zName;
                                     oo1.DB.dbCtorHelper.call(this, opt);
                                 };
                                 OpfsSAHPoolDb.prototype = Object.create(
-                                    oo1.DB.prototype
+                                    oo1.DB.prototype,
                                 );
                                 poolUtil.OpfsSAHPoolDb = OpfsSAHPoolDb;
                             }
@@ -971,4 +971,3 @@ export function createOpfsSahpoolInitializer() {
         };
     };
 }
-

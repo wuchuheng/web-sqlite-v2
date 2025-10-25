@@ -26,13 +26,11 @@ export const queryOperationsTests: TestCase[] = [
 
       try {
         db.exec(`CREATE TABLE ${tableName} (value INTEGER)`);
-        db.exec(
-          `INSERT INTO ${tableName} VALUES (10), (20), (30), (40), (50)`
-        );
+        db.exec(`INSERT INTO ${tableName} VALUES (10), (20), (30), (40), (50)`);
 
         const result = TestUtils.execQuery(
           db,
-          `SELECT COUNT(*) as cnt, SUM(value) as sum, AVG(value) as avg FROM ${tableName}`
+          `SELECT COUNT(*) as cnt, SUM(value) as sum, AVG(value) as avg FROM ${tableName}`,
         );
 
         TestUtils.assertEqual(result[0].cnt, 5, "Count should be 5");
@@ -63,15 +61,19 @@ export const queryOperationsTests: TestCase[] = [
            FROM ${tableName}
            GROUP BY product
            HAVING total > 10
-           ORDER BY product`
+           ORDER BY product`,
         );
 
         TestUtils.assertEqual(
           result.length,
           1,
-          "Only Apple should have total > 10"
+          "Only Apple should have total > 10",
         );
-        TestUtils.assertEqual(result[0].product, "Apple", "Product should be Apple");
+        TestUtils.assertEqual(
+          result[0].product,
+          "Apple",
+          "Product should be Apple",
+        );
       } finally {
         db.close();
       }
@@ -87,14 +89,12 @@ export const queryOperationsTests: TestCase[] = [
       try {
         db.exec(`CREATE TABLE ${usersTable} (id INTEGER, name TEXT)`);
         db.exec(
-          `CREATE TABLE ${ordersTable} (id INTEGER, user_id INTEGER, product TEXT)`
+          `CREATE TABLE ${ordersTable} (id INTEGER, user_id INTEGER, product TEXT)`,
         );
 
+        db.exec(`INSERT INTO ${usersTable} VALUES (1, 'Alice'), (2, 'Bob')`);
         db.exec(
-          `INSERT INTO ${usersTable} VALUES (1, 'Alice'), (2, 'Bob')`
-        );
-        db.exec(
-          `INSERT INTO ${ordersTable} VALUES (1, 1, 'Book'), (2, 1, 'Pen'), (3, 2, 'Laptop')`
+          `INSERT INTO ${ordersTable} VALUES (1, 1, 'Book'), (2, 1, 'Pen'), (3, 2, 'Laptop')`,
         );
 
         const result = TestUtils.execQuery(
@@ -102,7 +102,7 @@ export const queryOperationsTests: TestCase[] = [
           `SELECT u.name, COUNT(o.id) as order_count
            FROM ${usersTable} u
            LEFT JOIN ${ordersTable} o ON u.id = o.user_id
-           GROUP BY u.id`
+           GROUP BY u.id`,
         );
 
         TestUtils.assertEqual(result.length, 2, "Should have two users");
@@ -123,7 +123,7 @@ export const queryOperationsTests: TestCase[] = [
 
         const result = TestUtils.execQuery(
           db,
-          `SELECT value, (SELECT AVG(value) FROM ${tableName}) as avg FROM ${tableName}`
+          `SELECT value, (SELECT AVG(value) FROM ${tableName}) as avg FROM ${tableName}`,
         );
 
         TestUtils.assertEqual(result.length, 3, "Should have three rows");
@@ -145,7 +145,7 @@ export const queryOperationsTests: TestCase[] = [
 
         const result = TestUtils.execQuery(
           db,
-          `SELECT value FROM ${tableName} ORDER BY value DESC LIMIT 3`
+          `SELECT value FROM ${tableName} ORDER BY value DESC LIMIT 3`,
         );
 
         TestUtils.assertEqual(result.length, 3, "Should have three rows");

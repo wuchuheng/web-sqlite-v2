@@ -19,7 +19,7 @@ export const createAsyncLoad = (
     readAsync,
     getUniqueRunDependency,
     addRunDependency,
-    removeRunDependency
+    removeRunDependency,
 ) => {
     /** @type {import('./async-utils.d.ts').AsyncLoader} */
     const asyncLoader = (url, onload, onerror, noRunDep) => {
@@ -42,7 +42,7 @@ export const createAsyncLoad = (
                 } else {
                     throw new Error(`Loading data file "${url}" failed.`);
                 }
-            }
+            },
         );
 
         // 3. Output handling - add dependency tracking

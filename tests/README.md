@@ -8,32 +8,32 @@ This example demonstrates how to use SQLite3 WebAssembly with **Origin Private F
 
 ### 🗄️ **OPFS Persistent Storage**
 
--   Creates a persistent SQLite database stored in OPFS (`/demo/users.db`)
--   Database persists across browser sessions and page reloads
--   Demonstrates the `sqlite3.oo1.OpfsDb` class usage
+- Creates a persistent SQLite database stored in OPFS (`/demo/users.db`)
+- Database persists across browser sessions and page reloads
+- Demonstrates the `sqlite3.oo1.OpfsDb` class usage
 
 ### 🏗️ **Database Schema Management**
 
--   Creates a comprehensive `users` table with multiple column types
--   Implements database indexes for optimized query performance
--   Shows proper SQL table creation with constraints and defaults
+- Creates a comprehensive `users` table with multiple column types
+- Implements database indexes for optimized query performance
+- Shows proper SQL table creation with constraints and defaults
 
 ### 📊 **Data Operations**
 
--   **Insert Operations**: Batch insertion of sample user data using prepared statements
--   **Query Operations**: Various SELECT queries including:
-    -   Simple data retrieval
-    -   Filtered queries with conditions
-    -   Aggregate functions (COUNT, AVG)
-    -   Grouped data analysis
--   **Transaction Management**: Demonstrates both successful commits and rollbacks
+- **Insert Operations**: Batch insertion of sample user data using prepared statements
+- **Query Operations**: Various SELECT queries including:
+    - Simple data retrieval
+    - Filtered queries with conditions
+    - Aggregate functions (COUNT, AVG)
+    - Grouped data analysis
+- **Transaction Management**: Demonstrates both successful commits and rollbacks
 
 ### ⚙️ **Advanced Features**
 
--   **Prepared Statements**: Efficient and secure parameterized queries
--   **Transaction Safety**: ACID compliance with automatic rollback on errors
--   **Error Handling**: Comprehensive error handling and user feedback
--   **Performance Optimizations**: Indexes and efficient query patterns
+- **Prepared Statements**: Efficient and secure parameterized queries
+- **Transaction Safety**: ACID compliance with automatic rollback on errors
+- **Error Handling**: Comprehensive error handling and user feedback
+- **Performance Optimizations**: Indexes and efficient query patterns
 
 ## Database Schema
 
@@ -72,7 +72,7 @@ const db = new sqlite3.oo1.OpfsDb("/demo/users.db", "c");
 ```javascript
 db.transaction(() => {
     const stmt = db.prepare(
-        "INSERT INTO users (username, email, full_name, age) VALUES (?, ?, ?, ?)"
+        "INSERT INTO users (username, email, full_name, age) VALUES (?, ?, ?, ?)",
     );
 
     users.forEach((user) => {
@@ -110,9 +110,9 @@ const ageGroups = db.selectObjects(`
 
 ### Prerequisites
 
--   **Node.js** and **pnpm** installed
--   **Modern browser** with OPFS support (Chrome 86+, Firefox 111+)
--   **HTTP/HTTPS server** (OPFS requires secure context)
+- **Node.js** and **pnpm** installed
+- **Modern browser** with OPFS support (Chrome 86+, Firefox 111+)
+- **HTTP/HTTPS server** (OPFS requires secure context)
 
 ### Quick Start
 
@@ -129,7 +129,6 @@ const ageGroups = db.selectObjects(`
     ```
 
     This command will:
-
     - Start an HTTP server with necessary COOP/COEP headers
     - Automatically open your browser to the demo page
     - Serve the demo at `http://127.0.0.1:3000/examples/simpleDemo/index.html`
@@ -154,17 +153,17 @@ These headers are **required** for SharedArrayBuffer and OPFS functionality.
 
 ### ✅ **Supported Browsers**
 
--   **Chrome/Chromium**: 86+ (full OPFS support)
--   **Firefox**: 111+ (OPFS support)
--   **Safari**: 15.4+ (limited OPFS support)
--   **Edge**: 86+ (Chromium-based)
+- **Chrome/Chromium**: 86+ (full OPFS support)
+- **Firefox**: 111+ (OPFS support)
+- **Safari**: 15.4+ (limited OPFS support)
+- **Edge**: 86+ (Chromium-based)
 
 ### ❌ **Unsupported Environments**
 
--   Internet Explorer (any version)
--   Older browser versions without OPFS APIs
--   `file://` protocol (must use HTTP/HTTPS)
--   Environments without SharedArrayBuffer support
+- Internet Explorer (any version)
+- Older browser versions without OPFS APIs
+- `file://` protocol (must use HTTP/HTTPS)
+- Environments without SharedArrayBuffer support
 
 ## Key Implementation Details
 
@@ -241,17 +240,14 @@ Oldest user: { username: 'bob_wilson', age: 45 }
 ### Common Issues
 
 1. **"OPFS VFS unavailable" Error**
-
     - **Cause**: Missing COOP/COEP headers or unsupported browser
     - **Solution**: Ensure server sends required headers and use supported browser
 
 2. **"SharedArrayBuffer is not defined"**
-
     - **Cause**: Security context requirements not met
     - **Solution**: Use HTTPS or localhost with proper headers
 
 3. **Database Not Persisting**
-
     - **Cause**: Using in-memory database instead of OPFS
     - **Solution**: Verify using `OpfsDb` class with proper file path
 
@@ -261,10 +257,10 @@ Oldest user: { username: 'bob_wilson', age: 45 }
 
 ### Debugging Tips
 
--   Open browser developer tools to see detailed console output
--   Check the Network tab for any failed resource loads
--   Verify OPFS availability: `navigator.storage?.getDirectory !== undefined`
--   Test SharedArrayBuffer: `typeof SharedArrayBuffer !== 'undefined'`
+- Open browser developer tools to see detailed console output
+- Check the Network tab for any failed resource loads
+- Verify OPFS availability: `navigator.storage?.getDirectory !== undefined`
+- Test SharedArrayBuffer: `typeof SharedArrayBuffer !== 'undefined'`
 
 ## Next Steps
 
@@ -279,7 +275,7 @@ After exploring this demo, you can:
 
 ## Related Documentation
 
--   [SQLite WASM Documentation](https://sqlite.org/wasm/doc/trunk/index.md)
--   [OPFS API Documentation](https://sqlite.org/wasm/doc/trunk/persistence.md#vfs-opfs)
--   [Object-Oriented API (OO1)](https://sqlite.org/wasm/doc/trunk/api-oo1.md)
--   [Browser OPFS Support](https://developer.mozilla.org/en-US/docs/Web/API/File_System_API)
+- [SQLite WASM Documentation](https://sqlite.org/wasm/doc/trunk/index.md)
+- [OPFS API Documentation](https://sqlite.org/wasm/doc/trunk/persistence.md#vfs-opfs)
+- [Object-Oriented API (OO1)](https://sqlite.org/wasm/doc/trunk/api-oo1.md)
+- [Browser OPFS Support](https://developer.mozilla.org/en-US/docs/Web/API/File_System_API)

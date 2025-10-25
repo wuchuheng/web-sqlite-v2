@@ -1,5 +1,10 @@
 import { PATH } from "../../utils/path.mjs";
-import { ERRNO_CODES, MODE, OPEN_FLAGS, STREAM_STATE_MASK } from "./constants.mjs";
+import {
+    ERRNO_CODES,
+    MODE,
+    OPEN_FLAGS,
+    STREAM_STATE_MASK,
+} from "./constants.mjs";
 
 /**
  * Generates high-level node manipulation helpers (create, rename, open, etc.)
@@ -11,7 +16,7 @@ import { ERRNO_CODES, MODE, OPEN_FLAGS, STREAM_STATE_MASK } from "./constants.mj
  */
 export function createNodeActions(
     FS,
-    { FS_modeStringToFlags, getPathFS, Module }
+    { FS_modeStringToFlags, getPathFS, Module },
 ) {
     return {
         create(path, mode) {
@@ -111,7 +116,10 @@ export function createNodeActions(
             if (!oldDir.node_ops.rename) {
                 throw new FS.ErrnoError(ERRNO_CODES.EPERM);
             }
-            if (FS.isMountpoint(oldNode) || (newNode && FS.isMountpoint(newNode))) {
+            if (
+                FS.isMountpoint(oldNode) ||
+                (newNode && FS.isMountpoint(newNode))
+            ) {
                 throw new FS.ErrnoError(ERRNO_CODES.EBUSY);
             }
             if (newDir !== oldDir) {
@@ -187,7 +195,7 @@ export function createNodeActions(
             }
             return PATH_FS.resolve(
                 FS.getPath(link.parent),
-                link.node_ops.readlink(link)
+                link.node_ops.readlink(link),
             );
         },
         stat(path, dontFollow) {
@@ -350,12 +358,11 @@ export function createNodeActions(
             if (flags & OPEN_FLAGS.O_TRUNC && !created) {
                 FS.truncate(node, 0);
             }
-            flags &=
-                ~(
-                    OPEN_FLAGS.O_EXCL |
-                    OPEN_FLAGS.O_TRUNC |
-                    OPEN_FLAGS.O_NOFOLLOW
-                );
+            flags &= ~(
+                OPEN_FLAGS.O_EXCL |
+                OPEN_FLAGS.O_TRUNC |
+                OPEN_FLAGS.O_NOFOLLOW
+            );
             const stream = FS.createStream({
                 node,
                 path: FS.getPath(node),

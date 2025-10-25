@@ -177,7 +177,7 @@ function createInt64Bindings(wasm, _capi) {
                                 op,
                                 wasm.cstrToJs(z0),
                                 wasm.cstrToJs(z1),
-                                rowid
+                                rowid,
                             );
                         };
                     },
@@ -192,8 +192,16 @@ function createInt64Bindings(wasm, _capi) {
     // Add vtab bindings if available
     if (wasm.bigIntEnabled && !!wasm.exports.sqlite3_declare_vtab) {
         bindings.push(
-            ["sqlite3_create_module", "int", ["sqlite3*", "string", "sqlite3_module*", "*"]],
-            ["sqlite3_create_module_v2", "int", ["sqlite3*", "string", "sqlite3_module*", "*", "*"]],
+            [
+                "sqlite3_create_module",
+                "int",
+                ["sqlite3*", "string", "sqlite3_module*", "*"],
+            ],
+            [
+                "sqlite3_create_module_v2",
+                "int",
+                ["sqlite3*", "string", "sqlite3_module*", "*", "*"],
+            ],
             ["sqlite3_declare_vtab", "int", ["sqlite3*", "string:flexible"]],
             ["sqlite3_drop_modules", "int", ["sqlite3*", "**"]],
             ["sqlite3_vtab_collation", "string", "sqlite3_index_info*", "int"],
@@ -203,7 +211,13 @@ function createInt64Bindings(wasm, _capi) {
             ["sqlite3_vtab_in_next", "int", "sqlite3_value*", "**"],
             ["sqlite3_vtab_nochange", "int", "sqlite3_context*"],
             ["sqlite3_vtab_on_conflict", "int", "sqlite3*"],
-            ["sqlite3_vtab_rhs_value", "int", "sqlite3_index_info*", "int", "**"]
+            [
+                "sqlite3_vtab_rhs_value",
+                "int",
+                "sqlite3_index_info*",
+                "int",
+                "**",
+            ],
         );
     }
 
@@ -231,7 +245,7 @@ function createInt64Bindings(wasm, _capi) {
                                     wasm.cstrToJs(zDb),
                                     wasm.cstrToJs(zTbl),
                                     iKey1,
-                                    iKey2
+                                    iKey2,
                                 );
                             };
                         },
@@ -240,7 +254,7 @@ function createInt64Bindings(wasm, _capi) {
                 ],
             ],
             ["sqlite3_preupdate_new", "int", ["sqlite3*", "int", "**"]],
-            ["sqlite3_preupdate_old", "int", ["sqlite3*", "int", "**"]]
+            ["sqlite3_preupdate_old", "int", ["sqlite3*", "int", "**"]],
         );
     }
 
@@ -256,7 +270,7 @@ function createInt64Bindings(wasm, _capi) {
 function setupAdapters(wasm, capi, util, sqlite3) {
     const __xString = wasm.xWrap.argAdapter("string");
     wasm.xWrap.argAdapter("string:flexible", (v) =>
-        __xString(util.flexibleString(v))
+        __xString(util.flexibleString(v)),
     );
 
     wasm.xWrap.argAdapter(
@@ -266,7 +280,7 @@ function setupAdapters(wasm, capi, util, sqlite3) {
             v = "" + v;
             let rc = this[v];
             return rc || (this[v] = wasm.allocCString(v));
-        }.bind(Object.create(null))
+        }.bind(Object.create(null)),
     );
 
     const __xArgPtr = wasm.xWrap.argAdapter("*");
@@ -282,15 +296,11 @@ function setupAdapters(wasm, capi, util, sqlite3) {
     wasm.xWrap.argAdapter("sqlite3_session*", __xArgPtr);
 
     wasm.xWrap.argAdapter("sqlite3_stmt*", (v) =>
-        __xArgPtr(
-            v instanceof (sqlite3?.oo1?.Stmt || nilType) ? v.pointer : v
-        )
+        __xArgPtr(v instanceof (sqlite3?.oo1?.Stmt || nilType) ? v.pointer : v),
     );
 
     wasm.xWrap.argAdapter("sqlite3*", (v) =>
-        __xArgPtr(
-            v instanceof (sqlite3?.oo1?.DB || nilType) ? v.pointer : v
-        )
+        __xArgPtr(v instanceof (sqlite3?.oo1?.DB || nilType) ? v.pointer : v),
     );
 
     wasm.xWrap.argAdapter("sqlite3_vfs*", (v) => {
@@ -300,12 +310,12 @@ function setupAdapters(wasm, capi, util, sqlite3) {
                 sqlite3.SQLite3Error.toss(
                     capi.SQLITE_NOTFOUND,
                     "Unknown sqlite3_vfs name:",
-                    v
+                    v,
                 )
             );
         }
         return __xArgPtr(
-            v instanceof (capi.sqlite3_vfs || nilType) ? v.pointer : v
+            v instanceof (capi.sqlite3_vfs || nilType) ? v.pointer : v,
         );
     });
 
@@ -314,15 +324,13 @@ function setupAdapters(wasm, capi, util, sqlite3) {
             __xArgPtr(
                 v instanceof (capi.sqlite3_index_info || nilType)
                     ? v.pointer
-                    : v
-            )
+                    : v,
+            ),
         );
         wasm.xWrap.argAdapter("sqlite3_module*", (v) =>
             __xArgPtr(
-                v instanceof (capi.sqlite3_module || nilType)
-                    ? v.pointer
-                    : v
-            )
+                v instanceof (capi.sqlite3_module || nilType) ? v.pointer : v,
+            ),
         );
     }
 
@@ -343,7 +351,7 @@ function wrapBindings(wasm, capi, util, sqlite3, toss) {
     if (0 === wasm.exports.sqlite3_step.length) {
         wasm.xWrap.doArgcCheck = false;
         console.warn(
-            "Disabling sqlite3.wasm.xWrap.doArgcCheck due to environmental quirks."
+            "Disabling sqlite3.wasm.xWrap.doArgcCheck due to environmental quirks.",
         );
     }
 
@@ -362,7 +370,7 @@ function wrapBindings(wasm, capi, util, sqlite3, toss) {
         return () =>
             toss(
                 fname + "() is unavailable due to lack",
-                "of BigInt support in this build."
+                "of BigInt support in this build.",
             );
     };
     for (const e of wasm.bindingSignatures.int64) {
@@ -380,7 +388,7 @@ function wrapBindings(wasm, capi, util, sqlite3, toss) {
             "int",
             "sqlite3*",
             "int",
-            "string"
+            "string",
         );
 
         util.sqlite3__wasm_db_error = function (pDb, resultCode, message) {
@@ -395,7 +403,10 @@ function wrapBindings(wasm, capi, util, sqlite3, toss) {
         };
     } else {
         util.sqlite3__wasm_db_error = function (_pDb, errCode, _msg) {
-            console.warn("sqlite3__wasm_db_error() is not exported.", arguments);
+            console.warn(
+                "sqlite3__wasm_db_error() is not exported.",
+                arguments,
+            );
             return errCode;
         };
     }
@@ -409,7 +420,7 @@ function setupCTypes(wasm, capi, util, sqlite3, toss) {
     if (!cJson) {
         toss(
             "Maintenance required: increase sqlite3__wasm_enum_json()'s",
-            "static buffer size!"
+            "static buffer size!",
         );
     }
 
@@ -453,7 +464,7 @@ function setupCTypes(wasm, capi, util, sqlite3, toss) {
     if (!wasm.functionEntry(capi.SQLITE_WASM_DEALLOC)) {
         toss(
             "Internal error: cannot resolve exported function",
-            "entry SQLITE_WASM_DEALLOC (==" + capi.SQLITE_WASM_DEALLOC + ")."
+            "entry SQLITE_WASM_DEALLOC (==" + capi.SQLITE_WASM_DEALLOC + ").",
         );
     }
 
@@ -497,7 +508,7 @@ function setupCTypes(wasm, capi, util, sqlite3, toss) {
         capi.sqlite3_vtab_config = wasm.xWrap(
             "sqlite3__wasm_vtab_config",
             "int",
-            ["sqlite3*", "int", "int"]
+            ["sqlite3*", "int", "int"],
         );
     }
 }
@@ -511,7 +522,7 @@ function setupCloseWrapper(wasm, capi, __dbCleanupMap) {
         return util.sqlite3__wasm_db_error(
             pDb,
             capi.SQLITE_MISUSE,
-            f + "() requires " + n + " argument" + (1 === n ? "" : "s") + "."
+            f + "() requires " + n + " argument" + (1 === n ? "" : "s") + ".",
         );
     };
 
@@ -540,7 +551,7 @@ function setupSessionDelete(wasm, capi) {
         const __sqlite3SessionDelete = wasm.xWrap(
             "sqlite3session_delete",
             undefined,
-            ["sqlite3_session*"]
+            ["sqlite3_session*"],
         );
         capi.sqlite3session_delete = function (pSession) {
             if (1 !== arguments.length) {
@@ -561,7 +572,7 @@ function setupCollationCreation(wasm, capi, util, __dbCleanupMap) {
         return util.sqlite3__wasm_db_error(
             pDb,
             capi.SQLITE_MISUSE,
-            f + "() requires " + n + " argument" + (1 === n ? "" : "s") + "."
+            f + "() requires " + n + " argument" + (1 === n ? "" : "s") + ".",
         );
     };
 
@@ -569,13 +580,17 @@ function setupCollationCreation(wasm, capi, util, __dbCleanupMap) {
         return util.sqlite3__wasm_db_error(
             pDb,
             capi.SQLITE_FORMAT,
-            "SQLITE_UTF8 is the only supported encoding."
+            "SQLITE_UTF8 is the only supported encoding.",
         );
     };
 
     const contextKey = (argv, argIndex) => {
         return (
-            "argv[" + argIndex + "]:" + argv[0] + ":" +
+            "argv[" +
+            argIndex +
+            "]:" +
+            argv[0] +
+            ":" +
             wasm.cstrToJs(argv[1]).toLowerCase()
         );
     };
@@ -598,7 +613,7 @@ function setupCollationCreation(wasm, capi, util, __dbCleanupMap) {
                 signature: "v(p)",
                 contextKey,
             }),
-        ]
+        ],
     );
 
     capi.sqlite3_create_collation_v2 = function (
@@ -607,7 +622,7 @@ function setupCollationCreation(wasm, capi, util, __dbCleanupMap) {
         eTextRep,
         pArg,
         xCompare,
-        xDestroy
+        xDestroy,
     ) {
         if (6 !== arguments.length)
             return __dbArgcMismatch(pDb, "sqlite3_create_collation_v2", 6);
@@ -623,7 +638,7 @@ function setupCollationCreation(wasm, capi, util, __dbCleanupMap) {
                 eTextRep,
                 pArg,
                 xCompare,
-                xDestroy
+                xDestroy,
             );
             if (0 === rc && xCompare instanceof Function) {
                 __dbCleanupMap.addCollation(pDb, zName);
@@ -636,7 +651,14 @@ function setupCollationCreation(wasm, capi, util, __dbCleanupMap) {
 
     capi.sqlite3_create_collation = (pDb, zName, eTextRep, pArg, xCompare) => {
         return 5 === arguments.length
-            ? capi.sqlite3_create_collation_v2(pDb, zName, eTextRep, pArg, xCompare, 0)
+            ? capi.sqlite3_create_collation_v2(
+                  pDb,
+                  zName,
+                  eTextRep,
+                  pArg,
+                  xCompare,
+                  0,
+              )
             : __dbArgcMismatch(pDb, "sqlite3_create_collation", 5);
     };
 }
@@ -656,7 +678,11 @@ function setupConfigWrapper(wasm, capi) {
             case capi.SQLITE_CONFIG_URI:
                 return wasm.exports.sqlite3__wasm_config_i(op, args[0]);
             case capi.SQLITE_CONFIG_LOOKASIDE:
-                return wasm.exports.sqlite3__wasm_config_ii(op, args[0], args[1]);
+                return wasm.exports.sqlite3__wasm_config_ii(
+                    op,
+                    args[0],
+                    args[1],
+                );
             case capi.SQLITE_CONFIG_MEMDB_MAXSIZE:
                 return wasm.exports.sqlite3__wasm_config_j(op, args[0]);
             default:
@@ -706,7 +732,7 @@ function setupKvvfs(wasm, capi, util) {
 
     if (util.isUIThread()) {
         const kvvfsMethods = new capi.sqlite3_kvvfs_methods(
-            wasm.exports.sqlite3__wasm_kvvfs_methods()
+            wasm.exports.sqlite3__wasm_kvvfs_methods(),
         );
         delete capi.sqlite3_kvvfs_methods;
 
@@ -778,7 +804,7 @@ function setupKvvfs(wasm, capi, util) {
         for (const k of Object.keys(kvvfsImpls)) {
             kvvfsMethods[kvvfsMethods.memberKey(k)] = wasm.installFunction(
                 kvvfsMethods.memberSignature(k),
-                kvvfsImpls[k]
+                kvvfsImpls[k],
             );
         }
     } else {
@@ -796,7 +822,7 @@ function setupStructMethodInstaller(wasm, sqlite3, toss) {
         tgt,
         name,
         func,
-        applyArgcCheck = callee.installMethodArgcCheck
+        applyArgcCheck = callee.installMethodArgcCheck,
     ) {
         if (!(tgt instanceof StructBinder.StructType)) {
             toss("Usage error: target object is-not-a StructType.");
@@ -812,9 +838,11 @@ function setupStructMethodInstaller(wasm, sqlite3, toss) {
                     if (func.length !== arguments.length) {
                         toss(
                             "Argument mismatch for",
-                            tgt.structInfo.name + "::" + funcName +
+                            tgt.structInfo.name +
+                                "::" +
+                                funcName +
                                 ": Native signature is:",
-                            sig
+                            sig,
                         );
                     }
                     return func.apply(this, args);
@@ -840,7 +868,7 @@ function setupStructMethodInstaller(wasm, sqlite3, toss) {
                 "Member",
                 name,
                 "does not have a function pointer signature:",
-                sigN
+                sigN,
             );
         }
         const memKey = tgt.memberKey(name);
@@ -854,12 +882,15 @@ function setupStructMethodInstaller(wasm, sqlite3, toss) {
             }
             tgt[memKey] = fProxy;
         } else {
-            const pFunc = wasm.installFunction(fProxy, tgt.memberSignature(name, true));
+            const pFunc = wasm.installFunction(
+                fProxy,
+                tgt.memberSignature(name, true),
+            );
             tgt[memKey] = pFunc;
             if (!tgt.ondispose || !tgt.ondispose.__removeFuncList) {
                 tgt.addOnDispose(
                     "ondispose.__removeFuncList handler",
-                    callee.removeFuncList
+                    callee.removeFuncList,
                 );
                 tgt.ondispose.__removeFuncList = [];
             }
@@ -872,7 +903,7 @@ function setupStructMethodInstaller(wasm, sqlite3, toss) {
     const installMethods = function (
         structInstance,
         methods,
-        applyArgcCheck = installMethod.installMethodArgcCheck
+        applyArgcCheck = installMethod.installMethodArgcCheck,
     ) {
         const seen = new Map();
         for (const k of Object.keys(methods)) {
@@ -893,7 +924,7 @@ function setupStructMethodInstaller(wasm, sqlite3, toss) {
     StructBinder.StructType.prototype.installMethod = function callee(
         name,
         _func,
-        _applyArgcCheck = installMethod.installMethodArgcCheck
+        _applyArgcCheck = installMethod.installMethodArgcCheck,
     ) {
         return arguments.length < 3 && name && "object" === typeof name
             ? installMethods(this, ...arguments)
@@ -902,7 +933,7 @@ function setupStructMethodInstaller(wasm, sqlite3, toss) {
 
     StructBinder.StructType.prototype.installMethods = function (
         methods,
-        applyArgcCheck = installMethod.installMethodArgcCheck
+        applyArgcCheck = installMethod.installMethodArgcCheck,
     ) {
         return installMethods(this, methods, applyArgcCheck);
     };

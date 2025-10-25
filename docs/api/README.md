@@ -2,7 +2,7 @@
 id: DOC-API-OVERVIEW
 title: SQLite WASM API Overview
 summary: Describe the documentation set that explains the SQLite WASM APIs exposed by the toolkit and how they relate to one another.
-audience: ["engineering","architecture"]
+audience: ["engineering", "architecture"]
 status: in-progress
 owner: API Documentation Maintainer
 updated: 2025-02-14
@@ -103,26 +103,26 @@ When converting to TypeScript, pay special attention to:
 
 ## API Stability
 
--   **C-Style API**: Has the same strong stability guarantees as SQLite C API
--   **OO1 API**: Stable interface with potential extensions
--   **Worker API**: Stable message format
--   **WASM Utilities**: Internal APIs may change; use documented interfaces only
+- **C-Style API**: Has the same strong stability guarantees as SQLite C API
+- **OO1 API**: Stable interface with potential extensions
+- **Worker API**: Stable message format
+- **WASM Utilities**: Internal APIs may change; use documented interfaces only
 
 ## Documentation Structure
 
 Each API documentation includes:
 
--   **Interface Definitions** - TypeScript interfaces and type definitions
--   **Method Signatures** - Complete function signatures with parameter types
--   **Usage Examples** - Practical code examples
--   **Type Conversions** - How data flows between JS and SQLite
--   **Error Handling** - Exception types and error patterns
--   **Memory Management** - Allocation and cleanup requirements
+- **Interface Definitions** - TypeScript interfaces and type definitions
+- **Method Signatures** - Complete function signatures with parameter types
+- **Usage Examples** - Practical code examples
+- **Type Conversions** - How data flows between JS and SQLite
+- **Error Handling** - Exception types and error patterns
+- **Memory Management** - Allocation and cleanup requirements
 
 ## Resources
 
--   [Official SQLite WASM Documentation](https://sqlite.org/wasm/doc/trunk/api-index.md)
--   [Building SQLite WASM](https://sqlite.org/wasm/doc/trunk/building.md)
+- [Official SQLite WASM Documentation](https://sqlite.org/wasm/doc/trunk/api-index.md)
+- [Building SQLite WASM](https://sqlite.org/wasm/doc/trunk/building.md)
 
 ## Contributing
 

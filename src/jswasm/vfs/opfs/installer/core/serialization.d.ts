@@ -16,5 +16,5 @@ import type {
  */
 export function createSerializer(
   state: OpfsState,
-  toss: (...args: unknown[]) => never
+  toss: (...args: unknown[]) => never,
 ): SerializerInterface;

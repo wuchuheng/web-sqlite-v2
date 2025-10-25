@@ -10,10 +10,7 @@ export const environmentTests: TestCase[] = [
     name: "SQLite3 module loads successfully",
     fn: async (sqlite3) => {
       TestUtils.assert(sqlite3, "SQLite3 module should be initialized");
-      TestUtils.assert(
-        sqlite3.version,
-        "SQLite3 should have version info"
-      );
+      TestUtils.assert(sqlite3.version, "SQLite3 should have version info");
     },
   },
   {
@@ -28,7 +25,7 @@ export const environmentTests: TestCase[] = [
     fn: async () => {
       TestUtils.assert(
         typeof SharedArrayBuffer !== "undefined",
-        "SharedArrayBuffer must be available"
+        "SharedArrayBuffer must be available",
       );
     },
   },

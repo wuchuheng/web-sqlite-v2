@@ -107,7 +107,7 @@ let sqlite3InitModule = (() => {
             scriptDirectory,
         } = detectEnvironment();
         const { readAsync, readBinary } = createFileReaders(
-            ENVIRONMENT_IS_WORKER
+            ENVIRONMENT_IS_WORKER,
         );
 
         // 3. Setup module configuration
@@ -140,7 +140,7 @@ let sqlite3InitModule = (() => {
             fileData,
             canRead,
             canWrite,
-            canOwn
+            canOwn,
         ) => {
             FS.createDataFile(
                 parent,
@@ -148,7 +148,7 @@ let sqlite3InitModule = (() => {
                 fileData,
                 canRead,
                 canWrite,
-                canOwn
+                canOwn,
             );
         };
 
@@ -157,7 +157,7 @@ let sqlite3InitModule = (() => {
             byteArray,
             fullname,
             finish,
-            onerror
+            onerror,
         ) => {
             if (typeof globalThis.Browser !== "undefined") {
                 globalThis.Browser.init();
@@ -184,7 +184,7 @@ let sqlite3InitModule = (() => {
                 },
                 init: () => FS?.init(),
             },
-            { init: () => TTY?.init() }
+            { init: () => TTY?.init() },
         );
 
         const {
@@ -208,7 +208,7 @@ let sqlite3InitModule = (() => {
             readAsync,
             getUniqueRunDependency,
             addRunDependency,
-            removeRunDependency
+            removeRunDependency,
         );
 
         const FS_createPreloadedFile = (
@@ -221,7 +221,7 @@ let sqlite3InitModule = (() => {
             onerror,
             dontCreateFile,
             canOwn,
-            preFinish
+            preFinish,
         ) => {
             const fullname = name
                 ? PATH_FS.resolve(PATH.join2(parent, name))
@@ -238,7 +238,7 @@ let sqlite3InitModule = (() => {
                             byteArray,
                             canRead,
                             canWrite,
-                            canOwn
+                            canOwn,
                         );
                     }
                     onload?.();
@@ -252,7 +252,7 @@ let sqlite3InitModule = (() => {
                         () => {
                             onerror?.();
                             removeRunDependency(dep);
-                        }
+                        },
                     )
                 ) {
                     return;
@@ -317,7 +317,7 @@ let sqlite3InitModule = (() => {
             HEAP64,
             UTF8ArrayToString,
             lengthBytesUTF8,
-            stringToUTF8Array
+            stringToUTF8Array,
         );
         const SYSCALLS = syscallsModule.SYSCALLS;
         const ___syscall_chmod = syscallsModule.___syscall_chmod;
@@ -349,7 +349,7 @@ let sqlite3InitModule = (() => {
             HEAPU8,
             HEAPU32,
             HEAP64,
-            stringToUTF8Array
+            stringToUTF8Array,
         );
 
         const {
@@ -375,7 +375,7 @@ let sqlite3InitModule = (() => {
 
         // 14. Create MEMFS and TTY
         const MEMFS = createMEMFS(FS, HEAP8, mmapAlloc, (address, size) =>
-            zeroMemory(HEAPU8, address, size)
+            zeroMemory(HEAPU8, address, size),
         );
         TTY = createTTY(out, err, FS);
 
@@ -448,7 +448,7 @@ let sqlite3InitModule = (() => {
         // 18. Attach SQLite3 exports and setup mmap
         const { emscriptenBuiltinMemalign } = attachSqlite3WasmExports(
             Module,
-            wasmExports
+            wasmExports,
         );
         mmapAlloc = createMmapAlloc(emscriptenBuiltinMemalign, HEAPU8);
         Module["wasmMemory"] = wasmMemory;

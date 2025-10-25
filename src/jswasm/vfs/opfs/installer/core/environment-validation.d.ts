@@ -9,7 +9,7 @@
  * @returns Error object if validation fails, null if environment is valid
  */
 export function validateOpfsEnvironment(
-  globalScope: typeof globalThis
+  globalScope: typeof globalThis,
 ): Error | null;
 
 /**

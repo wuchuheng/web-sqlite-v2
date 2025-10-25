@@ -144,7 +144,7 @@ const bigIntEnabled: boolean;
 const ppDb = sqlite3.wasm.alloc(sqlite3.wasm.ptrSizeof);
 
 if (sqlite3.wasm.bigIntEnabled) {
-    console.log('Using 64-bit pointers with BigInt support');
+    console.log("Using 64-bit pointers with BigInt support");
 }
 ```
 
@@ -193,9 +193,23 @@ function peekPtr(ptr: WasmPointer | WasmPointer[]): WasmPointer | WasmPointer[];
 /**
  * Generic peek with type specifier
  */
-function peek(ptr: WasmPointer | WasmPointer[], type?: PeekType): number | bigint | (number | bigint)[];
+function peek(
+    ptr: WasmPointer | WasmPointer[],
+    type?: PeekType,
+): number | bigint | (number | bigint)[];
 
-type PeekType = 'i1' | 'i8' | 'i16' | 'i32' | 'i64' | 'f32' | 'f64' | 'float' | 'double' | 'ptr' | '*';
+type PeekType =
+    | "i1"
+    | "i8"
+    | "i16"
+    | "i32"
+    | "i64"
+    | "f32"
+    | "f64"
+    | "float"
+    | "double"
+    | "ptr"
+    | "*";
 ```
 
 **Usage Examples**:
@@ -209,8 +223,8 @@ const float64 = sqlite3.wasm.peek64f(add(ptr, 8));
 const pointer = sqlite3.wasm.peekPtr(add(ptr, 16));
 
 // Generic peek
-const value = sqlite3.wasm.peek(ptr, 'i32');
-const floatValue = sqlite3.wasm.peek(ptr, 'f64');
+const value = sqlite3.wasm.peek(ptr, "i32");
+const floatValue = sqlite3.wasm.peek(ptr, "f64");
 ```
 
 ### poke() - Write to Memory 🟢
@@ -236,7 +250,10 @@ function poke32(ptr: WasmPointer | WasmPointer[], value: number): SQLite3Wasm;
 /**
  * Write 64-bit signed integer
  */
-function poke64(ptr: WasmPointer | WasmPointer[], value: number | bigint): SQLite3Wasm;
+function poke64(
+    ptr: WasmPointer | WasmPointer[],
+    value: number | bigint,
+): SQLite3Wasm;
 
 /**
  * Write 32-bit float
@@ -251,12 +268,19 @@ function poke64f(ptr: WasmPointer | WasmPointer[], value: number): SQLite3Wasm;
 /**
  * Write pointer value
  */
-function pokePtr(ptr: WasmPointer | WasmPointer[], value?: WasmPointer): SQLite3Wasm;
+function pokePtr(
+    ptr: WasmPointer | WasmPointer[],
+    value?: WasmPointer,
+): SQLite3Wasm;
 
 /**
  * Generic poke with type specifier
  */
-function poke(ptr: WasmPointer | WasmPointer[], value: number | bigint, type?: PokeType): SQLite3Wasm;
+function poke(
+    ptr: WasmPointer | WasmPointer[],
+    value: number | bigint,
+    type?: PokeType,
+): SQLite3Wasm;
 
 type PokeType = PeekType;
 ```
@@ -276,8 +300,8 @@ sqlite3.wasm.pokePtr(add(ptr, 16), somePointer);
 
 // Generic poke with chaining support
 sqlite3.wasm
-    .poke(ptr, 42, 'i32')
-    .poke(add(ptr, 4), 3.14, 'f64')
+    .poke(ptr, 42, "i32")
+    .poke(add(ptr, 4), 3.14, "f64")
     .poke32(add(ptr, 8), 3);
 ```
 
@@ -334,8 +358,18 @@ function heapForSize(
         | typeof Float64Array
         | typeof BigInt64Array
         | typeof BigUint64Array,
-    unsigned?: boolean
-): Int8Array | Uint8Array | Int16Array | Uint16Array | Int32Array | Uint32Array | Float32Array | Float64Array | BigInt64Array | BigUint64Array;
+    unsigned?: boolean,
+):
+    | Int8Array
+    | Uint8Array
+    | Int16Array
+    | Uint16Array
+    | Int32Array
+    | Uint32Array
+    | Float32Array
+    | Float64Array
+    | BigInt64Array
+    | BigUint64Array;
 ```
 
 **Usage Examples**:
@@ -388,7 +422,10 @@ Allocate memory for a JavaScript string and convert to null-terminated C string.
  * @param addNul - Add null terminator (default: true)
  * @returns Pointer to allocated C string
  */
-function allocCString(jsString: string, returnWithLength?: boolean): WasmPointer | [WasmPointer, number] | null;
+function allocCString(
+    jsString: string,
+    returnWithLength?: boolean,
+): WasmPointer | [WasmPointer, number] | null;
 ```
 
 **Usage Example**:
@@ -424,7 +461,7 @@ function jstrcpy(
     target: Uint8Array | WasmPointer,
     offset?: number,
     maxBytes?: number,
-    addNul?: boolean
+    addNul?: boolean,
 ): number;
 ```
 
@@ -496,12 +533,19 @@ function setPtrValue(ptr: WasmPointer, value: WasmPointer): SQLite3Wasm;
 /**
  * Legacy alias for peek()
  */
-function getMemValue(ptr: WasmPointer | WasmPointer[], type?: PeekType): number | bigint | (number | bigint)[];
+function getMemValue(
+    ptr: WasmPointer | WasmPointer[],
+    type?: PeekType,
+): number | bigint | (number | bigint)[];
 
 /**
  * Legacy alias for poke()
  */
-function setMemValue(ptr: WasmPointer | WasmPointer[], value: number | bigint, type?: PokeType): SQLite3Wasm;
+function setMemValue(
+    ptr: WasmPointer | WasmPointer[],
+    value: number | bigint,
+    type?: PokeType,
+): SQLite3Wasm;
 ```
 
 **Usage Example**:
@@ -528,7 +572,7 @@ const ptrSizeof: 4 | 8;
 /**
  * Pointer intermediate representation
  */
-const ptrIR: 'i32' | 'i64';
+const ptrIR: "i32" | "i64";
 
 /**
  * Whether 64-bit heap views are available
@@ -545,12 +589,12 @@ Automatic resource cleanup using scope-based allocation.
 Allocate memory that is automatically freed when scope exits.
 
 ```typescript
-    /**
-     * Execute function with scoped allocations
-     * All allocations made via scopedAlloc are freed after function returns
-     */
-    function scopedAllocPush(): unknown;
-    function scopedAllocPop(state: unknown): void;
+/**
+ * Execute function with scoped allocations
+ * All allocations made via scopedAlloc are freed after function returns
+ */
+function scopedAllocPush(): unknown;
+function scopedAllocPop(state: unknown): void;
 
 /**
  * Scoped allocation
@@ -567,17 +611,26 @@ function scopedAllocCall<T>(callback: () => T): T;
 /**
  * Allocate pointer slots tracked by scoped allocator
  */
-function scopedAllocPtr(count?: number, safePtrSize?: boolean): WasmPointer | WasmPointer[];
+function scopedAllocPtr(
+    count?: number,
+    safePtrSize?: boolean,
+): WasmPointer | WasmPointer[];
 
 /**
  * Allocate pointer slots using general allocator
  */
-function allocPtr(count?: number, safePtrSize?: boolean): WasmPointer | WasmPointer[];
+function allocPtr(
+    count?: number,
+    safePtrSize?: boolean,
+): WasmPointer | WasmPointer[];
 
 /**
  * Allocate scoped UTF-8 string
  */
-function scopedAllocCString(jsString: string, returnWithLength?: boolean): WasmPointer | [WasmPointer, number] | null;
+function scopedAllocCString(
+    jsString: string,
+    returnWithLength?: boolean,
+): WasmPointer | [WasmPointer, number] | null;
 
 /**
  * Allocate argv-style list using scoped allocator
@@ -652,7 +705,10 @@ function xGet(funcName: string): (...args: unknown[]) => unknown;
 /**
  * Directly invoke an exported function
  */
-function xCall(funcName: string | ((...args: unknown[]) => unknown), ...args: unknown[]): unknown;
+function xCall(
+    funcName: string | ((...args: unknown[]) => unknown),
+    ...args: unknown[]
+): unknown;
 
 /**
  * Create wrapper with argument/result conversions
@@ -716,6 +772,7 @@ function xWrap(
 ```
 
 **Type Signatures**:
+
 - `"i32"` - 32-bit integer
 - `"i64"` - 64-bit integer
 - `"f32"` - 32-bit float
@@ -728,23 +785,25 @@ function xWrap(
 
 ```typescript
 // Wrap sqlite3_libversion (returns string)
-const getVersion = sqlite3.wasm.xWrap(
-    'sqlite3_libversion',
-    'string',
-    []
-);
+const getVersion = sqlite3.wasm.xWrap("sqlite3_libversion", "string", []);
 const version = getVersion();
 console.log(version); // "3.50.4"
 
 // Wrap sqlite3_open_v2
-const openDb = sqlite3.wasm.xWrap(
-    'sqlite3_open_v2',
-    'i32',
-    ['string', '*', 'i32', 'string']
-);
+const openDb = sqlite3.wasm.xWrap("sqlite3_open_v2", "i32", [
+    "string",
+    "*",
+    "i32",
+    "string",
+]);
 
 const ppDb = sqlite3.wasm.alloc(sqlite3.wasm.ptrSizeof);
-const rc = openDb(':memory:', ppDb, SQLITE_OPEN_READWRITE | SQLITE_OPEN_CREATE, null);
+const rc = openDb(
+    ":memory:",
+    ppDb,
+    SQLITE_OPEN_READWRITE | SQLITE_OPEN_CREATE,
+    null,
+);
 ```
 
 ## Memory Management Best Practices 🟢
@@ -795,7 +854,7 @@ const ptr = sqlite3.wasm.alloc(sqlite3.wasm.ptrSizeof);
 ```typescript
 function safeUse(ptr: WasmPointer) {
     if (!sqlite3.wasm.isValidPtr(ptr)) {
-        throw new Error('Invalid pointer');
+        throw new Error("Invalid pointer");
     }
     // Safe to use ptr
 }
@@ -824,12 +883,12 @@ db.exec("SELECT 1");
 function getPointerOutput() {
     const ppOut = sqlite3.wasm.alloc(sqlite3.wasm.ptrSizeof);
     try {
-        const rc = sqlite3.capi.sqlite3_open_v2(':memory:', ppOut, 0, null);
+        const rc = sqlite3.capi.sqlite3_open_v2(":memory:", ppOut, 0, null);
         if (rc === sqlite3.capi.SQLITE_OK) {
             const db = sqlite3.wasm.peekPtr(ppOut);
             return db;
         }
-        throw new Error('Failed to open database');
+        throw new Error("Failed to open database");
     } finally {
         sqlite3.wasm.dealloc(ppOut);
     }
@@ -914,7 +973,7 @@ declare namespace sqlite3 {
             target: Uint8Array | WasmPointer,
             offset?: number,
             maxBytes?: number,
-            addNul?: boolean
+            addNul?: boolean,
         ): number;
         function cstrlen(str: string | WasmPointer): number;
 
@@ -939,8 +998,16 @@ declare namespace sqlite3 {
         // Utilities
         function isPtr(value: any): boolean;
         function isValidPtr(ptr: WasmPointer): boolean;
-        function xCall(funcName: string, resultType?: string, ...args: any[]): any;
-        function xWrap(funcName: string, resultType?: string, argTypes?: string[]): Function;
+        function xCall(
+            funcName: string,
+            resultType?: string,
+            ...args: any[]
+        ): any;
+        function xWrap(
+            funcName: string,
+            resultType?: string,
+            argTypes?: string[],
+        ): Function;
     }
 }
 ```

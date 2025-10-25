@@ -20,7 +20,7 @@ export function setupOptionalVfsMethods(
   opfsVfs: SQLite3VFSInstance,
   dVfs: SQLite3VFSInstance | null,
   vfsSyncWrappers: Record<string, (...args: number[]) => number>,
-  state: { sabOPView: Int32Array; opIds: Record<string, number> }
+  state: { sabOPView: Int32Array; opIds: Record<string, number> },
 ): void;
 
 /**
@@ -32,5 +32,5 @@ export function setupOptionalVfsMethods(
 export function integrateWithOo1(
   sqlite3: SQLite3Module,
   opfsVfs: SQLite3VFSInstance,
-  opfsUtil: OpfsUtilInterface
+  opfsUtil: OpfsUtilInterface,
 ): void;

@@ -32,7 +32,7 @@ export function createWASIFunctions(
     HEAPU8,
     HEAPU32,
     HEAP64,
-    stringToUTF8Array
+    stringToUTF8Array,
 ) {
     // Utility function for UTF8 conversion
     const stringToUTF8 = (str, outPtr, maxBytesToWrite) => {
@@ -65,8 +65,7 @@ export function createWASIFunctions(
         const monthDaysCumulative = leap
             ? MONTH_DAYS_LEAP_CUMULATIVE
             : MONTH_DAYS_REGULAR_CUMULATIVE;
-        const yday =
-            monthDaysCumulative[date.getMonth()] + date.getDate() - 1;
+        const yday = monthDaysCumulative[date.getMonth()] + date.getDate() - 1;
 
         return yday;
     };
@@ -91,7 +90,7 @@ export function createWASIFunctions(
         const summerOffset = new Date(
             date.getFullYear(),
             6,
-            1
+            1,
         ).getTimezoneOffset();
         const winterOffset = start.getTimezoneOffset();
         const dst =
@@ -113,8 +112,7 @@ export function createWASIFunctions(
             HEAPU32[addr >> 2] = ptr;
             return 0;
         } catch (e) {
-            if (typeof FS == "undefined" || !(e.name === "ErrnoError"))
-                throw e;
+            if (typeof FS == "undefined" || !(e.name === "ErrnoError")) throw e;
             return -e.errno;
         }
     }
@@ -128,8 +126,7 @@ export function createWASIFunctions(
                 SYSCALLS.doMsync(addr, stream, len, flags, offset);
             }
         } catch (e) {
-            if (typeof FS == "undefined" || !(e.name === "ErrnoError"))
-                throw e;
+            if (typeof FS == "undefined" || !(e.name === "ErrnoError")) throw e;
             return -e.errno;
         }
     }
@@ -246,8 +243,7 @@ export function createWASIFunctions(
             FS.close(stream);
             return 0;
         } catch (e) {
-            if (typeof FS == "undefined" || !(e.name === "ErrnoError"))
-                throw e;
+            if (typeof FS == "undefined" || !(e.name === "ErrnoError")) throw e;
             return e.errno;
         }
     }
@@ -262,10 +258,10 @@ export function createWASIFunctions(
             const type = stream.tty
                 ? 2
                 : FS.isDir(stream.mode)
-                ? 3
-                : FS.isLink(stream.mode)
-                ? 7
-                : 4;
+                  ? 3
+                  : FS.isLink(stream.mode)
+                    ? 7
+                    : 4;
 
             HEAP8[pbuf] = type;
             HEAP16[(pbuf + 2) >> 1] = flags;
@@ -273,8 +269,7 @@ export function createWASIFunctions(
             HEAP64[(pbuf + 16) >> 3] = BigInt(rightsInheriting);
             return 0;
         } catch (e) {
-            if (typeof FS == "undefined" || !(e.name === "ErrnoError"))
-                throw e;
+            if (typeof FS == "undefined" || !(e.name === "ErrnoError")) throw e;
             return e.errno;
         }
     }
@@ -303,8 +298,7 @@ export function createWASIFunctions(
             HEAPU32[pnum >> 2] = num;
             return 0;
         } catch (e) {
-            if (typeof FS == "undefined" || !(e.name === "ErrnoError"))
-                throw e;
+            if (typeof FS == "undefined" || !(e.name === "ErrnoError")) throw e;
             return e.errno;
         }
     }
@@ -321,8 +315,7 @@ export function createWASIFunctions(
                 stream.getdents = null;
             return 0;
         } catch (e) {
-            if (typeof FS == "undefined" || !(e.name === "ErrnoError"))
-                throw e;
+            if (typeof FS == "undefined" || !(e.name === "ErrnoError")) throw e;
             return e.errno;
         }
     }
@@ -335,8 +328,7 @@ export function createWASIFunctions(
             }
             return 0;
         } catch (e) {
-            if (typeof FS == "undefined" || !(e.name === "ErrnoError"))
-                throw e;
+            if (typeof FS == "undefined" || !(e.name === "ErrnoError")) throw e;
             return e.errno;
         }
     }
@@ -367,8 +359,7 @@ export function createWASIFunctions(
             HEAPU32[pnum >> 2] = num;
             return 0;
         } catch (e) {
-            if (typeof FS == "undefined" || !(e.name === "ErrnoError"))
-                throw e;
+            if (typeof FS == "undefined" || !(e.name === "ErrnoError")) throw e;
             return e.errno;
         }
     }

@@ -20,7 +20,7 @@ import type {
 export function initializeOpfsState(
   opfsVfs: SQLite3VFSInstance,
   capi: SQLite3CAPI,
-  toss: (...args: unknown[]) => never
+  toss: (...args: unknown[]) => never,
 ): OpfsState;
 
 /**

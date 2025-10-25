@@ -16,7 +16,9 @@ interface Sqlite3InitModuleState extends Record<string, unknown> {
 }
 
 type Sqlite3ModuleWithInternals = Awaited<ReturnType<SQLite3InitModule>> & {
-    runSQLite3PostLoadInit: (module: Awaited<ReturnType<SQLite3InitModule>>) => void;
+    runSQLite3PostLoadInit: (
+        module: Awaited<ReturnType<SQLite3InitModule>>,
+    ) => void;
     sqlite3: {
         scriptInfo?: Sqlite3InitModuleState;
         __isUnderTest?: boolean;
@@ -33,7 +35,7 @@ const resolveCurrentScript = (): HTMLOrSVGScriptElement | null | undefined => {
 };
 
 const resolveScriptSrc = (
-    script: HTMLOrSVGScriptElement | null | undefined
+    script: HTMLOrSVGScriptElement | null | undefined,
 ): string | undefined => {
     if (!script) {
         return undefined;
@@ -52,30 +54,33 @@ const globalContext = globalThis as typeof globalThis & {
 };
 
 export function wrapSqlite3InitModule(
-    originalInit: SQLite3InitModule
+    originalInit: SQLite3InitModule,
 ): WrappedInitModule {
     if (!originalInit) {
         throw new Error(
-            "Expecting globalThis.sqlite3InitModule to be defined by the Emscripten build."
+            "Expecting globalThis.sqlite3InitModule to be defined by the Emscripten build.",
         );
     }
 
     const locationHref = globalThis.location?.href;
-    const initModuleState: Sqlite3InitModuleState = (globalContext.sqlite3InitModuleState =
-        Object.assign(Object.create(null), {
-            moduleScript: resolveCurrentScript(),
-            isWorker:
-                typeof (globalThis as { WorkerGlobalScope?: unknown })
-                    .WorkerGlobalScope !== "undefined",
-            location: globalThis.location as Location | undefined,
-            urlParams: locationHref
-                ? new URL(locationHref).searchParams
-                : new URLSearchParams(),
-            debugModule: () => {},
-        } satisfies Sqlite3InitModuleState));
+    const initModuleState: Sqlite3InitModuleState =
+        (globalContext.sqlite3InitModuleState = Object.assign(
+            Object.create(null),
+            {
+                moduleScript: resolveCurrentScript(),
+                isWorker:
+                    typeof (globalThis as { WorkerGlobalScope?: unknown })
+                        .WorkerGlobalScope !== "undefined",
+                location: globalThis.location as Location | undefined,
+                urlParams: locationHref
+                    ? new URL(locationHref).searchParams
+                    : new URLSearchParams(),
+                debugModule: () => {},
+            } satisfies Sqlite3InitModuleState,
+        ));
 
     initModuleState.debugModule = initModuleState.urlParams.has(
-        "sqlite3.debugModule"
+        "sqlite3.debugModule",
     )
         ? (...args: unknown[]) => console.warn("sqlite3.debugModule:", ...args)
         : () => {};
@@ -84,7 +89,9 @@ export function wrapSqlite3InitModule(
         const dir = initModuleState.urlParams.get("sqlite3.dir");
         initModuleState.sqlite3Dir = dir ? `${dir}/` : undefined;
     } else {
-        const scriptSrc = resolveScriptSrc(initModuleState.moduleScript ?? undefined);
+        const scriptSrc = resolveScriptSrc(
+            initModuleState.moduleScript ?? undefined,
+        );
         if (scriptSrc) {
             const segments = scriptSrc.split("/");
             segments.pop();
@@ -92,10 +99,13 @@ export function wrapSqlite3InitModule(
         }
     }
 
-    const wrappedInit: WrappedInitModule = ((...args: Parameters<SQLite3InitModule>) =>
+    const wrappedInit: WrappedInitModule = ((
+        ...args: Parameters<SQLite3InitModule>
+    ) =>
         originalInit(...args)
             .then((module) => {
-                const emscriptenModule = module as unknown as Sqlite3ModuleWithInternals;
+                const emscriptenModule =
+                    module as unknown as Sqlite3ModuleWithInternals;
                 emscriptenModule.runSQLite3PostLoadInit(module);
 
                 const sqlite3Namespace = emscriptenModule.sqlite3;
@@ -120,7 +130,9 @@ export function wrapSqlite3InitModule(
             })) as WrappedInitModule;
 
     globalContext.sqlite3InitModule = wrappedInit;
-    globalContext.sqlite3InitModule.ready = (originalInit as WrappedInitModule).ready;
+    globalContext.sqlite3InitModule.ready = (
+        originalInit as WrappedInitModule
+    ).ready;
 
     const moduleScript = globalContext.sqlite3InitModuleState?.moduleScript;
     const moduleScriptSrc = resolveScriptSrc(moduleScript ?? undefined);

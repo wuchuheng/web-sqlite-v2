@@ -36,13 +36,13 @@ const detectEnvironmentIssue = () => {
     if (!globalThis.SharedArrayBuffer) {
         issues.push(
             "Missing SharedArrayBuffer API.",
-            "The server must emit the COOP/COEP response headers to enable that."
+            "The server must emit the COOP/COEP response headers to enable that.",
         );
     }
     if (!globalThis.Atomics) {
         issues.push(
             "Missing Atomics API.",
-            "The server must emit the COOP/COEP response headers to enable that."
+            "The server must emit the COOP/COEP response headers to enable that.",
         );
     }
     const haveOpfsApis =

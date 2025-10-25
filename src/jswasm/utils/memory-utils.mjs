@@ -22,7 +22,7 @@ export const initRandomFill = () => {
     } else {
         // 3. Output handling - abort if not available
         throw new Error(
-            "initRandomDevice: crypto.getRandomValues not available"
+            "initRandomDevice: crypto.getRandomValues not available",
         );
     }
 };
@@ -88,7 +88,7 @@ export const createMmapAlloc = (_emscripten_builtin_memalign, HEAPU8) => {
         // 2. Core processing - allocate aligned memory
         const ptr = _emscripten_builtin_memalign(
             MMAP_ALIGNMENT_BYTES,
-            alignedSize
+            alignedSize,
         );
 
         // 3. Output handling - zero memory and return pointer

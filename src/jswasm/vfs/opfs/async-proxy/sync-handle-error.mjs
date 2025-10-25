@@ -11,9 +11,18 @@ class GetSyncHandleError extends Error {
      * @param {...string} messageParts - Fragments describing the failed operation.
      */
     constructor(cause, ...messageParts) {
-        super([messageParts.join(" "), ": ", cause.name, ": ", cause.message].join(""), {
-            cause,
-        });
+        super(
+            [
+                messageParts.join(" "),
+                ": ",
+                cause.name,
+                ": ",
+                cause.message,
+            ].join(""),
+            {
+                cause,
+            },
+        );
         this.name = "GetSyncHandleError";
     }
 
@@ -38,7 +47,11 @@ class GetSyncHandleError extends Error {
             if (cause?.name === "NotFoundError") {
                 return sqliteCodes.SQLITE_CANTOPEN;
             }
-        } else if (error && typeof error === "object" && error.name === "NotFoundError") {
+        } else if (
+            error &&
+            typeof error === "object" &&
+            error.name === "NotFoundError"
+        ) {
             return sqliteCodes.SQLITE_CANTOPEN;
         }
         return fallbackCode;

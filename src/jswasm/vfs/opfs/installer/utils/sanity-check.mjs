@@ -51,13 +51,13 @@ export function runSanityCheck(deps) {
             zDbFile,
             fid,
             openFlags,
-            pOut
+            pOut,
         );
         log(
             "open rc =",
             rc,
             "state.sabOPView[xOpen] =",
-            state.sabOPView[state.opIds.xOpen]
+            state.sabOPView[state.opIds.xOpen],
         );
         if (0 !== rc) {
             error("open failed with code", rc);

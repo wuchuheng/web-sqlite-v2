@@ -2,7 +2,7 @@
 id: DOC-HISTORY
 title: Repository History
 summary: Highlights the major milestones that shaped the current SQLite WASM distribution and documentation.
-audience: ["engineering","architecture"]
+audience: ["engineering", "architecture"]
 status: implemented
 owner: Maintainers
 updated: 2025-10-18
@@ -24,6 +24,6 @@ The runtime now ships as a collection of focused modules (`runtime`, `utils`, `v
 
 ## Near-Term Goals
 
-* Finish the TypeScript conversion by replacing remaining `.mjs` sources with `.mts` equivalents while keeping ESM output stable.
-* Automate the browser-based verification harness in CI so OPFS regressions surface without manual review.【F:docs/development/testing.md†L21-L36】
-* Continue pruning documentation to reflect repository reality as new modules move from `.mjs` to `.mts`.
+- Finish the TypeScript conversion by replacing remaining `.mjs` sources with `.mts` equivalents while keeping ESM output stable.
+- Automate the browser-based verification harness in CI so OPFS regressions surface without manual review.【F:docs/development/testing.md†L21-L36】
+- Continue pruning documentation to reflect repository reality as new modules move from `.mjs` to `.mts`.

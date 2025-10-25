@@ -2,7 +2,7 @@
 id: DOC-MOD-RUNTIME
 title: Runtime Lifecycle
 summary: Explains how the authored runtime modules coordinate environment detection, configuration, and WebAssembly startup.
-audience: ["engineering","architecture"]
+audience: ["engineering", "architecture"]
 status: verified
 owner: Runtime Maintainers
 updated: 2025-10-18

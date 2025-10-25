@@ -10,7 +10,7 @@ export function validateOpfsEnvironment(_globalObj) {
         return new Error(
             "Cannot install OPFS: Missing SharedArrayBuffer and/or Atomics. " +
                 "The server must emit the COOP/COEP response headers to enable those. " +
-                "See https://sqlite.org/wasm/doc/trunk/persistence.md#coop-coep"
+                "See https://sqlite.org/wasm/doc/trunk/persistence.md#coop-coep",
         );
     }
 
@@ -18,7 +18,7 @@ export function validateOpfsEnvironment(_globalObj) {
     if ("undefined" === typeof WorkerGlobalScope) {
         return new Error(
             "The OPFS sqlite3_vfs cannot run in the main thread " +
-                "because it requires Atomics.wait()."
+                "because it requires Atomics.wait().",
         );
     }
 

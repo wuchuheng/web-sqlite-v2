@@ -21,17 +21,17 @@ program
   .description("Serve local files with SharedArrayBuffer-ready headers")
   .argument(
     "[legacyBasePath]",
-    "Base directory to serve (legacy positional argument)"
+    "Base directory to serve (legacy positional argument)",
   )
   .option(
     "-b, --base-path <path>",
     "Base directory to serve, defaults to ./",
-    "./"
+    "./",
   )
   .option(
     "-u, --url-path-name <path>",
     "Relative URL path to open automatically in the browser",
-    "/"
+    "/",
   )
   .option("-p, --port <number>", "Port to listen on", "7411")
   .allowExcessArguments(false);
@@ -67,14 +67,14 @@ function openInBrowser(targetUrl: string): void {
     const child = spawn(command, args, { detached: true, stdio: "ignore" });
     child.on("error", (error) => {
       console.warn(
-        `⚠️  Failed to open browser automatically: ${error.message}`
+        `⚠️  Failed to open browser automatically: ${error.message}`,
       );
     });
     child.unref();
   } catch (error) {
     if (error instanceof Error) {
       console.warn(
-        `⚠️  Failed to open browser automatically: ${error.message}`
+        `⚠️  Failed to open browser automatically: ${error.message}`,
       );
     }
   }
@@ -108,14 +108,14 @@ function formatTimestamp(): string {
 
   return `${now.getFullYear()}/${String(now.getMonth() + 1).padStart(
     2,
-    "0"
+    "0",
   )}/${String(now.getDate()).padStart(2, "0")} ${hour}:${minute}:${second}`;
 }
 
 function logRequest(
   method: string,
   url: string,
-  status: "success" | "not_found"
+  status: "success" | "not_found",
 ): void {
   const timestamp = formatTimestamp();
 
@@ -144,7 +144,7 @@ const server = http.createServer((req, res) => {
   res.setHeader("Access-Control-Allow-Origin", "*");
   res.setHeader(
     "Access-Control-Allow-Headers",
-    "Origin, X-Requested-With, Content-Type, Accept, Range"
+    "Origin, X-Requested-With, Content-Type, Accept, Range",
   );
   res.setHeader("Cache-Control", "no-cache, no-store, must-revalidate");
 
@@ -199,7 +199,7 @@ const server = http.createServer((req, res) => {
 
             res.writeHead(200, { "Content-Type": "text/html" });
             res.write(
-              "<html><head><title>Directory Listing</title></head><body>"
+              "<html><head><title>Directory Listing</title></head><body>",
             );
             res.write(`<h1>Directory: ${parsedUrl.pathname}</h1><ul>`);
 
@@ -232,7 +232,7 @@ const server = http.createServer((req, res) => {
     filePath: string,
     response: http.ServerResponse,
     method: string,
-    requestUrl: string
+    requestUrl: string,
   ): void {
     const mimeType = getMimeType(filePath);
 
@@ -269,7 +269,7 @@ server.listen(PORT, () => {
     const normalizedPath = urlPathName.replace(/^\/+/, "");
     const targetUrl = new URL(
       normalizedPath,
-      `http://127.0.0.1:${PORT}/`
+      `http://127.0.0.1:${PORT}/`,
     ).toString();
     console.log(`🧭 Auto-opening: ${targetUrl}`);
     openInBrowser(targetUrl);

@@ -88,7 +88,7 @@ export enum SqliteOpenFlags {
 
 export type ExecCallback = (
   columnValues: (string | null)[],
-  columnNames: string[]
+  columnNames: string[],
 ) => number | boolean | void;
 
 export type SqliteDestructor = number | ((ptr: WasmPointer) => void);
@@ -113,13 +113,13 @@ export type SqliteRandomTypedArray = Uint8Array | Int8Array;
 export type ScalarFunction = (
   context: sqlite3_context,
   argc: number,
-  argv: sqlite3_value[]
+  argv: sqlite3_value[],
 ) => void;
 
 export type AggregateStepFunction = (
   context: sqlite3_context,
   argc: number,
-  argv: sqlite3_value[]
+  argv: sqlite3_value[],
 ) => void;
 
 export type AggregateFinalFunction = (context: sqlite3_context) => void;
@@ -266,7 +266,7 @@ export interface SQLite3CAPI {
     filename: string,
     ppDb: WasmPointer,
     flags: number,
-    vfs: string | number | null
+    vfs: string | number | null,
   ): SqliteResultCode;
   sqlite3_close_v2(pDb: sqlite3): SqliteResultCode;
   sqlite3_prepare_v2(
@@ -274,7 +274,7 @@ export interface SQLite3CAPI {
     sql: string | number | Uint8Array | Int8Array | ArrayBuffer,
     nByte: number,
     ppStmt: WasmPointer,
-    pzTail: WasmPointer | null
+    pzTail: WasmPointer | null,
   ): SqliteResultCode;
   sqlite3_prepare_v3(
     pDb: sqlite3,
@@ -282,7 +282,7 @@ export interface SQLite3CAPI {
     nByte: number,
     prepFlags: number,
     ppStmt: WasmPointer,
-    pzTail: WasmPointer | null
+    pzTail: WasmPointer | null,
   ): SqliteResultCode;
   sqlite3_step(pStmt: sqlite3_stmt): SqliteResultCode;
   sqlite3_finalize(pStmt: sqlite3_stmt): SqliteResultCode;
@@ -304,31 +304,31 @@ export interface SQLite3CAPI {
   sqlite3_bind_int(
     pStmt: sqlite3_stmt,
     index: number,
-    value: number
+    value: number,
   ): SqliteResultCode;
   sqlite3_bind_int64(
     pStmt: sqlite3_stmt,
     index: number,
-    value: bigint | number
+    value: bigint | number,
   ): SqliteResultCode;
   sqlite3_bind_double(
     pStmt: sqlite3_stmt,
     index: number,
-    value: number
+    value: number,
   ): SqliteResultCode;
   sqlite3_bind_text(
     pStmt: sqlite3_stmt,
     index: number,
     text: string | number,
     nBytes: number,
-    destructor?: number
+    destructor?: number,
   ): SqliteResultCode;
   sqlite3_bind_blob(
     pStmt: sqlite3_stmt,
     index: number,
     blob: number | SqliteBindableBlob,
     nBytes: number,
-    destructor?: number
+    destructor?: number,
   ): SqliteResultCode;
   sqlite3_errmsg(pDb: sqlite3): string;
   sqlite3_errstr(code: SqliteResultCode): string;
@@ -342,7 +342,7 @@ export interface SQLite3CAPI {
     sql: string,
     callback?: ExecCallback | WasmPointer | null,
     pArg?: WasmPointer | null,
-    pzErrMsg?: WasmPointer | null
+    pzErrMsg?: WasmPointer | null,
   ): SqliteResultCode;
   sqlite3_sql(pStmt: number): string;
   sqlite3_db_filename(pDb: sqlite3, dbName: string): string | null;
@@ -356,7 +356,7 @@ export interface SQLite3CAPI {
     pDb: number,
     mask: number,
     callback: number,
-    pCtx: number
+    pCtx: number,
   ): number;
   sqlite3_create_function_v2(
     pDb: sqlite3,
@@ -367,7 +367,7 @@ export interface SQLite3CAPI {
     xFunc: ScalarFunction | number | null,
     xStep: AggregateStepFunction | number | null,
     xFinal: AggregateFinalFunction | number | null,
-    xDestroy: FunctionDestructor | number | null
+    xDestroy: FunctionDestructor | number | null,
   ): SqliteResultCode;
   sqlite3_create_window_function(
     pDb: number,
@@ -379,7 +379,7 @@ export interface SQLite3CAPI {
     xFinal: (...args: unknown[]) => unknown,
     xValue: (...args: unknown[]) => unknown,
     xInverse: (...args: unknown[]) => unknown,
-    xDestroy: (...args: unknown[]) => unknown
+    xDestroy: (...args: unknown[]) => unknown,
   ): number;
   sqlite3_db_config(pDb: number, op: number, ...args: unknown[]): number;
   sqlite3_randomness(n: number, p: WasmPointer): void;
@@ -394,7 +394,7 @@ export interface SQLite3CAPI {
   sqlite3_js_db_uses_vfs(
     pDb: number,
     vfsName: string,
-    dbName?: number
+    dbName?: number,
   ): boolean;
   sqlite3_js_db_export(pDb: sqlite3, schema?: number | string): Uint8Array;
   sqlite3_js_aggregate_context(pCtx: number, n: number): number;
@@ -444,7 +444,7 @@ export class Stmt {
   bindAsBlob(value: Uint8Array | Int8Array | ArrayBuffer | string): this;
   bindAsBlob(
     index: number | string,
-    value: Uint8Array | Int8Array | ArrayBuffer | string
+    value: Uint8Array | Int8Array | ArrayBuffer | string,
   ): this;
   /** Execute one step of the statement */
   step(): boolean;
@@ -613,40 +613,40 @@ export class DB {
   createFunction(
     name: string,
     xFunc: (...args: unknown[]) => unknown,
-    options?: CreateFunctionOptions
+    options?: CreateFunctionOptions,
   ): this;
   createFunction(options: CreateFunctionOptions): this;
   /** Select a single value */
   selectValue<T = unknown>(
     sql: string,
     bind?: BindValue[] | Record<string, BindValue>,
-    asType?: number
+    asType?: number,
   ): T;
   /** Select multiple values (first column) */
   selectValues<T = unknown>(
     sql: string,
     bind?: BindValue[] | Record<string, BindValue>,
-    asType?: number
+    asType?: number,
   ): T[];
   /** Select a single row as array */
   selectArray<T = unknown[]>(
     sql: string,
-    bind?: BindValue[] | Record<string, BindValue>
+    bind?: BindValue[] | Record<string, BindValue>,
   ): T;
   /** Select a single row as object */
   selectObject<T = Record<string, unknown>>(
     sql: string,
-    bind?: BindValue[] | Record<string, BindValue>
+    bind?: BindValue[] | Record<string, BindValue>,
   ): T;
   /** Select all rows as arrays */
   selectArrays<T = unknown[][]>(
     sql: string,
-    bind?: BindValue[] | Record<string, BindValue>
+    bind?: BindValue[] | Record<string, BindValue>,
   ): T;
   /** Select all rows as objects */
   selectObjects<T = Record<string, unknown>[]>(
     sql: string,
-    bind?: BindValue[] | Record<string, BindValue>
+    bind?: BindValue[] | Record<string, BindValue>,
   ): T;
   /** Get count of open statements */
   openStatementCount(): number;
@@ -701,7 +701,7 @@ export class OpfsDb extends DB {
   /** Import a database image into OPFS */
   static importDb(
     filename: string,
-    bytes: Uint8Array | ArrayBuffer
+    bytes: Uint8Array | ArrayBuffer,
   ): Promise<number>;
 }
 
@@ -746,9 +746,9 @@ export interface SQLite3Wasm extends Sqlite3WasmNamespace {
       | (new (
           buffer: ArrayBuffer,
           byteOffset?: number,
-          length?: number
+          length?: number,
         ) => ArrayBufferView),
-    unsigned?: boolean
+    unsigned?: boolean,
   ):
     | Int8Array
     | Uint8Array
@@ -766,26 +766,26 @@ export interface SQLite3Wasm extends Sqlite3WasmNamespace {
   functionTable(): WebAssembly.Table;
   /** Resolves a function entry from the indirect function table. */
   functionEntry(
-    pointer: WasmPointer
+    pointer: WasmPointer,
   ): ((...args: unknown[]) => unknown) | undefined;
   /** Creates a wasm-compatible wrapper for a JavaScript function. */
   jsFuncToWasm(
     func: ((...args: unknown[]) => unknown) | string,
-    signature: string
+    signature: string,
   ): (...args: unknown[]) => unknown;
   /** Installs a function into the wasm indirect table and returns its index. */
   installFunction(
     func: ((...args: unknown[]) => unknown) | string,
-    signature?: string
+    signature?: string,
   ): WasmPointer;
   /** Installs a function whose lifetime is bound to the current scoped allocator. */
   scopedInstallFunction(
     func: ((...args: unknown[]) => unknown) | string,
-    signature?: string
+    signature?: string,
   ): WasmPointer;
   /** Removes a function from the wasm indirect table and returns the previous entry. */
   uninstallFunction(
-    pointer: WasmPointer | null | undefined
+    pointer: WasmPointer | null | undefined,
   ): ((...args: unknown[]) => unknown) | null | undefined;
   /** Allocates a block of memory on the WASM heap. */
   alloc(byteCount: number): WasmPointer;
@@ -807,13 +807,13 @@ export interface SQLite3Wasm extends Sqlite3WasmNamespace {
     target: Uint8Array | WasmPointer,
     offset?: number,
     maxBytes?: number,
-    addNul?: boolean
+    addNul?: boolean,
   ): number;
   /** Copies a C string into a target pointer, mirroring `strncpy`. */
   cstrncpy(
     targetPointer: WasmPointer,
     sourcePointer: WasmPointer,
-    n: number
+    n: number,
   ): number;
   /**
    * Encodes a JavaScript string into a new Uint8Array, optionally adding a NUL terminator.
@@ -822,20 +822,20 @@ export interface SQLite3Wasm extends Sqlite3WasmNamespace {
   /** Allocates a UTF-8 encoded copy of a JavaScript string. */
   allocCString(
     value: string,
-    returnWithLength?: boolean
+    returnWithLength?: boolean,
   ): WasmPointer | [WasmPointer, number] | null;
   /**
    * Reads values from WASM memory using an IR signature.
    */
   peek(
     pointer: WasmPointer | WasmPointer[],
-    signature?: PeekType
+    signature?: PeekType,
   ): number | bigint | (number | bigint)[];
   /** Writes values into WASM memory using an IR signature. */
   poke(
     pointer: WasmPointer | WasmPointer[],
     value: number | bigint,
-    signature?: PokeType
+    signature?: PokeType,
   ): this;
   /** Reads a pointer-sized value from WASM memory. */
   peekPtr(pointer: WasmPointer): WasmPointer;
@@ -868,13 +868,13 @@ export interface SQLite3Wasm extends Sqlite3WasmNamespace {
   /** Legacy alias for {@link peek}. */
   getMemValue(
     pointer: WasmPointer | WasmPointer[],
-    signature?: PeekType
+    signature?: PeekType,
   ): number | bigint | (number | bigint)[];
   /** Legacy alias for {@link poke}. */
   setMemValue(
     pointer: WasmPointer | WasmPointer[],
     value: number | bigint,
-    signature?: PokeType
+    signature?: PokeType,
   ): this;
   /** Reads a pointer value and returns it as a numeric pointer. */
   getPtrValue(pointer: WasmPointer): WasmPointer;
@@ -895,14 +895,14 @@ export interface SQLite3Wasm extends Sqlite3WasmNamespace {
   /** Allocates a pointer (or pointer array) tracked by the scoped allocator. */
   scopedAllocPtr(
     count?: number,
-    safePtrSize?: boolean
+    safePtrSize?: boolean,
   ): WasmPointer | WasmPointer[];
   /** Allocates a pointer (or pointer array) using the standard allocator. */
   allocPtr(count?: number, safePtrSize?: boolean): WasmPointer | WasmPointer[];
   /** Allocates a scoped CString, optionally returning its length. */
   scopedAllocCString(
     value: string,
-    returnWithLength?: boolean
+    returnWithLength?: boolean,
   ): WasmPointer | [WasmPointer, number] | null;
   /** Converts argc/argv data into a JavaScript string array. */
   cArgvToJs(argc: number, argvPointer: WasmPointer): (string | null)[];
@@ -927,7 +927,7 @@ export interface SQLite3Wasm extends Sqlite3WasmNamespace {
   xWrap(
     fnName: string,
     resultType?: string,
-    argTypes?: (string | unknown)[]
+    argTypes?: (string | unknown)[],
   ): (...args: unknown[]) => unknown;
   /** Stack helper mirroring the legacy pstack API. */
   pstack: {
@@ -939,7 +939,7 @@ export interface SQLite3Wasm extends Sqlite3WasmNamespace {
     allocChunks(chunkCount: number, chunkSize: number | string): WasmPointer[];
     allocPtr(
       count?: number,
-      safePtrSize?: boolean
+      safePtrSize?: boolean,
     ): WasmPointer | WasmPointer[];
     call<T>(callback: (sqlite3: SQLite3API) => T): T;
   };
@@ -971,7 +971,7 @@ export interface SQLite3API {
     typedArrayPart(
       array: ArrayBufferView,
       offset: number,
-      length: number
+      length: number,
     ): Uint8Array;
     affirmDbHeader(bytes: ArrayBufferView | ArrayBuffer): void;
     affirmIsDb(bytes: ArrayBufferView | ArrayBuffer): void;

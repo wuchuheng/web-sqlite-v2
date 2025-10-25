@@ -25,8 +25,7 @@
 /* global importScripts, detectEnvironmentIssue, wPost, AsyncProxyWorker */
 
 const baseUrl =
-    globalThis.__opfsAsyncProxyBaseUrl ??
-    new URL("./", self.location.href);
+    globalThis.__opfsAsyncProxyBaseUrl ?? new URL("./", self.location.href);
 const resolveUrl = (path) => new URL(path, baseUrl).href;
 
 importScripts(
@@ -35,7 +34,7 @@ importScripts(
     resolveUrl("serialization-buffer.mjs"),
     resolveUrl("sync-handle-error.mjs"),
     resolveUrl("state.mjs"),
-    resolveUrl("async-proxy-worker.mjs")
+    resolveUrl("async-proxy-worker.mjs"),
 );
 
 delete globalThis.__opfsAsyncProxyBaseUrl;
@@ -48,7 +47,7 @@ delete globalThis.__opfsAsyncProxyBaseUrl;
     }
 
     const worker = new AsyncProxyWorker(wPost);
-    worker.start().catch((error) =>
-        worker.logger.error("Worker start() failed:", error)
-    );
+    worker
+        .start()
+        .catch((error) => worker.logger.error("Worker start() failed:", error));
 })();

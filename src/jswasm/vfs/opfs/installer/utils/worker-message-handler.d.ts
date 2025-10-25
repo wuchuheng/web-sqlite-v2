@@ -81,5 +81,5 @@ export interface WorkerMessageEvent {
  * @returns Message handler function for worker message events
  */
 export function createWorkerMessageHandler(
-  deps: WorkerMessageHandlerDeps
+  deps: WorkerMessageHandlerDeps,
 ): (event: WorkerMessageEvent) => void;

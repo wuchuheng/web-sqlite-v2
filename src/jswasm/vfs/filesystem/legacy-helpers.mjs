@@ -78,7 +78,7 @@ export function createLegacyHelpers(FS, { FS_getMode }) {
         createFile(parent, name, _properties, canRead, canWrite) {
             const path = PATH.join2(
                 typeof parent == "string" ? parent : FS.getPath(parent),
-                name
+                name,
             );
             const mode = FS_getMode(canRead, canWrite);
             return FS.create(path, mode);
@@ -86,7 +86,8 @@ export function createLegacyHelpers(FS, { FS_getMode }) {
         createDataFile(parent, name, data, canRead, canWrite, canOwn) {
             let path = name;
             if (parent) {
-                parent = typeof parent == "string" ? parent : FS.getPath(parent);
+                parent =
+                    typeof parent == "string" ? parent : FS.getPath(parent);
                 path = name ? PATH.join2(parent, name) : parent;
             }
             const mode = FS_getMode(canRead, canWrite);
@@ -101,7 +102,9 @@ export function createLegacyHelpers(FS, { FS_getMode }) {
                 FS.chmod(node, mode | MODE.PERMISSION_WRITE);
                 const stream = FS.open(
                     node,
-                    OPEN_FLAGS.O_WRONLY | OPEN_FLAGS.O_CREAT | OPEN_FLAGS.O_TRUNC
+                    OPEN_FLAGS.O_WRONLY |
+                        OPEN_FLAGS.O_CREAT |
+                        OPEN_FLAGS.O_TRUNC,
                 );
                 FS.write(stream, data, 0, data.length, 0, canOwn);
                 FS.close(stream);
@@ -111,7 +114,7 @@ export function createLegacyHelpers(FS, { FS_getMode }) {
         createDevice(parent, name, input, output) {
             const path = PATH.join2(
                 typeof parent == "string" ? parent : FS.getPath(parent),
-                name
+                name,
             );
             const mode = FS_getMode(!!input, !!output);
             FS.createDevice.major ??= DEVICE_MAJOR_BASE;
@@ -167,14 +170,14 @@ export function createLegacyHelpers(FS, { FS_getMode }) {
                 return true;
             if (typeof XMLHttpRequest != "undefined") {
                 throw new Error(
-                    "Lazy loading should have been performed (contents set) in createLazyFile, but it was not. Lazy loading only works in web workers. Use --embed-file or --preload-file in emcc on the main thread."
+                    "Lazy loading should have been performed (contents set) in createLazyFile, but it was not. Lazy loading only works in web workers. Use --embed-file or --preload-file in emcc on the main thread.",
                 );
             }
             throw new FS.ErrnoError(ERRNO_CODES.EIO);
         },
         createLazyFile() {
             throw new Error(
-                "createLazyFile is deprecated. Use --embed-file or --preload-file in emcc."
+                "createLazyFile is deprecated. Use --embed-file or --preload-file in emcc.",
             );
         },
     };

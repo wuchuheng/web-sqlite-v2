@@ -31,7 +31,7 @@ import {
 export function applyDefaultBootstrapState(sqlite3ApiBootstrap) {
     if (!sqlite3ApiBootstrap) {
         throw new Error(
-            "sqlite3ApiBootstrap must exist before applying the default state."
+            "sqlite3ApiBootstrap must exist before applying the default state.",
         );
     }
 

@@ -66,7 +66,7 @@ export function createMEMFS(FS, HEAP8, mmapAlloc, _zeroMemory) {
                 null,
                 "/",
                 FS_CONSTANTS.DIR_MODE | FS_CONSTANTS.ALL_PERMISSIONS,
-                0
+                0,
             );
         },
 
@@ -193,7 +193,7 @@ export function createMEMFS(FS, HEAP8, mmapAlloc, _zeroMemory) {
                     (prevCapacity < FS_CONSTANTS.CAPACITY_DOUBLING_MAX
                         ? FS_CONSTANTS.GROWTH_FACTOR_LOW
                         : FS_CONSTANTS.GROWTH_FACTOR_HIGH)) >>>
-                    0
+                    0,
             );
             if (prevCapacity !== 0)
                 newCapacity = Math.max(newCapacity, FS_CONSTANTS.MIN_CAPACITY);
@@ -226,8 +226,8 @@ export function createMEMFS(FS, HEAP8, mmapAlloc, _zeroMemory) {
                     node.contents.set(
                         oldContents.subarray(
                             0,
-                            Math.min(newSize, node.usedBytes)
-                        )
+                            Math.min(newSize, node.usedBytes),
+                        ),
                     );
                 }
                 node.usedBytes = newSize;
@@ -398,7 +398,7 @@ export function createMEMFS(FS, HEAP8, mmapAlloc, _zeroMemory) {
                     parent,
                     newname,
                     FS_CONSTANTS.ALL_PERMISSIONS | FS_CONSTANTS.SYMLINK_MODE,
-                    0
+                    0,
                 );
                 node.link = oldpath;
                 return node;
@@ -440,7 +440,7 @@ export function createMEMFS(FS, HEAP8, mmapAlloc, _zeroMemory) {
                 ) {
                     buffer.set(
                         contents.subarray(position, position + size),
-                        offset
+                        offset,
                     );
                 } else {
                     for (let i = 0; i < size; i++)
@@ -479,7 +479,7 @@ export function createMEMFS(FS, HEAP8, mmapAlloc, _zeroMemory) {
                     if (canOwn) {
                         node.contents = buffer.subarray(
                             offset,
-                            offset + length
+                            offset + length,
                         );
                         node.usedBytes = length;
                         return length;
@@ -490,7 +490,7 @@ export function createMEMFS(FS, HEAP8, mmapAlloc, _zeroMemory) {
                     } else if (position + length <= node.usedBytes) {
                         node.contents.set(
                             buffer.subarray(offset, offset + length),
-                            position
+                            position,
                         );
                         return length;
                     }
@@ -500,7 +500,7 @@ export function createMEMFS(FS, HEAP8, mmapAlloc, _zeroMemory) {
                 if (node.contents.subarray && buffer.subarray) {
                     node.contents.set(
                         buffer.subarray(offset, offset + length),
-                        position
+                        position,
                     );
                 } else {
                     for (let i = 0; i < length; i++) {
@@ -550,7 +550,7 @@ export function createMEMFS(FS, HEAP8, mmapAlloc, _zeroMemory) {
                 MEMFS.expandFileStorage(stream.node, offset + length);
                 stream.node.usedBytes = Math.max(
                     stream.node.usedBytes,
-                    offset + length
+                    offset + length,
                 );
             },
 
@@ -595,13 +595,13 @@ export function createMEMFS(FS, HEAP8, mmapAlloc, _zeroMemory) {
                             if (contents.subarray) {
                                 contents = contents.subarray(
                                     position,
-                                    position + length
+                                    position + length,
                                 );
                             } else {
                                 contents = Array.prototype.slice.call(
                                     contents,
                                     position,
-                                    position + length
+                                    position + length,
                                 );
                             }
                         }
@@ -629,7 +629,7 @@ export function createMEMFS(FS, HEAP8, mmapAlloc, _zeroMemory) {
                     0,
                     length,
                     offset,
-                    false
+                    false,
                 );
                 return 0;
             },

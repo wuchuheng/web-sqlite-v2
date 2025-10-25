@@ -178,7 +178,7 @@ export function createExecHelpers(context) {
                         toss(
                             "exec(): invalid rowMode for a resultRows array: must",
                             "be one of 'array', 'object', a result column number,",
-                            "or column name reference."
+                            "or column name reference.",
                         );
                     }
                     plan.cbArg = (stmt) => stmt;
@@ -199,7 +199,7 @@ export function createExecHelpers(context) {
                                 toss(
                                     capi.SQLITE_NOTFOUND,
                                     "exec(): unknown result column:",
-                                    columnName
+                                    columnName,
                                 );
                             }
                             return record[columnName];

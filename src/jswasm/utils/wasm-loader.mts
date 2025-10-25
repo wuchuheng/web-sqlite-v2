@@ -52,7 +52,7 @@ export function createWasmLoader(config: WasmLoaderConfig): WasmLoader {
         if (!wasmBinary) {
             return readAsync(binaryFile).then(
                 (response) => new Uint8Array(response),
-                () => getBinarySync(binaryFile)
+                () => getBinarySync(binaryFile),
             );
         }
 
@@ -63,24 +63,30 @@ export function createWasmLoader(config: WasmLoaderConfig): WasmLoader {
         binaryFile: string,
         imports: WebAssembly.Imports,
         receiver: (
-            result: WebAssembly.WebAssemblyInstantiatedSource
-        ) => WebAssembly.Exports
+            result: WebAssembly.WebAssemblyInstantiatedSource,
+        ) => WebAssembly.Exports,
     ): Promise<WebAssembly.Exports> =>
         getBinaryPromise(binaryFile)
             .then((binary) => WebAssembly.instantiate(binary, imports))
-            .then((result) => receiver(result as unknown as WebAssembly.WebAssemblyInstantiatedSource), (reason) => {
-                err?.(`failed to asynchronously prepare wasm: ${reason}`);
-                abort(reason as Error);
-                return Promise.reject(reason);
-            });
+            .then(
+                (result) =>
+                    receiver(
+                        result as unknown as WebAssembly.WebAssemblyInstantiatedSource,
+                    ),
+                (reason) => {
+                    err?.(`failed to asynchronously prepare wasm: ${reason}`);
+                    abort(reason as Error);
+                    return Promise.reject(reason);
+                },
+            );
 
     const instantiateAsync = (
         binary: ArrayBuffer | undefined,
         binaryFile: string,
         imports: WebAssembly.Imports,
         callback: (
-            result: WebAssembly.WebAssemblyInstantiatedSource
-        ) => WebAssembly.Exports
+            result: WebAssembly.WebAssemblyInstantiatedSource,
+        ) => WebAssembly.Exports,
     ): Promise<WebAssembly.Exports> => {
         if (
             !binary &&
@@ -98,10 +104,10 @@ export function createWasmLoader(config: WasmLoaderConfig): WasmLoader {
                             return instantiateArrayBuffer(
                                 binaryFile,
                                 imports,
-                                callback
+                                callback,
                             );
-                        }
-                    )
+                        },
+                    ),
             );
         }
 
@@ -111,9 +117,13 @@ export function createWasmLoader(config: WasmLoaderConfig): WasmLoader {
     const createWasm = (): WebAssembly.Exports | Record<string, never> => {
         const info = getWasmImports();
 
-        const receiveInstance = (instance: WebAssembly.Instance): WebAssembly.Exports => {
+        const receiveInstance = (
+            instance: WebAssembly.Instance,
+        ): WebAssembly.Exports => {
             const exports = instance.exports;
-            const ctor = exports["__wasm_call_ctors"] as (() => void) | undefined;
+            const ctor = exports["__wasm_call_ctors"] as
+                | (() => void)
+                | undefined;
             if (ctor) {
                 addOnInit(ctor);
             }
@@ -125,19 +135,19 @@ export function createWasmLoader(config: WasmLoaderConfig): WasmLoader {
         addRunDependency("wasm-instantiate");
 
         const receiveInstantiationResult = (
-            result: WebAssembly.WebAssemblyInstantiatedSource
+            result: WebAssembly.WebAssemblyInstantiatedSource,
         ): WebAssembly.Exports => receiveInstance(result.instance);
 
         if (typeof Module.instantiateWasm === "function") {
             try {
                 const instantiated = Module.instantiateWasm(
                     info,
-                    receiveInstance
+                    receiveInstance,
                 );
                 return instantiated ?? {};
             } catch (error) {
                 err?.(
-                    `Module.instantiateWasm callback failed with error: ${error}`
+                    `Module.instantiateWasm callback failed with error: ${error}`,
                 );
                 readyPromiseReject?.(error as Error);
             }
@@ -149,7 +159,7 @@ export function createWasmLoader(config: WasmLoaderConfig): WasmLoader {
             wasmBinary,
             wasmBinaryFile,
             info,
-            receiveInstantiationResult
+            receiveInstantiationResult,
         ).catch((reason) => readyPromiseReject?.(reason as Error));
 
         return {};

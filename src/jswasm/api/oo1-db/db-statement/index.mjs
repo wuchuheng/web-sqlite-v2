@@ -30,7 +30,7 @@ export function createDbClasses(context, dbCtorHelper) {
         context,
         validators,
         bindHelpers,
-        INTERNAL_STATEMENT_TOKEN
+        INTERNAL_STATEMENT_TOKEN,
     );
 
     const Database = createDatabaseClass(
@@ -39,7 +39,7 @@ export function createDbClasses(context, dbCtorHelper) {
         validators,
         execHelpers,
         Statement,
-        INTERNAL_STATEMENT_TOKEN
+        INTERNAL_STATEMENT_TOKEN,
     );
 
     // 3. Output handling

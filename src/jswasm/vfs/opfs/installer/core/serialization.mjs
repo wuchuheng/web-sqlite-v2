@@ -11,12 +11,12 @@ export function createSerializer(state, toss) {
     const viewU8 = new Uint8Array(
         state.sabIO,
         state.sabS11nOffset,
-        state.sabS11nSize
+        state.sabS11nSize,
     );
     const viewDV = new DataView(
         state.sabIO,
         state.sabS11nOffset,
-        state.sabS11nSize
+        state.sabS11nSize,
     );
 
     // 2. Core processing

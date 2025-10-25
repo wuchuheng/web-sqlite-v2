@@ -52,7 +52,7 @@ export function createInitializationHelpers(FS, { Module }) {
                             "fd",
                             MODE.DIRECTORY | MODE.DIR_PERMISSION_MASK,
                             // Match the execute bits we expect the synthetic entries to expose.
-                            MODE.PERMISSION_EXECUTE
+                            MODE.PERMISSION_EXECUTE,
                         );
                         node.node_ops = {
                             lookup(parent, name) {
@@ -73,7 +73,7 @@ export function createInitializationHelpers(FS, { Module }) {
                     },
                 },
                 {},
-                "/proc/self/fd"
+                "/proc/self/fd",
             );
         },
         createStandardStreams(input, output, error) {

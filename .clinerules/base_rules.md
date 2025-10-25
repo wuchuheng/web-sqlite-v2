@@ -20,10 +20,10 @@
 
 **Why Readability Comes First:**
 
--   Code is written once but read many times
--   The "dumbest" human reader must be able to understand the code
--   Unreadable code cannot be effectively maintained, debugged, or improved
--   Stability and robustness are meaningless if no one can understand the code to achieve them
+- Code is written once but read many times
+- The "dumbest" human reader must be able to understand the code
+- Unreadable code cannot be effectively maintained, debugged, or improved
+- Stability and robustness are meaningless if no one can understand the code to achieve them
 
 **All other rules in this document serve this ultimate goal.** When in doubt, choose the approach that maximizes human understanding.
 
@@ -47,43 +47,43 @@
 
 **Readability First**: Code is written once, read many times
 
--   As established in the ultimate goal above, readability is the primary objective that precedes stability and robustness
--   Prefer explicit over implicit
--   Use descriptive names over comments when possible
--   Optimize for human understanding, not just functionality
+- As established in the ultimate goal above, readability is the primary objective that precedes stability and robustness
+- Prefer explicit over implicit
+- Use descriptive names over comments when possible
+- Optimize for human understanding, not just functionality
 
 **Consistency**: Follow established patterns within the codebase
 
--   Match existing code style first
--   Apply these rules only when no conflicting patterns exist
--   Maintain consistent abstraction levels
+- Match existing code style first
+- Apply these rules only when no conflicting patterns exist
+- Maintain consistent abstraction levels
 
 **Maintainability**: Design for change
 
--   Single Responsibility Principle
--   Minimize dependencies between components
--   Make intent clear through structure
+- Single Responsibility Principle
+- Minimize dependencies between components
+- Make intent clear through structure
 
 ### 1.2 Universal Standards
 
 **Line Length**: Maximum 120 characters
 
--   Break long argument lists across lines
--   Split complex expressions into intermediate variables
--   Use trailing commas where language supports it
+- Break long argument lists across lines
+- Split complex expressions into intermediate variables
+- Use trailing commas where language supports it
 
 **Naming Conventions**: Follow language standards
 
--   Functions/methods: verbs describing action (`getUserData`, `calculateTotal`)
--   Variables: nouns describing content (`userData`, `totalAmount`)
--   Constants: SCREAMING_SNAKE_CASE where conventional
+- Functions/methods: verbs describing action (`getUserData`, `calculateTotal`)
+- Variables: nouns describing content (`userData`, `totalAmount`)
+- Constants: SCREAMING_SNAKE_CASE where conventional
 
 **File Organization**: Consistent structure across languages
 
--   Dependencies/imports at top
--   Types/interfaces before implementation
--   Public API before private implementation
--   Related functionality grouped together
+- Dependencies/imports at top
+- Types/interfaces before implementation
+- Public API before private implementation
+- Related functionality grouped together
 
 ---
 
@@ -105,21 +105,21 @@ Is code repeated 3+ times?
 
 **Size Limits**:
 
--   Functions: 20-30 lines maximum
--   Methods in classes: 15-25 lines maximum
--   Exception: Simple property getters/setters can be longer
+- Functions: 20-30 lines maximum
+- Methods in classes: 15-25 lines maximum
+- Exception: Simple property getters/setters can be longer
 
 **Parameter Guidelines**:
 
--   Maximum 4 parameters for functions
--   Use objects/structs for more complex data
--   Required parameters first, optional parameters last
+- Maximum 4 parameters for functions
+- Use objects/structs for more complex data
+- Required parameters first, optional parameters last
 
 **Complexity Thresholds**:
 
--   Cyclomatic complexity ≤ 8
--   Nesting depth ≤ 3 levels
--   If exceeded, extract sub-functions
+- Cyclomatic complexity ≤ 8
+- Nesting depth ≤ 3 levels
+- If exceeded, extract sub-functions
 
 ## 3 Three-Phase Processing Pattern
 
@@ -135,14 +135,14 @@ Is code repeated 3+ times?
 
 **Guidelines**:
 
--   Use numeric comments (`// 1.`, `// 2.`, `// 3.`) inside function bodies only.
--   Sub-steps: `1.1`, `2.2`, up to three levels deep.
--   Numeric comments must only be used inside function or method bodies, never at the file, module, or global scope, and never on property declarations.
--   Only the prefixes `1.`, `2.`, and `3.` are permitted:
-    -   `1.` is for input handling (validation, preparation). This phase corresponds to the "input" section in computer architecture, where data is received, checked, and prepared before processing.
-    -   `2.` is for core processing (business logic). This phase corresponds to the "processing" section in computer architecture, where the system computes, transforms, or manipulates the input data to produce the desired result. Numeric comments with the prefix `2.` should be used to annotate steps that perform calculations, transformations, or any business logic that processes the validated input.
-    -   `3.` is for output (return or print result). This phase corresponds to the "output" section in computer architecture, where the processing result is returned, printed, or otherwise delivered as the final output of the function or method. Numeric comments with the prefix `3.` should be used to annotate steps that handle the result of processing and produce the final output.
--   Prefixes like `4.` or higher are invalid and must not be used.
+- Use numeric comments (`// 1.`, `// 2.`, `// 3.`) inside function bodies only.
+- Sub-steps: `1.1`, `2.2`, up to three levels deep.
+- Numeric comments must only be used inside function or method bodies, never at the file, module, or global scope, and never on property declarations.
+- Only the prefixes `1.`, `2.`, and `3.` are permitted:
+    - `1.` is for input handling (validation, preparation). This phase corresponds to the "input" section in computer architecture, where data is received, checked, and prepared before processing.
+    - `2.` is for core processing (business logic). This phase corresponds to the "processing" section in computer architecture, where the system computes, transforms, or manipulates the input data to produce the desired result. Numeric comments with the prefix `2.` should be used to annotate steps that perform calculations, transformations, or any business logic that processes the validated input.
+    - `3.` is for output (return or print result). This phase corresponds to the "output" section in computer architecture, where the processing result is returned, printed, or otherwise delivered as the final output of the function or method. Numeric comments with the prefix `3.` should be used to annotate steps that handle the result of processing and produce the final output.
+- Prefixes like `4.` or higher are invalid and must not be used.
 
 ### 3.2 Numeric Comment Placement Rules
 
@@ -156,9 +156,9 @@ Is code repeated 3+ times?
 | Global scope (e.g., script-level statements)  | No      |
 | Property or field declarations (class/object) | No      |
 
--   Numeric comments are only permitted inside function or method bodies.
--   They must not be used at file/module/global scope, on property/field declarations, or outside executable code blocks.
--   Use numeric comments to clarify distinct processing phases within functions, following the three-phase pattern.
+- Numeric comments are only permitted inside function or method bodies.
+- They must not be used at file/module/global scope, on property/field declarations, or outside executable code blocks.
+- Use numeric comments to clarify distinct processing phases within functions, following the three-phase pattern.
 
 ### 3.3 Valid Numeric Comment Usage Examples
 
@@ -207,7 +207,7 @@ function notNotNotTruth(value: unknown): boolean {
  * @throws {PaymentError} If validation or processing fails
  */
 async function processPayment(
-    payment: PaymentDetails
+    payment: PaymentDetails,
 ): Promise<TransactionResult> {
     // 1. Input validation and preparation
     // 1.1 Check for missing payment details
@@ -288,17 +288,17 @@ function badExample(input) {
 
 **DO**:
 
--   Document classes/types above declaration
--   Document public functions with full API docs
--   Use numbered comments inside function bodies only
--   Explain WHY for business logic, not WHAT
+- Document classes/types above declaration
+- Document public functions with full API docs
+- Use numbered comments inside function bodies only
+- Explain WHY for business logic, not WHAT
 
 **DON'T**:
 
--   Add numbered comments at file scope
--   Comment obvious code (`i++; // increment i`)
--   Use numbered comments on property declarations
--   Repeat information available in type signatures
+- Add numbered comments at file scope
+- Comment obvious code (`i++; // increment i`)
+- Use numbered comments on property declarations
+- Repeat information available in type signatures
 
 ### 3.3 Language-Specific Documentation
 
@@ -329,22 +329,22 @@ function calculateTotal(items: PurchaseItem[], taxRate: number): number {
 
 ### 4.1 When to Log
 
--   Log at key decision points: input validation failures, business rule triggers, external API calls, and error handling.
--   Use logging to record important state changes, warnings, and exceptions.
--   Avoid excessive logging in tight loops or trivial operations.
+- Log at key decision points: input validation failures, business rule triggers, external API calls, and error handling.
+- Use logging to record important state changes, warnings, and exceptions.
+- Avoid excessive logging in tight loops or trivial operations.
 
 ### 4.2 Logger Usage
 
--   If a logger module is declared in the project, always use it for logging (e.g., `logger.error`, `logger.info`).
--   Prefer structured logging (objects, context) over plain strings for easier analysis.
--   If no logger is present, use the language's standard logging facility (e.g., `console.log`, `print`, etc.).
+- If a logger module is declared in the project, always use it for logging (e.g., `logger.error`, `logger.info`).
+- Prefer structured logging (objects, context) over plain strings for easier analysis.
+- If no logger is present, use the language's standard logging facility (e.g., `console.log`, `print`, etc.).
 
 ### 4.3 Log Level Guidelines
 
--   Use ERROR for system failures and exceptions.
--   Use WARN for recoverable issues and deprecated usage.
--   Use INFO for significant business events and state changes.
--   Use DEBUG for detailed execution flow (development only).
+- Use ERROR for system failures and exceptions.
+- Use WARN for recoverable issues and deprecated usage.
+- Use INFO for significant business events and state changes.
+- Use DEBUG for detailed execution flow (development only).
 
 ### 4.4 Example (TypeScript)
 
@@ -373,11 +373,11 @@ async function registerUser(user: UserData): Promise<RegistrationResult> {
 
 ### 4.5 Logging Checklist
 
--   [ ] Are errors and exceptions logged with context?
--   [ ] Are important business events recorded?
--   [ ] Is the declared logger module used if available?
--   [ ] Are log levels appropriate for the message?
--   [ ] Is sensitive information excluded from logs?
+- [ ] Are errors and exceptions logged with context?
+- [ ] Are important business events recorded?
+- [ ] Is the declared logger module used if available?
+- [ ] Are log levels appropriate for the message?
+- [ ] Is sensitive information excluded from logs?
 
 ## 5. Quality Assurance
 
@@ -385,65 +385,65 @@ async function registerUser(user: UserData): Promise<RegistrationResult> {
 
 **Functionality**:
 
--   [ ] Does the code solve the intended problem?
--   [ ] Are edge cases handled appropriately?
--   [ ] Is error handling comprehensive?
--   [ ] Are there any obvious bugs or logic errors?
+- [ ] Does the code solve the intended problem?
+- [ ] Are edge cases handled appropriately?
+- [ ] Is error handling comprehensive?
+- [ ] Are there any obvious bugs or logic errors?
 
 **Design**:
 
--   [ ] Does the code follow single responsibility principle?
--   [ ] Are abstractions appropriate for the problem?
--   [ ] Is the code extensible for future requirements?
--   [ ] Are dependencies minimized and justified?
+- [ ] Does the code follow single responsibility principle?
+- [ ] Are abstractions appropriate for the problem?
+- [ ] Is the code extensible for future requirements?
+- [ ] Are dependencies minimized and justified?
 
 **Style**:
 
--   [ ] Does code follow established project conventions?
--   [ ] Are variable and function names descriptive?
--   [ ] Is the code properly formatted and consistent?
--   [ ] Are comments helpful and not redundant?
+- [ ] Does code follow established project conventions?
+- [ ] Are variable and function names descriptive?
+- [ ] Is the code properly formatted and consistent?
+- [ ] Are comments helpful and not redundant?
 
 **Performance**:
 
--   [ ] Are there any obvious performance bottlenecks?
--   [ ] Is memory usage reasonable?
--   [ ] Are database queries optimized?
--   [ ] Is caching used appropriately?
+- [ ] Are there any obvious performance bottlenecks?
+- [ ] Is memory usage reasonable?
+- [ ] Are database queries optimized?
+- [ ] Is caching used appropriately?
 
 ### 5.2 Refactoring Triggers
 
 **Extract Function When**:
 
--   Function exceeds 25 lines
--   Complex nested logic (>3 levels)
--   Repeated code blocks (3+ times)
--   Multiple responsibilities evident
+- Function exceeds 25 lines
+- Complex nested logic (>3 levels)
+- Repeated code blocks (3+ times)
+- Multiple responsibilities evident
 
 **Extract Class When**:
 
--   File exceeds 300 lines
--   Multiple related functions operate on same data
--   High coupling between function groups
--   Clear domain concepts emerge
+- File exceeds 300 lines
+- Multiple related functions operate on same data
+- High coupling between function groups
+- Clear domain concepts emerge
 
 **Simplify When**:
 
--   Cyclomatic complexity >8
--   Parameter count >4
--   Deep inheritance hierarchies (>3 levels)
--   Excessive coupling between modules
+- Cyclomatic complexity >8
+- Parameter count >4
+- Deep inheritance hierarchies (>3 levels)
+- Excessive coupling between modules
 
 ### High Cohesion, Low Coupling
 
 **Rule**:  
 Design modules, classes, and functions so that each has a clear, focused responsibility (high cohesion) and minimal dependencies on other parts of the system (low coupling).
 
--   Group related functionality together; avoid mixing unrelated concerns.
--   Limit the number of external dependencies required by each module or function.
--   Prefer passing only necessary data between components; avoid sharing global state.
--   Refactor code that handles multiple unrelated tasks into separate, focused units.
--   Changes in one module should have minimal impact on others.
+- Group related functionality together; avoid mixing unrelated concerns.
+- Limit the number of external dependencies required by each module or function.
+- Prefer passing only necessary data between components; avoid sharing global state.
+- Refactor code that handles multiple unrelated tasks into separate, focused units.
+- Changes in one module should have minimal impact on others.
 
 **Why**:  
 High cohesion improves maintainability and readability, while low coupling reduces the risk of unintended side effects and makes code easier to test and extend.
@@ -476,21 +476,21 @@ High cohesion improves maintainability and readability, while low coupling reduc
 
 **Should I add a comment?**
 
--   Is the WHY unclear from code? → Yes, add comment
--   Is it complex business logic? → Yes, explain the rule
--   Is it just describing WHAT code does? → No, improve code clarity instead
+- Is the WHY unclear from code? → Yes, add comment
+- Is it complex business logic? → Yes, explain the rule
+- Is it just describing WHAT code does? → No, improve code clarity instead
 
 **Should I extract this code?**
 
--   Used 3+ times? → Yes, extract immediately
--   > 20 lines with clear purpose? → Yes, extract function
--   Complex nested logic? → Yes, extract for clarity
+- Used 3+ times? → Yes, extract immediately
+- > 20 lines with clear purpose? → Yes, extract function
+- Complex nested logic? → Yes, extract for clarity
 
 **Should I add documentation?**
 
--   Public API? → Yes, full documentation
--   Complex algorithm? → Yes, explain approach
--   Simple getter/setter? → No, type info sufficient
+- Public API? → Yes, full documentation
+- Complex algorithm? → Yes, explain approach
+- Simple getter/setter? → No, type info sufficient
 
 ## 7. Empty Line Usage in Code Blocks and Documentation Comments
 
@@ -498,8 +498,8 @@ Use empty lines to visually separate distinct logical steps, categories, or unre
 
 ### Rule
 
--   In documentation comments, end each sentence with a period.
--   In code blocks, insert an empty line between lines that represent different logical steps or categories.
+- In documentation comments, end each sentence with a period.
+- In code blocks, insert an empty line between lines that represent different logical steps or categories.
 
 ### Examples
 
@@ -577,21 +577,18 @@ PB --> TC[techContext.md]
 ### Core Files (Required)
 
 1. `projectbrief.md`
-
     - Foundation document that shapes all other files
     - Created at project start if it doesn't exist
     - Defines core requirements and goals
     - Source of truth for project scope
 
 2. `productContext.md`
-
     - Why this project exists
     - Problems it solves
     - How it should work
     - User experience goals
 
 3. `activeContext.md`
-
     - Current work focus
     - Recent changes
     - Next steps
@@ -600,7 +597,6 @@ PB --> TC[techContext.md]
     - Learnings and project insights
 
 4. `systemPatterns.md`
-
     - System architecture
     - Key technical decisions
     - Design patterns in use
@@ -608,7 +604,6 @@ PB --> TC[techContext.md]
     - Critical implementation paths
 
 5. `techContext.md`
-
     - Technologies used
     - Development setup
     - Technical constraints
@@ -626,11 +621,11 @@ PB --> TC[techContext.md]
 
 Create additional files/folders within memory-bank/ when they help organize:
 
--   Complex feature documentation
--   Integration specifications
--   API documentation
--   Testing strategies
--   Deployment procedures
+- Complex feature documentation
+- Integration specifications
+- API documentation
+- Testing strategies
+- Deployment procedures
 
 ## Core Workflows
 

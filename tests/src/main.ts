@@ -118,13 +118,13 @@ class TestUIController {
       "opfs",
       hasOPFS ? "ready" : "error",
       hasOPFS ? "✅" : "❌",
-      hasOPFS ? "OK" : "No"
+      hasOPFS ? "OK" : "No",
     );
     this.updateEnvironmentStatus(
       "sab",
       hasSAB ? "ready" : "error",
       hasSAB ? "✅" : "❌",
-      hasSAB ? "OK" : "No"
+      hasSAB ? "OK" : "No",
     );
 
     // 3. Output handling
@@ -138,7 +138,7 @@ class TestUIController {
     key: string,
     _status: string,
     icon: string,
-    text: string
+    text: string,
   ): void {
     // 1. Input handling
     const iconEl = document.getElementById(`env-${key}-icon`);
@@ -193,7 +193,7 @@ class TestUIController {
     // 2. Core processing
     this.isRunning = false;
     const runBtn = document.getElementById(
-      "run-tests-btn"
+      "run-tests-btn",
     ) as HTMLButtonElement;
     const spinner = document.getElementById("run-spinner");
     if (runBtn) runBtn.disabled = false;
@@ -220,7 +220,7 @@ class TestUIController {
     // 3. Output handling
     this.logInitial("info", "🚀 Starting test suite...\\n");
     const runBtn = document.getElementById(
-      "run-tests-btn"
+      "run-tests-btn",
     ) as HTMLButtonElement;
     const spinner = document.getElementById("run-spinner");
     if (runBtn) runBtn.disabled = true;
@@ -359,7 +359,7 @@ class TestUIController {
     this.logToBlock(
       suiteId,
       "info",
-      `✓ Suite completed: ${passed} passed, ${failed} failed (${duration}ms)`
+      `✓ Suite completed: ${passed} passed, ${failed} failed (${duration}ms)`,
     );
   }
 
@@ -383,7 +383,7 @@ class TestUIController {
 
     // 3. Output handling
     const runBtn = document.getElementById(
-      "run-tests-btn"
+      "run-tests-btn",
     ) as HTMLButtonElement;
     const spinner = document.getElementById("run-spinner");
     if (runBtn) runBtn.disabled = false;
@@ -393,11 +393,11 @@ class TestUIController {
     this.logFinal("success", `🏁 All tests completed in ${duration}ms`);
     this.logFinal(
       "success",
-      `   Total: ${total} | Passed: ${passed} | Failed: ${failed}`
+      `   Total: ${total} | Passed: ${passed} | Failed: ${failed}`,
     );
     this.logFinal(
       "success",
-      `   Success Rate: ${((passed / total) * 100).toFixed(1)}%`
+      `   Success Rate: ${((passed / total) * 100).toFixed(1)}%`,
     );
     this.logFinal("success", `${"=".repeat(60)}`);
   }
@@ -516,7 +516,7 @@ class TestUIController {
     const testTreeEl = document.getElementById("test-tree");
     if (testTreeEl) {
       const suiteElement = testTreeEl.querySelector(
-        `[data-suite-id="${suiteId}"]`
+        `[data-suite-id="${suiteId}"]`,
       );
       if (suiteElement) {
         if (isCurrentlyCollapsed) {
@@ -560,7 +560,7 @@ class TestUIController {
   public handleTestClick(
     suite: string,
     testName: string,
-    testId: string
+    testId: string,
   ): void {
     // 1. Input handling - Set active test
     const testKey = `${suite}::${testName}`;
@@ -584,7 +584,7 @@ class TestUIController {
   public viewTestSource(
     suite: string,
     testName: string,
-    _testId: string
+    _testId: string,
   ): void {
     // 1. Input handling - Find test
     const tests = this.testTree.get(suite);
@@ -683,7 +683,7 @@ class TestUIController {
     const progressText = document.getElementById("test-progress-text");
     const passRateEl = document.getElementById("test-pass-rate");
     const progressBar = document.getElementById(
-      "test-progress-bar"
+      "test-progress-bar",
     ) as HTMLElement;
     const passedCount = document.getElementById("test-passed-count");
     const failedCount = document.getElementById("test-failed-count");
@@ -721,7 +721,7 @@ class TestUIController {
   private renderSourceView(
     suite: string,
     testName: string,
-    source: string
+    source: string,
   ): void {
     // 1. Input handling
     const rightPanel = document.querySelector(".right-panel");
@@ -820,14 +820,14 @@ class TestUIController {
     _suiteName: string,
     testName: string,
     testId: string,
-    suiteId: number
+    suiteId: number,
   ): void {
     // 1. Input handling
     const consoleLog = document.getElementById("console-log");
     if (!consoleLog) return;
 
     const groupBlock = consoleLog.querySelector(
-      `[data-log-id="group-${suiteId}"]`
+      `[data-log-id="group-${suiteId}"]`,
     );
     if (!groupBlock) return;
 
@@ -851,7 +851,7 @@ class TestUIController {
   private logToBlock(
     blockId: string | number | undefined,
     level: string,
-    message: string
+    message: string,
   ): void {
     // 1. Input handling
     const consoleLog = document.getElementById("console-log");
@@ -862,10 +862,10 @@ class TestUIController {
       level === "success"
         ? "success"
         : level === "error"
-        ? "error"
-        : level === "warn"
-        ? "warn"
-        : "info"
+          ? "error"
+          : level === "warn"
+            ? "warn"
+            : "info"
     }`;
 
     const entry = document.createElement("div");
@@ -873,11 +873,11 @@ class TestUIController {
     entry.textContent = message;
 
     let targetBlock = consoleLog.querySelector(
-      `[data-log-id="item-${blockId}"]`
+      `[data-log-id="item-${blockId}"]`,
     );
     if (!targetBlock) {
       targetBlock = consoleLog.querySelector(
-        `[data-log-id="group-${blockId}"]`
+        `[data-log-id="group-${blockId}"]`,
       );
     }
 
@@ -909,10 +909,10 @@ class TestUIController {
       level === "success"
         ? "success"
         : level === "error"
-        ? "error"
-        : level === "warn"
-        ? "warn"
-        : "info"
+          ? "error"
+          : level === "warn"
+            ? "warn"
+            : "info"
     }`;
 
     const entry = document.createElement("div");

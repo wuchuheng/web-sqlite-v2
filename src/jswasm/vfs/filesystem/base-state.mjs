@@ -1,4 +1,9 @@
-import { MODE, OPEN_FLAGS, STREAM_STATE_MASK, PERMISSION } from "./constants.mjs";
+import {
+    MODE,
+    OPEN_FLAGS,
+    STREAM_STATE_MASK,
+    PERMISSION,
+} from "./constants.mjs";
 
 /**
  * Creates the mutable filesystem state container that other helper modules

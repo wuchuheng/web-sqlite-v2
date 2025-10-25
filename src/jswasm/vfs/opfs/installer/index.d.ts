@@ -31,7 +31,7 @@ export interface InstallOpfsVfs {
  * and installs the VFS with error handling.
  */
 export type InstallOpfsVfsInitializer = (
-  sqlite3: SQLite3Module
+  sqlite3: SQLite3Module,
 ) => Promise<void>;
 
 /**
@@ -95,7 +95,7 @@ export interface InstallOpfsVfsContext {
  * @see README.md - Comprehensive documentation with migration guide
  */
 export function createInstallOpfsVfsContext(
-  sqlite3: SQLite3Module
+  sqlite3: SQLite3Module,
 ): InstallOpfsVfsContext;
 
 // Re-export all types from modules for convenience

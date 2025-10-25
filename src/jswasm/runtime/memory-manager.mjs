@@ -97,13 +97,16 @@ export function createMemoryManager(wasmMemory, Module) {
                 let overGrownHeapSize = oldSize * (1 + 0.2 / cutDown);
                 overGrownHeapSize = Math.min(
                     overGrownHeapSize,
-                    requestedSize + 100663296
+                    requestedSize + 100663296,
                 );
 
                 // Align to 64KB page boundary
                 const newSize = Math.min(
                     maxHeapSize,
-                    alignMemory(Math.max(requestedSize, overGrownHeapSize), 65536)
+                    alignMemory(
+                        Math.max(requestedSize, overGrownHeapSize),
+                        65536,
+                    ),
                 );
 
                 // Attempt growth

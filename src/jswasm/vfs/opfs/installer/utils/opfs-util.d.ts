@@ -38,7 +38,7 @@ export interface OpfsUtilDeps {
         filename: number,
         ppDb: number,
         flags: number,
-        vfsName: number
+        vfsName: number,
       ) => number;
       sqlite3_close_v2: (pDb: number) => number;
       sqlite3_exec: (
@@ -46,7 +46,7 @@ export interface OpfsUtilDeps {
         sql: number,
         callback: number,
         userData: number,
-        pzErr: number
+        pzErr: number,
       ) => number;
       SQLITE_OPEN_READONLY: number;
     };

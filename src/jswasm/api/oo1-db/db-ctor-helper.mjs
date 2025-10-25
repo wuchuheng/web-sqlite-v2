@@ -18,7 +18,7 @@ export function createDbCtorHelper(context) {
         toss(
             "The VFS for",
             name,
-            "is only available in the main window thread."
+            "is only available in the main window thread.",
         );
     const isWorkerThread = typeof importScripts === "function";
 
@@ -37,10 +37,10 @@ export function createDbCtorHelper(context) {
             if (capi.SQLITE_TRACE_STMT === traceFlag) {
                 console.log(
                     `SQL TRACE #${++this.counter} via sqlite3@${dbPointer}:`,
-                    wasm.cstrToJs(sqlPointer)
+                    wasm.cstrToJs(sqlPointer),
                 );
             }
-        }.bind({ counter: 0 })
+        }.bind({ counter: 0 }),
     );
 
     const normalizeArgs = (filename = ":memory:", flags = "c", vfs = null) => {
@@ -63,7 +63,7 @@ export function createDbCtorHelper(context) {
             toss(
                 "dbCtorHelper.setVfsPostOpenCallback() should not be used with",
                 "a non-function argument.",
-                callback
+                callback,
             );
         }
         vfsCallbacks[pVfs] = callback;
@@ -80,11 +80,7 @@ export function createDbCtorHelper(context) {
                 typeof vfsName !== "string" &&
                 typeof vfsName !== "number")
         ) {
-            sqlite3.config.error(
-                "Invalid DB ctor args",
-                opt,
-                ctorArgs
-            );
+            sqlite3.config.error("Invalid DB ctor args", opt, ctorArgs);
             toss("Invalid arguments for DB constructor.");
         }
 
@@ -113,7 +109,7 @@ export function createDbCtorHelper(context) {
                 filename,
                 pointerSlot,
                 openFlags,
-                vfsName || 0
+                vfsName || 0,
             );
             dbPointer = wasm.peekPtr(pointerSlot);
             context.checkRc(dbPointer, rc);
@@ -124,7 +120,7 @@ export function createDbCtorHelper(context) {
                     dbPointer,
                     capi.SQLITE_TRACE_STMT,
                     dbTraceLogger,
-                    dbPointer
+                    dbPointer,
                 );
             }
         } catch (error) {
@@ -151,7 +147,7 @@ export function createDbCtorHelper(context) {
             } else {
                 context.checkRc(
                     dbPointer,
-                    capi.sqlite3_exec(dbPointer, postInit, 0, 0, 0)
+                    capi.sqlite3_exec(dbPointer, postInit, 0, 0, 0),
                 );
             }
         } catch (error) {

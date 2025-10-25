@@ -54,7 +54,7 @@ export function createSqlite3Facade(options) {
                 return ff.isReady;
             }
             asyncInitialisers = asyncInitialisers.map((fn) =>
-                fn instanceof Function ? async () => fn(sqlite3) : fn
+                fn instanceof Function ? async () => fn(sqlite3) : fn,
             );
             asyncInitialisers.push(finaliser);
             let chain = Promise.resolve(sqlite3);

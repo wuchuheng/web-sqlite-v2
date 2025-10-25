@@ -24,7 +24,7 @@ export function initializeOpfsState(opfsVfs, capi, toss) {
     state.sabS11nOffset = state.fileBufferSize;
     state.sabS11nSize = opfsVfs.$mxPathname * 2;
     state.sabIO = new SharedArrayBuffer(
-        state.fileBufferSize + state.sabS11nSize
+        state.fileBufferSize + state.sabS11nSize,
     );
 
     // 2.3 Define operation IDs

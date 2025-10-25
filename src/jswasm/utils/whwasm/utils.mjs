@@ -16,7 +16,7 @@ export function assertAllocator(context, funcName) {
     ) {
         context.toss(
             "Object is missing alloc() and/or dealloc() function(s) required by",
-            funcName
+            funcName,
         );
     }
 }

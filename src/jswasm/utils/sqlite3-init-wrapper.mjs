@@ -8,7 +8,7 @@
 export function wrapSqlite3InitModule(originalInit) {
     if (!originalInit) {
         throw new Error(
-            "Expecting globalThis.sqlite3InitModule to be defined by the Emscripten build."
+            "Expecting globalThis.sqlite3InitModule to be defined by the Emscripten build.",
         );
     }
 
@@ -21,11 +21,11 @@ export function wrapSqlite3InitModule(originalInit) {
             urlParams: globalThis?.location?.href
                 ? new URL(globalThis.location.href).searchParams
                 : new URLSearchParams(),
-        }
+        },
     ));
 
     initModuleState.debugModule = initModuleState.urlParams.has(
-        "sqlite3.debugModule"
+        "sqlite3.debugModule",
     )
         ? (...args) => console.warn("sqlite3.debugModule:", ...args)
         : () => {};

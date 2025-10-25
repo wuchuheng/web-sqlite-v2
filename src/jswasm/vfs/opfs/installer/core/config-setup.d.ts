@@ -16,5 +16,5 @@ import type {
  */
 export function prepareOpfsConfig(
   options: OpfsInstallerOptions | null | undefined,
-  defaultProxyUri: string
+  defaultProxyUri: string,
 ): OpfsConfig;

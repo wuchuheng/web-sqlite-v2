@@ -43,15 +43,15 @@ export const databaseLifecycleTests: TestCase[] = [
       const tableName = LIFECYCLE_TABLES.persistence;
       const firstConnection = TestUtils.createTestDb(
         sqlite3,
-        LIFECYCLE_DB_FILE
+        LIFECYCLE_DB_FILE,
       );
 
       try {
         firstConnection.exec(
-          `CREATE TABLE ${tableName} (id INTEGER PRIMARY KEY, value TEXT)`
+          `CREATE TABLE ${tableName} (id INTEGER PRIMARY KEY, value TEXT)`,
         );
         firstConnection.exec(
-          `INSERT INTO ${tableName} (value) VALUES ('persistent_data')`
+          `INSERT INTO ${tableName} (value) VALUES ('persistent_data')`,
         );
       } finally {
         firstConnection.close();
@@ -59,19 +59,19 @@ export const databaseLifecycleTests: TestCase[] = [
 
       const secondConnection = TestUtils.createTestDb(
         sqlite3,
-        LIFECYCLE_DB_FILE
+        LIFECYCLE_DB_FILE,
       );
 
       try {
         const result = TestUtils.execQuery(
           secondConnection,
-          `SELECT value FROM ${tableName}`
+          `SELECT value FROM ${tableName}`,
         );
         TestUtils.assertEqual(result.length, 1, "Should have one row");
         TestUtils.assertEqual(
           result[0].value,
           "persistent_data",
-          "Data should persist"
+          "Data should persist",
         );
       } finally {
         secondConnection.close();

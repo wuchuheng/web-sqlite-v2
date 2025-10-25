@@ -20,7 +20,8 @@ export function resolveBootstrapConfig(apiConfig, options = {}) {
         bigIntEnabled: Boolean(
             moduleRef && moduleRef.HEAPU64
                 ? true
-                : globalObject && typeof globalObject.BigInt64Array !== "undefined"
+                : globalObject &&
+                      typeof globalObject.BigInt64Array !== "undefined",
         ),
         debug: console.debug.bind(console),
         warn: console.warn.bind(console),

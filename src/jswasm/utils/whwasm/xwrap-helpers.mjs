@@ -61,7 +61,7 @@ export function attachXWrapAdapters(context) {
         resultConverters.set(
             type,
             argConverters.get(type) ||
-                context.toss("Missing arg converter:", type)
+                context.toss("Missing arg converter:", type),
         );
     }
 
@@ -123,7 +123,7 @@ export function attachXWrapAdapters(context) {
             if (FuncPtrAdapter.warnOnUse) {
                 console.warn(
                     "xArg.FuncPtrAdapter is an internal-only API and is not intended for client code.",
-                    options
+                    options,
                 );
             }
             this.signature =
@@ -143,7 +143,7 @@ export function attachXWrapAdapters(context) {
                     "Invalid options.bindScope (",
                     options.bindScope,
                     ") for FuncPtrAdapter. Expecting one of:",
-                    FuncPtrAdapter.bindScopes.join(", ")
+                    FuncPtrAdapter.bindScopes.join(", "),
                 );
             }
             this.isTransient = this.bindScope === "transient";
@@ -180,7 +180,7 @@ export function attachXWrapAdapters(context) {
                 const pointer = installer.installFunctionInternal(
                     callback,
                     this.signature,
-                    this.isTransient
+                    this.isTransient,
                 );
                 if (pair) {
                     if (pair[1]) {
@@ -205,7 +205,7 @@ export function attachXWrapAdapters(context) {
                 if (pair && pair[1] && pair[1] !== value) {
                     try {
                         cache.scopedAlloc[cache.scopedAlloc.length - 1].push(
-                            pair[1]
+                            pair[1],
                         );
                     } catch (_error) {}
                     pair[0] = pair[1] = value | 0;
@@ -213,7 +213,7 @@ export function attachXWrapAdapters(context) {
                 return value || 0;
             }
             throw new TypeError(
-                `Invalid FuncPtrAdapter argument type. Expecting a function pointer or a ${this.name} function matching signature ${this.signature}.`
+                `Invalid FuncPtrAdapter argument type. Expecting a function pointer or a ${this.name} function matching signature ${this.signature}.`,
             );
         }
     }
@@ -242,14 +242,14 @@ export function attachXWrapAdapters(context) {
         type === null
             ? value
             : type
-            ? ensureResultAdapter(type)(value)
-            : undefined;
+              ? ensureResultAdapter(type)(value)
+              : undefined;
     cache.xWrap.convertResultNoCheck = (type, value) =>
         type === null
             ? value
             : type
-            ? resultConverters.get(type)(value)
-            : undefined;
+              ? resultConverters.get(type)(value)
+              : undefined;
 
     /**
      * Wraps a wasm export with automatic argument and result conversions.
@@ -268,7 +268,7 @@ export function attachXWrapAdapters(context) {
             fArg =
                 target.functionEntry(fArg) ||
                 context.toss(
-                    "Function pointer not found in WASM function table."
+                    "Function pointer not found in WASM function table.",
                 );
         }
 
@@ -299,7 +299,7 @@ export function attachXWrapAdapters(context) {
                     context.toss(
                         fnName + "() requires",
                         fn.length,
-                        "argument(s)."
+                        "argument(s).",
                     );
                 }
                 return cache.xWrap.convertResult(resultType, fn.call(null));
@@ -317,12 +317,12 @@ export function attachXWrapAdapters(context) {
                         verifiedArgTypes[i],
                         callArgs[i],
                         callArgs,
-                        i
+                        i,
                     );
                 }
                 return cache.xWrap.convertResultNoCheck(
                     resultType,
-                    fn.apply(null, callArgs)
+                    fn.apply(null, callArgs),
                 );
             } finally {
                 target.scopedAllocPop(scope);
@@ -336,7 +336,7 @@ export function attachXWrapAdapters(context) {
         typeName,
         adapter,
         modeName,
-        map
+        map,
     ) => {
         if (typeof typeName === "string") {
             if (argsLength === 1) {
@@ -371,7 +371,7 @@ export function attachXWrapAdapters(context) {
             typeName,
             adapter,
             "resultAdapter()",
-            resultConverters
+            resultConverters,
         );
     };
 
@@ -389,7 +389,7 @@ export function attachXWrapAdapters(context) {
             typeName,
             adapter,
             "argAdapter()",
-            argConverters
+            argConverters,
         );
     };
 

@@ -129,7 +129,7 @@ export function attachHeapAccessors(context) {
                 }
         }
         context.toss(
-            "Invalid heapForSize() size: expecting 8, 16, 32, or 64 (BigInt)."
+            "Invalid heapForSize() size: expecting 8, 16, 32, or 64 (BigInt).",
         );
     };
 }

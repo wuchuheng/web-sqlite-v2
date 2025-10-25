@@ -106,7 +106,7 @@ export function UTF8ArrayToString(heapOrArray, idx = 0, maxBytesToRead = NaN) {
         ) {
             // Two-byte character
             decodedString += String.fromCharCode(
-                ((byte0 & UTF8_BYTE_MASKS.TWO_BYTE_DATA_MASK) << 6) | byte1
+                ((byte0 & UTF8_BYTE_MASKS.TWO_BYTE_DATA_MASK) << 6) | byte1,
             );
             continue;
         }
@@ -140,7 +140,7 @@ export function UTF8ArrayToString(heapOrArray, idx = 0, maxBytesToRead = NaN) {
             decodedString += String.fromCharCode(
                 UTF8_CONSTANTS.HIGH_SURROGATE_START | (codePoint >> 10),
                 UTF8_CONSTANTS.LOW_SURROGATE_START |
-                    (codePoint & UTF8_CONSTANTS.SURROGATE_MASK)
+                    (codePoint & UTF8_CONSTANTS.SURROGATE_MASK),
             );
         }
     }
@@ -278,7 +278,7 @@ export function intArrayFromString(stringy, dontAddNull, length) {
         stringy,
         byteArray,
         0,
-        byteArray.length
+        byteArray.length,
     );
 
     // 3. Output handling

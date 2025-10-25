@@ -30,11 +30,12 @@ export const transactionsTests: TestCase[] = [
         db.exec(`INSERT INTO ${tableName} VALUES (2)`);
         db.exec("COMMIT");
 
-        const result = TestUtils.execQuery(
-          db,
-          `SELECT * FROM ${tableName}`
+        const result = TestUtils.execQuery(db, `SELECT * FROM ${tableName}`);
+        TestUtils.assertEqual(
+          result.length,
+          2,
+          "Both inserts should be committed",
         );
-        TestUtils.assertEqual(result.length, 2, "Both inserts should be committed");
       } finally {
         db.close();
       }
@@ -54,14 +55,11 @@ export const transactionsTests: TestCase[] = [
         db.exec(`INSERT INTO ${tableName} VALUES (2)`);
         db.exec("ROLLBACK");
 
-        const result = TestUtils.execQuery(
-          db,
-          `SELECT * FROM ${tableName}`
-        );
+        const result = TestUtils.execQuery(db, `SELECT * FROM ${tableName}`);
         TestUtils.assertEqual(
           result.length,
           1,
-          "Second insert should be rolled back"
+          "Second insert should be rolled back",
         );
       } finally {
         db.close();
@@ -75,7 +73,9 @@ export const transactionsTests: TestCase[] = [
       const tableName = TRANSACTION_TABLES.autoRollback;
 
       try {
-        db.exec(`CREATE TABLE ${tableName} (id INTEGER PRIMARY KEY, value TEXT)`);
+        db.exec(
+          `CREATE TABLE ${tableName} (id INTEGER PRIMARY KEY, value TEXT)`,
+        );
         db.exec(`INSERT INTO ${tableName} VALUES (1, 'first')`);
 
         try {
@@ -91,14 +91,11 @@ export const transactionsTests: TestCase[] = [
           }
         }
 
-        const result = TestUtils.execQuery(
-          db,
-          `SELECT * FROM ${tableName}`
-        );
+        const result = TestUtils.execQuery(db, `SELECT * FROM ${tableName}`);
         TestUtils.assertEqual(
           result.length,
           1,
-          "Only first insert should remain"
+          "Only first insert should remain",
         );
       } finally {
         db.close();
@@ -126,11 +123,12 @@ export const transactionsTests: TestCase[] = [
         db.exec("ROLLBACK TO sp2");
         db.exec("COMMIT");
 
-        const result = TestUtils.execQuery(
-          db,
-          `SELECT * FROM ${tableName}`
+        const result = TestUtils.execQuery(db, `SELECT * FROM ${tableName}`);
+        TestUtils.assertEqual(
+          result.length,
+          2,
+          "Should have two values (1 and 2)",
         );
-        TestUtils.assertEqual(result.length, 2, "Should have two values (1 and 2)");
       } finally {
         db.close();
       }

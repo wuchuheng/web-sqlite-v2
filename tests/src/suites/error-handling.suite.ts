@@ -70,7 +70,7 @@ export const errorHandlingTests: TestCase[] = [
         } catch (error) {
           TestUtils.assertTrue(
             (error as Error).message.length > 0,
-            "Error message should not be empty"
+            "Error message should not be empty",
           );
         }
       } finally {

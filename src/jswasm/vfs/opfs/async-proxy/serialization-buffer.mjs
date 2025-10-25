@@ -12,7 +12,13 @@ class SerializationBuffer {
     /**
      * @param {SerializationBufferOptions} options - Construction options.
      */
-    constructor({ sharedBuffer, offset, size, littleEndian, exceptionVerbosity }) {
+    constructor({
+        sharedBuffer,
+        offset,
+        size,
+        littleEndian,
+        exceptionVerbosity,
+    }) {
         this.bytes = new Uint8Array(sharedBuffer, offset, size);
         this.view = new DataView(sharedBuffer, offset, size);
         this.littleEndian = littleEndian;
@@ -25,13 +31,23 @@ class SerializationBuffer {
          * @type {Record<string, {id:number,size?:number,getter?:string,setter?:string}>}
          */
         this.typeInfo = {
-            number: { id: 1, size: 8, getter: "getFloat64", setter: "setFloat64" },
-            bigint: { id: 2, size: 8, getter: "getBigInt64", setter: "setBigInt64" },
+            number: {
+                id: 1,
+                size: 8,
+                getter: "getFloat64",
+                setter: "setFloat64",
+            },
+            bigint: {
+                id: 2,
+                size: 8,
+                getter: "getBigInt64",
+                setter: "setBigInt64",
+            },
             boolean: { id: 3, size: 4, getter: "getInt32", setter: "setInt32" },
             string: { id: 4 },
         };
         this.typeInfoById = Object.fromEntries(
-            Object.values(this.typeInfo).map((info) => [info.id, info])
+            Object.values(this.typeInfo).map((info) => [info.id, info]),
         );
     }
 
@@ -50,7 +66,7 @@ class SerializationBuffer {
             if (!descriptor) {
                 toss(
                     "Maintenance required: this value type cannot be serialized.",
-                    value
+                    value,
                 );
             }
             return descriptor;
@@ -69,7 +85,11 @@ class SerializationBuffer {
                 offset += descriptor.size;
             } else {
                 const encoded = this.textEncoder.encode(value);
-                this.view.setInt32(offset, encoded.byteLength, this.littleEndian);
+                this.view.setInt32(
+                    offset,
+                    encoded.byteLength,
+                    this.littleEndian,
+                );
                 offset += 4;
                 this.bytes.set(encoded, offset);
                 offset += encoded.byteLength;
@@ -98,7 +118,9 @@ class SerializationBuffer {
         }
         for (const descriptor of types) {
             if (descriptor.getter) {
-                values.push(this.view[descriptor.getter](offset, this.littleEndian));
+                values.push(
+                    this.view[descriptor.getter](offset, this.littleEndian),
+                );
                 offset += descriptor.size;
             } else {
                 const length = this.view.getInt32(offset, this.littleEndian);
@@ -120,7 +142,10 @@ class SerializationBuffer {
      * @param {import("./serialization-buffer.d.ts").SerializableError} error - Error object to stringify.
      */
     storeException(priority, error) {
-        if (this.exceptionVerbosity <= 0 || priority > this.exceptionVerbosity) {
+        if (
+            this.exceptionVerbosity <= 0 ||
+            priority > this.exceptionVerbosity
+        ) {
             return;
         }
         if (!error || typeof error !== "object") {

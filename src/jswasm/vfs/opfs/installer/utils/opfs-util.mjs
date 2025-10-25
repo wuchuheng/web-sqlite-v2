@@ -48,7 +48,7 @@ export function createOpfsUtil(deps) {
      */
     opfsUtil.getDirForFilename = async function (
         absFilename,
-        createDirs = false
+        createDirs = false,
     ) {
         // 1. Input handling
         const path = opfsUtil.getResolvedPath(absFilename, true);
@@ -143,12 +143,12 @@ export function createOpfsUtil(deps) {
     opfsUtil.unlink = async function (
         fsEntryName,
         recursive = false,
-        throwOnError = false
+        throwOnError = false,
     ) {
         try {
             const [hDir, filenamePart] = await opfsUtil.getDirForFilename(
                 fsEntryName,
-                false
+                false,
             );
             await hDir.removeEntry(filenamePart, { recursive });
             return true;
@@ -158,7 +158,7 @@ export function createOpfsUtil(deps) {
                     "unlink(",
                     arguments[0],
                     ") failed: " + e.message,
-                    { cause: e }
+                    { cause: e },
                 );
             }
             return false;
@@ -204,7 +204,7 @@ export function createOpfsUtil(deps) {
         // 1. Input handling
         const [hDir, fnamePart] = await opfsUtil.getDirForFilename(
             filename,
-            true
+            true,
         );
         const hFile = await hDir.getFileHandle(fnamePart, { create: true });
         let sah = await hFile.createSyncAccessHandle();
@@ -226,7 +226,7 @@ export function createOpfsUtil(deps) {
             }
             if (nWrote < 512 || 0 !== nWrote % 512) {
                 throw new Error(
-                    `Input size ${nWrote} is not correct for an SQLite database.`
+                    `Input size ${nWrote} is not correct for an SQLite database.`,
                 );
             }
             if (!checkedHeader) {
@@ -266,7 +266,7 @@ export function createOpfsUtil(deps) {
         // 2. Core processing
         const [hDir, fnamePart] = await opfsUtil.getDirForFilename(
             filename,
-            true
+            true,
         );
         let sah;
         let nWrote = 0;
@@ -277,7 +277,7 @@ export function createOpfsUtil(deps) {
             nWrote = sah.write(bytes, { at: 0 });
             if (nWrote !== n) {
                 throw new Error(
-                    `Expected to write ${n} bytes but wrote ${nWrote}.`
+                    `Expected to write ${n} bytes but wrote ${nWrote}.`,
                 );
             }
             sah.write(new Uint8Array([1, 1]), { at: 18 });
@@ -327,7 +327,7 @@ export function createOpfsUtil(deps) {
                 n,
                 "op(s) for",
                 t,
-                "ms (incl. " + w + " ms of waiting on the async side)"
+                "ms (incl. " + w + " ms of waiting on the async side)",
             );
             sqlite3.config.log("Serialization metrics:", metrics.s11n);
             W.postMessage({ type: "opfs-async-metrics" });
@@ -358,13 +358,13 @@ export function createOpfsUtil(deps) {
     opfsUtil.debug = {
         asyncShutdown: function (opRun, warn) {
             warn(
-                "Shutting down OPFS async listener. The OPFS VFS will no longer work."
+                "Shutting down OPFS async listener. The OPFS VFS will no longer work.",
             );
             opRun("opfs-async-shutdown");
         },
         asyncRestart: function (W, warn) {
             warn(
-                "Attempting to restart OPFS VFS async listener. Might work, might not."
+                "Attempting to restart OPFS VFS async listener. Might work, might not.",
             );
             W.postMessage({ type: "opfs-async-restart" });
         },

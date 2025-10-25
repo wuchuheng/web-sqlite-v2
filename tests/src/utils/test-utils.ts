@@ -6,7 +6,7 @@ type SQLite3WithOpfs = SQLite3API & {
     unlink?: (fsEntryName: string, recursive?: boolean) => Promise<unknown>;
     getResolvedPath?: (
       filename: string,
-      splitIt?: boolean
+      splitIt?: boolean,
     ) => string | string[];
     mkdir?: (dirName: string) => Promise<unknown>;
   };
@@ -54,7 +54,7 @@ export class TestUtils {
    * Best-effort creation of the backing tests directory on OPFS.
    */
   private static async ensureOpfsTestDirectory(
-    opfs: NonNullable<SQLite3WithOpfs["opfs"]>
+    opfs: NonNullable<SQLite3WithOpfs["opfs"]>,
   ): Promise<void> {
     if (typeof opfs.mkdir !== "function") return;
 
@@ -102,7 +102,7 @@ export class TestUtils {
         console.warn(
           `Failed to cleanup OPFS database ${filename}: ${
             (error as Error).message
-          }`
+          }`,
         );
       }
     }
@@ -133,7 +133,7 @@ export class TestUtils {
   static assertTrue(value: unknown, message?: string): void {
     TestUtils.assert(
       !!value,
-      message || `Expected truthy value but got ${value}`
+      message || `Expected truthy value but got ${value}`,
     );
   }
 
@@ -143,7 +143,7 @@ export class TestUtils {
   static assertFalse(value: unknown, message?: string): void {
     TestUtils.assert(
       !value,
-      message || `Expected falsy value but got ${value}`
+      message || `Expected falsy value but got ${value}`,
     );
   }
 
@@ -195,7 +195,7 @@ export class TestUtils {
   static execQuery<T extends Record<string, unknown> = Record<string, unknown>>(
     db: Database,
     sql: string,
-    params: BindValue[] = []
+    params: BindValue[] = [],
   ): T[] {
     const results: T[] = [];
     const stmt = db.prepare(sql);

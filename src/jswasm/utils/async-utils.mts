@@ -14,7 +14,7 @@ export const createAsyncLoad = (
     readAsync: AsyncReadFunction,
     getUniqueRunDependency: DependencyIdFactory,
     addRunDependency: DependencyTracker,
-    removeRunDependency: DependencyTracker
+    removeRunDependency: DependencyTracker,
 ): AsyncLoader => {
     const asyncLoader: AsyncLoader = (url, onload, onerror, noRunDep) => {
         // 1. Input handling - get unique dependency ID if needed
@@ -38,7 +38,7 @@ export const createAsyncLoad = (
                 } else {
                     throw new Error(`Loading data file "${url}" failed.`);
                 }
-            }
+            },
         );
 
         // 3. Output handling - add dependency tracking

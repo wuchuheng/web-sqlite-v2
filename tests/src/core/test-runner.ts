@@ -50,7 +50,7 @@ export class TestRunner {
     sqlite3InitModule: (config: {
       print: typeof console.log;
       printErr: typeof console.error;
-    }) => Promise<SQLite3API>
+    }) => Promise<SQLite3API>,
   ): Promise<boolean> {
     this.log("info", "🚀 Initializing SQLite3 WASM module...");
 
@@ -66,7 +66,7 @@ export class TestRunner {
       const hasOpfs = !!this.sqlite3.capi.sqlite3_vfs_find("opfs");
       this.log(
         hasOpfs ? "success" : "warn",
-        `🏗️ OPFS VFS: ${hasOpfs ? "Available" : "Not available"}`
+        `🏗️ OPFS VFS: ${hasOpfs ? "Available" : "Not available"}`,
       );
 
       await TestUtils.cleanupTrackedOpfsDatabases(this.sqlite3);
@@ -76,7 +76,7 @@ export class TestRunner {
     } catch (error) {
       this.log(
         "error",
-        `❌ Initialization failed: ${(error as Error).message}`
+        `❌ Initialization failed: ${(error as Error).message}`,
       );
       return false;
     }
@@ -101,7 +101,7 @@ export class TestRunner {
     const startTime = performance.now();
     const plannedTotal = this.testSuites.reduce(
       (sum, suite) => sum + suite.tests.length,
-      0
+      0,
     );
 
     this.sendMessage("test-plan", { total: plannedTotal });

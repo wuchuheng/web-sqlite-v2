@@ -4,9 +4,9 @@ import type { RuntimeFS, RuntimeTTY } from "../shared/runtime-types.d.ts";
  * Constructs the runtime TTY helpers backed by the virtual filesystem streams.
  */
 export declare function createTTY(
-    out: (message: string) => void,
-    err: (message: string) => void,
-    FS: RuntimeFS
+  out: (message: string) => void,
+  err: (message: string) => void,
+  FS: RuntimeFS,
 ): RuntimeTTY;
 
 /**

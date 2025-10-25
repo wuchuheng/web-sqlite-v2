@@ -12,7 +12,9 @@ export function createBootstrapUtil(errorFns, wasm) {
     // The C bridge still relies on 32-bit pointers even when BigInt support is
     // compiled in. Guard the helper with a numeric-only check to avoid
     // accidental bigint coercion on comparisons.
-    const isInt32 = (n) => typeof n !== "bigint" && !!(n === (n | 0) && n <= 0x7fffffff && n >= -0x80000000);
+    const isInt32 = (n) =>
+        typeof n !== "bigint" &&
+        !!(n === (n | 0) && n <= 0x7fffffff && n >= -0x80000000);
 
     const bigIntFits64 = (function () {
         let max;
@@ -26,7 +28,8 @@ export function createBootstrapUtil(errorFns, wasm) {
         };
     })();
 
-    const bigIntFits32 = (value) => value >= -0x7fffffffn - 1n && value <= 0x7fffffffn;
+    const bigIntFits32 = (value) =>
+        value >= -0x7fffffffn - 1n && value <= 0x7fffffffn;
 
     const bigIntFitsDouble = (function () {
         let min;
@@ -41,7 +44,9 @@ export function createBootstrapUtil(errorFns, wasm) {
     })();
 
     const isTypedArray = (value) => {
-        return value && value.constructor && isInt32(value.constructor.BYTES_PER_ELEMENT)
+        return value &&
+            value.constructor &&
+            isInt32(value.constructor.BYTES_PER_ELEMENT)
             ? value
             : false;
     };
@@ -49,9 +54,12 @@ export function createBootstrapUtil(errorFns, wasm) {
     // SharedArrayBuffer isn't always available (e.g. in some test contexts).
     // Defer to a stub in that case so instanceof checks remain predictable.
     const sharedArrayBufferCtor =
-        typeof SharedArrayBuffer === "undefined" ? function () {} : SharedArrayBuffer;
+        typeof SharedArrayBuffer === "undefined"
+            ? function () {}
+            : SharedArrayBuffer;
 
-    const isSharedTypedArray = (typedArray) => typedArray.buffer instanceof sharedArrayBufferCtor;
+    const isSharedTypedArray = (typedArray) =>
+        typedArray.buffer instanceof sharedArrayBufferCtor;
 
     const typedArrayPart = (typedArray, begin, end) =>
         isSharedTypedArray(typedArray)
@@ -61,13 +69,16 @@ export function createBootstrapUtil(errorFns, wasm) {
     const isBindableTypedArray = (value) =>
         !!(
             value &&
-            (value instanceof Uint8Array || value instanceof Int8Array || value instanceof ArrayBuffer)
+            (value instanceof Uint8Array ||
+                value instanceof Int8Array ||
+                value instanceof ArrayBuffer)
         );
 
     const isSQLableTypedArray = isBindableTypedArray;
 
     const affirmBindableTypedArray = (value) =>
-        isBindableTypedArray(value) || toss3("Value is not of a supported TypedArray type.");
+        isBindableTypedArray(value) ||
+        toss3("Value is not of a supported TypedArray type.");
 
     const utf8Decoder = new TextDecoder("utf-8");
     const typedArrayToString = (typedArray, begin, end) =>
@@ -76,7 +87,7 @@ export function createBootstrapUtil(errorFns, wasm) {
     const flexibleString = (value) => {
         if (isSQLableTypedArray(value)) {
             return typedArrayToString(
-                value instanceof ArrayBuffer ? new Uint8Array(value) : value
+                value instanceof ArrayBuffer ? new Uint8Array(value) : value,
             );
         } else if (Array.isArray(value)) {
             return value.join("");
@@ -97,7 +108,8 @@ export function createBootstrapUtil(errorFns, wasm) {
         isSQLableTypedArray,
         isTypedArray,
         typedArrayToString,
-        isUIThread: () => globalThis.window === globalThis && !!globalThis.document,
+        isUIThread: () =>
+            globalThis.window === globalThis && !!globalThis.document,
         isSharedTypedArray,
         toss: (...args) => {
             throw new Error(args.join(" "));

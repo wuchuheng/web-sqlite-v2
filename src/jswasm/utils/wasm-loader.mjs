@@ -49,7 +49,7 @@ export function createWasmLoader(config) {
         if (!wasmBinary) {
             return readAsync(binaryFile).then(
                 (response) => new Uint8Array(response),
-                () => getBinarySync(binaryFile)
+                () => getBinarySync(binaryFile),
             );
         }
 
@@ -76,25 +76,18 @@ export function createWasmLoader(config) {
                 (response) => {
                     const result = WebAssembly.instantiateStreaming(
                         response,
-                        imports
+                        imports,
                     );
-                    return result.then(
-                        callback,
-                        (reason) => {
-                            err?.(
-                                `wasm streaming compile failed: ${reason}`
-                            );
-                            err?.(
-                                "falling back to ArrayBuffer instantiation"
-                            );
-                            return instantiateArrayBuffer(
-                                binaryFile,
-                                imports,
-                                callback
-                            );
-                        }
-                    );
-                }
+                    return result.then(callback, (reason) => {
+                        err?.(`wasm streaming compile failed: ${reason}`);
+                        err?.("falling back to ArrayBuffer instantiation");
+                        return instantiateArrayBuffer(
+                            binaryFile,
+                            imports,
+                            callback,
+                        );
+                    });
+                },
             );
         }
         return instantiateArrayBuffer(binaryFile, imports, callback);
@@ -122,7 +115,7 @@ export function createWasmLoader(config) {
                 return Module["instantiateWasm"](info, receiveInstance);
             } catch (e) {
                 err?.(
-                    `Module.instantiateWasm callback failed with error: ${e}`
+                    `Module.instantiateWasm callback failed with error: ${e}`,
                 );
                 readyPromiseReject?.(e);
             }
@@ -134,7 +127,7 @@ export function createWasmLoader(config) {
             wasmBinary,
             wasmBinaryFile,
             info,
-            receiveInstantiationResult
+            receiveInstantiationResult,
         ).catch((reason) => readyPromiseReject?.(reason));
 
         return {};

@@ -27,12 +27,17 @@ export const dataTypesTests: TestCase[] = [
         db.exec(`CREATE TABLE ${tableName} (value INTEGER)`);
         db.exec(`INSERT INTO ${tableName} VALUES (42), (-100), (0)`);
 
-        const result = TestUtils.execQuery(
-          db,
-          `SELECT * FROM ${tableName}`
+        const result = TestUtils.execQuery(db, `SELECT * FROM ${tableName}`);
+        TestUtils.assertEqual(
+          result[0].value,
+          42,
+          "Should store positive integer",
         );
-        TestUtils.assertEqual(result[0].value, 42, "Should store positive integer");
-        TestUtils.assertEqual(result[1].value, -100, "Should store negative integer");
+        TestUtils.assertEqual(
+          result[1].value,
+          -100,
+          "Should store negative integer",
+        );
         TestUtils.assertEqual(result[2].value, 0, "Should store zero");
       } finally {
         db.close();
@@ -49,13 +54,10 @@ export const dataTypesTests: TestCase[] = [
         db.exec(`CREATE TABLE ${tableName} (value REAL)`);
         db.exec(`INSERT INTO ${tableName} VALUES (3.14), (-2.5), (0.0)`);
 
-        const result = TestUtils.execQuery(
-          db,
-          `SELECT * FROM ${tableName}`
-        );
+        const result = TestUtils.execQuery(db, `SELECT * FROM ${tableName}`);
         TestUtils.assertTrue(
           Math.abs((result[0].value as number) - 3.14) < 0.001,
-          "Should store float"
+          "Should store float",
         );
       } finally {
         db.close();
@@ -71,19 +73,16 @@ export const dataTypesTests: TestCase[] = [
       try {
         db.exec(`CREATE TABLE ${tableName} (value TEXT)`);
         db.exec(
-          `INSERT INTO ${tableName} VALUES ('Hello'), (''), ('Unicode: 你好 🚀')`
+          `INSERT INTO ${tableName} VALUES ('Hello'), (''), ('Unicode: 你好 🚀')`,
         );
 
-        const result = TestUtils.execQuery(
-          db,
-          `SELECT * FROM ${tableName}`
-        );
+        const result = TestUtils.execQuery(db, `SELECT * FROM ${tableName}`);
         TestUtils.assertEqual(result[0].value, "Hello", "Should store text");
         TestUtils.assertEqual(result[1].value, "", "Should store empty string");
         TestUtils.assertEqual(
           result[2].value,
           "Unicode: 你好 🚀",
-          "Should store Unicode"
+          "Should store Unicode",
         );
       } finally {
         db.close();
@@ -105,7 +104,7 @@ export const dataTypesTests: TestCase[] = [
 
         const result = TestUtils.execQuery(
           db,
-          `SELECT LENGTH(value) as len FROM ${tableName}`
+          `SELECT LENGTH(value) as len FROM ${tableName}`,
         );
         TestUtils.assertEqual(result[0].len, 5, "Blob should have 5 bytes");
       } finally {
@@ -123,10 +122,7 @@ export const dataTypesTests: TestCase[] = [
         db.exec(`CREATE TABLE ${tableName} (value TEXT)`);
         db.exec(`INSERT INTO ${tableName} VALUES (NULL), ('not null')`);
 
-        const result = TestUtils.execQuery(
-          db,
-          `SELECT * FROM ${tableName}`
-        );
+        const result = TestUtils.execQuery(db, `SELECT * FROM ${tableName}`);
         TestUtils.assertEqual(result[0].value, null, "Should store NULL");
         TestUtils.assertEqual(result[1].value, "not null", "Should store text");
       } finally {

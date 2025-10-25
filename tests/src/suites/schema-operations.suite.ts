@@ -37,7 +37,7 @@ export const schemaOperationsTests: TestCase[] = [
 
         const tables = TestUtils.execQuery(
           db,
-          `SELECT name FROM sqlite_master WHERE type='table' AND name='${tableName}'`
+          `SELECT name FROM sqlite_master WHERE type='table' AND name='${tableName}'`,
         );
         TestUtils.assertEqual(tables.length, 1, "Table should be created");
       } finally {
@@ -53,18 +53,14 @@ export const schemaOperationsTests: TestCase[] = [
 
       try {
         db.exec(
-          `CREATE TABLE ${tableName} (id INTEGER, name TEXT, price REAL)`
+          `CREATE TABLE ${tableName} (id INTEGER, name TEXT, price REAL)`,
         );
-        db.exec(
-          `CREATE INDEX idx_${tableName}_name ON ${tableName}(name)`
-        );
-        db.exec(
-          `CREATE INDEX idx_${tableName}_price ON ${tableName}(price)`
-        );
+        db.exec(`CREATE INDEX idx_${tableName}_name ON ${tableName}(name)`);
+        db.exec(`CREATE INDEX idx_${tableName}_price ON ${tableName}(price)`);
 
         const indexes = TestUtils.execQuery(
           db,
-          "SELECT name FROM sqlite_master WHERE type='index'"
+          "SELECT name FROM sqlite_master WHERE type='index'",
         );
         TestUtils.assertTrue(indexes.length >= 2, "Indexes should be created");
       } finally {
@@ -82,10 +78,7 @@ export const schemaOperationsTests: TestCase[] = [
         db.exec(`CREATE TABLE ${tableName} (id INTEGER PRIMARY KEY)`);
         db.exec(`ALTER TABLE ${tableName} ADD COLUMN name TEXT`);
 
-        const info = TestUtils.execQuery(
-          db,
-          `PRAGMA table_info(${tableName})`
-        );
+        const info = TestUtils.execQuery(db, `PRAGMA table_info(${tableName})`);
         TestUtils.assertEqual(info.length, 2, "Should have 2 columns");
       } finally {
         db.close();
@@ -104,7 +97,7 @@ export const schemaOperationsTests: TestCase[] = [
 
         const tables = TestUtils.execQuery(
           db,
-          `SELECT name FROM sqlite_master WHERE type='table' AND name='${tableName}'`
+          `SELECT name FROM sqlite_master WHERE type='table' AND name='${tableName}'`,
         );
         TestUtils.assertEqual(tables.length, 0, "Table should be dropped");
       } finally {

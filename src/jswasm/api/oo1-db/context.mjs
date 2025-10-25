@@ -24,18 +24,12 @@ export function createOo1Context(sqlite3) {
         if (!resultCode) return dbOrPtr;
         let dbPointer = dbOrPtr;
         if (dbPointer && typeof dbPointer === "object") {
-            dbPointer =
-                ptrMap.get(dbPointer) ?? dbPointer.pointer ?? dbPointer;
+            dbPointer = ptrMap.get(dbPointer) ?? dbPointer.pointer ?? dbPointer;
         }
         const message = dbPointer
             ? capi.sqlite3_errmsg(dbPointer)
             : capi.sqlite3_errstr(resultCode);
-        toss(
-            resultCode,
-            "sqlite3 result code",
-            `${resultCode}:`,
-            message
-        );
+        toss(resultCode, "sqlite3 result code", `${resultCode}:`, message);
         return dbOrPtr;
     };
 

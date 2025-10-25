@@ -1,18 +1,18 @@
 import type { BootstrapConfig } from "./bootstrap/configuration.d.ts";
 import type {
-    Sqlite3Facade as InternalSqlite3Facade,
-    Sqlite3Initializer as InternalSqlite3Initializer,
-    Sqlite3AsyncInitializer as InternalSqlite3AsyncInitializer,
-    Sqlite3BootstrapFunction as InternalSqlite3BootstrapFunction,
-    Sqlite3BootstrapGlobal as InternalSqlite3BootstrapGlobal,
-    Sqlite3EmscriptenModule as InternalSqlite3EmscriptenModule,
-    Sqlite3JsValue,
-    Sqlite3ResultValue,
-    Sqlite3BinaryValue,
-    Sqlite3StructInstance,
-    Sqlite3StructDisposer,
-    Sqlite3WasmCallArgument as InternalSqlite3WasmCallArgument,
-    Sqlite3WasmCallResult as InternalSqlite3WasmCallResult,
+  Sqlite3Facade as InternalSqlite3Facade,
+  Sqlite3Initializer as InternalSqlite3Initializer,
+  Sqlite3AsyncInitializer as InternalSqlite3AsyncInitializer,
+  Sqlite3BootstrapFunction as InternalSqlite3BootstrapFunction,
+  Sqlite3BootstrapGlobal as InternalSqlite3BootstrapGlobal,
+  Sqlite3EmscriptenModule as InternalSqlite3EmscriptenModule,
+  Sqlite3JsValue,
+  Sqlite3ResultValue,
+  Sqlite3BinaryValue,
+  Sqlite3StructInstance,
+  Sqlite3StructDisposer,
+  Sqlite3WasmCallArgument as InternalSqlite3WasmCallArgument,
+  Sqlite3WasmCallResult as InternalSqlite3WasmCallResult,
 } from "./bootstrap/runtime/sqlite3-facade-namespace.d.ts";
 import type { DB as Sqlite3DatabaseHandle } from "../../types/index.d.ts";
 
@@ -77,11 +77,11 @@ export type Sqlite3WasmCallResult = InternalSqlite3WasmCallResult;
  * relying on the wider OO1 `Stmt` definition.
  */
 export interface Sqlite3StatementContext {
-    readonly pointer: number;
-    readonly columnCount: number;
-    readonly parameterCount: number;
-    get(index: number): Sqlite3ResultValue;
-    getColumnName(index: number): string;
+  readonly pointer: number;
+  readonly columnCount: number;
+  readonly parameterCount: number;
+  get(index: number): Sqlite3ResultValue;
+  getColumnName(index: number): string;
 }
 
 /**
@@ -89,13 +89,13 @@ export interface Sqlite3StatementContext {
  * parameters from worker messages.
  */
 export type Sqlite3BindableValue =
-    | null
-    | undefined
-    | number
-    | bigint
-    | string
-    | boolean
-    | Sqlite3BinaryValue;
+  | null
+  | undefined
+  | number
+  | bigint
+  | string
+  | boolean
+  | Sqlite3BinaryValue;
 
 /**
  * Read-only projection of a row encoded as a positional array.
@@ -117,8 +117,8 @@ export type Sqlite3RowValue = Sqlite3RowArray | Sqlite3RowObject;
  * operation.
  */
 export type Sqlite3WorkerRowCallback = (
-    row: Sqlite3RowValue,
-    statement: Sqlite3StatementContext
+  row: Sqlite3RowValue,
+  statement: Sqlite3StatementContext,
 ) => boolean | void;
 
 /**
@@ -127,245 +127,268 @@ export type Sqlite3WorkerRowCallback = (
  * within the worker pipeline.
  */
 export interface Sqlite3WorkerExecOptions {
-    sql: string;
-    bind?:
-        | ReadonlyArray<Sqlite3BindableValue>
-        | Readonly<Record<string, Sqlite3BindableValue>>;
-    rowMode?: "array" | "object" | "stmt" | number | `$${string}`;
-    resultRows?: Sqlite3RowValue[];
-    columnNames?: string[];
-    callback?: Sqlite3WorkerRowCallback | string;
-    returnValue?: "this" | "resultRows" | "saveSql";
-    saveSql?: string[];
-    countChanges?: boolean | 64;
+  sql: string;
+  bind?:
+    | ReadonlyArray<Sqlite3BindableValue>
+    | Readonly<Record<string, Sqlite3BindableValue>>;
+  rowMode?: "array" | "object" | "stmt" | number | `$${string}`;
+  resultRows?: Sqlite3RowValue[];
+  columnNames?: string[];
+  callback?: Sqlite3WorkerRowCallback | string;
+  returnValue?: "this" | "resultRows" | "saveSql";
+  saveSql?: string[];
+  countChanges?: boolean | 64;
 }
 
 /**
  * Request payload understood by the worker `open` handler.
  */
 export interface WorkerOpenRequest {
-    filename?: string;
-    vfs?: string;
-    flags?: string;
-    simulateError?: boolean;
+  filename?: string;
+  vfs?: string;
+  flags?: string;
+  simulateError?: boolean;
 }
 
 /**
  * Request payload understood by the worker `close` handler.
  */
 export interface WorkerCloseRequest {
-    unlink?: boolean;
+  unlink?: boolean;
 }
 
 /**
  * Converter directives accepted by the worker `xCall` handler.
  */
 export interface Sqlite3WorkerXCallConverters {
-    readonly args?: ReadonlyArray<
-        true | string | Readonly<[string, ...Sqlite3WasmCallArgument[]]>
-    >;
-    result?: true | Readonly<[string, ...Sqlite3WasmCallArgument[]]>;
+  readonly args?: ReadonlyArray<
+    true | string | Readonly<[string, ...Sqlite3WasmCallArgument[]]>
+  >;
+  result?: true | Readonly<[string, ...Sqlite3WasmCallArgument[]]>;
 }
 
 /**
  * Structured payload understood by the worker `xCall` handler.
  */
 export interface WorkerXCallRequest {
-    fn: string;
-    args: Sqlite3WasmCallArgument[];
-    converters?: Sqlite3WorkerXCallConverters;
-    resultType?: string;
-    argTypes?: string[];
-    resultSize?: number;
-    xCall?: "flex" | "wrapped";
-    flexResult?: Sqlite3WasmCallResult[];
+  fn: string;
+  args: Sqlite3WasmCallArgument[];
+  converters?: Sqlite3WorkerXCallConverters;
+  resultType?: string;
+  argTypes?: string[];
+  resultSize?: number;
+  xCall?: "flex" | "wrapped";
+  flexResult?: Sqlite3WasmCallResult[];
 }
 
 /**
  * Definition payload forwarded to the scalar/aggregate registration helpers.
  */
 export interface WorkerFunctionRequest {
-    name: string;
-    xFunc?: (...args: Sqlite3JsValue[]) => Sqlite3JsValue | void;
-    xStep?: (...args: Sqlite3JsValue[]) => void;
-    xFinal?: (...args: Sqlite3JsValue[]) => void;
-    xValue?: (...args: Sqlite3JsValue[]) => Sqlite3JsValue | void;
-    xInverse?: (...args: Sqlite3JsValue[]) => void;
-    xDestroy?: () => void;
-    pApp?: number;
-    arity?: number;
-    deterministic?: boolean;
-    directOnly?: boolean;
-    innocuous?: boolean;
+  name: string;
+  xFunc?: (...args: Sqlite3JsValue[]) => Sqlite3JsValue | void;
+  xStep?: (...args: Sqlite3JsValue[]) => void;
+  xFinal?: (...args: Sqlite3JsValue[]) => void;
+  xValue?: (...args: Sqlite3JsValue[]) => Sqlite3JsValue | void;
+  xInverse?: (...args: Sqlite3JsValue[]) => void;
+  xDestroy?: () => void;
+  pApp?: number;
+  arity?: number;
+  deterministic?: boolean;
+  directOnly?: boolean;
+  innocuous?: boolean;
 }
 
 /**
  * Snapshot of sqlite3 configuration flags returned by
  * `sqlite3_wasm_config_get()`.
  */
-export type Sqlite3ConfigSnapshot = Readonly<Record<string, number | string | boolean>>;
+export type Sqlite3ConfigSnapshot = Readonly<
+  Record<string, number | string | boolean>
+>;
 
 /**
  * Standard status object returned from sqlite3 configuration helpers.
  */
 export interface Sqlite3StatusObject {
-    result: number;
-    message?: string;
-    [key: string]: number | string | boolean | Sqlite3StatusObject | undefined;
+  result: number;
+  message?: string;
+  [key: string]: number | string | boolean | Sqlite3StatusObject | undefined;
 }
 
 /**
  * Success payload produced by the worker `open` handler.
  */
 export interface WorkerOpenResponse {
-    filename: string;
-    persistent: boolean;
-    dbId: string;
-    vfs?: string;
+  filename: string;
+  persistent: boolean;
+  dbId: string;
+  vfs?: string;
 }
 
 /**
  * Success payload produced by the worker `close` handler.
  */
 export interface WorkerCloseResponse {
-    filename?: string;
+  filename?: string;
 }
 
 /**
  * Success payload produced by the worker `exec` handler.
  */
 export interface WorkerExecResult extends Sqlite3WorkerExecOptions {
-    changeCount?: number | bigint;
+  changeCount?: number | bigint;
 }
 
 /**
  * Success payload produced by the worker `loadExtension` handler.
  */
 export interface WorkerExtensionResponse {
-    filename: string;
+  filename: string;
 }
 
 /**
  * Response produced by the worker `configSet` handler when the call succeeds.
  */
 export interface WorkerConfigResponse extends Sqlite3StatusObject {
-    message: string;
+  message: string;
 }
 
 /**
  * Error payload posted back to the main thread when a worker handler throws.
  */
 export interface Sqlite3WorkerErrorResult {
-    operation: string;
-    message: string;
-    errorClass: string;
-    input: Sqlite3WorkerMessage;
-    stack?: string | string[];
+  operation: string;
+  message: string;
+  errorClass: string;
+  input: Sqlite3WorkerMessage;
+  stack?: string | string[];
 }
 
 /**
  * Result envelope forwarded from the worker back to the caller.
  */
 export type Sqlite3WorkerResponse =
-    | {
-          type: "result" | "error";
-          dbId?: string;
-          messageId?: string | number;
-          workerReceivedTime: number;
-          workerRespondTime: number;
-          departureTime?: number;
-          result:
-              | WorkerOpenResponse
-              | WorkerCloseResponse
-              | WorkerExecResult
-              | WorkerExtensionResponse
-              | WorkerConfigResponse
-              | Sqlite3StatusObject
-              | Sqlite3ConfigSnapshot
-              | Sqlite3DatabaseHandle
-              | Sqlite3WorkerErrorResult
-              | Sqlite3WasmCallResult
-              | Sqlite3WasmCallResult[]
-              | number;
-      }
-    | {
-          type: "sqlite3-api";
-          result: "worker1-ready";
-      };
+  | {
+      type: "result" | "error";
+      dbId?: string;
+      messageId?: string | number;
+      workerReceivedTime: number;
+      workerRespondTime: number;
+      departureTime?: number;
+      result:
+        | WorkerOpenResponse
+        | WorkerCloseResponse
+        | WorkerExecResult
+        | WorkerExtensionResponse
+        | WorkerConfigResponse
+        | Sqlite3StatusObject
+        | Sqlite3ConfigSnapshot
+        | Sqlite3DatabaseHandle
+        | Sqlite3WorkerErrorResult
+        | Sqlite3WasmCallResult
+        | Sqlite3WasmCallResult[]
+        | number;
+    }
+  | {
+      type: "sqlite3-api";
+      result: "worker1-ready";
+    };
 
 /**
  * Mutable runtime state shared across worker message handlers.
  */
 export interface WorkerRuntimeState {
-    dbList: Sqlite3DatabaseHandle[];
-    idSeq: number;
-    idMap: WeakMap<Sqlite3DatabaseHandle, string>;
-    xfer: Transferable[];
-    dbs: Record<string, Sqlite3DatabaseHandle>;
-    open(options: WorkerOpenRequest): Sqlite3DatabaseHandle;
-    close(db: Sqlite3DatabaseHandle | undefined, alsoUnlink?: boolean): void;
-    post(message: Sqlite3WorkerResponse, transferList?: Transferable[]): void;
-    getDb(id: string | undefined, require?: boolean): Sqlite3DatabaseHandle | undefined;
+  dbList: Sqlite3DatabaseHandle[];
+  idSeq: number;
+  idMap: WeakMap<Sqlite3DatabaseHandle, string>;
+  xfer: Transferable[];
+  dbs: Record<string, Sqlite3DatabaseHandle>;
+  open(options: WorkerOpenRequest): Sqlite3DatabaseHandle;
+  close(db: Sqlite3DatabaseHandle | undefined, alsoUnlink?: boolean): void;
+  post(message: Sqlite3WorkerResponse, transferList?: Transferable[]): void;
+  getDb(
+    id: string | undefined,
+    require?: boolean,
+  ): Sqlite3DatabaseHandle | undefined;
 }
 
 /**
  * Common envelope shared by all worker request messages.
  */
 export interface Sqlite3WorkerMessageBase {
-    type: "sqlite3";
-    id?:
-        | "open"
-        | "close"
-        | "exec"
-        | "configGet"
-        | "configSet"
-        | "registerFunction"
-        | "unregisterFunction"
-        | "loadExtension"
-        | "xCall";
-    messageId?: string | number;
-    dbId?: string;
-    departureTime?: number;
+  type: "sqlite3";
+  id?:
+    | "open"
+    | "close"
+    | "exec"
+    | "configGet"
+    | "configSet"
+    | "registerFunction"
+    | "unregisterFunction"
+    | "loadExtension"
+    | "xCall";
+  messageId?: string | number;
+  dbId?: string;
+  departureTime?: number;
 }
 
 /**
  * Worker request message variants supported by the bootstrap helpers.
  */
 export type Sqlite3WorkerMessage =
-    | (Sqlite3WorkerMessageBase & { id: "open"; args?: WorkerOpenRequest })
-    | (Sqlite3WorkerMessageBase & { id: "close"; args?: WorkerCloseRequest })
-    | (Sqlite3WorkerMessageBase & {
-          id: "exec";
-          args: string | Sqlite3WorkerExecOptions;
-      })
-    | (Sqlite3WorkerMessageBase & { id: "configGet" })
-    | (Sqlite3WorkerMessageBase & { id: "configSet"; args: Record<string, number | string | boolean> })
-    | (Sqlite3WorkerMessageBase & { id: "registerFunction"; args: WorkerFunctionRequest })
-    | (Sqlite3WorkerMessageBase & { id: "unregisterFunction"; args: WorkerFunctionRequest })
-    | (Sqlite3WorkerMessageBase & { id: "loadExtension"; args: { filename: string; entryPoint?: string } })
-    | (Sqlite3WorkerMessageBase & { id: "xCall" } & WorkerXCallRequest);
+  | (Sqlite3WorkerMessageBase & { id: "open"; args?: WorkerOpenRequest })
+  | (Sqlite3WorkerMessageBase & { id: "close"; args?: WorkerCloseRequest })
+  | (Sqlite3WorkerMessageBase & {
+      id: "exec";
+      args: string | Sqlite3WorkerExecOptions;
+    })
+  | (Sqlite3WorkerMessageBase & { id: "configGet" })
+  | (Sqlite3WorkerMessageBase & {
+      id: "configSet";
+      args: Record<string, number | string | boolean>;
+    })
+  | (Sqlite3WorkerMessageBase & {
+      id: "registerFunction";
+      args: WorkerFunctionRequest;
+    })
+  | (Sqlite3WorkerMessageBase & {
+      id: "unregisterFunction";
+      args: WorkerFunctionRequest;
+    })
+  | (Sqlite3WorkerMessageBase & {
+      id: "loadExtension";
+      args: { filename: string; entryPoint?: string };
+    })
+  | (Sqlite3WorkerMessageBase & { id: "xCall" } & WorkerXCallRequest);
 
 /**
  * Struct-like object expected by `sqlite3.vfs.installVfs()`.
  */
 export interface Sqlite3StructMethodTable extends Sqlite3StructInstance {
-    installMethods(
-        methods: Record<string, (...args: Sqlite3WasmCallArgument[]) => Sqlite3WasmCallResult>,
-        applyArgcCheck: boolean
-    ): void;
-    registerVfs?(asDefault: boolean): Sqlite3StructInstance;
-    addOnDispose?(disposer: Sqlite3StructDisposer): void;
+  installMethods(
+    methods: Record<
+      string,
+      (...args: Sqlite3WasmCallArgument[]) => Sqlite3WasmCallResult
+    >,
+    applyArgcCheck: boolean,
+  ): void;
+  registerVfs?(asDefault: boolean): Sqlite3StructInstance;
+  addOnDispose?(disposer: Sqlite3StructDisposer): void;
 }
 
 /**
  * Describes a VFS or IO component supplied to `sqlite3.vfs.installVfs()`.
  */
 export interface Sqlite3VfsComponentOptions {
-    struct: Sqlite3StructMethodTable;
-    methods: Record<string, (...args: Sqlite3WasmCallArgument[]) => Sqlite3WasmCallResult>;
-    applyArgcCheck?: boolean;
-    name?: string;
-    asDefault?: boolean;
+  struct: Sqlite3StructMethodTable;
+  methods: Record<
+    string,
+    (...args: Sqlite3WasmCallArgument[]) => Sqlite3WasmCallResult
+  >;
+  applyArgcCheck?: boolean;
+  name?: string;
+  asDefault?: boolean;
 }
 
 /**
@@ -373,23 +396,23 @@ export interface Sqlite3VfsComponentOptions {
  * `io` or `vfs` must be provided.
  */
 export interface Sqlite3VfsInstallOptions {
-    io?: Sqlite3VfsComponentOptions;
-    vfs?: Sqlite3VfsComponentOptions;
+  io?: Sqlite3VfsComponentOptions;
+  vfs?: Sqlite3VfsComponentOptions;
 }
 
 declare global {
-    /**
-     * Bootstrap entry point installed during module initialisation. Consumers
-     * may call the function to receive the sqlite3 facade if the automatic
-     * bootstrap is bypassed.
-     */
-    var sqlite3ApiBootstrap: Sqlite3BootstrapFunction;
+  /**
+   * Bootstrap entry point installed during module initialisation. Consumers
+   * may call the function to receive the sqlite3 facade if the automatic
+   * bootstrap is bypassed.
+   */
+  var sqlite3ApiBootstrap: Sqlite3BootstrapFunction;
 
-    /**
-     * Optional configuration overrides inspected by the bootstrapper before
-     * resolving the final {@link BootstrapConfig} instance.
-     */
-    var sqlite3ApiConfig: Partial<BootstrapConfig> | undefined;
+  /**
+   * Optional configuration overrides inspected by the bootstrapper before
+   * resolving the final {@link BootstrapConfig} instance.
+   */
+  var sqlite3ApiConfig: Partial<BootstrapConfig> | undefined;
 }
 
 /**
@@ -398,7 +421,7 @@ declare global {
  * caches the result on both the bootstrap function and Emscripten module.
  */
 export function runSQLite3PostLoadInit(
-    emscriptenModule: Sqlite3EmscriptenModule
+  emscriptenModule: Sqlite3EmscriptenModule,
 ): void;
 
 export {};

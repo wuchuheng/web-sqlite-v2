@@ -8,122 +8,122 @@ import type { EmscriptenModule } from "../emscripten-module.d.ts";
  * settings for the target architecture.
  */
 export interface BootstrapConfig {
-    /**
-     * WebAssembly module exports containing SQLite3 C functions
-     *
-     * Typically obtained from Module.asm or wasmExports after WASM instantiation.
-     * Contains all sqlite3_* functions, memory allocation functions, and WASM-specific
-     * utility functions.
-     */
-    exports?: WebAssembly.Exports;
+  /**
+   * WebAssembly module exports containing SQLite3 C functions
+   *
+   * Typically obtained from Module.asm or wasmExports after WASM instantiation.
+   * Contains all sqlite3_* functions, memory allocation functions, and WASM-specific
+   * utility functions.
+   */
+  exports?: WebAssembly.Exports;
 
-    /**
-     * WebAssembly linear memory object
-     *
-     * The shared memory buffer between JavaScript and WASM. All HEAP8, HEAP16,
-     * HEAP32, and HEAP64 typed arrays are views into this memory.
-     */
-    memory?: WebAssembly.Memory;
+  /**
+   * WebAssembly linear memory object
+   *
+   * The shared memory buffer between JavaScript and WASM. All HEAP8, HEAP16,
+   * HEAP32, and HEAP64 typed arrays are views into this memory.
+   */
+  memory?: WebAssembly.Memory;
 
-    /**
-     * Enable BigInt support for 64-bit integers
-     *
-     * When true, uses BigInt for sqlite3_int64 values. When false, large integers
-     * may lose precision when represented as JavaScript numbers.
-     */
-    bigIntEnabled: boolean;
+  /**
+   * Enable BigInt support for 64-bit integers
+   *
+   * When true, uses BigInt for sqlite3_int64 values. When false, large integers
+   * may lose precision when represented as JavaScript numbers.
+   */
+  bigIntEnabled: boolean;
 
-    /**
-     * Debug message logging function
-     *
-     * Called with debug-level messages during initialization and runtime. Set to
-     * a no-op function to disable debug output.
-     */
-    debug: (...args: (string | number | boolean)[]) => void;
+  /**
+   * Debug message logging function
+   *
+   * Called with debug-level messages during initialization and runtime. Set to
+   * a no-op function to disable debug output.
+   */
+  debug: (...args: (string | number | boolean)[]) => void;
 
-    /**
-     * Warning message logging function
-     *
-     * Called with warning-level messages for non-fatal issues like deprecated
-     * API usage or suboptimal configurations.
-     */
-    warn: (...args: (string | number | boolean)[]) => void;
+  /**
+   * Warning message logging function
+   *
+   * Called with warning-level messages for non-fatal issues like deprecated
+   * API usage or suboptimal configurations.
+   */
+  warn: (...args: (string | number | boolean)[]) => void;
 
-    /**
-     * Error message logging function
-     *
-     * Called with error-level messages for failures during initialization or
-     * runtime errors that may cause instability.
-     */
-    error: (...args: (string | number | boolean)[]) => void;
+  /**
+   * Error message logging function
+   *
+   * Called with error-level messages for failures during initialization or
+   * runtime errors that may cause instability.
+   */
+  error: (...args: (string | number | boolean)[]) => void;
 
-    /**
-     * General logging function
-     *
-     * Called with informational messages during normal operation. Typically
-     * mapped to console.log or a custom logger.
-     */
-    log: (...args: (string | number | boolean)[]) => void;
+  /**
+   * General logging function
+   *
+   * Called with informational messages during normal operation. Typically
+   * mapped to console.log or a custom logger.
+   */
+  log: (...args: (string | number | boolean)[]) => void;
 
-    /**
-     * WASMFS OPFS directory mount point
-     *
-     * If set, specifies the directory path where OPFS (Origin Private File System)
-     * should be mounted in the WASMFS virtual file system. Must be in the form
-     * "/dir-name" (leading slash, no trailing slash, single path component).
-     *
-     * @example "/opfs-storage"
-     */
-    wasmfsOpfsDir?: string;
+  /**
+   * WASMFS OPFS directory mount point
+   *
+   * If set, specifies the directory path where OPFS (Origin Private File System)
+   * should be mounted in the WASMFS virtual file system. Must be in the form
+   * "/dir-name" (leading slash, no trailing slash, single path component).
+   *
+   * @example "/opfs-storage"
+   */
+  wasmfsOpfsDir?: string;
 
-    /**
-     * Use standard C allocator instead of SQLite's allocator
-     *
-     * When true, uses malloc/free/realloc from the C standard library. When false,
-     * uses sqlite3_malloc/sqlite3_free/sqlite3_realloc. Affects allocExportName,
-     * deallocExportName, and reallocExportName.
-     */
-    useStdAlloc: boolean;
+  /**
+   * Use standard C allocator instead of SQLite's allocator
+   *
+   * When true, uses malloc/free/realloc from the C standard library. When false,
+   * uses sqlite3_malloc/sqlite3_free/sqlite3_realloc. Affects allocExportName,
+   * deallocExportName, and reallocExportName.
+   */
+  useStdAlloc: boolean;
 
-    /**
-     * Name of the allocation function export
-     *
-     * Either "sqlite3_malloc" (useStdAlloc: false) or "malloc" (useStdAlloc: true).
-     * Used by wasm.alloc() to allocate memory for strings, blobs, and temporary buffers.
-     */
-    allocExportName: string;
+  /**
+   * Name of the allocation function export
+   *
+   * Either "sqlite3_malloc" (useStdAlloc: false) or "malloc" (useStdAlloc: true).
+   * Used by wasm.alloc() to allocate memory for strings, blobs, and temporary buffers.
+   */
+  allocExportName: string;
 
-    /**
-     * Name of the deallocation function export
-     *
-     * Either "sqlite3_free" (useStdAlloc: false) or "free" (useStdAlloc: true).
-     * Used by wasm.dealloc() to free previously allocated memory.
-     */
-    deallocExportName: string;
+  /**
+   * Name of the deallocation function export
+   *
+   * Either "sqlite3_free" (useStdAlloc: false) or "free" (useStdAlloc: true).
+   * Used by wasm.dealloc() to free previously allocated memory.
+   */
+  deallocExportName: string;
 
-    /**
-     * Name of the reallocation function export
-     *
-     * Either "sqlite3_realloc" (useStdAlloc: false) or "realloc" (useStdAlloc: true).
-     * Used by wasm.realloc() to resize previously allocated memory blocks.
-     */
-    reallocExportName: string;
+  /**
+   * Name of the reallocation function export
+   *
+   * Either "sqlite3_realloc" (useStdAlloc: false) or "realloc" (useStdAlloc: true).
+   * Used by wasm.realloc() to resize previously allocated memory blocks.
+   */
+  reallocExportName: string;
 
-    /**
-     * Size of a pointer in bytes for the target WASM architecture
-     *
-     * Typically 4 for wasm32 (default) or 8 for wasm64. Determines heap offset
-     * calculations and pointer arithmetic.
-     */
-    wasmPtrSizeof?: number;
+  /**
+   * Size of a pointer in bytes for the target WASM architecture
+   *
+   * Typically 4 for wasm32 (default) or 8 for wasm64. Determines heap offset
+   * calculations and pointer arithmetic.
+   */
+  wasmPtrSizeof?: number;
 
-    /**
-     * Intermediate representation type for pointers
-     *
-     * Either "i32" for 32-bit pointers (wasm32) or "i64" for 64-bit pointers (wasm64).
-     * Used by xWrap signature strings to specify pointer parameter types.
-     */
-    wasmPtrIR?: "i32" | "i64";
+  /**
+   * Intermediate representation type for pointers
+   *
+   * Either "i32" for 32-bit pointers (wasm32) or "i64" for 64-bit pointers (wasm64).
+   * Used by xWrap signature strings to specify pointer parameter types.
+   */
+  wasmPtrIR?: "i32" | "i64";
 }
 
 /**
@@ -134,22 +134,22 @@ export interface BootstrapConfig {
  * module and global object.
  */
 export interface ResolveBootstrapConfigOptions {
-    /**
-     * Reference to the Emscripten module
-     *
-     * Used to extract default values for exports and memory if not explicitly
-     * provided in apiConfig. Typically the global Module object created by
-     * Emscripten glue code.
-     */
-    moduleRef?: EmscriptenModule;
+  /**
+   * Reference to the Emscripten module
+   *
+   * Used to extract default values for exports and memory if not explicitly
+   * provided in apiConfig. Typically the global Module object created by
+   * Emscripten glue code.
+   */
+  moduleRef?: EmscriptenModule;
 
-    /**
-     * Global object reference
-     *
-     * The global object (globalThis, window, self) used for looking up default
-     * configuration values. Defaults to globalThis if not provided.
-     */
-    globalObject?: typeof globalThis;
+  /**
+   * Global object reference
+   *
+   * The global object (globalThis, window, self) used for looking up default
+   * configuration values. Defaults to globalThis if not provided.
+   */
+  globalObject?: typeof globalThis;
 }
 
 /**
@@ -178,6 +178,6 @@ export interface ResolveBootstrapConfigOptions {
  * ```
  */
 export function resolveBootstrapConfig(
-    apiConfig?: Partial<BootstrapConfig>,
-    options?: ResolveBootstrapConfigOptions
+  apiConfig?: Partial<BootstrapConfig>,
+  options?: ResolveBootstrapConfigOptions,
 ): BootstrapConfig;

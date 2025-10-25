@@ -27,7 +27,7 @@ export const initRandomFill = (): RandomFillFunction => {
                     | BigInt64Array
                     | BigUint64Array
                     | Float32Array
-                    | Float64Array
+                    | Float64Array,
             ) as unknown as T;
         };
     }
@@ -40,7 +40,7 @@ export const initRandomFill = (): RandomFillFunction => {
  * environment specific helper and subsequent calls reuse the cached instance.
  */
 export let randomFill: RandomFillFunction = <T extends ArrayBufferView>(
-    view: T
+    view: T,
 ): T => {
     randomFill = initRandomFill();
     return randomFill(view);
@@ -52,7 +52,7 @@ export let randomFill: RandomFillFunction = <T extends ArrayBufferView>(
 export const zeroMemory = (
     heap: Uint8Array,
     address: number,
-    size: number
+    size: number,
 ): void => {
     heap.fill(0, address, address + size);
 };
@@ -69,13 +69,13 @@ export const alignMemory = (size: number, alignment: number): number => {
  */
 export const createMmapAlloc = (
     emscriptenBuiltinMemalign: BuiltinMemalign,
-    heap: Uint8Array
+    heap: Uint8Array,
 ): MmapAllocator => {
     return (size) => {
         const alignedSize = alignMemory(size, MMAP_ALIGNMENT_BYTES);
         const pointer = emscriptenBuiltinMemalign(
             MMAP_ALIGNMENT_BYTES,
-            alignedSize
+            alignedSize,
         );
 
         if (pointer) {

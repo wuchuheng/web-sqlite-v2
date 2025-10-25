@@ -90,7 +90,7 @@ export function createBindingHelpers(context, validators) {
             index,
             strPtr,
             length,
-            capi.SQLITE_WASM_DEALLOC
+            capi.SQLITE_WASM_DEALLOC,
         );
     };
 
@@ -128,7 +128,7 @@ export function createBindingHelpers(context, validators) {
                     if (!util.bigIntFits64(value)) {
                         toss(
                             "BigInt value is too big to store without precision loss:",
-                            value
+                            value,
                         );
                     } else if (wasm.bigIntEnabled) {
                         binder = capi.sqlite3_bind_int64;
@@ -138,7 +138,7 @@ export function createBindingHelpers(context, validators) {
                     } else {
                         toss(
                             "BigInt value is too big to store without precision loss:",
-                            value
+                            value,
                         );
                     }
                 } else {
@@ -156,7 +156,7 @@ export function createBindingHelpers(context, validators) {
                 rc = capi.sqlite3_bind_int(
                     stmtPointer,
                     resolvedIndex,
-                    value ? 1 : 0
+                    value ? 1 : 0,
                 );
                 break;
             case BindTypes.blob: {
@@ -170,7 +170,7 @@ export function createBindingHelpers(context, validators) {
                 } else if (!util.isBindableTypedArray(value)) {
                     toss(
                         "Binding a value as a blob requires that it be a string,",
-                        "Uint8Array, Int8Array, or ArrayBuffer."
+                        "Uint8Array, Int8Array, or ArrayBuffer.",
                     );
                 }
                 const blobPtr = wasm.alloc(blob.byteLength || 1);
@@ -180,7 +180,7 @@ export function createBindingHelpers(context, validators) {
                     resolvedIndex,
                     blobPtr,
                     blob.byteLength,
-                    capi.SQLITE_WASM_DEALLOC
+                    capi.SQLITE_WASM_DEALLOC,
                 );
                 break;
             }

@@ -1,4 +1,8 @@
-import { UTF8ArrayToString, lengthBytesUTF8, stringToUTF8Array } from "../../utils/utf8.mjs";
+import {
+    UTF8ArrayToString,
+    lengthBytesUTF8,
+    stringToUTF8Array,
+} from "../../utils/utf8.mjs";
 import { ERRNO_CODES, OPEN_FLAGS, STREAM_STATE_MASK } from "./constants.mjs";
 
 /** Write protection flag used with mmap/allocate helpers. */
@@ -71,7 +75,7 @@ export function createStreamHelpers(FS) {
                 buffer,
                 offset,
                 length,
-                position
+                position,
             );
             if (!seeking) stream.position += bytesRead;
             return bytesRead;
@@ -107,7 +111,7 @@ export function createStreamHelpers(FS) {
                 offset,
                 length,
                 position,
-                canOwn
+                canOwn,
             );
             if (!seeking) stream.position += bytesWritten;
             return bytesWritten;
@@ -150,7 +154,13 @@ export function createStreamHelpers(FS) {
             if (!length) {
                 throw new FS.ErrnoError(ERRNO_CODES.EINVAL);
             }
-            return stream.stream_ops.mmap(stream, length, position, prot, flags);
+            return stream.stream_ops.mmap(
+                stream,
+                length,
+                position,
+                prot,
+                flags,
+            );
         },
         msync(stream, buffer, offset, length, mmapFlags) {
             if (!stream.stream_ops.msync) {
@@ -161,7 +171,7 @@ export function createStreamHelpers(FS) {
                 buffer,
                 offset,
                 length,
-                mmapFlags
+                mmapFlags,
             );
         },
         ioctl(stream, cmd, arg) {
@@ -193,7 +203,7 @@ export function createStreamHelpers(FS) {
         writeFile(path, data, opts = {}) {
             opts.flags =
                 opts.flags ||
-                (OPEN_FLAGS.O_WRONLY | OPEN_FLAGS.O_CREAT | OPEN_FLAGS.O_TRUNC);
+                OPEN_FLAGS.O_WRONLY | OPEN_FLAGS.O_CREAT | OPEN_FLAGS.O_TRUNC;
             const stream = FS.open(path, opts.flags, opts.mode);
             if (typeof data == "string") {
                 const buf = new Uint8Array(lengthBytesUTF8(data) + 1);
@@ -201,9 +211,16 @@ export function createStreamHelpers(FS) {
                     data,
                     buf,
                     0,
-                    buf.length
+                    buf.length,
                 );
-                FS.write(stream, buf, 0, actualNumBytes, undefined, opts.canOwn);
+                FS.write(
+                    stream,
+                    buf,
+                    0,
+                    actualNumBytes,
+                    undefined,
+                    opts.canOwn,
+                );
             } else if (ArrayBuffer.isView(data)) {
                 FS.write(
                     stream,
@@ -211,7 +228,7 @@ export function createStreamHelpers(FS) {
                     0,
                     data.byteLength,
                     undefined,
-                    opts.canOwn
+                    opts.canOwn,
                 );
             } else {
                 throw new Error("Unsupported data type");

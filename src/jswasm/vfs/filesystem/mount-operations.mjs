@@ -29,7 +29,7 @@ export function createMountOperations(FS, { err }) {
             FS.syncFSRequests++;
             if (FS.syncFSRequests > 1) {
                 err(
-                    `warning: ${FS.syncFSRequests} FS.syncfs operations in flight at once, probably just doing extra work`
+                    `warning: ${FS.syncFSRequests} FS.syncfs operations in flight at once, probably just doing extra work`,
                 );
             }
             const mounts = FS.getMounts(FS.root.mount);

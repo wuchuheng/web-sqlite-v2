@@ -16,9 +16,9 @@ The Object-Oriented API (OO1) provides a high-level, JavaScript-friendly interfa
 
 Each API item in this document has a verification status indicator:
 
--   ⚫ **Not Verified** - Type definitions and JSDoc have not been verified against source code
--   🟡 **Partially Verified** - Type definitions verified, but JSDoc incomplete or inconsistent
--   🟢 **Verified** - Type definitions and JSDoc fully verified and consistent with source code
+- ⚫ **Not Verified** - Type definitions and JSDoc have not been verified against source code
+- 🟡 **Partially Verified** - Type definitions verified, but JSDoc incomplete or inconsistent
+- 🟢 **Verified** - Type definitions and JSDoc fully verified and consistent with source code
 
 Last updated: 2025-10-18
 
@@ -26,10 +26,10 @@ Last updated: 2025-10-18
 
 The OO1 API is accessed via `sqlite3.oo1` and includes:
 
--   **DB class** - Main database connection class
--   **Stmt class** - Prepared statement wrapper
--   **JsStorageDb class** - localStorage/sessionStorage database integration
--   **OpfsDb class** - Origin Private File System persistent databases
+- **DB class** - Main database connection class
+- **Stmt class** - Prepared statement wrapper
+- **JsStorageDb class** - localStorage/sessionStorage database integration
+- **OpfsDb class** - Origin Private File System persistent databases
 
 ## DB Class 🟢
 
@@ -58,10 +58,10 @@ constructor(config: {
 
 **Flags**: String containing one or more:
 
--   `"c"` - Create if doesn't exist (SQLITE_OPEN_CREATE)
--   `"r"` - Read-only (SQLITE_OPEN_READONLY)
--   `"w"` - Read-write (SQLITE_OPEN_READWRITE)
--   `"t"` - Trace mode (outputs SQL to console)
+- `"c"` - Create if doesn't exist (SQLITE_OPEN_CREATE)
+- `"r"` - Read-only (SQLITE_OPEN_READONLY)
+- `"w"` - Read-write (SQLITE_OPEN_READWRITE)
+- `"t"` - Trace mode (outputs SQL to console)
 
 **Default**: `"c"` (equivalent to `SQLITE_OPEN_CREATE | SQLITE_OPEN_READWRITE`)
 
@@ -236,10 +236,13 @@ const result = db.exec("SELECT * FROM users WHERE age > ?", {
 console.log(result.resultRows);
 
 // Capture the SQL text evaluated by exec()
-const statements = db.exec(`
+const statements = db.exec(
+    `
     CREATE TABLE log (msg TEXT);
     INSERT INTO log VALUES ('hi');
-`, { returnValue: "saveSql" });
+`,
+    { returnValue: "saveSql" },
+);
 console.log(statements.saveSql); // ["CREATE TABLE log (msg TEXT)", "INSERT INTO log VALUES ('hi')"]
 ```
 
@@ -775,7 +778,7 @@ const db = new sqlite3.oo1.JsStorageDb("local");
 
 // Use normally
 db.exec(
-    "CREATE TABLE IF NOT EXISTS settings (key TEXT PRIMARY KEY, value TEXT)"
+    "CREATE TABLE IF NOT EXISTS settings (key TEXT PRIMARY KEY, value TEXT)",
 );
 db.exec("INSERT OR REPLACE INTO settings VALUES (?, ?)", {
     bind: ["theme", "dark"],
@@ -979,19 +982,19 @@ declare namespace sqlite3 {
             exec(sql: string, options?: ExecOptions): this | ExecResult;
             selectArray(
                 sql: string,
-                bind?: any[] | Record<string, any>
+                bind?: any[] | Record<string, any>,
             ): any[] | undefined;
             selectArrays(
                 sql: string,
-                bind?: any[] | Record<string, any>
+                bind?: any[] | Record<string, any>,
             ): any[][];
             selectObject(
                 sql: string,
-                bind?: any[] | Record<string, any>
+                bind?: any[] | Record<string, any>,
             ): Record<string, any> | undefined;
             selectObjects(
                 sql: string,
-                bind?: any[] | Record<string, any>
+                bind?: any[] | Record<string, any>,
             ): Record<string, any>[];
             selectValue(sql: string, bind?: any[] | Record<string, any>): any;
             prepare(sql: string): Stmt;
@@ -1040,6 +1043,6 @@ declare namespace sqlite3 {
 
 ## See Also
 
--   [C-Style API Documentation](./c-style-api.md) - Low-level C API bindings
--   [WASM Utilities Documentation](./wasm-utilities.md) - Memory management utilities
--   [Worker API Documentation](./worker-api.md) - Web Worker integration
+- [C-Style API Documentation](./c-style-api.md) - Low-level C API bindings
+- [WASM Utilities Documentation](./wasm-utilities.md) - Memory management utilities
+- [Worker API Documentation](./worker-api.md) - Web Worker integration

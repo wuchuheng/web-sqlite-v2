@@ -39,12 +39,12 @@ export function runSQLite3PostLoadInit(_EmscriptenModule) {
      */
     globalThis.sqlite3ApiBootstrap = function sqlite3ApiBootstrap(
         apiConfig = globalThis.sqlite3ApiConfig ||
-            sqlite3ApiBootstrap.defaultConfig
+            sqlite3ApiBootstrap.defaultConfig,
     ) {
         if (sqlite3ApiBootstrap.sqlite3) {
             (sqlite3ApiBootstrap.sqlite3.config || console).warn(
                 "sqlite3ApiBootstrap() called multiple times.",
-                "Config and external initializers are ignored on calls after the first."
+                "Config and external initializers are ignored on calls after the first.",
             );
             return sqlite3ApiBootstrap.sqlite3;
         }
@@ -72,7 +72,7 @@ export function runSQLite3PostLoadInit(_EmscriptenModule) {
 
         if (config.wasmfsOpfsDir && !/^\/[^/]+$/.test(config.wasmfsOpfsDir)) {
             toss3(
-                "config.wasmfsOpfsDir must be falsy or in the form '/dir-name'."
+                "config.wasmfsOpfsDir must be falsy or in the form '/dir-name'.",
             );
         }
 
@@ -98,7 +98,7 @@ export function runSQLite3PostLoadInit(_EmscriptenModule) {
                 toss3(
                     "API config object requires a WebAssembly.Memory object",
                     "in either config.exports.memory (exported)",
-                    "or config.memory (imported)."
+                    "or config.memory (imported).",
                 ),
         });
 
@@ -125,7 +125,7 @@ export function runSQLite3PostLoadInit(_EmscriptenModule) {
                 SQLite3Error,
                 WasmAllocError,
                 toss3,
-            })
+            }),
         );
 
         // Build the public facade and run any synchronous bootstrap hooks.
@@ -155,7 +155,7 @@ export function runSQLite3PostLoadInit(_EmscriptenModule) {
                         : wasmExports,
                 memory: Module.wasmMemory,
             },
-            globalThis.sqlite3ApiConfig || {}
+            globalThis.sqlite3ApiConfig || {},
         );
 
         globalThis.sqlite3ApiConfig = SABC;
@@ -176,7 +176,7 @@ export function runSQLite3PostLoadInit(_EmscriptenModule) {
             "This is not running in an Emscripten module context, so",
             "globalThis.sqlite3ApiBootstrap() is _not_ being called due to lack",
             "of config info for the WASM environment.",
-            "It must be called manually."
+            "It must be called manually.",
         );
     }
 }

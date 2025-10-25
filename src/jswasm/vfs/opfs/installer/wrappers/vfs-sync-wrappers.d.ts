@@ -14,5 +14,5 @@ import type {
  * @returns Object containing all VFS method implementations
  */
 export function createVfsSyncWrappers(
-  deps: VfsSyncWrapperDeps
+  deps: VfsSyncWrapperDeps,
 ): VfsSyncWrappers;

@@ -36,7 +36,7 @@ export function createVfsInitializer() {
             if (this.pointer !== capi.sqlite3_vfs_find(this.$zName)) {
                 toss(
                     "BUG: sqlite3_vfs_find(vfs.$zName) failed for just-installed VFS",
-                    this
+                    this,
                 );
             }
             return this;
@@ -53,7 +53,7 @@ export function createVfsInitializer() {
                     if ("vfs" === key) {
                         if (!o.struct.$zName && "string" === typeof o.name) {
                             o.struct.addOnDispose(
-                                (o.struct.$zName = wasm.allocCString(o.name))
+                                (o.struct.$zName = wasm.allocCString(o.name)),
                             );
                         }
                         o.struct.registerVfs(!!o.asDefault);
@@ -64,7 +64,7 @@ export function createVfsInitializer() {
                 toss(
                     "Misuse: installVfs() options object requires at least",
                     "one of:",
-                    propList
+                    propList,
                 );
             return this;
         };
@@ -133,7 +133,7 @@ export function createVtabInitializer() {
                 } else if (!wasm.isPtr(ptr)) {
                     sqlite3.SQLite3Error.toss(
                         "Invalid argument to",
-                        methodName + "()"
+                        methodName + "()",
                     );
                 }
                 let rc = this.get(ptr);
@@ -175,7 +175,7 @@ export function createVtabInitializer() {
             if (f.errorReporter instanceof Function) {
                 try {
                     f.errorReporter(
-                        "sqlite3_module::" + methodName + "(): " + err.message
+                        "sqlite3_module::" + methodName + "(): " + err.message,
                     );
                 } catch (_e) {}
             }
@@ -216,7 +216,7 @@ export function createVtabInitializer() {
                                 argc,
                                 argv,
                                 ppVtab,
-                                pzErr
+                                pzErr,
                             ) {
                                 try {
                                     return func(...arguments) || 0;
@@ -227,7 +227,7 @@ export function createVtabInitializer() {
                                         wasm.dealloc(wasm.peekPtr(pzErr));
                                         wasm.pokePtr(
                                             pzErr,
-                                            wasm.allocCString(e.message)
+                                            wasm.allocCString(e.message),
                                         );
                                     }
                                     return vtab.xError(methodName, e);

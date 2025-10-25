@@ -17,10 +17,10 @@
  * @module syscalls
  */
 
-import { createSyscallHelpers } from './syscall-helpers.mjs';
-import { createStatSyscalls } from './stat-syscalls.mjs';
-import { createFileSyscalls } from './file-syscalls.mjs';
-import { createIoctlSyscalls } from './ioctl-syscalls.mjs';
+import { createSyscallHelpers } from "./syscall-helpers.mjs";
+import { createStatSyscalls } from "./stat-syscalls.mjs";
+import { createFileSyscalls } from "./file-syscalls.mjs";
+import { createIoctlSyscalls } from "./ioctl-syscalls.mjs";
 
 /**
  * Creates and initializes all syscall implementations
@@ -69,7 +69,7 @@ export function createSYSCALLS(
     HEAP64,
     UTF8ArrayToString,
     lengthBytesUTF8,
-    stringToUTF8Array
+    stringToUTF8Array,
 ) {
     // 1. Initialize syscall helpers and utilities
     const {
@@ -90,7 +90,7 @@ export function createSYSCALLS(
         HEAP64,
         UTF8ArrayToString,
         lengthBytesUTF8,
-        stringToUTF8Array
+        stringToUTF8Array,
     );
 
     // 2. Initialize stat syscalls (stat, lstat, fstat, newfstatat)
@@ -109,11 +109,18 @@ export function createSYSCALLS(
         lengthBytesUTF8,
         HEAP8,
         HEAP16,
-        HEAP32
+        HEAP32,
     );
 
     // 4. Initialize ioctl syscalls (terminal control)
-    const ioctlSyscalls = createIoctlSyscalls(FS, SYSCALLS, syscallGetVarargP, HEAP8, HEAP16, HEAP32);
+    const ioctlSyscalls = createIoctlSyscalls(
+        FS,
+        SYSCALLS,
+        syscallGetVarargP,
+        HEAP8,
+        HEAP16,
+        HEAP32,
+    );
 
     // 5. Return unified syscall interface
     return {

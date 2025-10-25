@@ -44,7 +44,7 @@ export function createVfsSyncWrappers(deps) {
             wasm.poke(
                 pOut,
                 2440587.5 + new Date().getTime() / 86400000,
-                "double"
+                "double",
             );
             return 0;
         },

@@ -31,7 +31,9 @@ export const PATH: PathUtilities = {
     splitPath: (filename) => {
         const match = splitPathRe.exec(filename);
         if (!match) {
-            throw new Error(`Unable to resolve path components for "${filename}".`);
+            throw new Error(
+                `Unable to resolve path components for "${filename}".`,
+            );
         }
         return match.slice(1) as [string, string, string, string];
     },
@@ -68,7 +70,7 @@ export const PATH: PathUtilities = {
 
         let normalized = PATH.normalizeArray(
             path.split("/").filter(Boolean),
-            !isAbsolute
+            !isAbsolute,
         ).join("/");
 
         if (!normalized && !isAbsolute) {
@@ -115,16 +117,18 @@ export const PATH: PathUtilities = {
 };
 
 export const createPathFS = (
-    fs: FileSystemLike | null = null
+    fs: FileSystemLike | null = null,
 ): PathFsUtilities => {
     const resolveInternal = (...args: string[]): string => {
         let resolvedPath = "";
         let resolvedAbsolute = false;
 
         for (let i = args.length - 1; i >= -1 && !resolvedAbsolute; i -= 1) {
-            const value = i >= 0 ? args[i] : fs?.cwd() ?? "/";
+            const value = i >= 0 ? args[i] : (fs?.cwd() ?? "/");
             if (typeof value !== "string") {
-                throw new TypeError("Arguments to path.resolve must be strings");
+                throw new TypeError(
+                    "Arguments to path.resolve must be strings",
+                );
             }
 
             if (!value) {
@@ -137,7 +141,7 @@ export const createPathFS = (
 
         const normalized = PATH.normalizeArray(
             resolvedPath.split("/").filter(Boolean),
-            !resolvedAbsolute
+            !resolvedAbsolute,
         ).join("/");
 
         if (!normalized && !resolvedAbsolute) {

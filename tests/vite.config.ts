@@ -1,4 +1,4 @@
-import { defineConfig } from 'vite'
+import { defineConfig } from "vite";
 
 /**
  * Vite configuration for SQLite3 WASM test suite
@@ -14,10 +14,10 @@ export default defineConfig({
     headers: {
       // Required for SharedArrayBuffer and OPFS functionality
       // These headers match scripts/http-server.ts configuration
-      'Cross-Origin-Embedder-Policy': 'require-corp',
-      'Cross-Origin-Opener-Policy': 'same-origin',
-      'Access-Control-Allow-Origin': '*',
-      'Cache-Control': 'no-cache, no-store, must-revalidate',
+      "Cross-Origin-Embedder-Policy": "require-corp",
+      "Cross-Origin-Opener-Policy": "same-origin",
+      "Access-Control-Allow-Origin": "*",
+      "Cache-Control": "no-cache, no-store, must-revalidate",
     },
   },
 
@@ -26,31 +26,31 @@ export default defineConfig({
     port: 3000,
     cors: true,
     headers: {
-      'Cross-Origin-Embedder-Policy': 'require-corp',
-      'Cross-Origin-Opener-Policy': 'same-origin',
-      'Access-Control-Allow-Origin': '*',
-      'Cache-Control': 'no-cache, no-store, must-revalidate',
+      "Cross-Origin-Embedder-Policy": "require-corp",
+      "Cross-Origin-Opener-Policy": "same-origin",
+      "Access-Control-Allow-Origin": "*",
+      "Cache-Control": "no-cache, no-store, must-revalidate",
     },
   },
 
   // Build configuration
   build: {
-    outDir: 'dist',
+    outDir: "dist",
     sourcemap: true,
     rollupOptions: {
       input: {
-        main: './index.html',
+        main: "./index.html",
       },
     },
   },
 
   // Optimize dependencies
   optimizeDeps: {
-    exclude: ['@wuchuheng/web-sqlite'],
+    exclude: ["@wuchuheng/web-sqlite"],
   },
 
   // Worker configuration
   worker: {
-    format: 'es',
+    format: "es",
   },
-})
+});

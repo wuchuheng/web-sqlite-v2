@@ -2,7 +2,7 @@
 id: DOC-API-WORKER
 title: Worker API Reference
 summary: Capture the message-based and promise-based worker interfaces for executing SQLite queries off the main thread.
-audience: ["engineering","ops"]
+audience: ["engineering", "ops"]
 status: in-progress
 owner: API Documentation Maintainer
 updated: 2025-02-14
@@ -59,7 +59,7 @@ function initWorker1API(): void;
 **Worker Script Example** (`sqlite-worker.js`):
 
 ```javascript
-importScripts('sqlite3.js');
+importScripts("sqlite3.js");
 
 sqlite3InitModule().then((sqlite3) => {
     sqlite3.initWorker1API();
@@ -70,16 +70,16 @@ sqlite3InitModule().then((sqlite3) => {
 **Main Thread Setup**:
 
 ```javascript
-const worker = new Worker('sqlite-worker.js');
+const worker = new Worker("sqlite-worker.js");
 
-worker.onmessage = function(event) {
+worker.onmessage = function (event) {
     const message = event.data;
-    console.log('Received from worker:', message);
+    console.log("Received from worker:", message);
 };
 
 worker.postMessage({
-    type: 'open',
-    args: { filename: ':memory:' }
+    type: "open",
+    args: { filename: ":memory:" },
 });
 ```
 
@@ -200,12 +200,12 @@ interface OpenResponse {
 
 ```javascript
 worker.postMessage({
-    type: 'open',
-    messageId: 'open-1',
+    type: "open",
+    messageId: "open-1",
     args: {
-        filename: 'mydb.sqlite3',
-        vfs: 'opfs'
-    }
+        filename: "mydb.sqlite3",
+        vfs: "opfs",
+    },
 });
 
 // Response:
@@ -255,10 +255,10 @@ interface CloseResponse {
 
 ```javascript
 worker.postMessage({
-    type: 'close',
-    messageId: 'close-1',
-    dbId: 'db-1',
-    args: { unlink: false }
+    type: "close",
+    messageId: "close-1",
+    dbId: "db-1",
+    args: { unlink: false },
 });
 
 // Response result.filename echoes the path of the closed database when available.
@@ -322,36 +322,36 @@ interface ExecResponse {
 ```javascript
 // Simple execution
 worker.postMessage({
-    type: 'exec',
-    messageId: 'exec-1',
-    dbId: 'db-1',
+    type: "exec",
+    messageId: "exec-1",
+    dbId: "db-1",
     args: {
-        sql: 'CREATE TABLE users (id INTEGER PRIMARY KEY, name TEXT)'
-    }
+        sql: "CREATE TABLE users (id INTEGER PRIMARY KEY, name TEXT)",
+    },
 });
 
 // Insert with bind parameters
 worker.postMessage({
-    type: 'exec',
-    messageId: 'exec-2',
-    dbId: 'db-1',
+    type: "exec",
+    messageId: "exec-2",
+    dbId: "db-1",
     args: {
-        sql: 'INSERT INTO users (name) VALUES (?)',
-        bind: ['Alice']
-    }
+        sql: "INSERT INTO users (name) VALUES (?)",
+        bind: ["Alice"],
+    },
 });
 
 // Query with results
 worker.postMessage({
-    type: 'exec',
-    messageId: 'exec-3',
-    dbId: 'db-1',
+    type: "exec",
+    messageId: "exec-3",
+    dbId: "db-1",
     args: {
-        sql: 'SELECT * FROM users',
-        rowMode: 'object',
-        returnValue: 'resultRows',
-        columnNames: []
-    }
+        sql: "SELECT * FROM users",
+        rowMode: "object",
+        returnValue: "resultRows",
+        columnNames: [],
+    },
 });
 
 // Response:
@@ -369,26 +369,26 @@ worker.postMessage({
 
 // Change counts
 worker.postMessage({
-    type: 'exec',
-    messageId: 'exec-5',
-    dbId: 'db-1',
+    type: "exec",
+    messageId: "exec-5",
+    dbId: "db-1",
     args: {
         sql: 'UPDATE users SET name = name || "!"',
-        countChanges: true
-    }
+        countChanges: true,
+    },
 });
 // Response result.changeCount contains the number of affected rows
 
 // Stream rows via callback messages
 worker.postMessage({
-    type: 'exec',
-    messageId: 'exec-4',
-    dbId: 'db-1',
+    type: "exec",
+    messageId: "exec-4",
+    dbId: "db-1",
     args: {
-        sql: 'SELECT name FROM users',
-        rowMode: '$name',
-        callback: 'users-row'
-    }
+        sql: "SELECT name FROM users",
+        rowMode: "$name",
+        callback: "users-row",
+    },
 });
 
 // The worker will post messages like:
@@ -438,9 +438,9 @@ interface ExportResponse {
 
 ```javascript
 worker.postMessage({
-    type: 'export',
-    messageId: 'export-1',
-    dbId: 'db-1'
+    type: "export",
+    messageId: "export-1",
+    dbId: "db-1",
 });
 
 // Response includes Uint8Array of database
@@ -486,8 +486,8 @@ interface ConfigGetResponse {
 
 ```javascript
 worker.postMessage({
-    type: 'config-get',
-    messageId: 'config-1'
+    type: "config-get",
+    messageId: "config-1",
 });
 ```
 
@@ -496,21 +496,21 @@ worker.postMessage({
 Errors are returned as special error messages:
 
 ```javascript
-worker.onmessage = function(event) {
+worker.onmessage = function (event) {
     const msg = event.data;
 
-    if (msg.type === 'error') {
+    if (msg.type === "error") {
         console.error(`Error in ${msg.operation}: ${msg.message}`);
         return;
     }
 
     // Handle normal responses
     switch (msg.type) {
-        case 'open':
-            console.log('Database opened:', msg.dbId);
+        case "open":
+            console.log("Database opened:", msg.dbId);
             break;
-        case 'exec':
-            console.log('Query result:', msg.result);
+        case "exec":
+            console.log("Query result:", msg.result);
             break;
     }
 };
@@ -536,7 +536,7 @@ interface PromiserConfig {
 }
 
 function sqlite3Worker1Promiser(
-    config?: PromiserConfig | ((promiser: Promiser) => void)
+    config?: PromiserConfig | ((promiser: Promiser) => void),
 ): Promiser;
 
 declare namespace sqlite3Worker1Promiser {
@@ -550,31 +550,31 @@ declare namespace sqlite3Worker1Promiser {
 
 ```javascript
 const promiser = sqlite3Worker1Promiser({
-    worker: new Worker('sqlite-worker.js'),
+    worker: new Worker("sqlite-worker.js"),
     onready: async (factory) => {
         const { result } = await factory({
-            type: 'open',
-            args: { filename: ':memory:' }
+            type: "open",
+            args: { filename: ":memory:" },
         });
         const dbId = result.dbId;
 
         await factory({
-            type: 'exec',
+            type: "exec",
             dbId,
-            args: { sql: 'CREATE TABLE users (id INTEGER, name TEXT)' }
+            args: { sql: "CREATE TABLE users (id INTEGER, name TEXT)" },
         });
 
         const query = await factory({
-            type: 'exec',
+            type: "exec",
             dbId,
             args: {
-                sql: 'SELECT * FROM users',
-                rowMode: 'object',
-                returnValue: 'resultRows'
-            }
+                sql: "SELECT * FROM users",
+                rowMode: "object",
+                returnValue: "resultRows",
+            },
         });
-        console.log('Rows:', query.result.resultRows);
-    }
+        console.log("Rows:", query.result.resultRows);
+    },
 });
 ```
 
@@ -584,17 +584,17 @@ const promiser = sqlite3Worker1Promiser({
 
 ```javascript
 const promiser = await sqlite3Worker1Promiser.v2({
-    worker: new Worker('sqlite-worker.js')
+    worker: new Worker("sqlite-worker.js"),
 });
 
 const { result } = await promiser({
-    type: 'open',
-    args: { filename: ':memory:' }
+    type: "open",
+    args: { filename: ":memory:" },
 });
 
 await promiser({
-    type: 'close',
-    dbId: result.dbId
+    type: "close",
+    dbId: result.dbId,
 });
 ```
 
@@ -605,14 +605,14 @@ await promiser({
 ```javascript
 try {
     await promiser({
-        type: 'exec',
-        dbId: 'db-1',
+        type: "exec",
+        dbId: "db-1",
         args: {
-            sql: 'INVALID SQL'
-        }
+            sql: "INVALID SQL",
+        },
     });
 } catch (error) {
-    console.error('SQL Error:', error.message);
+    console.error("SQL Error:", error.message);
 }
 ```
 
@@ -620,28 +620,28 @@ try {
 
 ```javascript
 // main.js
-import promiserFactory from './sqlite3-worker1-promiser.mjs';
+import promiserFactory from "./sqlite3-worker1-promiser.mjs";
 
 async function main() {
     // Initialize worker with promiser
     const promiser = await promiserFactory({
-        worker: new Worker('sqlite-worker.js'),
-        onready: () => console.log('Worker ready')
+        worker: new Worker("sqlite-worker.js"),
+        onready: () => console.log("Worker ready"),
     });
 
     try {
         // Open OPFS database
         const { dbId } = await promiser({
-            type: 'open',
+            type: "open",
             args: {
-                filename: 'myapp.sqlite3',
-                vfs: 'opfs'
-            }
+                filename: "myapp.sqlite3",
+                vfs: "opfs",
+            },
         });
 
         // Create schema
         await promiser({
-            type: 'exec',
+            type: "exec",
             dbId,
             args: {
                 sql: `
@@ -651,49 +651,50 @@ async function main() {
                         completed BOOLEAN DEFAULT 0,
                         created_at DATETIME DEFAULT CURRENT_TIMESTAMP
                     )
-                `
-            }
+                `,
+            },
         });
 
         // Insert todo
         await promiser({
-            type: 'exec',
+            type: "exec",
             dbId,
             args: {
-                sql: 'INSERT INTO todos (title) VALUES (?)',
-                bind: ['Learn SQLite WASM']
-            }
+                sql: "INSERT INTO todos (title) VALUES (?)",
+                bind: ["Learn SQLite WASM"],
+            },
         });
 
         // Query todos
         const result = await promiser({
-            type: 'exec',
+            type: "exec",
             dbId,
             args: {
-                sql: 'SELECT * FROM todos ORDER BY created_at DESC',
-                rowMode: 'object',
-                returnValue: 'resultRows'
-            }
+                sql: "SELECT * FROM todos ORDER BY created_at DESC",
+                rowMode: "object",
+                returnValue: "resultRows",
+            },
         });
 
-        console.log('Todos:', result.result.resultRows);
+        console.log("Todos:", result.result.resultRows);
 
         // Export database
         const exportResult = await promiser({
-            type: 'export',
-            dbId
+            type: "export",
+            dbId,
         });
 
-        console.log(`Exported ${exportResult.result.byteArray.byteLength} bytes`);
+        console.log(
+            `Exported ${exportResult.result.byteArray.byteLength} bytes`,
+        );
 
         // Close database
         await promiser({
-            type: 'close',
-            dbId
+            type: "close",
+            dbId,
         });
-
     } catch (error) {
-        console.error('Database error:', error);
+        console.error("Database error:", error);
     } finally {
         promiser.close(); // Terminate worker
     }
@@ -709,31 +710,31 @@ The Worker API supports multiple concurrent database connections using `dbId`:
 ```javascript
 // Open multiple databases
 const db1 = await promiser({
-    type: 'open',
-    args: { filename: 'users.db' }
+    type: "open",
+    args: { filename: "users.db" },
 });
 
 const db2 = await promiser({
-    type: 'open',
-    args: { filename: 'products.db' }
+    type: "open",
+    args: { filename: "products.db" },
 });
 
 // Execute on specific databases
 await promiser({
-    type: 'exec',
+    type: "exec",
     dbId: db1.dbId,
-    args: { sql: 'SELECT * FROM users' }
+    args: { sql: "SELECT * FROM users" },
 });
 
 await promiser({
-    type: 'exec',
+    type: "exec",
     dbId: db2.dbId,
-    args: { sql: 'SELECT * FROM products' }
+    args: { sql: "SELECT * FROM products" },
 });
 
 // Close both
-await promiser({ type: 'close', dbId: db1.dbId });
-await promiser({ type: 'close', dbId: db2.dbId });
+await promiser({ type: "close", dbId: db1.dbId });
+await promiser({ type: "close", dbId: db2.dbId });
 ```
 
 ## Limitations and Considerations ⚫
@@ -751,7 +752,7 @@ Worker API operations are asynchronous, which complicates:
 ```javascript
 // Execute entire transaction in single message
 await promiser({
-    type: 'exec',
+    type: "exec",
     dbId,
     args: {
         sql: `
@@ -759,8 +760,8 @@ await promiser({
             INSERT INTO users (name) VALUES ('Alice');
             INSERT INTO users (name) VALUES ('Bob');
             COMMIT;
-        `
-    }
+        `,
+    },
 });
 ```
 
@@ -775,23 +776,23 @@ Large result sets incur message passing overhead. Consider:
 ```javascript
 // Bad: Transfer all rows
 const all = await promiser({
-    type: 'exec',
+    type: "exec",
     dbId,
     args: {
-        sql: 'SELECT * FROM large_table',
-        returnValue: 'resultRows'
-    }
+        sql: "SELECT * FROM large_table",
+        returnValue: "resultRows",
+    },
 });
 
 // Good: Paginate
 const page = await promiser({
-    type: 'exec',
+    type: "exec",
     dbId,
     args: {
-        sql: 'SELECT * FROM large_table LIMIT ? OFFSET ?',
+        sql: "SELECT * FROM large_table LIMIT ? OFFSET ?",
         bind: [100, 0],
-        returnValue: 'resultRows'
-    }
+        returnValue: "resultRows",
+    },
 });
 ```
 
@@ -806,6 +807,7 @@ Message data must be serializable (no functions, circular references, etc.).
 ## Browser Compatibility ⚫
 
 **Required Features**:
+
 - Web Workers support (all modern browsers)
 - Structured cloning for message passing
 - OPFS support for persistent storage (Chrome 86+, Firefox 111+, Safari 15.4+)
@@ -813,8 +815,8 @@ Message data must be serializable (no functions, circular references, etc.).
 **Check for Worker Support**:
 
 ```javascript
-if (typeof Worker === 'undefined') {
-    console.error('Web Workers not supported');
+if (typeof Worker === "undefined") {
+    console.error("Web Workers not supported");
 } else {
     // Initialize worker API
 }
@@ -825,12 +827,14 @@ if (typeof Worker === 'undefined') {
 ### When to Use Worker API ⚫
 
 **Use Worker API when**:
+
 - Running computationally expensive queries
 - Working with large datasets
 - Building responsive UIs that can't afford main thread blocking
 - Implementing real-time applications
 
 **Use OO1 API (main thread) when**:
+
 - Simple, quick queries
 - Need synchronous API
 - Building Node.js applications
@@ -839,60 +843,63 @@ if (typeof Worker === 'undefined') {
 ### Optimization Tips ⚫
 
 1. **Batch Operations**:
+
 ```javascript
 // Bad: Multiple messages
 for (const user of users) {
     await promiser({
-        type: 'exec',
+        type: "exec",
         dbId,
         args: {
-            sql: 'INSERT INTO users (name) VALUES (?)',
-            bind: [user.name]
-        }
+            sql: "INSERT INTO users (name) VALUES (?)",
+            bind: [user.name],
+        },
     });
 }
 
 // Good: Single message with transaction
 await promiser({
-    type: 'exec',
+    type: "exec",
     dbId,
     args: {
         sql: `
             BEGIN TRANSACTION;
-            ${users.map(u => `INSERT INTO users (name) VALUES ('${u.name}');`).join('\n')}
+            ${users.map((u) => `INSERT INTO users (name) VALUES ('${u.name}');`).join("\n")}
             COMMIT;
-        `
-    }
+        `,
+    },
 });
 ```
 
 2. **Minimize Round Trips**:
+
 ```javascript
 // Combine multiple operations in one SQL string
 await promiser({
-    type: 'exec',
+    type: "exec",
     dbId,
     args: {
         sql: `
             CREATE TABLE IF NOT EXISTS users (id INTEGER PRIMARY KEY, name TEXT);
             CREATE INDEX IF NOT EXISTS idx_users_name ON users(name);
             INSERT INTO users (name) VALUES ('Alice'), ('Bob'), ('Charlie');
-        `
-    }
+        `,
+    },
 });
 ```
 
 3. **Use Appropriate Row Modes**:
+
 ```javascript
 // Array mode is faster for large result sets
 const arrayResults = await promiser({
-    type: 'exec',
+    type: "exec",
     dbId,
     args: {
-        sql: 'SELECT * FROM large_table',
-        rowMode: 'array', // Faster than 'object'
-        returnValue: 'resultRows'
-    }
+        sql: "SELECT * FROM large_table",
+        rowMode: "array", // Faster than 'object'
+        returnValue: "resultRows",
+    },
 });
 ```
 

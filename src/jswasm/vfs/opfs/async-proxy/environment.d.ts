@@ -1,18 +1,18 @@
 export type WorkerMessageValue =
-    | string
-    | number
-    | bigint
-    | boolean
-    | symbol
-    | object;
+  | string
+  | number
+  | bigint
+  | boolean
+  | symbol
+  | object;
 
 export type WorkerMessagePayload = ReadonlyArray<WorkerMessageValue>;
 
 export type WorkerMessageType = string;
 
 export type WorkerPostFn = (
-    type: WorkerMessageType,
-    ...payload: WorkerMessagePayload
+  type: WorkerMessageType,
+  ...payload: WorkerMessagePayload
 ) => void;
 
 export type ErrorPart = string | number | bigint | boolean | symbol;

@@ -59,7 +59,7 @@ export function createDbCleanup(wasm, capi) {
     }.bind(
         Object.assign(Object.create(null), {
             dbMap: new Map(),
-        })
+        }),
     );
 
     /**
@@ -172,7 +172,7 @@ export function createDbCleanup(wasm, capi) {
                     name + "(",
                     closeArgs,
                     ") threw:",
-                    e
+                    e,
                 );
             }
         }
@@ -191,7 +191,7 @@ export function createDbCleanup(wasm, capi) {
                         capi.SQLITE_UTF8,
                         0,
                         0,
-                        0
+                        0,
                     );
                 } catch (_e) {}
             }
@@ -209,17 +209,7 @@ export function createDbCleanup(wasm, capi) {
             for (const e of fmap) {
                 const name = e[0],
                     arities = e[1];
-                const fargs = [
-                    pDb,
-                    name,
-                    0,
-                    capi.SQLITE_UTF8,
-                    0,
-                    0,
-                    0,
-                    0,
-                    0,
-                ];
+                const fargs = [pDb, name, 0, capi.SQLITE_UTF8, 0, 0, 0, 0, 0];
                 if (i) fargs.push(0);
                 for (const arity of arities) {
                     try {

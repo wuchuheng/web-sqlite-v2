@@ -9,7 +9,7 @@
  * @module stat-syscalls
  */
 
-import { SPECIAL_FLAGS } from './errno-constants.mjs';
+import { SPECIAL_FLAGS } from "./errno-constants.mjs";
 
 /**
  * Creates stat-related syscall implementations
@@ -47,7 +47,7 @@ export function createStatSyscalls(FS, SYSCALLS) {
             return SYSCALLS.doStat(FS.stat, path, buf);
         } catch (e) {
             // 3. Handle errors
-            if (typeof FS === 'undefined' || !(e.name === 'ErrnoError')) {
+            if (typeof FS === "undefined" || !(e.name === "ErrnoError")) {
                 throw e;
             }
             return -e.errno;
@@ -76,7 +76,7 @@ export function createStatSyscalls(FS, SYSCALLS) {
             return SYSCALLS.doStat(FS.lstat, path, buf);
         } catch (e) {
             // 3. Handle errors
-            if (typeof FS === 'undefined' || !(e.name === 'ErrnoError')) {
+            if (typeof FS === "undefined" || !(e.name === "ErrnoError")) {
                 throw e;
             }
             return -e.errno;
@@ -106,7 +106,7 @@ export function createStatSyscalls(FS, SYSCALLS) {
             return SYSCALLS.doStat(FS.stat, stream.path, buf);
         } catch (e) {
             // 3. Handle errors
-            if (typeof FS === 'undefined' || !(e.name === 'ErrnoError')) {
+            if (typeof FS === "undefined" || !(e.name === "ErrnoError")) {
                 throw e;
             }
             return -e.errno;
@@ -149,7 +149,7 @@ export function createStatSyscalls(FS, SYSCALLS) {
             return SYSCALLS.doStat(nofollow ? FS.lstat : FS.stat, path, buf);
         } catch (e) {
             // 5. Handle errors
-            if (typeof FS === 'undefined' || !(e.name === 'ErrnoError')) {
+            if (typeof FS === "undefined" || !(e.name === "ErrnoError")) {
                 throw e;
             }
             return -e.errno;

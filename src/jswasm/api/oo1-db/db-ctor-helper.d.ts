@@ -7,32 +7,32 @@ import type { DB } from "@wuchuheng/web-sqlite";
  * Normalised constructor options produced by the helper.
  */
 export interface NormalizedDbConstructorOptions extends DBConstructorOptions {
-    filename: string | number;
-    flags: string;
-    vfs: string | number | null;
+  filename: string | number;
+  flags: string;
+  vfs: string | number | null;
 }
 
 /**
  * Helper invoked by the Database constructor to open sqlite3 connections.
  */
 export interface DbCtorHelper {
-    (
-        this: DB,
-        options?: string | number | DBConstructorOptions,
-        flags?: string,
-        vfs?: string | number | null
-    ): void;
-    /** Normalises the constructor arguments into an options structure. */
-    normalizeArgs(
-        options?: string | number | DBConstructorOptions,
-        flags?: string,
-        vfs?: string | number | null
-    ): NormalizedDbConstructorOptions;
-    /** Registers a callback invoked after a VFS-backed connection opens. */
-    setVfsPostOpenCallback(
-        vfsPointer: number,
-        callback: (db: DB, sqlite3: SQLite3API) => void
-    ): void;
+  (
+    this: DB,
+    options?: string | number | DBConstructorOptions,
+    flags?: string,
+    vfs?: string | number | null,
+  ): void;
+  /** Normalises the constructor arguments into an options structure. */
+  normalizeArgs(
+    options?: string | number | DBConstructorOptions,
+    flags?: string,
+    vfs?: string | number | null,
+  ): NormalizedDbConstructorOptions;
+  /** Registers a callback invoked after a VFS-backed connection opens. */
+  setVfsPostOpenCallback(
+    vfsPointer: number,
+    callback: (db: DB, sqlite3: SQLite3API) => void,
+  ): void;
 }
 
 /**

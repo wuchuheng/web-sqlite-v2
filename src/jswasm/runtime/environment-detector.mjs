@@ -21,10 +21,7 @@ export function detectEnvironment() {
     if (ENVIRONMENT_IS_WEB || ENVIRONMENT_IS_WORKER) {
         if (ENVIRONMENT_IS_WORKER) {
             scriptDirectory = self.location.href;
-        } else if (
-            typeof document !== "undefined" &&
-            document.currentScript
-        ) {
+        } else if (typeof document !== "undefined" && document.currentScript) {
             scriptDirectory = document.currentScript.src;
         }
 
@@ -34,7 +31,7 @@ export function detectEnvironment() {
         } else {
             scriptDirectory = scriptDirectory.substr(
                 0,
-                scriptDirectory.replace(/[?#].*/, "").lastIndexOf("/") + 1
+                scriptDirectory.replace(/[?#].*/, "").lastIndexOf("/") + 1,
             );
         }
     }
@@ -69,16 +66,14 @@ export function createFileReaders(ENVIRONMENT_IS_WORKER) {
 
     // 2. Create asynchronous reader for all browser environments
     readers.readAsync = (url) => {
-        return fetch(url, { credentials: "same-origin" }).then(
-            (response) => {
-                if (response.ok) {
-                    return response.arrayBuffer();
-                }
-                return Promise.reject(
-                    new Error(response.status + " : " + response.url)
-                );
+        return fetch(url, { credentials: "same-origin" }).then((response) => {
+            if (response.ok) {
+                return response.arrayBuffer();
             }
-        );
+            return Promise.reject(
+                new Error(response.status + " : " + response.url),
+            );
+        });
     };
 
     // 3. Return reader functions

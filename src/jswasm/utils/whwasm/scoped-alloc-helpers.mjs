@@ -85,7 +85,7 @@ export function attachScopedAllocators(context) {
             jstr,
             returnWithLength,
             target.scopedAlloc,
-            "scopedAllocCString()"
+            "scopedAllocCString()",
         );
 
     const allocMainArgv = (isScoped, list) => {
@@ -93,14 +93,13 @@ export function attachScopedAllocators(context) {
         const allocCString =
             target[isScoped ? "scopedAllocCString" : "allocCString"];
         const ptr =
-            allocator((list.length + 1) * target.ptrSizeof) || context.toss(
-                "Allocation failed for argv list."
-            );
+            allocator((list.length + 1) * target.ptrSizeof) ||
+            context.toss("Allocation failed for argv list.");
         let index = 0;
         for (const entry of list) {
             target.pokePtr(
                 ptr + target.ptrSizeof * index++,
-                allocCString(String(entry))
+                allocCString(String(entry)),
             );
         }
         target.pokePtr(ptr + target.ptrSizeof * index, 0);
@@ -209,8 +208,7 @@ export function attachScopedAllocators(context) {
      * @returns {unknown}
      */
     target.xCall = (fname, ...args) => {
-        const fn =
-            fname instanceof Function ? fname : target.xGet(fname);
+        const fn = fname instanceof Function ? fname : target.xGet(fname);
         if (!(fn instanceof Function)) {
             context.toss("Exported symbol", fname, "is not a function.");
         }
