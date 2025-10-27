@@ -10,7 +10,7 @@ export default defineConfig({
       fileName: () => "index.js",
     },
     outDir: "dist",
-    sourcemap: false,
+    sourcemap: true,
     emptyOutDir: true,
     minify: false,
     rollupOptions: {

@@ -3,16 +3,16 @@
   "version": "1.0.0",
   "description": "SQLite3 WebAssembly implementation with OPFS support",
   "type": "module",
-  "main": "./src/jswasm/sqlite3.mjs",
-  "types": "./src/jswasm/sqlite3.d.ts",
+  "main": "./dist/index.js",
+  "types": "./dist/index.d.ts",
   "exports": {
     ".": {
-      "types": "./src/jswasm/sqlite3.d.ts",
-      "default": "./src/jswasm/sqlite3.mjs"
+      "types": "./dist/index.d.ts",
+      "default": "./dist/index.js"
     }
   },
   "scripts": {
-    "build": "vite build",
+    "build": "vite build --watch",
     "test": "pnpm -w --filter @wuchuheng/web-sqlite-tests dev",
     "lint": "eslint . --ext .ts,.js,.mjs --ignore-path .gitignore --fix; pnpm run test:lint",
     "test:lint": "cd tests && pnpm run lint",
