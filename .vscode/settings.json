@@ -103,6 +103,7 @@
         "jstr",
         "jstrcpy",
         "jstrlen",
+        "jswasm",
         "kvinfo",
         "kvstorage",
         "kvvfs",
