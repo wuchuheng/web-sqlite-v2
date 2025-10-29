@@ -3,6 +3,7 @@
 This guide defines the JSDoc style required for all exported functions, classes, types, and variables in the `src/jswasm` migration to TypeScript. It complements the Three‑Phase numeric comments (inside function bodies) by documenting API intent and usage at declaration sites.
 
 Goals:
+
 - Make APIs self‑describing and IDE‑friendly (hover tooltips, parameter help).
 - Preserve behavioral clarity during the JS→TS migration.
 - Keep documentation consistent and concise.
@@ -24,6 +25,7 @@ Numeric comments remain inside function bodies only; do not mix numeric comments
 ## Function JSDoc Templates
 
 Minimal function:
+
 ```ts
 /**
  * Short action description in imperative mood.
@@ -32,10 +34,13 @@ Minimal function:
  * @param foo - What this value represents
  * @returns What the function returns
  */
-export function doThing(foo: string): number { /* ... */ }
+export function doThing(foo: string): number {
+    /* ... */
+}
 ```
 
 With throws and example:
+
 ```ts
 /**
  * Parses a JSON string into a value.
@@ -48,10 +53,13 @@ With throws and example:
  * const value = safeParse('{"a":1}')
  * // value => { a: 1 }
  */
-export function safeParse<T = unknown>(input: string): T { /* ... */ }
+export function safeParse<T = unknown>(input: string): T {
+    /* ... */
+}
 ```
 
 Generic:
+
 ```ts
 /**
  * Maps values using a provided transform.
@@ -62,13 +70,18 @@ Generic:
  * @param fn - Mapping function from T to R
  * @returns Mapped items of type R
  */
-export function map<T, R>(items: readonly T[], fn: (t: T) => R): R[] { /* ... */ }
+export function map<T, R>(items: readonly T[], fn: (t: T) => R): R[] {
+    /* ... */
+}
 ```
 
 Constant/enum/object:
+
 ```ts
 /** UTF‑8 encoding constants and bit masks. */
-export const UTF8_CONSTANTS = { /* ... */ } as const
+export const UTF8_CONSTANTS = {
+    /* ... */
+} as const;
 ```
 
 ## UTF‑8 Utilities — Example JSDoc
@@ -84,7 +97,13 @@ Match these shapes when migrating `src/jswasm/utils/utf8.mjs` to TS.
  * @param maxBytesToRead - Maximum bytes to read; stops at NUL or limit
  * @returns Decoded string
  */
-export function UTF8ArrayToString(bytes: Uint8Array, idx = 0, maxBytesToRead = Number.NaN): string { /* ... */ }
+export function UTF8ArrayToString(
+    bytes: Uint8Array,
+    idx = 0,
+    maxBytesToRead = Number.NaN,
+): string {
+    /* ... */
+}
 
 /**
  * Calculates the number of bytes required to encode a string as UTF‑8.
@@ -92,7 +111,9 @@ export function UTF8ArrayToString(bytes: Uint8Array, idx = 0, maxBytesToRead = N
  * @param str - The input string
  * @returns Byte length in UTF‑8 encoding
  */
-export function lengthBytesUTF8(str: string): number { /* ... */ }
+export function lengthBytesUTF8(str: string): number {
+    /* ... */
+}
 
 /**
  * Encodes a string into a destination byte array using UTF‑8.
@@ -105,11 +126,13 @@ export function lengthBytesUTF8(str: string): number { /* ... */ }
  * @returns Number of bytes written (excluding NUL)
  */
 export function stringToUTF8Array(
-  str: string,
-  heap: Uint8Array | number[],
-  outIdx: number,
-  maxBytesToWrite: number,
-): number { /* ... */ }
+    str: string,
+    heap: Uint8Array | number[],
+    outIdx: number,
+    maxBytesToWrite: number,
+): number {
+    /* ... */
+}
 
 /**
  * Converts a string to a UTF‑8 encoded number[] array.
@@ -120,10 +143,12 @@ export function stringToUTF8Array(
  * @returns Encoded byte array
  */
 export function intArrayFromString(
-  input: string,
-  dontAddNull?: boolean,
-  length?: number,
-): number[] { /* ... */ }
+    input: string,
+    dontAddNull?: boolean,
+    length?: number,
+): number[] {
+    /* ... */
+}
 ```
 
 ## Style Guidance
@@ -147,4 +172,3 @@ export function intArrayFromString(
 ---
 
 This guide aligns with the repository’s base rules: readability first, numeric comments inside function bodies, and consistent documentation for public APIs.
-

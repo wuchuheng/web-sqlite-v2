@@ -16,42 +16,42 @@ Scope
 Message Protocol
 
 - Request
-  - shape: { action: 0|1|2 | 'open'|'sql'|'close', messageId: number, payload: any }
-  - Actions
-    - Open: payload = string (db name). Returns DB metadata.
-    - Sql: payload = string (SQL). Returns rows in object rowMode.
-    - Close: payload = { unlink?: boolean }. Returns filename info.
+    - shape: { action: 0|1|2 | 'open'|'sql'|'close', messageId: number, payload: any }
+    - Actions
+        - Open: payload = string (db name). Returns DB metadata.
+        - Sql: payload = string (SQL). Returns rows in object rowMode.
+        - Close: payload = { unlink?: boolean }. Returns filename info.
 
 - Response
-  - shape: {
+    - shape: {
       action: same-as-request,
       messageId: same,
       success: boolean,
       payload: any,
       error?: string,
       errorStack?: string
-    }
+      }
 
 Behavior Details
 
 - Initialization
-  - Lazily load sqlite3 via src/jswasm/sqlite3.mjs on first Open.
-  - Default bootstrappers install OPFS and Worker APIs; our messages are distinct
-    (they don’t use { type: 'sqlite3' }), so no handler conflicts.
+    - Lazily load sqlite3 via src/jswasm/sqlite3.mjs on first Open.
+    - Default bootstrappers install OPFS and Worker APIs; our messages are distinct
+      (they don’t use { type: 'sqlite3' }), so no handler conflicts.
 
 - Open
-  - Prefer sqlite3.oo1.OpfsDb if available; fallback to sqlite3.oo1.DB.
-  - Compute a stable dbId using pointer and a local sequence for replies.
-  - Return { id, filename, vfs } in payload.
+    - Prefer sqlite3.oo1.OpfsDb if available; fallback to sqlite3.oo1.DB.
+    - Compute a stable dbId using pointer and a local sequence for replies.
+    - Return { id, filename, vfs } in payload.
 
 - Sql
-  - Execute with rowMode: 'object' and returnValue: 'resultRows'.
-  - payload: { rows: Array<Record<string, unknown>> }.
+    - Execute with rowMode: 'object' and returnValue: 'resultRows'.
+    - payload: { rows: Array<Record<string, unknown>> }.
 
 - Close
-  - Close active DB; if payload.unlink is true and VFS supports it, best-effort unlink
-    is left to default wrappers (not implemented explicitly in this pass).
-  - payload: { filename?: string }.
+    - Close active DB; if payload.unlink is true and VFS supports it, best-effort unlink
+      is left to default wrappers (not implemented explicitly in this pass).
+    - payload: { filename?: string }.
 
 Error Handling
 
@@ -75,4 +75,3 @@ Validation
 
 - After implementing, run lint and build locally. The Worker code is self-contained
   and does not require network access.
-
