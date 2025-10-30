@@ -12,6 +12,7 @@ Scope:
 
 - Modules under `src/jswasm/**`, starting with low‑risk leaf utilities (e.g., `src/jswasm/utils/utf8.mjs`).
 - No external API changes to the public package surface unless explicitly planned.
+- Target environment: browser‑only. Node.js execution is out of scope.
 
 Principles:
 
@@ -21,44 +22,34 @@ Principles:
 - Verify twice: unit tests for the module + browser tests for integrated behavior.
 - Remove originals only after both test layers pass and references are switched.
 
-## Workflow Overview
+## Primary Safety Workflow (Mandatory)
 
-1. Pick a leaf module
+The migration must be conservative and test‑driven. Follow these exact steps for every module:
 
-- Example: `src/jswasm/utils/utf8.mjs`.
-- Confirm it has no or minimal internal dependencies.
+1) Baseline tests for the original file
+- Write unit tests targeting the ORIGINAL `.mjs` (no changes to code yet).
+- Run tests and ensure GREEN baseline. If tests fail, fix tests first or adjust scope.
 
-2. Add unit tests for the current JS behavior
+2) Create the migration file (TypeScript)
+- Add a `.ts` file with identical exports and behavior, in a dedicated subdirectory if applicable (e.g., `utils/utf8/utf8.ts`).
+- Add types and JSDoc; avoid `any`. If inference is not feasible for a case, leave the smallest possible `any` and document it for later.
 
-- Add a unit test file (Vitest recommended) that imports the existing `.mjs` and asserts behavior.
-- Cover: happy paths, multibyte UTF‑8, surrogate pairs, boundaries (buffer limits, null terminator), and error cases.
+3) Test the migration file
+- Point the unit tests at the MIGRATION implementation (prefer the emitted `.js` from the `.ts`, not the `.ts` directly), and re‑run tests until GREEN.
 
-3. Create a `.ts` migration file side‑by‑side
+4) Compile and replace
+- Use `tsconfig.migration.json` to COMPILE ONLY the module under migration, emitting `.js` (and optionally `.d.ts`) next to the `.ts`.
+- After tests pass against the emitted `.js`, update internal imports from `.mjs` to `.js` for this module, and remove the old `.mjs`.
 
-- Create `src/jswasm/utils/utf8.ts` with the same named exports and behavior.
-- Add types for inputs/outputs; keep function shapes identical.
-- Use in‑function numeric comments for the three‑phase pattern only when helpful.
+5) Verify integration
+- Run the browser tests (`pnpm test`) to ensure 0 failures and no console errors.
+- Keep changes scoped; do not refactor other modules in the same PR unless explicitly requested.
 
-4. Compile the TS file to JS in place
+This process ensures a safe, step‑by‑step refactoring: tests first, migrate, test again, then compile and replace.
 
-- Use `tsc` to emit `utf8.js` alongside `utf8.ts` in the same directory (in‑place emit).
-- Do not remove the original `utf8.mjs` yet.
+## Workflow Summary
 
-5. Point unit tests at the new implementation
-
-- Update the unit test import to target the compiled `utf8.js` (or import `utf8.ts` directly via Vitest TS support).
-- Ensure unit tests pass identically.
-
-6. Switch internal references gradually
-
-- Replace imports of `./utf8.mjs` with `./utf8.js` in dependents.
-- Run browser tests (`pnpm test`) and verify all suites pass with 0 failures.
-
-7. Remove originals (code + manual types)
-
-- After unit + browser tests pass and references are updated, delete the original `.mjs`.
-- If a manual `.d.ts` existed for this module, replace it with the newly emitted `.d.ts` from the TS build (see “Manual .d.ts Replacement Policy”).
-- Run linting (`pnpm lint`) and browser tests again to confirm no regressions.
+The Primary Safety Workflow above is the single source of truth. Use it step‑by‑step for every module; avoid parallel checklists to reduce drift. The example below illustrates the same flow applied to `utils/utf8.mjs`.
 
 ## Example: Migrating `utils/utf8.mjs`
 
@@ -133,15 +124,18 @@ Notes:
 
 ## TS Compile Strategy (In‑Place Emit)
 
-- Create a dedicated `tsconfig.jswasm.json` to compile only files under `src/jswasm` and emit JS next to TS files.
+- Create a dedicated `tsconfig.migration.json` to compile only the files being migrated and emit JS next to TS files (in‑place emit).
 - Recommended compiler options:
-    - `"target": "ES2020"`, `"module": "ESNext"`, `"moduleResolution": "Bundler"`.
+    - `"target": "ES2022"`, `"module": "ESNext"`, `"moduleResolution": "Bundler"`.
     - `"strict": true`, `"skipLibCheck": true`.
     - Omit `outDir` for in‑place emit (TS will generate `.js` next to `.ts`).
-    - `"declaration": true` to emit `.d.ts` alongside, if useful for internal typing.
+    - Set `"declaration": false` by default. Enable `true` temporarily only when replacing a manual `.d.ts` for the module under migration.
 - Add scripts:
-    - `"build:jswasm": "tsc -p tsconfig.jswasm.json"`
-    - `"dev:jswasm": "tsc -p tsconfig.jswasm.json -w"`
+    - `"build:migration": "tsc -p tsconfig.migration.json"`
+    - `"build:migration:watch": "tsc --watch -p tsconfig.migration.json"`
+    - Optional type‑only watchers:
+        - `"typecheck:watch": "tsc --watch -p tsconfig.json"`
+        - `"typecheck:migration:watch": "tsc --watch -p tsconfig.migration.json"`
 
 Why in‑place emit?
 
@@ -150,16 +144,32 @@ Why in‑place emit?
 
 Caveats:
 
-- ESM extensions: existing imports use `.mjs`. After migration, update imports to `.js` explicitly.
+- ESM extensions: existing imports use `.mjs`. After migration, update imports to `.js` explicitly. This project standardizes on `.ts` sources and emitted `.js` runtime for browser delivery.
 - Ensure emitted `.js` preserves `export` names and semantics 1:1 with the original `.mjs`.
+
+Import extensions policy (ESM, explicit .js):
+
+- Use explicit `.js` extensions in all ESM imports after migration.
+- Example: change `import { x } from "./utf8.mjs"` to `import { x } from "./utf8.js"` once the module is migrated.
+
+Example – safe union narrowing for DB.exec():
+
+```ts
+import type { ExecResult } from "../../src/jswasm/sqlite3";
+
+const r = db.exec(sql, { rowMode: "object", returnValue: "resultRows" });
+const rows = ("resultRows" in (r as ExecResult) && (r as ExecResult).resultRows) || [];
+// Or:
+// const rows = (r as ExecResult).resultRows ?? [];
+```
 
 ## Manual .d.ts Replacement Policy
 
 When a module has a hand‑written declaration file (e.g., `src/jswasm/utils/utf8.d.ts`), the migration should replace it with the compiler‑generated declaration from the new `utf8.ts`.
 
-Steps:
+Steps (on‑demand declarations):
 
-- Ensure `"declaration": true` in the TS config used for jswasm migration.
+- Temporarily set `"declaration": true` in the migration TS config only when you intend to replace a manual `.d.ts`.
 - Compile the new TS module and let `tsc` emit `utf8.d.ts` in the same folder.
 - If an original manual `.d.ts` exists, compare the public API surface (names and shapes) with the emitted `.d.ts`:
     - If equivalent: remove the manual `.d.ts` and keep the emitted one.
@@ -170,6 +180,44 @@ Notes:
 
 - Prefer generated declarations; do not maintain parallel manual `.d.ts` once a module has been migrated.
 - If needed for incremental parity, temporarily keep the manual `.d.ts` under a different name (e.g., `utf8.d.ts.bak`) and remove it before finalizing the PR.
+
+## Type Conformance Gate (Required)
+
+- Before switching imports from `.mjs` → emitted `.js` or removing the original `.mjs`, the project must pass strict type checks.
+- Commands:
+  - Typecheck all: `pnpm exec tsc -p tsconfig.json --noEmit`
+  - Module-scoped compile: `pnpm run build:migration`
+- Policy:
+  - Prefer precise types from existing local `.d.ts` files under `src/jswasm/**`.
+  - When the runtime returns a union (e.g., `this | ExecResult`), narrow locally using an `in` check or an explicit type annotation.
+  - Keep JSDoc at declaration sites and numeric comments inside function bodies to document assumptions used for narrowing.
+  - Scope changes to the migrating module only; do not refactor unrelated code to appease types.
+
+Example – narrowing DB.exec() return:
+
+```ts
+import type { ExecResult } from "../../src/jswasm/sqlite3";
+
+const r = db.exec(sql, { returnValue: "resultRows", rowMode: "object" });
+const rows = "resultRows" in (r as ExecResult) ? (r as ExecResult).resultRows ?? [] : [];
+```
+
+## External Type Sources (Upstream Fallback)
+
+When local information is insufficient to define precise types, derive them from the upstream SQLite source:
+
+- Upstream repository (secondary source of truth): `sqlite/sqlite`
+  - C API: `sqlite3.h`
+  - WASM glue and JS bridge: `ext/wasm/**`
+- Procedure:
+  - Identify the missing or ambiguous type in local code.
+  - Cross-check the corresponding symbol in upstream (C declaration and/or wasm glue).
+  - Update the minimal local `.d.ts` to reflect the upstream signature and semantics.
+  - Record the upstream commit hash used for derivation in the PR description or code comment.
+- Networked environments:
+  - If local tooling cannot access upstream due to network restrictions, request approval to fetch the necessary upstream files.
+- Scope:
+  - Keep changes minimal and localized; do not wholesale copy upstream typings.
 
 ## Browser Integration Tests (End‑to‑End)
 
@@ -224,7 +272,7 @@ export function lengthBytesUTF8(str: string): number {
 }
 ```
 
-Example – multi‑phase function:
+Example – multi‑phase function (Uint8Array shown for brevity; if the API also accepts `number[]`, keep the manual path and guard `subarray` usage):
 
 ```ts
 export function UTF8ArrayToString(
@@ -280,25 +328,57 @@ export function UTF8ArrayToString(
 }
 ```
 
+## Applied Pattern (UTF‑8 Example)
+
+This section documents the concrete rules applied while migrating `src/jswasm/utils/utf8` as a worked example. Apply this exact pattern to all subsequent modules — the utf8 module is illustrative, not special.
+
+- Directory shape for migrated module (optional)
+  - Prefer matching the current flat layout to minimize churn:
+    - `src/jswasm/utils/utf8.ts` (source)
+    - `src/jswasm/utils/utf8.js` (emitted runtime)
+    - `src/jswasm/utils/utf8.test.ts` (unit tests)
+  - If you choose a subfolder per module, keep naming consistent.
+  - Keep the original `src/jswasm/utils/utf8.mjs` until parity is proven; only then switch imports and remove it.
+
+- Avoid `any` (typed read/write helpers)
+  - When interoperating with `Uint8Array | number[]`, avoid `any` by using narrow helpers:
+
+```ts
+export type UTF8ByteArray = Uint8Array | number[];
+
+const readAt = (a: UTF8ByteArray, i: number): number =>
+  a instanceof Uint8Array ? a[i] : a[i];
+
+const writeAt = (a: UTF8ByteArray, i: number, v: number): void => {
+  if (a instanceof Uint8Array) a[i] = v; else a[i] = v;
+};
+```
+
+Note: For compile configuration and scripts, see TS Compile Strategy and Commands sections.
+
+- Import switching policy (.mjs → .js)
+  - Unit tests should import the emitted `.js` (e.g., `./utf8.js`) to validate the runtime output.
+  - Only after tests and browser validation pass should internal imports move from `*.mjs` to `*.js`.
+  - If avoiding broad import churn, optionally add a temporary compatibility re‑export:
+
+```js
+// src/jswasm/utils/utf8.mjs (optional, temporary)
+export * from "./utf8/utf8.js";
+```
+
 ## Per‑Module Migration Checklist
 
-- [ ] Identify leaf module and consumers.
-- [ ] Create unit tests for the current `.mjs` behavior.
-- [ ] Port to `.ts` with identical exports and types.
-- [ ] Add numeric comments inside function/method bodies following the Three‑Phase pattern (1. Input, 2. Processing, 3. Output).
-- [ ] Add JSDoc for all exported symbols (functions, classes, types, variables) per docs/development/jsdoc-standards.md.
-- [ ] Compile to `.js` next to the `.ts` (in‑place emit).
-- [ ] Point unit tests at TS or compiled JS and pass.
-- [ ] Update internal imports from `.mjs` to `.js` for this module.
-- [ ] Run browser tests: 0 failures.
-- [ ] Remove original `.mjs` file.
-- [ ] Replace/remove manual `.d.ts` with the emitted `.d.ts` from the TS build.
-- [ ] Lint, type‑check, and re‑run browser tests.
+- [ ] Pick a leaf module and list its consumers.
+- [ ] Follow the Primary Safety Workflow steps 1–5 for this module (see “Primary Safety Workflow (Mandatory)” above).
+- [ ] Compile using `tsconfig.migration.json` per “TS Compile Strategy (In‑Place Emit)”.
+- [ ] Add JSDoc for exports and numeric comments inside functions per base rules.
+- [ ] Switch imports to the emitted `.js` only after unit + browser tests pass; then remove the original `.mjs`.
+- [ ] Replace any manual `.d.ts` with the emitted declaration; run lint and tests.
 
 ## Commands (Suggested)
 
-- Unit tests: `pnpm test:unit` (Vitest) / `pnpm dev:unit` for watch mode.
-- JSWASM TS compile: `pnpm build:jswasm` / `pnpm dev:jswasm`.
+- Unit tests: `pnpm run test:unit` (Vitest) / `pnpm run test:unit:watch` for watch mode.
+- Migration compile: `pnpm run build:migration` / `pnpm run build:migration:watch`.
 - Browser tests: `pnpm test` (opens `tests/` runner with COOP/COEP headers).
 - Lint: `pnpm lint`.
 

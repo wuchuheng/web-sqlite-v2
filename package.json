@@ -14,6 +14,12 @@
     "scripts": {
         "build": "vite build --watch",
         "test": "pnpm --filter @wuchuheng/web-sqlite-tests exec vite --port 50001 --host 0.0.0.0",
+        "test:unit": "vitest run",
+        "test:unit:watch": "vitest",
+        "typecheck:watch": "tsc --watch -p tsconfig.json",
+        "typecheck:migration:watch": "tsc --watch -p tsconfig.migration.json",
+        "build:migration": "tsc -p tsconfig.migration.json",
+        "build:migration:watch": "tsc --watch -p tsconfig.migration.json",
         "lint": "eslint . --ext .ts,.js,.mjs --ignore-path .gitignore --fix; pnpm run test:lint",
         "test:lint": "cd tests && pnpm run lint",
         "docs:dev": "vitepress dev docs",

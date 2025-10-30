@@ -1,0 +1,312 @@
+/**
+ * UTF-8 encoding and decoding utilities.
+ * Provides functions for converting between JavaScript strings and UTF-8 byte arrays.
+ */
+
+export type UTF8ByteArray = Uint8Array | number[];
+
+// Internal helpers to avoid using `any` while supporting both Uint8Array and number[]
+const readAt = (a: UTF8ByteArray, i: number): number =>
+    (a instanceof Uint8Array ? a[i] : a[i]);
+
+const writeAt = (a: UTF8ByteArray, i: number, v: number): void => {
+    if (a instanceof Uint8Array) a[i] = v;
+    else a[i] = v;
+};
+
+/** UTF-8 encoding constants and bit masks. */
+const UTF8_CONSTANTS = {
+    /** Maximum single-byte character value (0-127). */
+    MAX_SINGLE_BYTE: 0x7f,
+    /** Maximum two-byte character value. */
+    MAX_TWO_BYTES: 0x7ff,
+    /** Maximum three-byte character value. */
+    MAX_THREE_BYTES: 0xffff,
+    /** Maximum code point value (BMP limit). */
+    MAX_BMP: 0x10000,
+    /** High surrogate start. */
+    HIGH_SURROGATE_START: 0xd800,
+    /** High surrogate end. */
+    HIGH_SURROGATE_END: 0xdfff,
+    /** Low surrogate start. */
+    LOW_SURROGATE_START: 0xdc00,
+    /** Surrogate offset for code point calculation. */
+    SURROGATE_OFFSET: 0x10000,
+    /** Surrogate mask. */
+    SURROGATE_MASK: 0x3ff,
+} as const;
+
+/** UTF-8 byte sequence prefixes and masks. */
+const UTF8_BYTE_MASKS = {
+    /** Single-byte character mask (0xxxxxxx). */
+    SINGLE_BYTE_MASK: 0x80,
+    /** Two-byte prefix (110xxxxx). */
+    TWO_BYTE_PREFIX: 0xc0,
+    /** Two-byte check mask. */
+    TWO_BYTE_MASK: 0xe0,
+    /** Three-byte prefix (1110xxxx). */
+    THREE_BYTE_PREFIX: 0xe0,
+    /** Three-byte check mask. */
+    THREE_BYTE_MASK: 0xf0,
+    /** Four-byte prefix (11110xxx). */
+    FOUR_BYTE_PREFIX: 0xf0,
+    /** Continuation byte prefix (10xxxxxx). */
+    CONTINUATION_PREFIX: 0x80,
+    /** Continuation byte mask. */
+    CONTINUATION_MASK: 63,
+    /** Two-byte data mask. */
+    TWO_BYTE_DATA_MASK: 31,
+    /** Three-byte data mask. */
+    THREE_BYTE_DATA_MASK: 15,
+    /** Four-byte data mask. */
+    FOUR_BYTE_DATA_MASK: 7,
+} as const;
+
+/** Minimum length threshold for using TextDecoder optimization. */
+const TEXT_DECODER_THRESHOLD = 16;
+
+/**
+ * TextDecoder instance for UTF-8 decoding.
+ */
+const UTF8Decoder =
+    typeof TextDecoder !== "undefined" ? new TextDecoder() : undefined;
+
+/**
+ * Converts a UTF-8 encoded byte array to a JavaScript string.
+ */
+export function UTF8ArrayToString(
+    heapOrArray: UTF8ByteArray,
+    idx: number = 0,
+    maxBytesToRead: number = Number.NaN,
+): string {
+    // 1. Input handling
+    const endIdx = idx + maxBytesToRead;
+    let endPtr = idx;
+
+    // Find the end of the string (null terminator or max bytes)
+    // Note: Access by index is valid for both Uint8Array and number[]
+    while (readAt(heapOrArray, endPtr) && !(endPtr >= endIdx)) ++endPtr;
+
+    // 2. Core processing - use TextDecoder for longer strings if available
+    if (
+        endPtr - idx > TEXT_DECODER_THRESHOLD &&
+        heapOrArray instanceof Uint8Array &&
+        UTF8Decoder
+    ) {
+        return UTF8Decoder.decode(
+            (heapOrArray as Uint8Array).subarray(idx, endPtr),
+        );
+    }
+
+    // Manual UTF-8 decoding for shorter strings or when TextDecoder unavailable
+    let decodedString = "";
+
+    while (idx < endPtr) {
+        let byte0 = readAt(heapOrArray, idx++);
+
+        // 2.1 Single-byte character (ASCII)
+        if (!(byte0 & UTF8_BYTE_MASKS.SINGLE_BYTE_MASK)) {
+            decodedString += String.fromCharCode(byte0);
+            continue;
+        }
+
+        // 2.2 Multi-byte character
+        const byte1 = readAt(heapOrArray, idx++) & UTF8_BYTE_MASKS.CONTINUATION_MASK;
+
+        if (
+            (byte0 & UTF8_BYTE_MASKS.TWO_BYTE_MASK) ===
+            UTF8_BYTE_MASKS.TWO_BYTE_PREFIX
+        ) {
+            // Two-byte character
+            decodedString += String.fromCharCode(
+                ((byte0 & UTF8_BYTE_MASKS.TWO_BYTE_DATA_MASK) << 6) | byte1,
+            );
+            continue;
+        }
+
+        const byte2 = readAt(heapOrArray, idx++) & UTF8_BYTE_MASKS.CONTINUATION_MASK;
+
+        if (
+            (byte0 & UTF8_BYTE_MASKS.THREE_BYTE_MASK) ===
+            UTF8_BYTE_MASKS.THREE_BYTE_PREFIX
+        ) {
+            // Three-byte character
+            byte0 =
+                ((byte0 & UTF8_BYTE_MASKS.THREE_BYTE_DATA_MASK) << 12) |
+                (byte1 << 6) |
+                byte2;
+        } else {
+            // Four-byte character
+            byte0 =
+                ((byte0 & UTF8_BYTE_MASKS.FOUR_BYTE_DATA_MASK) << 18) |
+                (byte1 << 12) |
+                (byte2 << 6) |
+                (readAt(heapOrArray, idx++) & UTF8_BYTE_MASKS.CONTINUATION_MASK);
+        }
+
+        // 2.3 Convert code point to character(s)
+        if (byte0 < UTF8_CONSTANTS.MAX_BMP) {
+            decodedString += String.fromCharCode(byte0);
+        } else {
+            // Surrogate pair for code points outside BMP
+            const codePoint = byte0 - UTF8_CONSTANTS.MAX_BMP;
+            decodedString += String.fromCharCode(
+                UTF8_CONSTANTS.HIGH_SURROGATE_START | (codePoint >> 10),
+                UTF8_CONSTANTS.LOW_SURROGATE_START |
+                    (codePoint & UTF8_CONSTANTS.SURROGATE_MASK),
+            );
+        }
+    }
+
+    // 3. Output handling
+    return decodedString;
+}
+
+/**
+ * Calculates the byte length of a string when encoded as UTF-8.
+ */
+export const lengthBytesUTF8 = (str: string): number => {
+    // 1. Input handling
+    let totalBytes = 0;
+
+    // 2. Core processing - calculate byte length for each character
+    for (let i = 0; i < str.length; ++i) {
+        const charCode = str.charCodeAt(i);
+
+        if (charCode <= UTF8_CONSTANTS.MAX_SINGLE_BYTE) {
+            totalBytes++;
+        } else if (charCode <= UTF8_CONSTANTS.MAX_TWO_BYTES) {
+            totalBytes += 2;
+        } else if (
+            charCode >= UTF8_CONSTANTS.HIGH_SURROGATE_START &&
+            charCode <= UTF8_CONSTANTS.HIGH_SURROGATE_END
+        ) {
+            // Surrogate pair (4 bytes)
+            totalBytes += 4;
+            ++i; // Skip the next character (low surrogate)
+        } else {
+            totalBytes += 3;
+        }
+    }
+
+    // 3. Output handling
+    return totalBytes;
+};
+
+/**
+ * Encodes a JavaScript string as UTF-8 into a byte array.
+ */
+export const stringToUTF8Array = (
+    str: string,
+    heap: UTF8ByteArray,
+    outIdx: number,
+    maxBytesToWrite: number,
+): number => {
+    // 1. Input handling
+    if (!(maxBytesToWrite > 0)) return 0;
+
+    const startIdx = outIdx;
+    const endIdx = outIdx + maxBytesToWrite - 1;
+
+    // 2. Core processing - encode string to UTF-8
+    for (let i = 0; i < str.length; ++i) {
+        let codePoint = str.charCodeAt(i);
+
+        // 2.1 Handle surrogate pairs
+        if (
+            codePoint >= UTF8_CONSTANTS.HIGH_SURROGATE_START &&
+            codePoint <= UTF8_CONSTANTS.HIGH_SURROGATE_END
+        ) {
+            const lowSurrogate = str.charCodeAt(++i);
+            codePoint =
+                (UTF8_CONSTANTS.SURROGATE_OFFSET +
+                    ((codePoint & UTF8_CONSTANTS.SURROGATE_MASK) << 10)) |
+                (lowSurrogate & UTF8_CONSTANTS.SURROGATE_MASK);
+        }
+
+        // 2.2 Encode based on character range
+        if (codePoint <= UTF8_CONSTANTS.MAX_SINGLE_BYTE) {
+            // Single-byte character (ASCII)
+            if (outIdx >= endIdx) break;
+            writeAt(heap, outIdx++, codePoint);
+        } else if (codePoint <= UTF8_CONSTANTS.MAX_TWO_BYTES) {
+            // Two-byte character
+            if (outIdx + 1 >= endIdx) break;
+            writeAt(heap, outIdx++, UTF8_BYTE_MASKS.TWO_BYTE_PREFIX | (codePoint >> 6));
+            writeAt(
+                heap,
+                outIdx++,
+                UTF8_BYTE_MASKS.CONTINUATION_PREFIX |
+                    (codePoint & UTF8_BYTE_MASKS.CONTINUATION_MASK),
+            );
+        } else if (codePoint <= UTF8_CONSTANTS.MAX_THREE_BYTES) {
+            // Three-byte character
+            if (outIdx + 2 >= endIdx) break;
+            writeAt(heap, outIdx++, UTF8_BYTE_MASKS.THREE_BYTE_PREFIX | (codePoint >> 12));
+            writeAt(
+                heap,
+                outIdx++,
+                UTF8_BYTE_MASKS.CONTINUATION_PREFIX |
+                    ((codePoint >> 6) & UTF8_BYTE_MASKS.CONTINUATION_MASK),
+            );
+            writeAt(
+                heap,
+                outIdx++,
+                UTF8_BYTE_MASKS.CONTINUATION_PREFIX |
+                    (codePoint & UTF8_BYTE_MASKS.CONTINUATION_MASK),
+            );
+        } else {
+            // Four-byte character
+            if (outIdx + 3 >= endIdx) break;
+            writeAt(heap, outIdx++, UTF8_BYTE_MASKS.FOUR_BYTE_PREFIX | (codePoint >> 18));
+            writeAt(
+                heap,
+                outIdx++,
+                UTF8_BYTE_MASKS.CONTINUATION_PREFIX |
+                    ((codePoint >> 12) & UTF8_BYTE_MASKS.CONTINUATION_MASK),
+            );
+            writeAt(
+                heap,
+                outIdx++,
+                UTF8_BYTE_MASKS.CONTINUATION_PREFIX |
+                    ((codePoint >> 6) & UTF8_BYTE_MASKS.CONTINUATION_MASK),
+            );
+            writeAt(
+                heap,
+                outIdx++,
+                UTF8_BYTE_MASKS.CONTINUATION_PREFIX |
+                    (codePoint & UTF8_BYTE_MASKS.CONTINUATION_MASK),
+            );
+        }
+    }
+
+    // 3. Output handling - add null terminator and return length
+    writeAt(heap, outIdx, 0);
+    return outIdx - startIdx;
+};
+
+/**
+ * Converts a string to a byte array with UTF-8 encoding.
+ */
+export function intArrayFromString(
+    stringy: string,
+    dontAddNull?: boolean,
+    length?: number,
+): number[] {
+    // 1. Input handling
+    const byteLength =
+        length && length > 0 ? length : lengthBytesUTF8(stringy) + 1;
+    const byteArray = new Array<number>(byteLength);
+
+    // 2. Core processing
+    const numBytesWritten = stringToUTF8Array(
+        stringy,
+        byteArray,
+        0,
+        byteArray.length,
+    );
+
+    // 3. Output handling
+    if (dontAddNull) byteArray.length = numBytesWritten;
+    return byteArray;
+}

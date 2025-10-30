@@ -1,0 +1,21 @@
+{
+    // "extends": "./tsconfig.json",
+    "compilerOptions": {
+        "noEmit": false,
+        "module": "ESNext",
+        "target": "ES2022",
+        "moduleResolution": "bundler",
+        "allowImportingTsExtensions": false,
+        "sourceMap": false,
+        "declaration": false,
+        "declarationMap": false,
+        "composite": false
+    },
+    "include": [
+        "src/jswasm/utils/utf8/*.ts"
+    ],
+    "exclude": [
+        "src/**/*.test.ts",
+        "src/**/*.d.ts"
+    ]
+}
