@@ -2,7 +2,7 @@ import {
     UTF8ArrayToString,
     lengthBytesUTF8,
     stringToUTF8Array,
-} from "../../utils/utf8.mjs";
+} from "../../utils/utf8/utf8";
 import { ERRNO_CODES, OPEN_FLAGS, STREAM_STATE_MASK } from "./constants.mjs";
 
 /** Write protection flag used with mmap/allocate helpers. */

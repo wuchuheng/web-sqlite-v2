@@ -38,7 +38,7 @@ import {
     UTF8ArrayToString,
     lengthBytesUTF8,
     stringToUTF8Array,
-} from "./utils/utf8.mjs";
+} from "./utils/utf8/utf8";
 import { createTTY } from "./system/tty-operations.mjs";
 import { createMEMFS } from "./vfs/memfs.mjs";
 import { createSYSCALLS } from "./system/syscalls.mjs";

@@ -3,7 +3,7 @@
  * Handles terminal input/output and TTY device management.
  */
 
-import { UTF8ArrayToString, intArrayFromString } from "../utils/utf8.mjs";
+import { UTF8ArrayToString, intArrayFromString } from "../utils/utf8/utf8";
 
 /** Errno constants for TTY operations. */
 const ERRNO = {
