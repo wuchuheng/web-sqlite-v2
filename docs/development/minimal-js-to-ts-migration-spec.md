@@ -32,6 +32,7 @@ Follow this step-by-step sequence for every minimal unit:
     - Cover the behaviors exposed by the `.mjs` file and `.d.ts` types using Vitest (the repo already has `vitest.config.ts`).
     - Point the tests at the existing `.mjs` implementation and run `npm run test:unit`. Tests must pass to establish the baseline.
     - Before the tests target the new `.ts`, add the new migration entry to `tsconfig.migration.json` so the `build:migration` output can emit the paired `.js` and `.d.ts`.
+    - **Unit-test gating**: before any `*.test.ts` is created, read all files in `.memory-bank/` (if present), analyze the target source and declaration, and craft a short plan in `docs/development` describing the intended cases and scaffolding; pause for developer approval before writing the actual test file.
 
 3. **Create the migration subdirectory.**
     - Mirror the original path inside a new folder: if the module was `src/jswasm/utils/utf8.mjs`, create `src/jswasm/utils/utf8/`.
