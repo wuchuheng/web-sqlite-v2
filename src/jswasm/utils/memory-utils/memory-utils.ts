@@ -17,28 +17,25 @@ export type MmapAllocator = (size: number) => number;
 
 /** Initializes the environment-specific random fill helper. */
 export const initRandomFill = (): RandomFillFunction => {
-    // 1. Input handling - verify `crypto.getRandomValues` exists.
-    const hasCrypto =
-        typeof crypto === "object" &&
-        typeof crypto.getRandomValues === "function";
-    if (!hasCrypto) {
-        // 3. Output handling - abort when Web Crypto is unavailable.
-        throw new Error(
-            "initRandomDevice: crypto.getRandomValues not available",
-        );
-    }
+  // 1. Input handling - verify `crypto.getRandomValues` exists.
+  const hasCrypto =
+    typeof crypto === "object" && typeof crypto.getRandomValues === "function";
+  if (!hasCrypto) {
+    // 3. Output handling - abort when Web Crypto is unavailable.
+    throw new Error("initRandomDevice: crypto.getRandomValues not available");
+  }
 
-    // 2. Core processing - return the platform random fill handler.
-    return (view) => crypto.getRandomValues(view);
+  // 2. Core processing - return the platform random fill handler.
+  return (view) => crypto.getRandomValues(view);
 };
 
 /** Lazily initialized random fill helper. */
 export let randomFill: RandomFillFunction = (view) => {
-    // 1. Input handling - ensure the helper is initialized.
-    randomFill = initRandomFill();
-    // 2. Core processing - fill the view using the initialized helper.
-    // 3. Output handling - return the filled view.
-    return randomFill(view);
+  // 1. Input handling - ensure the helper is initialized.
+  randomFill = initRandomFill();
+  // 2. Core processing - fill the view using the initialized helper.
+  // 3. Output handling - return the filled view.
+  return randomFill(view);
 };
 
 /**
@@ -48,14 +45,14 @@ export let randomFill: RandomFillFunction = (view) => {
  * @param size - Number of bytes to clear.
  */
 export const zeroMemory = (
-    heap: Uint8Array,
-    address: number,
-    size: number,
+  heap: Uint8Array,
+  address: number,
+  size: number,
 ): void => {
-    // 1. Input handling - rely on typed-array bounds.
-    // 2. Core processing - overwrite with 0.
-    heap.fill(0, address, address + size);
-    // 3. Output handling - no return value.
+  // 1. Input handling - rely on typed-array bounds.
+  // 2. Core processing - overwrite with 0.
+  heap.fill(0, address, address + size);
+  // 3. Output handling - no return value.
 };
 
 /**
@@ -64,11 +61,11 @@ export const zeroMemory = (
  * @param alignment - Alignment boundary.
  */
 export const alignMemory = (size: number, alignment: number): number => {
-    // 1. Input handling - trust the caller for valid alignment.
-    // 2. Core processing - compute the aligned value.
-    const aligned = Math.ceil(size / alignment) * alignment;
-    // 3. Output handling - return the aligned size.
-    return aligned;
+  // 1. Input handling - trust the caller for valid alignment.
+  // 2. Core processing - compute the aligned value.
+  const aligned = Math.ceil(size / alignment) * alignment;
+  // 3. Output handling - return the aligned size.
+  return aligned;
 };
 
 /**
@@ -77,18 +74,18 @@ export const alignMemory = (size: number, alignment: number): number => {
  * @param heap - Uint8Array heap array for zeroing.
  */
 export const createMmapAlloc = (
-    memalign: BuiltinMemalign,
-    heap: Uint8Array,
+  memalign: BuiltinMemalign,
+  heap: Uint8Array,
 ): MmapAllocator => {
-    return (size) => {
-        // 1. Input handling - align the requested size.
-        const alignedSize = alignMemory(size, MMAP_ALIGNMENT_BYTES);
-        // 2. Core processing - allocate via Emscripten helper.
-        const pointer = memalign(MMAP_ALIGNMENT_BYTES, alignedSize);
-        // 3. Output handling - zero memory and return the pointer.
-        if (pointer !== 0) {
-            zeroMemory(heap, pointer, alignedSize);
-        }
-        return pointer;
-    };
+  return (size) => {
+    // 1. Input handling - align the requested size.
+    const alignedSize = alignMemory(size, MMAP_ALIGNMENT_BYTES);
+    // 2. Core processing - allocate via Emscripten helper.
+    const pointer = memalign(MMAP_ALIGNMENT_BYTES, alignedSize);
+    // 3. Output handling - zero memory and return the pointer.
+    if (pointer !== 0) {
+      zeroMemory(heap, pointer, alignedSize);
+    }
+    return pointer;
+  };
 };

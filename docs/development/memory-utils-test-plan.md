@@ -1,6 +1,7 @@
 # Memory Utils Test Plan
 
 ## Purpose
+
 Exercise the existing `memory-utils.mjs` behaviors so the baseline
 Vitest suite documents stability before the TypeScript migration begins.
 
@@ -14,10 +15,10 @@ Vitest suite documents stability before the TypeScript migration begins.
 4. **`alignMemory`** – rounds input sizes up to the nearest multiple of the
    provided alignment (e.g., 64 and 256 bytes).
 5. **`createMmapAlloc`** – ensures the returned allocator:
-   - aligns the requested size to 64KB,
-   - calls the provided `_emscripten_builtin_memalign`,
-   - zeroes the heap on success, and
-   - returns the pointer (or `0` when the allocation fails).
+    - aligns the requested size to 64KB,
+    - calls the provided `_emscripten_builtin_memalign`,
+    - zeroes the heap on success, and
+    - returns the pointer (or `0` when the allocation fails).
 
 ## Test data
 
@@ -35,8 +36,8 @@ Vitest suite documents stability before the TypeScript migration begins.
 - Use Vitest `beforeEach` hooks to restore any global overrides (e.g.,
   `crypto`) so other tests stay stable.
 - Helper functions:
-  - `mockCrypto()` to inject a `getRandomValues` spy.
-  - `createHeap(size)` to produce zeroed views with `fill`.
+    - `mockCrypto()` to inject a `getRandomValues` spy.
+    - `createHeap(size)` to produce zeroed views with `fill`.
 
 ## Commands
 

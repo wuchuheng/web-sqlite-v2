@@ -18,8 +18,5 @@
         "src/jswasm/utils/path/*.ts",
         "src/jswasm/utils/sqlite3-init-wrapper/*.ts"
     ],
-    "exclude": [
-        "src/**/*.test.ts",
-        "src/**/*.d.ts"
-    ]
+    "exclude": ["src/**/*.test.ts", "src/**/*.d.ts"]
 }

@@ -3,7 +3,7 @@
  * Provides functions for converting between JavaScript strings and UTF-8 byte arrays.
  */
 // Internal helpers to avoid using `any` while supporting both Uint8Array and number[]
-const readAt = (a, i) => (a instanceof Uint8Array ? a[i] : a[i]);
+const readAt = (a, i) => a instanceof Uint8Array ? a[i] : a[i];
 const writeAt = (a, i, v) => {
     if (a instanceof Uint8Array)
         a[i] = v;

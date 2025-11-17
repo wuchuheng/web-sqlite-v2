@@ -8,17 +8,17 @@ Verify that `wrapSqlite3InitModule` wires the Emscripten initializer into the ex
 
 1. **Error path**: calling `wrapSqlite3InitModule` without an initializer should throw the same error emitted in production (guarding against missing globals).
 2. **Happy path**: the wrapped initializer:
-   - Replaces `globalThis.sqlite3InitModule` with a function that invokes `runSQLite3PostLoadInit`, swaps out `asyncPostInit`, and resolves the original module.
-   - Records `sqlite3InitModuleState` with `moduleScript`, `location`, `urlParams`, and derives `sqlite3Dir` + `scriptDir`.
-   - Honors `wrappedInit.__isUnderTest` by propagating the flag to `sqlite3.__isUnderTest`.
+    - Replaces `globalThis.sqlite3InitModule` with a function that invokes `runSQLite3PostLoadInit`, swaps out `asyncPostInit`, and resolves the original module.
+    - Records `sqlite3InitModuleState` with `moduleScript`, `location`, `urlParams`, and derives `sqlite3Dir` + `scriptDir`.
+    - Honors `wrappedInit.__isUnderTest` by propagating the flag to `sqlite3.__isUnderTest`.
 3. **Debug routing**: when the URL params contain `sqlite3.debugModule`, the `debugModule` helper should be a no-op (the test ensures it can be invoked without throwing).
 
 ## Test data
 
 - Stub `originalInit` as a function returning a resolved Promise with:
-  - `runSQLite3PostLoadInit` mocked via `vi.fn()`.
-  - `sqlite3` object containing an `asyncPostInit` that resolves to a sentinel value.
-  - `sqlite3.asyncPostInit` is deleted after wrapping to mimic the production flow.
+    - `runSQLite3PostLoadInit` mocked via `vi.fn()`.
+    - `sqlite3` object containing an `asyncPostInit` that resolves to a sentinel value.
+    - `sqlite3.asyncPostInit` is deleted after wrapping to mimic the production flow.
 - `globalThis.document.currentScript.src` pointing at a known path so the derived directories can be asserted.
 - `globalThis.location` set to a `URL` (e.g., `https://example.com/app/index.mjs?sqlite3.dir=/assets/&sqlite3.debugModule=1`) to exercise query-based branches.
 - `globalThis.sqlite3InitModuleState` is cleaned between tests to avoid leakage.

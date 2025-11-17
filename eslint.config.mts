@@ -60,10 +60,7 @@ const config = defineConfig([
         files: ["**/*.{ts,mts,cts}"],
         languageOptions: {
             parserOptions: {
-                project: [
-                    "./tsconfig.eslint.json",
-                    "./test2/tsconfig.json",
-                ],
+                project: ["./tsconfig.eslint.json", "./test2/tsconfig.json"],
                 // Ensure type-aware lint uses the right tsconfig roots
                 tsconfigRootDir: __dirname,
             },

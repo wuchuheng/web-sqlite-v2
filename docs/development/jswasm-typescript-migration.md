@@ -26,22 +26,27 @@ Principles:
 
 The migration must be conservative and test‑driven. Follow these exact steps for every module:
 
-1) Baseline tests for the original file
+1. Baseline tests for the original file
+
 - Write unit tests targeting the ORIGINAL `.mjs` (no changes to code yet).
 - Run tests and ensure GREEN baseline. If tests fail, fix tests first or adjust scope.
 
-2) Create the migration file (TypeScript)
+2. Create the migration file (TypeScript)
+
 - Add a `.ts` file with identical exports and behavior, in a dedicated subdirectory if applicable (e.g., `utils/utf8/utf8.ts`).
 - Add types and JSDoc; avoid `any`. If inference is not feasible for a case, leave the smallest possible `any` and document it for later.
 
-3) Test the migration file
+3. Test the migration file
+
 - Point the unit tests at the MIGRATION implementation (prefer the emitted `.js` from the `.ts`, not the `.ts` directly), and re‑run tests until GREEN.
 
-4) Compile and replace
+4. Compile and replace
+
 - Use `tsconfig.migration.json` to COMPILE ONLY the module under migration, emitting `.js` (and optionally `.d.ts`) next to the `.ts`.
 - After tests pass against the emitted `.js`, update internal imports from `.mjs` to `.js` for this module, and remove the old `.mjs`.
 
-5) Verify integration
+5. Verify integration
+
 - Run the browser tests (`pnpm test`) to ensure 0 failures and no console errors.
 - Keep changes scoped; do not refactor other modules in the same PR unless explicitly requested.
 
@@ -158,7 +163,8 @@ Example – safe union narrowing for DB.exec():
 import type { ExecResult } from "../../src/jswasm/sqlite3";
 
 const r = db.exec(sql, { rowMode: "object", returnValue: "resultRows" });
-const rows = ("resultRows" in (r as ExecResult) && (r as ExecResult).resultRows) || [];
+const rows =
+    ("resultRows" in (r as ExecResult) && (r as ExecResult).resultRows) || [];
 // Or:
 // const rows = (r as ExecResult).resultRows ?? [];
 ```
@@ -185,13 +191,13 @@ Notes:
 
 - Before switching imports from `.mjs` → emitted `.js` or removing the original `.mjs`, the project must pass strict type checks.
 - Commands:
-  - Typecheck all: `pnpm exec tsc -p tsconfig.json --noEmit`
-  - Module-scoped compile: `pnpm run build:migration`
+    - Typecheck all: `pnpm exec tsc -p tsconfig.json --noEmit`
+    - Module-scoped compile: `pnpm run build:migration`
 - Policy:
-  - Prefer precise types from existing local `.d.ts` files under `src/jswasm/**`.
-  - When the runtime returns a union (e.g., `this | ExecResult`), narrow locally using an `in` check or an explicit type annotation.
-  - Keep JSDoc at declaration sites and numeric comments inside function bodies to document assumptions used for narrowing.
-  - Scope changes to the migrating module only; do not refactor unrelated code to appease types.
+    - Prefer precise types from existing local `.d.ts` files under `src/jswasm/**`.
+    - When the runtime returns a union (e.g., `this | ExecResult`), narrow locally using an `in` check or an explicit type annotation.
+    - Keep JSDoc at declaration sites and numeric comments inside function bodies to document assumptions used for narrowing.
+    - Scope changes to the migrating module only; do not refactor unrelated code to appease types.
 
 Example – narrowing DB.exec() return:
 
@@ -199,7 +205,10 @@ Example – narrowing DB.exec() return:
 import type { ExecResult } from "../../src/jswasm/sqlite3";
 
 const r = db.exec(sql, { returnValue: "resultRows", rowMode: "object" });
-const rows = "resultRows" in (r as ExecResult) ? (r as ExecResult).resultRows ?? [] : [];
+const rows =
+    "resultRows" in (r as ExecResult)
+        ? ((r as ExecResult).resultRows ?? [])
+        : [];
 ```
 
 ## External Type Sources (Upstream Fallback)
@@ -207,17 +216,17 @@ const rows = "resultRows" in (r as ExecResult) ? (r as ExecResult).resultRows ??
 When local information is insufficient to define precise types, derive them from the upstream SQLite source:
 
 - Upstream repository (secondary source of truth): `sqlite/sqlite`
-  - C API: `sqlite3.h`
-  - WASM glue and JS bridge: `ext/wasm/**`
+    - C API: `sqlite3.h`
+    - WASM glue and JS bridge: `ext/wasm/**`
 - Procedure:
-  - Identify the missing or ambiguous type in local code.
-  - Cross-check the corresponding symbol in upstream (C declaration and/or wasm glue).
-  - Update the minimal local `.d.ts` to reflect the upstream signature and semantics.
-  - Record the upstream commit hash used for derivation in the PR description or code comment.
+    - Identify the missing or ambiguous type in local code.
+    - Cross-check the corresponding symbol in upstream (C declaration and/or wasm glue).
+    - Update the minimal local `.d.ts` to reflect the upstream signature and semantics.
+    - Record the upstream commit hash used for derivation in the PR description or code comment.
 - Networked environments:
-  - If local tooling cannot access upstream due to network restrictions, request approval to fetch the necessary upstream files.
+    - If local tooling cannot access upstream due to network restrictions, request approval to fetch the necessary upstream files.
 - Scope:
-  - Keep changes minimal and localized; do not wholesale copy upstream typings.
+    - Keep changes minimal and localized; do not wholesale copy upstream typings.
 
 ## Browser Integration Tests (End‑to‑End)
 
@@ -333,33 +342,34 @@ export function UTF8ArrayToString(
 This section documents the concrete rules applied while migrating `src/jswasm/utils/utf8` as a worked example. Apply this exact pattern to all subsequent modules — the utf8 module is illustrative, not special.
 
 - Directory shape for migrated module (optional)
-  - Prefer matching the current flat layout to minimize churn:
-    - `src/jswasm/utils/utf8.ts` (source)
-    - `src/jswasm/utils/utf8.js` (emitted runtime)
-    - `src/jswasm/utils/utf8.test.ts` (unit tests)
-  - If you choose a subfolder per module, keep naming consistent.
-  - Keep the original `src/jswasm/utils/utf8.mjs` until parity is proven; only then switch imports and remove it.
+    - Prefer matching the current flat layout to minimize churn:
+        - `src/jswasm/utils/utf8.ts` (source)
+        - `src/jswasm/utils/utf8.js` (emitted runtime)
+        - `src/jswasm/utils/utf8.test.ts` (unit tests)
+    - If you choose a subfolder per module, keep naming consistent.
+    - Keep the original `src/jswasm/utils/utf8.mjs` until parity is proven; only then switch imports and remove it.
 
 - Avoid `any` (typed read/write helpers)
-  - When interoperating with `Uint8Array | number[]`, avoid `any` by using narrow helpers:
+    - When interoperating with `Uint8Array | number[]`, avoid `any` by using narrow helpers:
 
 ```ts
 export type UTF8ByteArray = Uint8Array | number[];
 
 const readAt = (a: UTF8ByteArray, i: number): number =>
-  a instanceof Uint8Array ? a[i] : a[i];
+    a instanceof Uint8Array ? a[i] : a[i];
 
 const writeAt = (a: UTF8ByteArray, i: number, v: number): void => {
-  if (a instanceof Uint8Array) a[i] = v; else a[i] = v;
+    if (a instanceof Uint8Array) a[i] = v;
+    else a[i] = v;
 };
 ```
 
 Note: For compile configuration and scripts, see TS Compile Strategy and Commands sections.
 
 - Import switching policy (.mjs → .js)
-  - Unit tests should import the emitted `.js` (e.g., `./utf8.js`) to validate the runtime output.
-  - Only after tests and browser validation pass should internal imports move from `*.mjs` to `*.js`.
-  - If avoiding broad import churn, optionally add a temporary compatibility re‑export:
+    - Unit tests should import the emitted `.js` (e.g., `./utf8.js`) to validate the runtime output.
+    - Only after tests and browser validation pass should internal imports move from `*.mjs` to `*.js`.
+    - If avoiding broad import churn, optionally add a temporary compatibility re‑export:
 
 ```js
 // src/jswasm/utils/utf8.mjs (optional, temporary)
