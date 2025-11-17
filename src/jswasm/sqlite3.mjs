@@ -49,7 +49,7 @@ import {
     zeroMemory,
     createMmapAlloc,
 } from "./utils/memory-utils.mjs";
-import { createAsyncLoad } from "./utils/async-utils.mjs";
+import { createAsyncLoad } from "./utils/async-utils/async-utils.js";
 import { wrapSqlite3InitModule } from "./utils/sqlite3-init-wrapper.mjs";
 import { createWasmLoader } from "./utils/wasm-loader.mjs";
 import { attachSqlite3WasmExports } from "./wasm/sqlite3-wasm-exports.mjs";
