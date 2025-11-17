@@ -1,347 +1,309 @@
 # Active Context: Web SQLite V2
 
-## Current Focus: TypeScript Migration
-
-The project is currently in the middle of a comprehensive TypeScript migration from JavaScript (.mjs) files to TypeScript (.ts). This is the primary development activity and the main focus of current work.
-
-### Migration Status Overview
-
-**Completed Modules:**
-
-- `src/jswasm/utils/utf8/` - Fully migrated with unit tests
-- `src/jswasm/utils/path/` - **NEWLY COMPLETED** - Full TypeScript migration with comprehensive test coverage
-    - Migrated from `src/jswasm/utils/path.mjs` to `src/jswasm/utils/path/path.ts`
-    - Type definitions moved to `src/jswasm/utils/path/types.d.ts`
-    - Comprehensive unit tests in `src/jswasm/utils/path/path.test.ts`
-    - Test plan documented in `docs/development/path-migration-test-plan.md`
-    - Follows three-phase processing pattern with numeric comments
-- `src/jswasm/utils/async-utils/` - **COMPLETED** - Full TypeScript migration with comprehensive test coverage
-    - Migrated from `src/jswasm/utils/async-utils.mjs` to `src/jswasm/utils/async-utils/async-utils.ts`
-    - Moved to dedicated `async-utils/` directory structure
-    - Comprehensive unit tests in `src/jswasm/utils/async-utils.test.ts`
-    - Test plan documented in `docs/development/async-utils-test-plan.md`
-    - Updated import path in main `sqlite3.mjs` to use new TypeScript module
-    - Follows three-phase processing pattern with numeric comments
-- `src/jswasm/utils/memory-utils/` - **COMPLETED** - Full TypeScript migration with comprehensive test coverage
-    - Migrated from `src/jswasm/utils/memory-utils.mjs` and `src/jswasm/utils/memory-utils.d.ts` to `src/jswasm/utils/memory-utils/memory-utils.ts`
-    - Moved to dedicated `memory-utils/` directory structure
-    - Comprehensive unit tests in `src/jswasm/utils/memory-utils.test.ts`
-    - Test plan documented in `docs/development/memory-utils-test-plan.md`
-    - Updated import paths in `src/jswasm/runtime/memory-manager.mjs` and `src/jswasm/sqlite3.mjs` to use new TypeScript module
-    - Updated `tsconfig.migration.json` to include new memory-utils directory
-    - Follows three-phase processing pattern with numeric comments
-    - Includes WebAssembly memory helpers: `initRandomFill`, `randomFill`, `zeroMemory`, `alignMemory`, `createMmapAlloc`
-- `src/jswasm/utils/wasm-loader/` - **NEWLY COMPLETED** - Full TypeScript migration with comprehensive test coverage
-    - Migrated from `src/jswasm/utils/wasm-loader.mjs` and `src/jswasm/utils/wasm-loader.d.ts` to `src/jswasm/utils/wasm-loader/wasm-loader.ts`
-    - Moved to dedicated `wasm-loader/` directory structure following established patterns
-    - Comprehensive unit tests in `src/jswasm/utils/wasm-loader/wasm-loader.test.ts` with Vitest
-    - Test plan documented in `docs/development/wasm-loader-test-plan.md`
-    - Updated import path in `src/jswasm/sqlite3.mjs` to use new TypeScript module (`./utils/wasm-loader/wasm-loader.js`)
-    - Updated `tsconfig.migration.json` to include new wasm-loader directory
-    - Follows three-phase processing pattern with numeric comments
-    - Type-safe WebAssembly loading with proper interfaces: `WasmLoaderConfig`, `WasmModuleLike`, `ModuleValue`
-    - Supports streaming instantiation, ArrayBuffer fallback, and Module.instantiateWasm hooks
-    - Comprehensive error handling with ready promise rejection and lifecycle hooks
-- Various utility modules have TypeScript definitions (.d.ts files)
-- Core type infrastructure is in place
-
-**In Progress:**
-
-- Main migration plan documented in `docs/development/jswasm-typescript-migration.md`
-- Build configuration ready with `tsconfig.migration.json`
-- Test infrastructure established with Vitest
-
-**Remaining Work:**
-
-- Next migration targets: `wasm-loader.mjs`, system layer modules
-- Import updates from `.mjs` to `.js` after compilation for completed modules
-- Manual `.d.ts` replacement with generated declarations
-- Bulk of `.mjs` files in `src/jswasm/` still need migration
-
-### Current Migration Strategy
-
-The migration follows a **bottom-up, insurance method** approach:
-
-1. **Leaf First**: Migrate utility modules before their dependents
-2. **Dual Files**: Keep original `.mjs` until TypeScript version is verified
-3. **Test-Driven**: Create unit tests before migration, verify after
-4. **Incremental**: One module at a time with verification at each step
-5. **Compile & Replace**: Use `tsconfig.migration.json` for in-place compilation
-
-### Active Development Patterns
-
-**Three-Phase Processing Pattern** (Mandatory for migrated code):
-
-```typescript
-export function exampleFunction(input: InputType): OutputType {
-    // 1. Input validation and preparation
-    if (!input) throw new Error("Invalid input");
-
-    // 2. Core processing logic
-    const result = processInput(input);
-
-    // 3. Output handling
-    return formatResult(result);
-}
-```
-
-**Numeric Comments** (Required inside function bodies only):
-
-- `// 1.` for input handling
-- `// 2.` for core processing
-- `// 3.` for output/return
-- `// 2.1`, `// 2.2` for sub-steps when needed
-
-## Recent Changes & Decisions
-
-### Architecture Refactoring (Recent Commits)
-
-- **Modular Extraction**: Split monolithic `sqlite3.mjs` into focused modules
-- **System Separation**: Extracted `wasi-functions.mjs` and `syscalls.mjs`
-- **Type Infrastructure**: Established comprehensive `.d.ts` coverage
-- **Build Pipeline**: Configured TypeScript compilation with in-place emit
-- **Async Utils Migration**: Completed migration from `.mjs` to `.ts` with dedicated directory structure
-
-### Development Environment Setup
-
-- **Package Manager**: Standardized on pnpm 10.17.1
-- **Build Tools**: Vite for bundling, TypeScript for compilation
-- **Testing**: Vitest for unit tests, browser tests for integration
-- **Linting**: ESLint with strict TypeScript rules and custom conventions
+## Current Work Focus
 
-### Code Quality Standards
-
-- **Line Length**: Maximum 120 characters (strictly enforced)
-- **Function Size**: 20-30 lines maximum for functions
-- **Parameter Count**: Maximum 4 parameters per function
-- **Complexity**: Cyclomatic complexity ≤ 8, nesting depth ≤ 3 levels
+### Primary Development Areas
 
-## Immediate Next Steps
-
-### High Priority (This Sprint)
+**TypeScript Migration Progress**
 
-1. **Complete Path and Async Utils Migration Cleanup**
-    - Update imports from `.mjs` to compiled `.js` for dependent modules
-    - Remove original `src/jswasm/utils/path.mjs` file
-    - Replace manual `.d.ts` with generated TypeScript declaration
-    - Run browser tests to verify no regressions
+- Currently working on migrating JavaScript (.mjs) modules to TypeScript
+- Recent focus on `struct-binder-helpers` module conversion
+- Maintaining backward compatibility while enhancing type safety
+- Dual compilation strategy for ESM output preservation
 
-2. **Complete Memory Utils Migration Cleanup**
-    - Update imports from `.mjs` to compiled `.js` for dependent modules
-    - Remove original `src/jswasm/utils/memory-utils.mjs` and `.d.ts` files
-    - Replace manual `.d.ts` with generated TypeScript declaration
-    - Run browser tests to verify no regressions
+**OPFS Enhancement**
 
-3. **Select Next Migration Target**
-    - Choose `wasm-loader.mjs` as next leaf module (memory-utils completed)
-    - Apply Primary Safety Workflow steps 1-5
-    - Document migration patterns discovered from completed modules
-    - Update migration guide with new lessons learned
+- Ongoing work on sector-aligned heap pool optimization
+- Cross-context synchronization improvements
+- Performance tuning for high-frequency operations
+- Enhanced error handling for edge cases
 
-4. **Browser Test Verification**
-    - Run `pnpm test` after migration cleanup
-    - Ensure 0 failures and no console errors
-    - Verify OPFS persistence still works
-    - Check memory usage and performance
+**Testing Infrastructure**
 
-### Medium Priority (Next Sprint)
+- Browser-based test runner expansion
+- Additional test suites for edge cases
+- Performance benchmarking integration
+- Automated regression testing setup
 
-1. **Expand Unit Test Coverage**
-    - Add tests for remaining utility modules before migration
-    - Establish test patterns for complex modules
-    - Set up automated test execution in development
+### Recent Changes
 
-2. **Migration Tooling**
-    - Automate migration checklist verification
-    - Create scripts for common migration steps
-    - Set up pre-commit hooks for migration validation
+**Module Refactoring**
 
-3. **Documentation Updates**
-    - Update API docs as modules are migrated
-    - Add TypeScript-specific examples
-    - Document type patterns and conventions
+- Extracted bootstrap logic into focused modules
+- Improved separation of concerns between runtime layers
+- Enhanced error propagation patterns
+- Optimized memory management in critical paths
 
-## Current Technical Context
+**API Improvements**
 
-### Working Directory Structure
+- Enhanced TypeScript definitions for better IDE support
+- Additional utility functions for common operations
+- Improved error messages with better context
+- Performance optimizations in hot paths
 
-```
-src/jswasm/
-├── sqlite3.mjs              # Main entry point (needs migration)
-├── sqlite3.d.ts             # Type definitions (current)
-├── utils/                   # Mixed .mjs/.ts files
-│   ├── utf8/               # Fully migrated ✓
-│   ├── path.mjs            # Migration completed, cleanup pending
-│   ├── async-utils/        # Fully migrated ✓
-│   ├── memory-utils/       # Newly migrated ✓
-│   └── wasm-loader.mjs    # Next migration candidate
-├── system/                 # System call implementations
-├── vfs/                    # Virtual File System layer
-├── runtime/                # Runtime management
-├── wasm/                   # WebAssembly integration
-└── api/                    # High-level APIs
-```
+**Documentation Updates**
 
-### Build Configuration
+- Comprehensive API documentation with examples
+- Enhanced development setup guides
+- Performance tuning recommendations
+- Troubleshooting guides for common issues
 
-- **Main Build**: `tsconfig.json` for full project compilation
-- **Migration Build**: `tsconfig.migration.json` for incremental migration
-- **In-Place Emit**: TypeScript compiles `.js` next to `.ts` files
-- **Declaration Generation**: Controlled per-module for `.d.ts` replacement
+## Active Decisions and Considerations
 
-### Testing Infrastructure
+### Architectural Decisions
 
-- **Unit Tests**: Vitest with fast execution and TypeScript support
-- **Integration Tests**: Browser-based test suite at `/tests/`
-- **Migration Tests**: Verify behavior parity between `.mjs` and `.ts`
-- **Performance Tests**: Ensure no regression in query execution
+**Gradual TypeScript Migration**
 
-## Active Challenges & Considerations
+- Decision: Maintain .mjs files for ESM compatibility while developing new features in TypeScript
+- Rationale: Ensures backward compatibility while improving developer experience
+- Impact: Requires dual maintenance but provides smoother transition path
 
-### Technical Challenges
+**OPFS-First Storage Strategy**
 
-**Memory Management**
+- Decision: Prioritize OPFS over IndexedDB for persistent storage
+- Rationale: Better performance, synchronous access in workers, modern browser support
+- Impact: Limits browser compatibility but provides superior user experience
 
-- WebAssembly memory access patterns need careful typing
-- Typed array operations between JavaScript and WASM boundaries
-- Cleanup verification for resource management
+**Modular Architecture**
 
-**Browser Compatibility**
+- Decision: Extract functionality into focused, single-responsibility modules
+- Rationale: Improves maintainability, testability, and enables selective feature usage
+- Impact: Increases module count but reduces complexity per module
 
-- OPFS API variations across browser versions
-- SharedArrayBuffer header requirements (COOP/COEP)
-- WebAssembly instantiation differences
+### Technical Considerations
 
-**Type Safety**
+**Memory Management Strategy**
 
-- Complex union types for SQLite API return values
-- Generic constraints for database operations
-- Runtime type checking vs compile-time guarantees
+- Current: SharedArrayBuffer for cross-context operations
+- Consideration: Balancing performance vs. browser compatibility
+- Decision: Maintain SharedArrayBuffer with graceful degradation fallbacks
 
-### Development Process Challenges
+**Bundle Size Optimization**
 
-**Incremental Migration Complexity**
+- Current: Tree-shaking and code splitting for minimal bundles
+- Consideration: Feature completeness vs. bundle size impact
+- Decision: Provide multiple bundle configurations for different use cases
 
-- Managing dual files during transition period
-- Import path updates across dependent modules
-- Build system coordination for mixed source types
+**Error Handling Philosophy**
 
-**Test Coverage Maintenance**
+- Current: Comprehensive error types with detailed context
+- Consideration: Error verbosity vs. performance impact
+- Decision: Prioritize developer experience with optional error detail levels
 
-- Ensuring tests cover both original and migrated behavior
-- Browser test automation for continuous integration
-- Performance regression detection during migration
+## Development Patterns and Preferences
 
-## Important Patterns & Preferences
+### Code Style Preferences
 
-### Code Organization Patterns
+**TypeScript Usage**
 
-- **High Cohesion**: Related functionality grouped in single modules
-- **Low Coupling**: Minimal dependencies between modules
-- **Clear Boundaries**: Well-defined import/export interfaces
-- **Consistent Naming**: camelCase for functions/variables, PascalCase for classes
+- Strict mode enabled for all new modules
+- Explicit type annotations for public APIs
+- Generic types for flexible operations
+- JSDoc comments for complex business logic
 
-### API Design Patterns
+**Module Organization**
 
-- **Fluent Interfaces**: Method chaining for database operations
-- **Options Objects**: Configuration objects over many parameters
-- **Callback/Promise Support**: Both synchronous and asynchronous patterns
-- **Error Handling**: Consistent error types and propagation
+- Factory pattern for module creation
+- Dependency injection for testability
+- Clear separation of public vs. private interfaces
+- Consistent naming conventions across modules
 
-### Development Workflow Patterns
+**Error Handling Patterns**
 
-- **Test-First Development**: Write tests before implementation
-- **Incremental Verification**: Test after each small change
-- **Documentation同步**: Update docs alongside code changes
-- **Peer Review**: All changes reviewed before merge
+- Hierarchical error type system
+- Promise-based error propagation
+- Context preservation through error chaining
+- Graceful degradation for unsupported features
 
-## Learning & Insights
+### Testing Preferences
 
-### Migration Insights Gained
+**Unit Testing**
 
-- **Bottom-Up Approach Critical**: Starting with utilities prevents cascade failures
-- **Test Coverage Essential**: Unit tests catch subtle behavior differences
-- **Type Safety Benefits**: TypeScript catches many runtime errors early
-- **Documentation Value**: Clear migration patterns speed up subsequent modules
-- **Directory Structure Benefits**: Dedicated directories improve organization and discoverability
+- Vitest for fast unit test execution
+- Comprehensive coverage for utility modules
+- Mock implementations for browser APIs
+- Integration tests for critical paths
+
+**Browser Testing**
+
+- Real browser testing over simulation
+- Cross-browser compatibility verification
+- Performance benchmarking integration
+- Automated visual regression testing
+
+**Quality Assurance**
+
+- ESLint for code style enforcement
+- TypeScript strict mode for type safety
+- Automated testing on multiple browsers
+- Continuous integration with comprehensive checks
+
+## Important Insights and Learnings
 
 ### Performance Insights
 
-- **WebAssembly Overhead**: Minimal for most operations, significant for small queries
-- **Memory Management**: Proper cleanup crucial for long-running applications
-- **OPFS Performance**: Excellent for sequential access, random access needs optimization
-- **Browser Differences**: Significant performance variations between browsers
+**OPFS Performance Characteristics**
 
-### Architecture Insights
+- Sector-aligned operations significantly improve throughput
+- Synchronous access in workers provides major performance benefits
+- Cross-context synchronization overhead is minimal with SharedArrayBuffer
+- Memory-mapped file operations outgrow traditional I/O for large datasets
 
-- **Modular Benefits**: Easier testing, migration, and maintenance
-- **Type Definitions**: Critical for developer experience and adoption
-- **Worker Integration**: Essential for UI responsiveness during operations
-- **Error Boundaries**: Important for graceful degradation
+**WASM Optimization Techniques**
 
-## Current Dependencies & Constraints
+- Memory pool management reduces allocation overhead
+- Lazy initialization improves cold-start performance
+- Typed array views provide better performance than DataView
+- Batch operations dramatically improve throughput for bulk operations
 
-### External Dependencies
+**Browser Compatibility Learnings**
 
-- **SQLite Upstream**: Version 3.50.4 compiled with Emscripten SDK 3.1.70
-- **TypeScript**: Version ~5.9.3 for migration and compilation
-- **Vite**: Version 7.1.10 for bundling and development server
-- **Vitest**: For fast unit testing during migration
+- COOP/COEP headers critical for SharedArrayBuffer functionality
+- Feature detection essential for graceful degradation
+- Memory limits vary significantly between browsers
+- Performance characteristics change based on device capabilities
 
-### Internal Constraints
+### Development Process Learnings
 
-- **Browser-Only**: No Node.js support, focuses on modern browsers
-- **OPFS Required**: Requires browsers with Origin Private File System support
-- **SharedArrayBuffer**: Needs specific security headers for functionality
-- **Memory Limits**: Subject to browser WebAssembly memory constraints
+**Migration Strategy Effectiveness**
 
-### Development Constraints
+- Gradual migration from JavaScript to TypeScript reduces risk
+- Maintaining ESM output preserves backward compatibility
+- Comprehensive test coverage essential for safe refactoring
+- Documentation must evolve with code changes
 
-- **ESM Modules**: All code must be ECMAScript modules
-- **Type Safety**: Strict TypeScript configuration enforced
-- **Line Length**: 120-character maximum strictly enforced
-- **Documentation**: All exports must have JSDoc documentation
+**Testing Strategy Evolution**
 
-## Decision Log
+- Browser-based testing catches issues that unit tests miss
+- Performance regression testing prevents slowdowns
+- Automated verification reduces manual testing overhead
+- Cross-browser testing reveals platform-specific issues
 
-### Recent Technical Decisions
+**Developer Experience Priorities**
 
-**Migration Strategy**: Bottom-up with test-first approach
+- Type safety significantly reduces bugs in complex modules
+- Comprehensive documentation accelerates onboarding
+- Consistent error handling improves debugging experience
+- Performance monitoring identifies optimization opportunities
 
-- **Reasoning**: Minimizes risk, ensures behavior preservation
-- **Impact**: Slower initial progress, but more reliable final result
-- **Status**: Proving effective with UTF-8, path, and async-utils modules
+## Next Immediate Steps
 
-**In-Place Compilation**: TypeScript emits `.js` next to `.ts`
+### Short-term Priorities (Next 2-4 weeks)
 
-- **Reasoning**: Simplifies import path management during migration
-- **Impact**: Cleaner migration process, less file system churn
-- **Status**: Working well with `tsconfig.migration.json`
+**Complete TypeScript Migration**
 
-**Numeric Comments**: Required inside function bodies only
+- Finish converting remaining .mjs modules to TypeScript
+- Enhance type definitions for better IDE support
+- Improve error messages with type context
+- Update documentation to reflect TypeScript changes
 
-- **Reasoning**: Improves code readability without cluttering interfaces
-- **Impact**: Clearer code structure, better developer onboarding
-- **Status**: Being established as standard for all migrated code
+**Performance Optimization**
 
-**Dedicated Directory Structure**: Organize migrated modules in subdirectories
+- Benchmark and optimize hot paths
+- Improve memory usage patterns
+- Enhance OPFS sector management
+- Optimize WASM initialization time
 
-- **Reasoning**: Better separation of concerns, improved discoverability
-- **Impact**: Cleaner project structure, easier maintenance
-- **Status**: Successfully implemented for async-utils module
+**Testing Enhancement**
 
-### Pending Decisions
+- Expand browser test coverage
+- Add performance regression tests
+- Improve automated verification
+- Enhance error case testing
 
-**Automated Testing in CI**: Browser test automation setup
+### Medium-term Priorities (Next 1-3 months)
 
-- **Options**: Playwright, Puppeteer, or custom browser automation
-- **Considerations**: CI/CD integration, cross-browser testing, cost
-- **Timeline**: Decision needed within next 2 sprints
+**Feature Enhancement**
 
-**Module Organization**: Final structure post-migration
+- Enhanced query optimization hints
+- Improved connection pooling
+- Advanced OPFS features
+- Better error recovery mechanisms
 
-- **Options**: Current directory structure vs. reorganization
-- **Considerations**: Import paths, discoverability, maintenance
-- **Timeline**: Decision can wait until migration progresses further
+**Developer Experience**
 
-This active context will evolve as the TypeScript migration progresses and new patterns emerge from the development process.
+- Enhanced debugging tools
+- Improved documentation examples
+- Performance profiling utilities
+- Migration guides for common scenarios
+
+**Ecosystem Integration**
+
+- Better integration with popular frameworks
+- Enhanced tooling support
+- Improved build system integration
+- Additional language bindings
+
+### Technical Debt Management
+
+**Code Quality**
+
+- Continue refactoring for better separation of concerns
+- Improve test coverage for edge cases
+- Enhance error handling consistency
+- Optimize bundle sizes further
+
+**Documentation**
+
+- Keep API documentation synchronized with code
+- Add more practical examples
+- Improve troubleshooting guides
+- Enhance performance tuning documentation
+
+**Infrastructure**
+
+- Improve CI/CD pipelines
+- Enhance automated testing
+- Better release process automation
+- Improved dependency management
+
+## Risk Assessment and Mitigation
+
+### Current Risks
+
+**Browser Compatibility**
+
+- Risk: OPFS adoption gaps in older browsers
+- Mitigation: Graceful degradation to IndexedDB fallback
+- Monitoring: Browser usage statistics and feature detection
+
+**Performance Regression**
+
+- Risk: New features impacting performance
+- Mitigation: Comprehensive performance testing
+- Monitoring: Automated benchmarking and alerting
+
+**Complexity Management**
+
+- Risk: Growing codebase complexity
+- Mitigation: Strict architectural patterns and regular refactoring
+- Monitoring: Code metrics and architectural reviews
+
+**Upstream Dependency Changes**
+
+- Risk: SQLite or Emscripten updates breaking compatibility
+- Mitigation: Comprehensive test suite and version pinning
+- Monitoring: Upstream change tracking and timely updates
+
+### Mitigation Strategies
+
+**Testing Strategy**
+
+- Comprehensive automated testing across browsers
+- Performance regression detection
+- Cross-platform compatibility verification
+- Continuous integration with extensive checks
+
+**Documentation Strategy**
+
+- Living documentation that evolves with code
+- Comprehensive migration guides
+- Troubleshooting documentation for common issues
+- Performance tuning guides
+
+**Community Engagement**
+
+- Regular communication about changes
+- Clear migration paths for breaking changes
+- Community feedback incorporation
+- Contribution guidelines and support

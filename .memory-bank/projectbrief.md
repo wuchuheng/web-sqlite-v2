@@ -1,166 +1,63 @@
 # Project Brief: Web SQLite V2
 
-**Project Name**: @wuchuheng/web-sqlite  
-**Version**: 1.0.0  
-**Type**: SQLite3 WebAssembly Library for Browsers  
-**Primary Goal**: Provide persistent SQLite database functionality in web browsers using WebAssembly and OPFS
+## Project Name
 
-## Core Requirements
+@wuchuheng/web-sqlite
 
-### Functional Requirements
+## Core Purpose
 
-- **SQLite3 Engine**: Full SQLite3 functionality compiled to WebAssembly (version 3.50.4)
-- **Browser Persistence**: OPFS (Origin Private File System) integration for durable storage
-- **Cross-Context Support**: Functionality in both main thread and Web Workers
-- **API Compatibility**: Object-oriented API (OO1) and low-level C-style API exposure
-- **Memory Management**: Efficient WebAssembly memory allocation and deallocation
-- **File System**: Complete in-memory file system (MEMFS) with POSIX-like operations
+Repackage the official `sqlite3.wasm` distribution into a maintainable module graph for browser and worker hosts.
 
-### Non-Functional Requirements
+## Primary Goals
 
-- **Performance**: Minimal overhead between JavaScript and WebAssembly layers
-- **Browser Compatibility**: Support for Chrome 86+, Firefox 111+, Safari 15.4+, Edge 86+
-- **Type Safety**: Complete TypeScript definitions for all public APIs
-- **Modularity**: Maintainable module structure with clear separation of concerns
-- **Documentation**: Comprehensive API documentation and development guides
-- **Testing**: Browser-based test suite with automated verification
-
-## Technical Goals
-
-### Architecture Goals
-
-- **Modular Design**: Split monolithic WASM integration into focused, maintainable modules
-- **Type Coverage**: Complete TypeScript migration from JavaScript (.mjs) to TypeScript (.ts)
-- **Memory Safety**: Robust WebAssembly memory management with proper cleanup
-- **OPFS Integration**: Seamless persistent storage across browser contexts
-- **Worker Support**: Efficient coordination between main thread and Web Workers
-
-### Development Goals
-
-- **Code Quality**: Adherence to strict coding standards (120-char line limit, three-phase processing pattern)
-- **Documentation**: Living documentation that evolves with the codebase
-- **Testing**: Comprehensive unit tests and integration tests with browser verification
-- **Build System**: Efficient build pipeline with TypeScript compilation and bundling
-- **Developer Experience**: Clear development workflow with linting, testing, and documentation
-
-## Scope Boundaries
-
-### In Scope
-
-- SQLite3 WebAssembly wrapper for browsers
-- OPFS persistence layer and VFS implementations
-- Object-oriented database API (OO1)
-- Low-level C-style API bindings
-- Memory management utilities
-- Path and UTF-8 string utilities
-- System call implementations (POSIX subset)
-- WebAssembly loading and lifecycle management
-
-### Out of Scope
-
-- Node.js runtime support (browser-only focus)
-- Server-side SQLite implementations
-- Database migration tools
-- GUI database management interfaces
-- Cloud synchronization features
-- Multi-user database access
+1. **Modular Runtime Architecture** - Extract SQLite WASM functionality into focused, maintainable modules
+2. **OPFS Persistence** - Provide reliable browser filesystem persistence across windows and workers
+3. **TypeScript Coverage** - Deliver comprehensive type definitions for all runtime facilities
+4. **Developer Experience** - Enable seamless SQLite initialization without editing generated amalgamation
 
 ## Success Criteria
 
-### Technical Success Metrics
+- Browser and worker hosts can initialize SQLite engine without WASM bundle modifications
+- OPFS persistence works consistently across different browser contexts
+- Full TypeScript type coverage for runtime, system, and VFS entry points
+- Modular structure allows independent evolution of components
+- Comprehensive test coverage with automated verification
 
-- **TypeScript Migration**: 100% migration from .mjs to .ts with type coverage
-- **Test Coverage**: Browser-based tests passing with 0 failures
-- **Performance**: Sub-millisecond query overhead for simple operations
-- **Browser Support**: Functional across all target browser versions
-- **Memory Efficiency**: No memory leaks in sustained usage scenarios
+## Scope
 
-### User Success Metrics
+**In Scope:**
 
-- **API Usability**: Intuitive object-oriented interface for common operations
-- **Documentation Quality**: Clear examples and comprehensive API reference
-- **Developer Experience**: Smooth onboarding with working examples
-- **Reliability**: Consistent behavior across different browser environments
-- **Performance**: Acceptable speed for typical web application workloads
+- SQLite3 WebAssembly runtime initialization and management
+- OPFS (Origin Private File System) integration and persistence
+- Memory management and environment detection utilities
+- Worker RPC API for cross-context database operations
+- TypeScript type definitions and documentation
+- Browser-based test harness and verification tools
 
-## Project Constraints
+**Out of Scope:**
 
-### Technical Constraints
+- Modifications to upstream SQLite C codebase
+- Non-browser SQLite deployments (Node.js, mobile, etc.)
+- Database migration tools or schema management
+- GUI administration interfaces
 
-- **WebAssembly Dependencies**: Relies on Emscripten SDK 3.1.70 for WASM compilation
-- **Browser API Requirements**: Requires SharedArrayBuffer and OPFS support
-- **Security Context**: Must run in secure context (HTTPS or localhost)
-- **Memory Limits**: Subject to browser WebAssembly memory constraints
-- **CORS Headers**: Requires specific COOP/COEP headers for SharedArrayBuffer
+## Constraints
 
-### Development Constraints
+- Must maintain compatibility with official SQLite WASM distribution
+- ESM module output required for browser consumption
+- TypeScript sources must compile to maintainable JavaScript
+- COOP/COEP headers required for SharedArrayBuffer support
+- Build process must not require Emscripten SDK for consumers
 
-- **Package Manager**: Uses pnpm for dependency management
-- **Build Tools**: Vite for bundling, TypeScript for compilation
-- **Testing**: Browser-based testing with Vite
-- **Documentation**: VitePress for static documentation generation
-- **Code Style**: ESLint with strict TypeScript rules and custom conventions
+## Stakeholders
 
-## Key Stakeholders
-
-### Primary Users
-
-- Web application developers requiring client-side database functionality
-- Progressive Web App (PWA) developers needing offline storage
-- Browser extension developers requiring local data persistence
-- Enterprise web application developers needing secure client-side storage
-
-### Development Team
-
-- Maintainers focused on WASM integration and browser compatibility
-- TypeScript developers working on API design and type safety
-- Documentation authors ensuring clear developer guidance
-- Quality assurance engineers verifying browser compatibility
-
-### External Dependencies
-
-- SQLite upstream project (sqlite/sqlite)
-- Emscripten WebAssembly toolchain
-- Browser vendors implementing OPFS and SharedArrayBuffer APIs
-- TypeScript team providing language and tooling support
+- **Developers** - Need reliable SQLite in browser applications
+- **Maintainers** - Require modular, testable codebase
+- **Upstream SQLite Team** - Compatibility with official distribution
+- **Browser Vendors** - Depend on standard Web APIs (OPFS, WebAssembly)
 
 ## Timeline Considerations
 
-### Short-term (Current Sprint)
-
-- Complete TypeScript migration for remaining .mjs files
-- Establish comprehensive memory bank documentation
-- Verify all browser tests passing after migration
-
-### Medium-term (Next 3 Months)
-
-- Automate browser testing in CI pipeline
-- Enhance OPFS performance and reliability
-- Expand API documentation with more examples
-
-### Long-term (6+ Months)
-
-- Optimize WebAssembly memory usage
-- Add advanced SQLite features (extensions, custom functions)
-- Consider additional browser storage mechanisms as fallbacks
-
-## Risk Assessment
-
-### High Risks
-
-- Browser compatibility issues with OPFS or SharedArrayBuffer
-- WebAssembly memory leaks or performance regressions
-- TypeScript migration introducing runtime behavior changes
-
-### Medium Risks
-
-- Documentation drift from implementation changes
-- Test suite not covering all edge cases
-- Build pipeline complexity affecting developer experience
-
-### Mitigation Strategies
-
-- Comprehensive browser testing across target versions
-- Incremental TypeScript migration with test verification
-- Memory usage monitoring and cleanup verification
-- Living documentation maintained alongside code changes
+- Ongoing TypeScript migration from .mjs to .ts sources
+- Continuous feature parity with upstream SQLite releases
+- Progressive enhancement of OPFS persistence capabilities
