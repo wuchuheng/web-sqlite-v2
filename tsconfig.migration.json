@@ -20,6 +20,7 @@
         "src/jswasm/utils/sqlite3-init-wrapper/*.ts",
         "src/jswasm/utils/wasm-loader/*.ts",
         "src/jswasm/utils/struct-binder/struct-binder-helpers/*.ts",
+        "src/jswasm/utils/struct-binder/struct-binder-signatures/*.ts",
         "src/jswasm/utils/struct-binder/struct-binder-memory/*.ts"
     ],
     "exclude": ["src/**/*.test.ts"]

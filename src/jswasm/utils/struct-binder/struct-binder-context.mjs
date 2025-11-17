@@ -6,7 +6,7 @@ import {
     isNumericValue,
     toss,
 } from "./struct-binder-helpers/struct-binder-helpers.js";
-import { createSignatureHelpers } from "./struct-binder-signatures.mjs";
+import { createSignatureHelpers } from "./struct-binder-signatures/struct-binder-signatures.js";
 import { createMemoryHelpers } from "./struct-binder-memory/struct-binder-memory";
 import { createMemberHelpers } from "./struct-binder-members.mjs";
 
