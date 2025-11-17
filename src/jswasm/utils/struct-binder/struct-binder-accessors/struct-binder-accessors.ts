@@ -3,7 +3,7 @@ import {
   RX_SIG_SIMPLE,
   describeMember,
   toss,
-} from "../struct-binder-helpers/struct-binder-helpers.js";
+} from "../struct-binder-helpers/struct-binder-helpers";
 
 export type StructMemberDescriptor = {
   key?: string;

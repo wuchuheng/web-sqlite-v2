@@ -5,8 +5,8 @@ import {
     defineReadonly,
     isNumericValue,
     toss,
-} from "./struct-binder-helpers/struct-binder-helpers.js";
-import { createSignatureHelpers } from "./struct-binder-signatures/struct-binder-signatures.js";
+} from "./struct-binder-helpers/struct-binder-helpers";
+import { createSignatureHelpers } from "./struct-binder-signatures/struct-binder-signatures";
 import { createMemoryHelpers } from "./struct-binder-memory/struct-binder-memory";
 import { createMemberHelpers } from "./struct-binder-members.mjs";
 

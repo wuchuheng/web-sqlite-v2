@@ -1,4 +1,4 @@
-import { createPathFS } from "../utils/path/path.js";
+import { createPathFS } from "../utils/path/path";
 import { createBaseState } from "./filesystem/base-state.mjs";
 import { createPathOperations } from "./filesystem/path-operations.mjs";
 import { createModeOperations } from "./filesystem/mode-operations.mjs";
