@@ -22,7 +22,7 @@ The project is currently in the middle of a comprehensive TypeScript migration f
     - Test plan documented in `docs/development/async-utils-test-plan.md`
     - Updated import path in main `sqlite3.mjs` to use new TypeScript module
     - Follows three-phase processing pattern with numeric comments
-- `src/jswasm/utils/memory-utils/` - **NEWLY COMPLETED** - Full TypeScript migration with comprehensive test coverage
+- `src/jswasm/utils/memory-utils/` - **COMPLETED** - Full TypeScript migration with comprehensive test coverage
     - Migrated from `src/jswasm/utils/memory-utils.mjs` and `src/jswasm/utils/memory-utils.d.ts` to `src/jswasm/utils/memory-utils/memory-utils.ts`
     - Moved to dedicated `memory-utils/` directory structure
     - Comprehensive unit tests in `src/jswasm/utils/memory-utils.test.ts`
@@ -31,6 +31,17 @@ The project is currently in the middle of a comprehensive TypeScript migration f
     - Updated `tsconfig.migration.json` to include new memory-utils directory
     - Follows three-phase processing pattern with numeric comments
     - Includes WebAssembly memory helpers: `initRandomFill`, `randomFill`, `zeroMemory`, `alignMemory`, `createMmapAlloc`
+- `src/jswasm/utils/wasm-loader/` - **NEWLY COMPLETED** - Full TypeScript migration with comprehensive test coverage
+    - Migrated from `src/jswasm/utils/wasm-loader.mjs` and `src/jswasm/utils/wasm-loader.d.ts` to `src/jswasm/utils/wasm-loader/wasm-loader.ts`
+    - Moved to dedicated `wasm-loader/` directory structure following established patterns
+    - Comprehensive unit tests in `src/jswasm/utils/wasm-loader/wasm-loader.test.ts` with Vitest
+    - Test plan documented in `docs/development/wasm-loader-test-plan.md`
+    - Updated import path in `src/jswasm/sqlite3.mjs` to use new TypeScript module (`./utils/wasm-loader/wasm-loader.js`)
+    - Updated `tsconfig.migration.json` to include new wasm-loader directory
+    - Follows three-phase processing pattern with numeric comments
+    - Type-safe WebAssembly loading with proper interfaces: `WasmLoaderConfig`, `WasmModuleLike`, `ModuleValue`
+    - Supports streaming instantiation, ArrayBuffer fallback, and Module.instantiateWasm hooks
+    - Comprehensive error handling with ready promise rejection and lifecycle hooks
 - Various utility modules have TypeScript definitions (.d.ts files)
 - Core type infrastructure is in place
 

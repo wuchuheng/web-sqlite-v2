@@ -60,7 +60,7 @@ Each module has a single, well-defined responsibility:
 - `path.mjs` - Path manipulation and normalization
 - `utf8/` - UTF-8 string encoding/decoding
 - `memory-utils.mjs` - WebAssembly memory management
-- `wasm-loader.mjs` - WebAssembly loading utilities
+- `wasm-loader/` - **NEWLY MIGRATED** - WebAssembly loading utilities with comprehensive TypeScript interfaces
 - `async-utils.mjs` - Async operation helpers
 
 **System Modules (`system/`)**
@@ -230,7 +230,83 @@ export class MemoryManager {
 }
 ```
 
-### 5. Error Handling Pattern
+### 5. WASM Loader Pattern
+
+**Purpose**: Type-safe WebAssembly module loading with comprehensive error handling and lifecycle management
+
+**Implementation**:
+
+```typescript
+export function createWasmLoader(config: WasmLoaderConfig): WasmLoader {
+    const {
+        Module,
+        wasmBinary,
+        locateFile,
+        readAsync,
+        readBinary,
+        addRunDependency,
+        removeRunDependency,
+        readyPromiseReject,
+        addOnInit,
+        abort,
+        err,
+        getWasmImports,
+        setWasmExports,
+    } = config;
+
+    function createWasm(): WebAssembly.Exports | Record<string, never> {
+        // 1. Prepare imports and dependency tracking
+        const info = getWasmImports();
+
+        // 2. Core instantiation logic
+        const receiveInstance = (
+            instance: WebAssembly.Instance,
+        ): WebAssembly.Exports => {
+            const exports = instance.exports;
+            addOnInit(exports["__wasm_call_ctors"] as () => void);
+            removeRunDependency("wasm-instantiate");
+            setWasmExports?.(exports);
+            return exports;
+        };
+
+        addRunDependency("wasm-instantiate");
+
+        // 3. Handle Module.instantiateWasm hook or fallback
+        const wasmHook = Module.instantiateWasm;
+        if (wasmHook) {
+            try {
+                const wasmHookResult = wasmHook(info, receiveInstance);
+                if (wasmHookResult) {
+                    return wasmHookResult;
+                }
+                return {};
+            } catch (error) {
+                err?.(
+                    `Module.instantiateWasm callback failed with error: ${error}`,
+                );
+                readyPromiseReject?.(
+                    (error ?? "Module.instantiateWasm failed") as LoaderError,
+                );
+                return {};
+            }
+        }
+
+        // Fallback to streaming or ArrayBuffer instantiation
+        instantiateAsync(
+            wasmBinary,
+            wasmBinaryFile,
+            info,
+            receiveInstantiationResult,
+        ).catch((reason) => readyPromiseReject?.(reason as LoaderError));
+
+        return {};
+    }
+
+    return { createWasm };
+}
+```
+
+### 6. Error Handling Pattern
 
 **Purpose**: Consistent error handling across WebAssembly and JavaScript boundaries
 

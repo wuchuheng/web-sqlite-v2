@@ -294,9 +294,9 @@ src/jswasm/
 ├── utils/                         # Utility functions
 │   ├── path.*                     # Path manipulation
 │   ├── utf8/                     # UTF-8 string handling
-│   ├── memory-utils.*             # Memory management utilities
-│   ├── wasm-loader.*              # WebAssembly loading
-│   ├── async-utils.*              # Async operation helpers
+│   ├── memory-utils/              # **NEWLY MIGRATED** - Memory management utilities
+│   ├── wasm-loader/               # **NEWLY MIGRATED** - WebAssembly loading utilities
+│   ├── async-utils/               # **MIGRATED** - Async operation helpers
 │   └── whwasm/                   # WASM helper utilities
 ├── shared/                        # Shared type definitions
 │   ├── runtime-types.*            # Runtime-related types

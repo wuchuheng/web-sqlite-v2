@@ -85,7 +85,7 @@
     - ✅ Updated import path in main `sqlite3.mjs` to use new TypeScript module
     - ✅ Follows three-phase processing pattern with numeric comments
     - ✅ Type-safe async loader factory with dependency tracking
-- ✅ `src/jswasm/utils/memory-utils/` - **NEWLY COMPLETED** - Full TypeScript migration
+- ✅ `src/jswasm/utils/memory-utils/` - **COMPLETED** - Full TypeScript migration
     - ✅ Migrated from `src/jswasm/utils/memory-utils.mjs` and `src/jswasm/utils/memory-utils.d.ts` to `src/jswasm/utils/memory-utils/memory-utils.ts`
     - ✅ Moved to dedicated `memory-utils/` directory structure
     - ✅ Comprehensive unit tests in `src/jswasm/utils/memory-utils.test.ts`
@@ -94,6 +94,17 @@
     - ✅ Updated `tsconfig.migration.json` to include new memory-utils directory
     - ✅ Follows three-phase processing pattern with numeric comments
     - ✅ WebAssembly memory helpers: `initRandomFill`, `randomFill`, `zeroMemory`, `alignMemory`, `createMmapAlloc`
+- ✅ `src/jswasm/utils/wasm-loader/` - **NEWLY COMPLETED** - Full TypeScript migration
+    - ✅ Migrated from `src/jswasm/utils/wasm-loader.mjs` and `src/jswasm/utils/wasm-loader.d.ts` to `src/jswasm/utils/wasm-loader/wasm-loader.ts`
+    - ✅ Moved to dedicated `wasm-loader/` directory structure following established patterns
+    - ✅ Comprehensive unit tests in `src/jswasm/utils/wasm-loader/wasm-loader.test.ts` with Vitest
+    - ✅ Test plan documented in `docs/development/wasm-loader-test-plan.md`
+    - ✅ Updated import path in `src/jswasm/sqlite3.mjs` to use new TypeScript module (`./utils/wasm-loader/wasm-loader.js`)
+    - ✅ Updated `tsconfig.migration.json` to include new wasm-loader directory
+    - ✅ Follows three-phase processing pattern with numeric comments
+    - ✅ Type-safe WebAssembly loading with proper interfaces: `WasmLoaderConfig`, `WasmModuleLike`, `ModuleValue`
+    - ✅ Supports streaming instantiation, ArrayBuffer fallback, and Module.instantiateWasm hooks
+    - ✅ Comprehensive error handling with ready promise rejection and lifecycle hooks
 - ✅ UTF-8 string encoding/decoding with comprehensive test coverage
 - ✅ Type-safe implementations with proper error handling
 - ✅ Three-phase processing pattern implementation
@@ -109,10 +120,11 @@
 
 **Next Migration Targets** 📋
 
-- 🔄 `src/jswasm/utils/wasm-loader.mjs` - WebAssembly loading utilities
 - 🔄 `src/jswasm/utils/sqlite3-init-wrapper.mjs` - SQLite initialization
 - 🔄 `src/jswasm/system/syscalls.mjs` - System call implementations
 - 🔄 `src/jswasm/system/wasi-functions.mjs` - WASI function implementations
+- 🔄 `src/jswasm/runtime/environment-detector.mjs` - Browser capability detection
+- 🔄 `src/jswasm/runtime/lifecycle-manager.mjs` - Module lifecycle management
 
 ### Architecture Improvements 🔄
 
@@ -136,7 +148,6 @@
 
 **Utility Modules** (High Priority)
 
-- 🔄 `src/jswasm/utils/wasm-loader.mjs` - WebAssembly loading utilities
 - 🔄 `src/jswasm/utils/sqlite3-init-wrapper.mjs` - SQLite initialization
 
 **System Layer** (Medium Priority)
@@ -239,7 +250,20 @@
 
 ### Completed Features ✅
 
-**Memory Utils Module Migration** (Latest)
+**WASM Loader Module Migration** (Latest)
+
+- ✅ Successfully migrated WebAssembly loader from JavaScript to TypeScript
+- ✅ Migrated from `src/jswasm/utils/wasm-loader.mjs` and `src/jswasm/utils/wasm-loader.d.ts` to `src/jswasm/utils/wasm-loader/wasm-loader.ts`
+- ✅ Moved to dedicated `wasm-loader/` directory structure following established patterns
+- ✅ Added comprehensive unit test coverage with Vitest for all loading scenarios
+- ✅ Updated import path in main `sqlite3.mjs` to use new TypeScript module
+- ✅ Updated `tsconfig.migration.json` to include new wasm-loader directory
+- ✅ Created detailed test plan documentation for WASM loader utilities
+- ✅ Type-safe WebAssembly loading with proper interfaces: `WasmLoaderConfig`, `WasmModuleLike`, `ModuleValue`
+- ✅ Supports streaming instantiation, ArrayBuffer fallback, and Module.instantiateWasm hooks
+- ✅ Comprehensive error handling with ready promise rejection and lifecycle hooks
+
+**Memory Utils Module Migration** (Previous)
 
 - ✅ Successfully migrated memory utilities from JavaScript to TypeScript
 - ✅ Migrated from `src/jswasm/utils/memory-utils.mjs` and `src/jswasm/utils/memory-utils.d.ts` to `src/jswasm/utils/memory-utils/memory-utils.ts`
@@ -354,8 +378,8 @@
 **TypeScript Migration Progress**
 
 - Target: 100% migration from .mjs to .ts
-- Current: ~20% (UTF-8, path, async-utils, and memory-utils modules complete)
-- Next Goal: 25% by end of current sprint
+- Current: ~25% (UTF-8, path, async-utils, memory-utils, and wasm-loader modules complete)
+- Next Goal: 30% by end of current sprint
 
 **Test Coverage**
 
