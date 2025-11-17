@@ -5,7 +5,7 @@
  * @module runtime/memory-manager
  */
 
-import { alignMemory } from "../utils/memory-utils.mjs";
+import { alignMemory } from "../utils/memory-utils/memory-utils.js";
 
 /**
  * Creates a memory manager for WebAssembly heap operations.

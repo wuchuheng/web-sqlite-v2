@@ -14,6 +14,7 @@
     "include": [
         "src/jswasm/utils/async-utils/*.ts",
         "src/jswasm/utils/utf8/*.ts",
+        "src/jswasm/utils/memory-utils/*.ts",
         "src/jswasm/utils/path/*.ts"
     ],
     "exclude": [

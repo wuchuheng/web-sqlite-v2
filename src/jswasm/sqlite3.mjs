@@ -48,7 +48,7 @@ import {
     randomFill as randomFillUtil,
     zeroMemory,
     createMmapAlloc,
-} from "./utils/memory-utils.mjs";
+} from "./utils/memory-utils/memory-utils.js";
 import { createAsyncLoad } from "./utils/async-utils/async-utils.js";
 import { wrapSqlite3InitModule } from "./utils/sqlite3-init-wrapper.mjs";
 import { createWasmLoader } from "./utils/wasm-loader.mjs";
