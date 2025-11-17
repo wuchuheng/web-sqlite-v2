@@ -1,4 +1,4 @@
-import { toss } from "./struct-binder-helpers.mjs";
+import { toss } from "./struct-binder-helpers/struct-binder-helpers.js";
 
 export const createSignatureHelpers = ({ ptrSizeof, ptrIR, bigIntEnabled }) => {
     const BigInt64ArrayCtor = globalThis.BigInt64Array;

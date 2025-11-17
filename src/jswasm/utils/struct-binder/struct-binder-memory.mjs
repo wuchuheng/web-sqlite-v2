@@ -1,4 +1,4 @@
-import { toss } from "./struct-binder-helpers.mjs";
+import { toss } from "./struct-binder-helpers/struct-binder-helpers.js";
 
 export const createMemoryHelpers = ({
     alloc,

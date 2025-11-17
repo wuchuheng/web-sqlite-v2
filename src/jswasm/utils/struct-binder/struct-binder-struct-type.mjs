@@ -2,7 +2,7 @@ import {
     INTERNAL_STRUCT_TOKEN,
     defineReadonly,
     toss,
-} from "./struct-binder-helpers.mjs";
+} from "./struct-binder-helpers/struct-binder-helpers.js";
 
 export const createStructType = (context) => {
     class StructType {

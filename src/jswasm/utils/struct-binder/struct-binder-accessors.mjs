@@ -3,7 +3,7 @@ import {
     RX_SIG_SIMPLE,
     describeMember,
     toss,
-} from "./struct-binder-helpers.mjs";
+} from "./struct-binder-helpers/struct-binder-helpers.js";
 
 const validateStructDefinition = (structName, structInfo) => {
     if (!structInfo || typeof structInfo !== "object") {
