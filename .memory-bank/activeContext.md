@@ -15,13 +15,22 @@ The project is currently in the middle of a comprehensive TypeScript migration f
     - Comprehensive unit tests in `src/jswasm/utils/path/path.test.ts`
     - Test plan documented in `docs/development/path-migration-test-plan.md`
     - Follows three-phase processing pattern with numeric comments
-- `src/jswasm/utils/async-utils/` - **NEWLY COMPLETED** - Full TypeScript migration with comprehensive test coverage
+- `src/jswasm/utils/async-utils/` - **COMPLETED** - Full TypeScript migration with comprehensive test coverage
     - Migrated from `src/jswasm/utils/async-utils.mjs` to `src/jswasm/utils/async-utils/async-utils.ts`
     - Moved to dedicated `async-utils/` directory structure
     - Comprehensive unit tests in `src/jswasm/utils/async-utils.test.ts`
     - Test plan documented in `docs/development/async-utils-test-plan.md`
     - Updated import path in main `sqlite3.mjs` to use new TypeScript module
     - Follows three-phase processing pattern with numeric comments
+- `src/jswasm/utils/memory-utils/` - **NEWLY COMPLETED** - Full TypeScript migration with comprehensive test coverage
+    - Migrated from `src/jswasm/utils/memory-utils.mjs` and `src/jswasm/utils/memory-utils.d.ts` to `src/jswasm/utils/memory-utils/memory-utils.ts`
+    - Moved to dedicated `memory-utils/` directory structure
+    - Comprehensive unit tests in `src/jswasm/utils/memory-utils.test.ts`
+    - Test plan documented in `docs/development/memory-utils-test-plan.md`
+    - Updated import paths in `src/jswasm/runtime/memory-manager.mjs` and `src/jswasm/sqlite3.mjs` to use new TypeScript module
+    - Updated `tsconfig.migration.json` to include new memory-utils directory
+    - Follows three-phase processing pattern with numeric comments
+    - Includes WebAssembly memory helpers: `initRandomFill`, `randomFill`, `zeroMemory`, `alignMemory`, `createMmapAlloc`
 - Various utility modules have TypeScript definitions (.d.ts files)
 - Core type infrastructure is in place
 
@@ -33,7 +42,7 @@ The project is currently in the middle of a comprehensive TypeScript migration f
 
 **Remaining Work:**
 
-- Next migration targets: `memory-utils.mjs`, system layer modules
+- Next migration targets: `wasm-loader.mjs`, system layer modules
 - Import updates from `.mjs` to `.js` after compilation for completed modules
 - Manual `.d.ts` replacement with generated declarations
 - Bulk of `.mjs` files in `src/jswasm/` still need migration
@@ -106,13 +115,19 @@ export function exampleFunction(input: InputType): OutputType {
     - Replace manual `.d.ts` with generated TypeScript declaration
     - Run browser tests to verify no regressions
 
-2. **Select Next Migration Target**
-    - Choose `memory-utils.mjs` as next leaf module (async-utils completed)
+2. **Complete Memory Utils Migration Cleanup**
+    - Update imports from `.mjs` to compiled `.js` for dependent modules
+    - Remove original `src/jswasm/utils/memory-utils.mjs` and `.d.ts` files
+    - Replace manual `.d.ts` with generated TypeScript declaration
+    - Run browser tests to verify no regressions
+
+3. **Select Next Migration Target**
+    - Choose `wasm-loader.mjs` as next leaf module (memory-utils completed)
     - Apply Primary Safety Workflow steps 1-5
     - Document migration patterns discovered from completed modules
     - Update migration guide with new lessons learned
 
-3. **Browser Test Verification**
+4. **Browser Test Verification**
     - Run `pnpm test` after migration cleanup
     - Ensure 0 failures and no console errors
     - Verify OPFS persistence still works
@@ -147,8 +162,8 @@ src/jswasm/
 │   ├── utf8/               # Fully migrated ✓
 │   ├── path.mjs            # Migration completed, cleanup pending
 │   ├── async-utils/        # Fully migrated ✓
-│   ├── memory-utils.mjs    # Next migration candidate
-│   └── wasm-loader.mjs    # Complex, later migration
+│   ├── memory-utils/       # Newly migrated ✓
+│   └── wasm-loader.mjs    # Next migration candidate
 ├── system/                 # System call implementations
 ├── vfs/                    # Virtual File System layer
 ├── runtime/                # Runtime management

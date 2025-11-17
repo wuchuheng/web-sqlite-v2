@@ -70,14 +70,14 @@
 **Completed Modules** ✅
 
 - ✅ `src/jswasm/utils/utf8/` - Fully migrated with unit tests
-- ✅ `src/jswasm/utils/path/` - **NEWLY COMPLETED** - Full TypeScript migration
+- ✅ `src/jswasm/utils/path/` - **COMPLETED** - Full TypeScript migration
     - ✅ Migrated from `src/jswasm/utils/path.mjs` to `src/jswasm/utils/path/path.ts`
     - ✅ Type definitions moved to `src/jswasm/utils/path/types.d.ts`
     - ✅ Comprehensive unit tests in `src/jswasm/utils/path/path.test.ts`
     - ✅ Test plan documented in `docs/development/path-migration-test-plan.md`
     - ✅ Three-phase processing pattern with numeric comments
     - ✅ POSIX-compliant path manipulation with full type safety
-- ✅ `src/jswasm/utils/async-utils/` - **NEWLY COMPLETED** - Full TypeScript migration
+- ✅ `src/jswasm/utils/async-utils/` - **COMPLETED** - Full TypeScript migration
     - ✅ Migrated from `src/jswasm/utils/async-utils.mjs` to `src/jswasm/utils/async-utils/async-utils.ts`
     - ✅ Moved to dedicated `async-utils/` directory structure
     - ✅ Comprehensive unit tests in `src/jswasm/utils/async-utils.test.ts`
@@ -85,6 +85,15 @@
     - ✅ Updated import path in main `sqlite3.mjs` to use new TypeScript module
     - ✅ Follows three-phase processing pattern with numeric comments
     - ✅ Type-safe async loader factory with dependency tracking
+- ✅ `src/jswasm/utils/memory-utils/` - **NEWLY COMPLETED** - Full TypeScript migration
+    - ✅ Migrated from `src/jswasm/utils/memory-utils.mjs` and `src/jswasm/utils/memory-utils.d.ts` to `src/jswasm/utils/memory-utils/memory-utils.ts`
+    - ✅ Moved to dedicated `memory-utils/` directory structure
+    - ✅ Comprehensive unit tests in `src/jswasm/utils/memory-utils.test.ts`
+    - ✅ Test plan documented in `docs/development/memory-utils-test-plan.md`
+    - ✅ Updated import paths in `src/jswasm/runtime/memory-manager.mjs` and `src/jswasm/sqlite3.mjs` to use new TypeScript module
+    - ✅ Updated `tsconfig.migration.json` to include new memory-utils directory
+    - ✅ Follows three-phase processing pattern with numeric comments
+    - ✅ WebAssembly memory helpers: `initRandomFill`, `randomFill`, `zeroMemory`, `alignMemory`, `createMmapAlloc`
 - ✅ UTF-8 string encoding/decoding with comprehensive test coverage
 - ✅ Type-safe implementations with proper error handling
 - ✅ Three-phase processing pattern implementation
@@ -100,7 +109,6 @@
 
 **Next Migration Targets** 📋
 
-- 🔄 `src/jswasm/utils/memory-utils.mjs` - Memory management helpers
 - 🔄 `src/jswasm/utils/wasm-loader.mjs` - WebAssembly loading utilities
 - 🔄 `src/jswasm/utils/sqlite3-init-wrapper.mjs` - SQLite initialization
 - 🔄 `src/jswasm/system/syscalls.mjs` - System call implementations
@@ -128,7 +136,6 @@
 
 **Utility Modules** (High Priority)
 
-- 🔄 `src/jswasm/utils/memory-utils.mjs` - WebAssembly memory helpers
 - 🔄 `src/jswasm/utils/wasm-loader.mjs` - WebAssembly loading utilities
 - 🔄 `src/jswasm/utils/sqlite3-init-wrapper.mjs` - SQLite initialization
 
@@ -232,7 +239,18 @@
 
 ### Completed Features ✅
 
-**Async Utils Module Migration** (Latest)
+**Memory Utils Module Migration** (Latest)
+
+- ✅ Successfully migrated memory utilities from JavaScript to TypeScript
+- ✅ Migrated from `src/jswasm/utils/memory-utils.mjs` and `src/jswasm/utils/memory-utils.d.ts` to `src/jswasm/utils/memory-utils/memory-utils.ts`
+- ✅ Moved to dedicated `memory-utils/` directory structure following established patterns
+- ✅ Added comprehensive unit test coverage with Vitest for all memory helper functions
+- ✅ Updated import paths in dependent modules (`memory-manager.mjs` and `sqlite3.mjs`)
+- ✅ Updated `tsconfig.migration.json` to include new memory-utils directory
+- ✅ Created detailed test plan documentation for memory utilities
+- ✅ WebAssembly memory helpers: `initRandomFill`, `randomFill`, `zeroMemory`, `alignMemory`, `createMmapAlloc`
+
+**Async Utils Module Migration** (Previous)
 
 - ✅ Successfully migrated async utilities from JavaScript to TypeScript
 - ✅ Implemented type-safe async loader factory with proper TypeScript interfaces
@@ -336,7 +354,7 @@
 **TypeScript Migration Progress**
 
 - Target: 100% migration from .mjs to .ts
-- Current: ~15% (UTF-8, path, and async-utils modules complete)
+- Current: ~20% (UTF-8, path, async-utils, and memory-utils modules complete)
 - Next Goal: 25% by end of current sprint
 
 **Test Coverage**
