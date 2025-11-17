@@ -77,6 +77,14 @@
     - ✅ Test plan documented in `docs/development/path-migration-test-plan.md`
     - ✅ Three-phase processing pattern with numeric comments
     - ✅ POSIX-compliant path manipulation with full type safety
+- ✅ `src/jswasm/utils/async-utils/` - **NEWLY COMPLETED** - Full TypeScript migration
+    - ✅ Migrated from `src/jswasm/utils/async-utils.mjs` to `src/jswasm/utils/async-utils/async-utils.ts`
+    - ✅ Moved to dedicated `async-utils/` directory structure
+    - ✅ Comprehensive unit tests in `src/jswasm/utils/async-utils.test.ts`
+    - ✅ Test plan documented in `docs/development/async-utils-test-plan.md`
+    - ✅ Updated import path in main `sqlite3.mjs` to use new TypeScript module
+    - ✅ Follows three-phase processing pattern with numeric comments
+    - ✅ Type-safe async loader factory with dependency tracking
 - ✅ UTF-8 string encoding/decoding with comprehensive test coverage
 - ✅ Type-safe implementations with proper error handling
 - ✅ Three-phase processing pattern implementation
@@ -93,7 +101,8 @@
 **Next Migration Targets** 📋
 
 - 🔄 `src/jswasm/utils/memory-utils.mjs` - Memory management helpers
-- 🔄 `src/jswasm/utils/async-utils.mjs` - Async operation utilities
+- 🔄 `src/jswasm/utils/wasm-loader.mjs` - WebAssembly loading utilities
+- 🔄 `src/jswasm/utils/sqlite3-init-wrapper.mjs` - SQLite initialization
 - 🔄 `src/jswasm/system/syscalls.mjs` - System call implementations
 - 🔄 `src/jswasm/system/wasi-functions.mjs` - WASI function implementations
 
@@ -121,7 +130,6 @@
 
 - 🔄 `src/jswasm/utils/memory-utils.mjs` - WebAssembly memory helpers
 - 🔄 `src/jswasm/utils/wasm-loader.mjs` - WebAssembly loading utilities
-- 🔄 `src/jswasm/utils/async-utils.mjs` - Async operation helpers
 - 🔄 `src/jswasm/utils/sqlite3-init-wrapper.mjs` - SQLite initialization
 
 **System Layer** (Medium Priority)
@@ -224,6 +232,15 @@
 
 ### Completed Features ✅
 
+**Async Utils Module Migration** (Latest)
+
+- ✅ Successfully migrated async utilities from JavaScript to TypeScript
+- ✅ Implemented type-safe async loader factory with proper TypeScript interfaces
+- ✅ Added comprehensive unit test coverage with Vitest
+- ✅ Established dedicated directory structure for migrated modules
+- ✅ Updated main sqlite3.mjs import path to use new TypeScript module
+- ✅ Created detailed test plan documentation for async utilities
+
 **Modular Architecture** (Last 3 months)
 
 - ✅ Successfully extracted system calls from monolithic structure
@@ -319,7 +336,7 @@
 **TypeScript Migration Progress**
 
 - Target: 100% migration from .mjs to .ts
-- Current: ~10% (UTF-8 and path modules complete)
+- Current: ~15% (UTF-8, path, and async-utils modules complete)
 - Next Goal: 25% by end of current sprint
 
 **Test Coverage**

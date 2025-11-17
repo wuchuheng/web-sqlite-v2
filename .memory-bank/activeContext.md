@@ -15,6 +15,13 @@ The project is currently in the middle of a comprehensive TypeScript migration f
     - Comprehensive unit tests in `src/jswasm/utils/path/path.test.ts`
     - Test plan documented in `docs/development/path-migration-test-plan.md`
     - Follows three-phase processing pattern with numeric comments
+- `src/jswasm/utils/async-utils/` - **NEWLY COMPLETED** - Full TypeScript migration with comprehensive test coverage
+    - Migrated from `src/jswasm/utils/async-utils.mjs` to `src/jswasm/utils/async-utils/async-utils.ts`
+    - Moved to dedicated `async-utils/` directory structure
+    - Comprehensive unit tests in `src/jswasm/utils/async-utils.test.ts`
+    - Test plan documented in `docs/development/async-utils-test-plan.md`
+    - Updated import path in main `sqlite3.mjs` to use new TypeScript module
+    - Follows three-phase processing pattern with numeric comments
 - Various utility modules have TypeScript definitions (.d.ts files)
 - Core type infrastructure is in place
 
@@ -26,8 +33,8 @@ The project is currently in the middle of a comprehensive TypeScript migration f
 
 **Remaining Work:**
 
-- Next migration targets: `memory-utils.mjs`, `async-utils.mjs`, system layer modules
-- Import updates from `.mjs` to `.js` after compilation for path module
+- Next migration targets: `memory-utils.mjs`, system layer modules
+- Import updates from `.mjs` to `.js` after compilation for completed modules
 - Manual `.d.ts` replacement with generated declarations
 - Bulk of `.mjs` files in `src/jswasm/` still need migration
 
@@ -73,6 +80,7 @@ export function exampleFunction(input: InputType): OutputType {
 - **System Separation**: Extracted `wasi-functions.mjs` and `syscalls.mjs`
 - **Type Infrastructure**: Established comprehensive `.d.ts` coverage
 - **Build Pipeline**: Configured TypeScript compilation with in-place emit
+- **Async Utils Migration**: Completed migration from `.mjs` to `.ts` with dedicated directory structure
 
 ### Development Environment Setup
 
@@ -92,20 +100,20 @@ export function exampleFunction(input: InputType): OutputType {
 
 ### High Priority (This Sprint)
 
-1. **Complete Path Module Migration Cleanup**
+1. **Complete Path and Async Utils Migration Cleanup**
     - Update imports from `.mjs` to compiled `.js` for dependent modules
     - Remove original `src/jswasm/utils/path.mjs` file
     - Replace manual `.d.ts` with generated TypeScript declaration
     - Run browser tests to verify no regressions
 
 2. **Select Next Migration Target**
-    - Choose between `memory-utils.mjs` and `async-utils.mjs` as next leaf module
+    - Choose `memory-utils.mjs` as next leaf module (async-utils completed)
     - Apply Primary Safety Workflow steps 1-5
-    - Document migration patterns discovered from path module
+    - Document migration patterns discovered from completed modules
     - Update migration guide with new lessons learned
 
 3. **Browser Test Verification**
-    - Run `pnpm test` after path module cleanup
+    - Run `pnpm test` after migration cleanup
     - Ensure 0 failures and no console errors
     - Verify OPFS persistence still works
     - Check memory usage and performance
@@ -137,8 +145,9 @@ src/jswasm/
 ├── sqlite3.d.ts             # Type definitions (current)
 ├── utils/                   # Mixed .mjs/.ts files
 │   ├── utf8/               # Fully migrated ✓
-│   ├── path.mjs            # Next migration candidate
-│   ├── memory-utils.mjs    # Migration candidate
+│   ├── path.mjs            # Migration completed, cleanup pending
+│   ├── async-utils/        # Fully migrated ✓
+│   ├── memory-utils.mjs    # Next migration candidate
 │   └── wasm-loader.mjs    # Complex, later migration
 ├── system/                 # System call implementations
 ├── vfs/                    # Virtual File System layer
@@ -228,6 +237,7 @@ src/jswasm/
 - **Test Coverage Essential**: Unit tests catch subtle behavior differences
 - **Type Safety Benefits**: TypeScript catches many runtime errors early
 - **Documentation Value**: Clear migration patterns speed up subsequent modules
+- **Directory Structure Benefits**: Dedicated directories improve organization and discoverability
 
 ### Performance Insights
 
@@ -274,7 +284,7 @@ src/jswasm/
 
 - **Reasoning**: Minimizes risk, ensures behavior preservation
 - **Impact**: Slower initial progress, but more reliable final result
-- **Status**: Proving effective with UTF-8 module
+- **Status**: Proving effective with UTF-8, path, and async-utils modules
 
 **In-Place Compilation**: TypeScript emits `.js` next to `.ts`
 
@@ -287,6 +297,12 @@ src/jswasm/
 - **Reasoning**: Improves code readability without cluttering interfaces
 - **Impact**: Clearer code structure, better developer onboarding
 - **Status**: Being established as standard for all migrated code
+
+**Dedicated Directory Structure**: Organize migrated modules in subdirectories
+
+- **Reasoning**: Better separation of concerns, improved discoverability
+- **Impact**: Cleaner project structure, easier maintenance
+- **Status**: Successfully implemented for async-utils module
 
 ### Pending Decisions
 
