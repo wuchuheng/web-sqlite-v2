@@ -4,3 +4,4 @@ tsconfig.tsbuildinfo
 dist
 docs/.vitepress/cache/
 src/**/*.js
+src/**/*.d.ts
