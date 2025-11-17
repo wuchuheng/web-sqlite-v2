@@ -33,7 +33,7 @@
  ** Using the Emscripten SDK version 3.1.70.
  */
 import { runSQLite3PostLoadInit } from "./wasm/sqlite3Apibootstrap.mjs";
-import { PATH } from "./utils/path.mjs";
+import { PATH } from "./utils/path/path.js";
 import {
     UTF8ArrayToString,
     lengthBytesUTF8,

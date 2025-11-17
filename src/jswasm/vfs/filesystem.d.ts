@@ -1,4 +1,4 @@
-import type { PathFsUtilities } from "../utils/path.d.ts";
+import type { PathFsUtilities } from "../utils/path/types.d.ts";
 import type { MutableFS, FSNode } from "./filesystem/base-state.d.ts";
 import type {
   PathOperations,

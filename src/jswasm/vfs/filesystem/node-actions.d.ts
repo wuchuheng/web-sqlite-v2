@@ -1,5 +1,5 @@
 import type { FSNode, FSStats, FSStream, MutableFS } from "./base-state.d.ts";
-import type { PathFsUtilities } from "../../utils/path.d.ts";
+import type { PathFsUtilities } from "../../utils/path/types.d.ts";
 import type { RuntimeModule } from "../../shared/runtime-types.d.ts";
 
 /**

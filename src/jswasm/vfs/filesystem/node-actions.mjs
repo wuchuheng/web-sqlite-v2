@@ -1,4 +1,4 @@
-import { PATH } from "../../utils/path.mjs";
+import { PATH } from "../../utils/path/path.js";
 import {
     ERRNO_CODES,
     MODE,

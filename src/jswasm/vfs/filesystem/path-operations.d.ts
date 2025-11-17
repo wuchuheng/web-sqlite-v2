@@ -1,5 +1,5 @@
 import type { FSNode, MutableFS } from "./base-state.d.ts";
-import type { PathFsUtilities } from "../../utils/path.d.ts";
+import type { PathFsUtilities } from "../../utils/path/types.d.ts";
 
 /**
  * Factory hooks required for building the path helper facade.
