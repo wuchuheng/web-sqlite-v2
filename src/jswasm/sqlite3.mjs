@@ -33,7 +33,7 @@
  ** Using the Emscripten SDK version 3.1.70.
  */
 import { runSQLite3PostLoadInit } from "./wasm/sqlite3Apibootstrap.mjs";
-import { PATH } from "./utils/path/path.js";
+import { PATH } from "./utils/path/path";
 import {
     UTF8ArrayToString,
     lengthBytesUTF8,
@@ -48,10 +48,10 @@ import {
     randomFill as randomFillUtil,
     zeroMemory,
     createMmapAlloc,
-} from "./utils/memory-utils/memory-utils.js";
-import { createAsyncLoad } from "./utils/async-utils/async-utils.js";
-import { wrapSqlite3InitModule } from "./utils/sqlite3-init-wrapper/sqlite3-init-wrapper.js";
-import { createWasmLoader } from "./utils/wasm-loader/wasm-loader.js";
+} from "./utils/memory-utils/memory-utils";
+import { createAsyncLoad } from "./utils/async-utils/async-utils";
+import { wrapSqlite3InitModule } from "./utils/sqlite3-init-wrapper/sqlite3-init-wrapper";
+import { createWasmLoader } from "./utils/wasm-loader/wasm-loader";
 import { attachSqlite3WasmExports } from "./wasm/sqlite3-wasm-exports.mjs";
 import {
     detectEnvironment,

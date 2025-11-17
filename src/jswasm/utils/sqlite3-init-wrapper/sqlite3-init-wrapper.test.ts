@@ -29,7 +29,7 @@ const createLocation = (
 const createDocument = () =>
   ({
     currentScript: {
-      src: "https://example.com/static/some/path/sqlite3-init-wrapper.js",
+      src: "https://example.com/static/some/path/sqlite3-init-wrapper",
     },
   }) as Document;
 

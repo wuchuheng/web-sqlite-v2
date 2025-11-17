@@ -1,4 +1,4 @@
-import { PATH } from "../../utils/path/path.js";
+import { PATH } from "../../utils/path/path";
 import {
     DEVICE_MAJOR_BASE,
     ERRNO_CODES,

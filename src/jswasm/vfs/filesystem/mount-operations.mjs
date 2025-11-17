@@ -1,4 +1,4 @@
-import { PATH } from "../../utils/path/path.js";
+import { PATH } from "../../utils/path/path";
 import { ERRNO_CODES } from "./constants.mjs";
 
 /**

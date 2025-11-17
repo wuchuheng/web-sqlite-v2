@@ -11,7 +11,7 @@
  * - SQL preparation → utils/sql-preparation.mjs
  */
 
-import { createWhWasmUtilInstaller } from "../utils/create-wh-wasm-util-installer/create-wh-wasm-util-installer.js";
+import { createWhWasmUtilInstaller } from "../utils/create-wh-wasm-util-installer/create-wh-wasm-util-installer";
 import {
     createCoreBindings,
     createOptionalBindings,
