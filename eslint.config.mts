@@ -8,9 +8,21 @@ import { fileURLToPath } from "node:url";
 // Resolve repository root for tsconfigRootDir
 const __dirname = dirname(fileURLToPath(import.meta.url));
 
-export default defineConfig([
+const config = defineConfig([
     {
-        ignores: ["**/*.d.ts"],
+        ignores: [
+            "**/*.d.ts",
+            "dist/**",
+            "docs/**",
+            "docs/.vitepress/cache/**",
+            "node_modules/**",
+            "tests/node_modules/**",
+            "test2/node_modules/**",
+            "tests/dist/**",
+            "test2/dist/**",
+            "tests/**",
+            "test2/**",
+        ],
     },
     {
         files: ["**/*.{js,mjs,cjs}"],
@@ -48,7 +60,11 @@ export default defineConfig([
         files: ["**/*.{ts,mts,cts}"],
         languageOptions: {
             parserOptions: {
-                // Disambiguate between root and tests tsconfig directories
+                project: [
+                    "./tsconfig.eslint.json",
+                    "./test2/tsconfig.json",
+                ],
+                // Ensure type-aware lint uses the right tsconfig roots
                 tsconfigRootDir: __dirname,
             },
             globals: {
@@ -74,4 +90,6 @@ export default defineConfig([
             ],
         },
     },
-]);
+]) as ReturnType<typeof defineConfig>;
+
+export default config;

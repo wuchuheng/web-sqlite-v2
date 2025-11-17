@@ -8,7 +8,7 @@
         "build": "tsc && vite build",
         "preview": "vite preview",
         "test": "vite --open",
-        "lint": "eslint . --ext .ts,.js,.mjs --ignore-path ../.gitignore --fix; pnpm run typeCheck",
+        "lint": "eslint . --ext .ts,.js,.mjs --fix; pnpm run typeCheck",
         "typeCheck": "tsc --noEmit --pretty",
         "serve:static": "npx http-server ./dist -c-1"
     },

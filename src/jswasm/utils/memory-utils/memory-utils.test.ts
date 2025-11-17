@@ -1,7 +1,7 @@
 import { afterEach, describe, expect, it, vi } from "vitest";
 
 type CryptoMock = {
-    getRandomValues: <T extends ArrayBufferView>(view: T) => ArrayBufferView;
+    getRandomValues: (view: Uint8Array) => Uint8Array;
 };
 
 const loadMemoryUtils = async () => {
@@ -42,7 +42,7 @@ describe("memory-utils.mjs (baseline)", () => {
     });
 
     it("initRandomFill proxies to crypto.getRandomValues", async () => {
-        const getRandomValues = vi.fn(<T extends ArrayBufferView>(view: T) => {
+        const getRandomValues = vi.fn((view: Uint8Array) => {
             view[0] = 0xab;
             return view;
         });
@@ -64,7 +64,7 @@ describe("memory-utils.mjs (baseline)", () => {
     });
 
     it("randomFill caches the initialized fill helper", async () => {
-        const getRandomValues = vi.fn(<T extends ArrayBufferView>(view: T) => view);
+        const getRandomValues = vi.fn((view: Uint8Array) => view);
         restoreCrypto = setGlobalCrypto({ getRandomValues });
         const memoryUtils = await loadMemoryUtils();
         const view = new Uint8Array([1, 2, 3]);
@@ -92,7 +92,7 @@ describe("memory-utils.mjs (baseline)", () => {
     it("createMmapAlloc aligns, allocates, and zeros memory", async () => {
         const memoryUtils = await loadMemoryUtils();
         const heap = createHeap(65536 * 2);
-        const memalign = vi.fn().mockImplementation((_align, _size) => 4096);
+        const memalign = vi.fn().mockImplementation((_align: number, _size: number) => 4096);
         const allocator = memoryUtils.createMmapAlloc(memalign, heap);
         const pointer = allocator(5000);
         expect(memalign).toHaveBeenCalledWith(65536, 65536);

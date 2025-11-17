@@ -3,7 +3,10 @@ import globals from "globals";
 import tseslint from "typescript-eslint";
 import { defineConfig } from "eslint/config";
 
-export default defineConfig([
+const config = defineConfig([
+    {
+        ignores: ["dist/**", "node_modules/**"],
+    },
     {
         files: ["**/*.{js,mjs,cjs}"],
         plugins: { js },
@@ -66,4 +69,6 @@ export default defineConfig([
             ],
         },
     },
-]);
+]) as ReturnType<typeof defineConfig>;
+
+export default config;

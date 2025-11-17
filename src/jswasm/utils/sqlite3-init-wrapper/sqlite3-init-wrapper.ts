@@ -1,27 +1,27 @@
-interface SQLite3ModuleAPI {
-    asyncPostInit: () => Promise<unknown>;
+export interface SQLite3ModuleAPI {
+    asyncPostInit?: () => Promise<unknown>;
     scriptInfo?: unknown;
     __isUnderTest?: boolean;
     [key: string]: unknown;
 }
 
-interface SQLite3FullModule {
+export interface SQLite3FullModule {
     runSQLite3PostLoadInit(module: SQLite3FullModule): void;
     sqlite3: SQLite3ModuleAPI;
     [key: string]: unknown;
 }
 
-type SQLite3InitModule = {
+export type SQLite3InitModule = {
     (config?: unknown): Promise<SQLite3FullModule>;
     ready?: Promise<unknown>;
 };
 
-type WrappedInitModule = SQLite3InitModule & {
+export type WrappedInitModule = SQLite3InitModule & {
     __isUnderTest?: boolean;
     ready?: Promise<unknown>;
 };
 
-interface Sqlite3InitModuleState {
+export interface Sqlite3InitModuleState {
     moduleScript: HTMLScriptElement | null;
     isWorker: boolean;
     location?: Location;
@@ -31,12 +31,12 @@ interface Sqlite3InitModuleState {
     debugModule: (...args: unknown[]) => void;
 }
 
-declare global {
-    interface GlobalThis {
-        sqlite3InitModule?: WrappedInitModule;
-        sqlite3InitModuleState?: Sqlite3InitModuleState;
-    }
-}
+type GlobalWithSqlite3 = typeof globalThis & {
+    sqlite3InitModule?: WrappedInitModule;
+    sqlite3InitModuleState?: Sqlite3InitModuleState;
+};
+
+const sqlite3Global = globalThis as GlobalWithSqlite3;
 
 const createInitModuleState = (): Sqlite3InitModuleState =>
     Object.assign(Object.create(null), (() => {
@@ -86,7 +86,7 @@ export function wrapSqlite3InitModule(
             "Expecting globalThis.sqlite3InitModule to be defined by the Emscripten build.",
         );
     }
-    const initModuleState = (globalThis.sqlite3InitModuleState =
+    const initModuleState = (sqlite3Global.sqlite3InitModuleState =
         createInitModuleState());
 
     // 2. Replace the initializer with the wrapped version that runs post-load hooks.
@@ -104,6 +104,9 @@ export function wrapSqlite3InitModule(
                 }
 
                 const asyncPostInit = sqlite3.asyncPostInit;
+                if (!asyncPostInit) {
+                    throw new Error("Missing sqlite3 asyncPostInit hook");
+                }
                 delete sqlite3.asyncPostInit;
                 return asyncPostInit();
             })
@@ -114,8 +117,8 @@ export function wrapSqlite3InitModule(
             });
     }) as WrappedInitModule;
 
-    globalThis.sqlite3InitModule = wrappedInit;
-    globalThis.sqlite3InitModule.ready = originalInit.ready;
+    sqlite3Global.sqlite3InitModule = wrappedInit;
+    sqlite3Global.sqlite3InitModule!.ready = originalInit.ready;
 
     // 3. Surface debug information and return the wrapped initializer.
     initModuleState.debugModule("sqlite3InitModuleState =", initModuleState);

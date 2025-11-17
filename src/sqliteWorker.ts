@@ -104,8 +104,7 @@ async function handleOpen(req: RequestMessage<string>) {
       messageId: req.messageId,
       success: false,
       error: e.message,
-      errorStack:
-        typeof e.stack === "string" ? e.stack.split(/\n\s*/) : undefined,
+      errorStack: e.stack?.split(/\n\s*/),
     });
   }
 }
@@ -141,7 +140,10 @@ async function handleSql(req: RequestMessage<string>) {
       returnValue: "resultRows",
       multi: true,
     });
-    const rows = (rc && rc.resultRows) || [];
+    const rows =
+      rc && "resultRows" in rc && Array.isArray(rc.resultRows)
+        ? rc.resultRows
+        : [];
 
     // 3. Output
     respond({
@@ -158,8 +160,7 @@ async function handleSql(req: RequestMessage<string>) {
       success: false,
       payload: null as unknown as never,
       error: e.message,
-      errorStack:
-        typeof e.stack === "string" ? e.stack.split(/\n\s*/) : undefined,
+      errorStack: e.stack?.split(/\n\s*/),
     });
   }
 }
@@ -199,8 +200,7 @@ async function handleClose(
       success: false,
       payload: null as unknown as never,
       error: e.message,
-      errorStack:
-        typeof e.stack === "string" ? e.stack.split(/\n\s*/) : undefined,
+      errorStack: e.stack?.split(/\n\s*/),
     });
   }
 }
