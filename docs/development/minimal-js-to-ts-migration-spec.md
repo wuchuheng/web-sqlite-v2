@@ -71,6 +71,54 @@ When an AI assistant is driving the migration, it **must obey all of the followi
 
 ---
 
+## Test Execution Contract
+
+Some steps are **test-gated**: they cannot be marked as completed in the checklist, and the AI must not ask to proceed to the next step, until the relevant tests have been run and confirmed passing.
+
+**Test-gated steps:**
+
+- **Step 2 – Add a test harness**
+    - `npm run test:unit` must be run against the existing `.mjs` implementation.
+    - The AI must either:
+        - Invoke the tests via tools (if available in the environment), **or**
+        - Instruct the user to run `npm run test:unit` and wait for the result (logs or a clear “tests passed”).
+
+    - If tests fail, the AI must stay in Step 2, help debug, and only mark Step 2 as `[x]` once tests pass.
+
+- **Step 4 – Redirect tests to the new TypeScript source**
+    - `npm run test:unit` must be run again, now targeting the TS implementation.
+    - The AI must **not**:
+        - Mark Step 4 as completed in the checklist, or
+        - Ask to proceed to Step 5,
+          until `npm run test:unit` has been run and confirmed passing.
+
+- **Step 6 – Update runtime references**
+    - After updating imports, `npm run test:unit` must be run once more.
+    - The AI must stay in Step 6 until the unit tests pass with the new import paths.
+
+- **Step 8 – Final verification**
+    - `pnpm test` must be run, and the manual browser checks completed.
+    - The AI must only mark Step 8 as done after the user confirms that:
+        - `pnpm test` succeeded, and
+        - No blocking errors appear in the browser console for the SQLite flows.
+
+**General rules for tests:**
+
+- The AI must always:
+    - Print the exact commands to run (`npm run test:unit`, `pnpm test`, etc.).
+    - Ask the user to run them and share results, unless the environment allows the AI to run them directly.
+
+- The AI must **not**:
+    - Assume tests have passed without explicit confirmation (logs or user statement).
+    - Mark a test-gated step as `[x]` in the checklist or ask to move on until tests are confirmed passing.
+
+- If tests fail at any step:
+    - The AI remains in the same step.
+    - It helps iterate on code and/or tests until the tests pass.
+    - Only then may it update the checklist and ask to proceed.
+
+---
+
 ## Standard Checklist Block & Gating Question
 
 At the end of **every step** in the Migration Workflow, the AI must:
@@ -227,13 +275,28 @@ The workflow below is the ordered TODO list.
 
 ### 4. Redirect tests to the new TypeScript source.
 
-- Update `*.test.ts` to import from the compiled output (e.g., `../utf8.js` once built) or the `.ts` while the build isn’t ready.
+- Update `*.test.ts` so imports no longer point at the `.mjs` file.
+    - **Before (Step 2 baseline):**
+
+        ```ts
+        import { something } from "./utf8.mjs";
+        ```
+
+    - **After (Step 4 migration):**
+
+        ```ts
+        import { something } from "./utf8/utf8";
+        ```
+
+    - In other words, **remove the `.mjs` suffix** and point the tests at the new module root path (without an extension). This allows the same test file to exercise the original `.mjs` at baseline and then the compiled `.js` / `.ts` implementation after migration, depending on the build and runner configuration.
+
+- Ensure Vitest resolves the extension-less path correctly for both the TS source (during migration) and the emitted JS (after `build:migration`).
 - Run `npm run test:unit` again until the tests pass against the TS implementation.
 
 **AI/human protocol for Step 4**
 
 - AI:
-    - Shows the updated imports in the test file.
+    - Shows the updated imports in the test file (from `*.mjs` to the extension-less module path).
     - Lists any test failures and the fixes made in the TS implementation.
     - Confirms that `npm run test:unit` passes (based on logs shared by the human).
     - Shows updated checklist with step 4 marked as done.
