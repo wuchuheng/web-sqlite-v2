@@ -73,9 +73,9 @@ When an AI assistant is driving the migration, it **must obey all of the followi
 
 ## Test Execution Contract
 
-Some steps are **test-gated**: they cannot be marked as completed in the checklist, and the AI must not ask to proceed to the next step, until the relevant tests have been run and confirmed passing.
+Some steps are **command-gated** (tests, build, lint): they cannot be marked as completed in the checklist, and the AI must not ask to proceed to the next step, until the relevant commands have been run and confirmed passing.
 
-**Test-gated steps:**
+**Command-gated steps:**
 
 - **Step 2 – Add a test harness**
     - `npm run test:unit` must be run against the existing `.mjs` implementation.
@@ -92,29 +92,34 @@ Some steps are **test-gated**: they cannot be marked as completed in the checkli
         - Ask to proceed to Step 5,
           until `npm run test:unit` has been run and confirmed passing.
 
-- **Step 6 – Update runtime references**
-    - After updating imports, `npm run test:unit` must be run once more.
-    - The AI must stay in Step 6 until the unit tests pass with the new import paths.
+- **Step 6 – Build, format, and lint**
+    - `npm run build:migration && npm run format && npm run lint` must be run.
+    - The AI must stay in Step 6 until this combined command completes successfully.
+    - If build or lint fails, the AI must help fix the issues in the new TS module and tests, then rerun the command.
 
-- **Step 8 – Final verification**
+- **Step 7 – Update runtime references**
+    - After updating imports, `npm run test:unit` must be run once more.
+    - The AI must stay in Step 7 until the unit tests pass with the new import paths.
+
+- **Step 9 – Final verification**
     - `pnpm test` must be run, and the manual browser checks completed.
-    - The AI must only mark Step 8 as done after the user confirms that:
+    - The AI must only mark Step 9 as done after the user confirms that:
         - `pnpm test` succeeded, and
         - No blocking errors appear in the browser console for the SQLite flows.
 
-**General rules for tests:**
+**General rules for commands/tests:**
 
 - The AI must always:
-    - Print the exact commands to run (`npm run test:unit`, `pnpm test`, etc.).
+    - Print the exact commands to run (`npm run test:unit`, `npm run build:migration && npm run format && npm run lint`, `pnpm test`, etc.).
     - Ask the user to run them and share results, unless the environment allows the AI to run them directly.
 
 - The AI must **not**:
-    - Assume tests have passed without explicit confirmation (logs or user statement).
-    - Mark a test-gated step as `[x]` in the checklist or ask to move on until tests are confirmed passing.
+    - Assume commands or tests have passed without explicit confirmation (logs or a clear user statement).
+    - Mark a command-gated step as `[x]` in the checklist or ask to move on until the commands are confirmed passing.
 
-- If tests fail at any step:
+- If any command fails at a gated step:
     - The AI remains in the same step.
-    - It helps iterate on code and/or tests until the tests pass.
+    - It helps iterate on code and/or tests until the commands pass.
     - Only then may it update the checklist and ask to proceed.
 
 ---
@@ -138,10 +143,11 @@ steps:
 - [ ] 3. Create the migration subdirectory
 - [ ] 4. Redirect tests to the new TypeScript source
 - [ ] 5. Compile the migration
-- [ ] 6. Update runtime references
-- [ ] 7. Remove now-unused artifacts
-- [ ] 8. Final verification
-- [ ] 9. Document and hand over
+- [ ] 6. Build, format, and lint
+- [ ] 7. Update runtime references
+- [ ] 8. Remove now-unused artifacts
+- [ ] 9. Final verification
+- [ ] 10. Document and hand over
 ```
 
 Rules:
@@ -166,10 +172,11 @@ steps:
 - [ ] 3. Create the migration subdirectory
 - [ ] 4. Redirect tests to the new TypeScript source
 - [ ] 5. Compile the migration
-- [ ] 6. Update runtime references
-- [ ] 7. Remove now-unused artifacts
-- [ ] 8. Final verification
-- [ ] 9. Document and hand over
+- [ ] 6. Build, format, and lint
+- [ ] 7. Update runtime references
+- [ ] 8. Remove now-unused artifacts
+- [ ] 9. Final verification
+- [ ] 10. Document and hand over
 ```
 
 ### Mandatory gating question
@@ -243,13 +250,14 @@ The workflow below is the ordered TODO list.
         - How the tests reference the existing `.mjs`.
         - How to run `npm run test:unit` and what passing looks like.
 
-    - Shows updated checklist with step 2 marked as done.
+    - Shows updated checklist with step 2 marked as done (only after tests pass).
     - Asks:
       _“Do you want me to proceed to step 3: Create the migration subdirectory?”_
 
 - AI stays in Step 2 until:
     - The human confirms the test plan, and
-    - The human is satisfied with the test file.
+    - The human is satisfied with the test file, and
+    - `npm run test:unit` has passed at least once against the `.mjs` baseline.
 
 ---
 
@@ -327,61 +335,86 @@ The workflow below is the ordered TODO list.
     - Suggests TS source adjustments to align the signatures.
     - Shows updated checklist with step 5 marked as done.
     - Asks:
-      _“Do you want me to proceed to step 6: Update runtime references?”_
+      _“Do you want me to proceed to step 6: Build, format, and lint?”_
 
 ---
 
-### 6. Update runtime references.
+### 6. Build, format, and lint.
+
+- Run the combined command to build the migration outputs, format the codebase, and lint for rule violations:
+
+    ```bash
+    npm run build:migration && npm run format && npm run lint
+    ```
+
+- Ensure:
+    - `npm run build:migration` succeeds without errors.
+    - `npm run format` completes (and you commit the formatting changes if this is a PR).
+    - `npm run lint` passes with no errors; address any reported issues in the new TS module and tests, or clearly justify any remaining warnings.
+
+**AI/human protocol for Step 6**
+
+- AI:
+    - Prints the combined command and explains the purpose of each sub-command.
+    - Waits for the user to run it and share outcomes (especially any lint/build failures).
+    - If the command fails, stays in Step 6 and iterates on the code until it passes.
+    - Once everything passes, shows updated checklist with step 6 marked as done.
+    - Asks:
+      _“Do you want me to proceed to step 7: Update runtime references?”_
+
+---
+
+### 7. Update runtime references.
 
 - Replace imports that pointed to `originalPath` with the new compiled `.js`
   (e.g., change `./utf8.mjs` → `./utf8/utf8.js`).
 - Verify the tests still pass; rerun `npm run test:unit` if needed.
 
-**AI/human protocol for Step 6**
+**AI/human protocol for Step 7**
 
 - AI:
     - Lists all files where imports were changed.
     - Shows an example diff for one or two representative imports.
     - Confirms `npm run test:unit` still passes, based on human logs.
-    - Shows updated checklist with step 6 marked as done.
+    - Shows updated checklist with step 7 marked as done.
     - Asks:
-      _“Do you want me to proceed to step 7: Remove now-unused artifacts?”_
+      _“Do you want me to proceed to step 8: Remove now-unused artifacts?”_
 
 ---
 
-### 7. Remove now-unused artifacts.
+### 8. Remove now-unused artifacts.
 
 - Delete the original `.mjs` and `.d.ts` files once the new JS and declaration outputs are proven equivalent.
 
-**AI/human protocol for Step 7**
+**AI/human protocol for Step 8**
 
 - AI:
     - Lists the exact files removed.
     - Confirms that no remaining imports point at the old `.mjs` or `.d.ts`.
-    - Shows updated checklist with step 7 marked as done.
+    - Shows updated checklist with step 8 marked as done.
     - Asks:
-      _“Do you want me to proceed to step 8: Final verification?”_
+      _“Do you want me to proceed to step 9: Final verification?”_
 
 ---
 
-### 8. Final verification.
+### 9. Final verification.
 
 - Run `pnpm test` to exercise the browser-based SQLite flows.
   This step often requires human interaction to open `http://127.0.0.1:50001` and check for console errors.
 - Keep notes about any windows or manual steps the human tester must follow.
 
-**AI/human protocol for Step 8**
+**AI/human protocol for Step 9**
 
 - AI:
     - Provides clear instructions for running `pnpm test` and manual browser checks.
     - Helps interpret any console or test failures and suggests fixes (which may loop back into earlier steps for this module).
-    - Once everything passes, shows updated checklist with step 8 marked as done.
+    - Once everything passes, shows updated checklist with step 9 marked as done.
     - Asks:
-      _“Do you want me to proceed to step 9: Document and hand over?”_
+      _“Do you want me to proceed to step 10: Document and hand over?”_
 
 ---
 
-### 9. Document and hand over.
+### 10. Document and hand over.
 
 - Describe the migration in the PR or follow-up documentation, mentioning:
     - Updated paths.
@@ -391,7 +424,7 @@ The workflow below is the ordered TODO list.
 - Note any deviations from the base rules or workflows in the final message
   (e.g., if a numeric comment outside a function was necessary).
 
-**AI/human protocol for Step 9**
+**AI/human protocol for Step 10**
 
 - AI:
     - Proposes PR description text and any additional docs snippets.
