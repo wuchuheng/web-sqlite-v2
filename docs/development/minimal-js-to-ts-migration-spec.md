@@ -47,7 +47,7 @@ When an AI assistant is driving the migration, it **must obey all of the followi
             - …
 
         - Ask the human explicitly:
-          **“Do you want me to proceed to step N+1: <step title>?”**
+          **“Do you want me to proceed to step N+1: \*\***?”\*\*
 
     - The AI **must not** begin any work from the next step until the human explicitly agrees (any clear “yes / proceed / go ahead” is fine).
 
@@ -154,7 +154,7 @@ Rules:
         - Future steps are `[ ]`.
 
 - The exact text of each step label must match the titles in the **Migration Workflow**, so tools can parse them reliably.
-- Tools like Codex/Cline can parse this `migration-checklist` block from the last assistant message to know where the flow is.
+- Tools like Codex/Cline can parse this `migration-checklist` block from the last assistant message to know where the flow is.\
 
 **Example after finishing Step 1:**
 
@@ -178,7 +178,7 @@ After the checklist block, the AI must always ask the human whether to proceed t
 
 - The question format must be:
 
-    > Do you want me to proceed to step <N+1>: <step title>?
+    > Do you want me to proceed to step <N+1>: ?
 
 - Examples:
     - After Step 1 is done:
@@ -275,20 +275,27 @@ The workflow below is the ordered TODO list.
 
 ### 4. Redirect tests to the new TypeScript source.
 
-- Update `*.test.ts` so imports no longer point at the `.mjs` file.
+- **Move the test file into the new migration subdirectory** so implementation and tests live together.
+    - Example for `src/jswasm/utils/utf8.mjs`:
+        - **Before (Step 2 location):** `src/jswasm/utils/utf8.test.ts`
+        - **After (Step 4 location):** `src/jswasm/utils/utf8/utf8.test.ts`
+
+- Inside the moved `*.test.ts`, update imports so they no longer point at the `.mjs` file.
     - **Before (Step 2 baseline):**
 
         ```ts
         import { something } from "./utf8.mjs";
         ```
 
-    - **After (Step 4 migration):**
+    - **After (Step 4 migration, inside `src/jswasm/utils/utf8/utf8.test.ts`):**
 
         ```ts
-        import { something } from "./utf8/utf8";
+        import { something } from "./utf8";
         ```
 
-    - In other words, **remove the `.mjs` suffix** and point the tests at the new module root path (without an extension). This allows the same test file to exercise the original `.mjs` at baseline and then the compiled `.js` / `.ts` implementation after migration, depending on the build and runner configuration.
+    - In other words:
+        - Move the test next to the new TS module, and
+        - **Remove the `.mjs` suffix** so the tests import the module by its extension-less root path. This allows the same test file to exercise the compiled JS/TS implementation depending on the build and runner configuration.
 
 - Ensure Vitest resolves the extension-less path correctly for both the TS source (during migration) and the emitted JS (after `build:migration`).
 - Run `npm run test:unit` again until the tests pass against the TS implementation.
@@ -296,7 +303,7 @@ The workflow below is the ordered TODO list.
 **AI/human protocol for Step 4**
 
 - AI:
-    - Shows the updated imports in the test file (from `*.mjs` to the extension-less module path).
+    - Shows the new location of the test file and the updated imports (from `*.mjs` to the extension-less module path next to the TS file).
     - Lists any test failures and the fixes made in the TS implementation.
     - Confirms that `npm run test:unit` passes (based on logs shared by the human).
     - Shows updated checklist with step 4 marked as done.
