@@ -14,7 +14,7 @@ Web SQLite V2 repackages the official `sqlite3.wasm` distribution into a maintai
 
 The git history shows three repeating themes:
 
-1. **Runtime modularization** – the early commits extract filesystem, loader, and bootstrap helpers into authored modules so maintainers can patch behavior without regenerating the WASM bundle.【F:src/jswasm/utils/sqlite3-init-wrapper.mjs†L1-L146】【F:src/jswasm/utils/async-utils/async-utils.ts†L1-L86】
+1. **Runtime modularization** – the early commits extract filesystem, loader, and bootstrap helpers into authored modules so maintainers can patch behavior without regenerating the WASM bundle.【F:src/jswasm/utils/sqlite3-init-wrapper/sqlite3-init-wrapper.ts†L1-L146】【F:src/jswasm/utils/async-utils/async-utils.ts†L1-L86】
 2. **Persistent storage** – OPFS installers, async proxies, and sector-aligned pooling make the browser filesystem behave consistently across windows and workers.【F:src/jswasm/vfs/opfs/opfs-sahpool-vfs.mjs†L1-L160】【F:src/jswasm/vfs/opfs/async-proxy/index.mjs†L1-L120】
 3. **Type coverage** – successive passes expand `.d.ts` coverage so TypeScript consumers get accurate signatures for runtime, system, and VFS entry points.【F:src/jswasm/sqlite3.d.ts†L1-L160】【F:src/jswasm/shared/opfs-vfs-installer.d.ts†L1-L74】
 

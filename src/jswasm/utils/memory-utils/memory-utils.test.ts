@@ -6,7 +6,7 @@ type CryptoMock = {
 
 const loadMemoryUtils = async () => {
     vi.resetModules();
-    return await import("./memory-utils/memory-utils");
+    return await import("./memory-utils");
 };
 
 type GlobalWithOptionalCrypto = Omit<typeof globalThis, "crypto"> & { crypto?: Crypto };

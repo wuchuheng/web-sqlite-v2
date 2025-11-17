@@ -35,4 +35,4 @@ The runtime layer replaces portions of the generated Emscripten glue with mainta
 
 ## Related Utilities
 
-The runtime layer is invoked through `sqlite3InitModule`, which wraps these helpers, installs filesystem shims, and resolves the final API facade that consumers import.【F:src/jswasm/sqlite3.mjs†L85-L118】 Supporting utilities such as `sqlite3-init-wrapper.mjs` and `async-utils` manage loader promises and background tasks that keep the boot sequence aligned with upstream behavior.【F:src/jswasm/utils/sqlite3-init-wrapper.mjs†L1-L146】【F:src/jswasm/utils/async-utils/async-utils.ts†L1-L86】
+The runtime layer is invoked through `sqlite3InitModule`, which wraps these helpers, installs filesystem shims, and resolves the final API facade that consumers import.【F:src/jswasm/sqlite3.mjs†L85-L118】 Supporting utilities such as `sqlite3-init-wrapper/sqlite3-init-wrapper.ts` and `async-utils` manage loader promises and background tasks that keep the boot sequence aligned with upstream behavior.【F:src/jswasm/utils/sqlite3-init-wrapper/sqlite3-init-wrapper.ts†L1-L146】【F:src/jswasm/utils/async-utils/async-utils.ts†L1-L86】
