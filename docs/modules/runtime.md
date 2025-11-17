@@ -23,7 +23,7 @@ The runtime layer replaces portions of the generated Emscripten glue with mainta
 
 ## Environment Detection
 
-`detectEnvironment` distinguishes window, worker, and blob contexts to derive the correct script directory, while `createFileReaders` builds synchronous and asynchronous fetch helpers according to that environment.【F:src/jswasm/runtime/environment-detector.mjs†L13-L85】 These primitives feed the WASM loader so binaries resolve whether the bundle runs on the main thread or inside a worker.【F:src/jswasm/utils/wasm-loader.mjs†L1-L107】
+`detectEnvironment` distinguishes window, worker, and blob contexts to derive the correct script directory, while `createFileReaders` builds synchronous and asynchronous fetch helpers according to that environment.【F:src/jswasm/runtime/environment-detector.mjs†L13-L85】 These primitives feed the WASM loader so binaries resolve whether the bundle runs on the main thread or inside a worker.【F:src/jswasm/utils/wasm-loader/wasm-loader.ts†L1-L160】
 
 ## Module Configuration
 

@@ -51,7 +51,7 @@ import {
 } from "./utils/memory-utils/memory-utils.js";
 import { createAsyncLoad } from "./utils/async-utils/async-utils.js";
 import { wrapSqlite3InitModule } from "./utils/sqlite3-init-wrapper/sqlite3-init-wrapper.js";
-import { createWasmLoader } from "./utils/wasm-loader.mjs";
+import { createWasmLoader } from "./utils/wasm-loader/wasm-loader.js";
 import { attachSqlite3WasmExports } from "./wasm/sqlite3-wasm-exports.mjs";
 import {
     detectEnvironment,

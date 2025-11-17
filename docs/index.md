@@ -10,7 +10,7 @@ updated: 2025-10-18
 
 ## Project Intent
 
-Web SQLite V2 repackages the official `sqlite3.wasm` distribution into a maintainable module graph so browser and worker hosts can initialize the engine without editing the generated amalgamation.【F:src/jswasm/sqlite3.mjs†L35-L118】 Responsibilities such as module configuration, WASM loading, memory orchestration, and environment detection live in focused utilities that can evolve independently of the upstream build.【F:src/jswasm/utils/wasm-loader.mjs†L1-L107】【F:src/jswasm/runtime/module-configurator.mjs†L1-L156】【F:src/jswasm/runtime/environment-detector.mjs†L1-L86】【F:src/jswasm/runtime/memory-manager.mjs†L1-L147】
+Web SQLite V2 repackages the official `sqlite3.wasm` distribution into a maintainable module graph so browser and worker hosts can initialize the engine without editing the generated amalgamation.【F:src/jswasm/sqlite3.mjs†L35-L118】 Responsibilities such as module configuration, WASM loading, memory orchestration, and environment detection live in focused utilities that can evolve independently of the upstream build.【F:src/jswasm/utils/wasm-loader/wasm-loader.ts†L1-L160】【F:src/jswasm/runtime/module-configurator.mjs†L1-L156】【F:src/jswasm/runtime/environment-detector.mjs†L1-L86】【F:src/jswasm/runtime/memory-manager.mjs†L1-L147】
 
 The git history shows three repeating themes:
 
