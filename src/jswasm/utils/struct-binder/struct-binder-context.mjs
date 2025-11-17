@@ -7,7 +7,7 @@ import {
     toss,
 } from "./struct-binder-helpers/struct-binder-helpers.js";
 import { createSignatureHelpers } from "./struct-binder-signatures.mjs";
-import { createMemoryHelpers } from "./struct-binder-memory.mjs";
+import { createMemoryHelpers } from "./struct-binder-memory/struct-binder-memory";
 import { createMemberHelpers } from "./struct-binder-members.mjs";
 
 const ensureConfig = (config) => {

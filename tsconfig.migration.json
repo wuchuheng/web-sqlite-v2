@@ -7,7 +7,7 @@
         "moduleResolution": "bundler",
         "allowImportingTsExtensions": false,
         "sourceMap": false,
-        "declaration": false,
+        "declaration": true,
         "declarationMap": false,
         "composite": false
     },
@@ -19,7 +19,8 @@
         "src/jswasm/utils/create-wh-wasm-util-installer/*.ts",
         "src/jswasm/utils/sqlite3-init-wrapper/*.ts",
         "src/jswasm/utils/wasm-loader/*.ts",
-        "src/jswasm/utils/struct-binder/struct-binder-helpers/*.ts"
+        "src/jswasm/utils/struct-binder/struct-binder-helpers/*.ts",
+        "src/jswasm/utils/struct-binder/struct-binder-memory/*.ts"
     ],
     "exclude": ["src/**/*.test.ts"]
 }

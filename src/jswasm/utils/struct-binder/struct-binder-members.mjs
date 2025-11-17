@@ -1,4 +1,7 @@
-import { toss, isNumericValue } from "./struct-binder-helpers/struct-binder-helpers.js";
+import {
+    toss,
+    isNumericValue,
+} from "./struct-binder-helpers/struct-binder-helpers";
 
 export const createMemberHelpers = ({
     memoryHelpers,
