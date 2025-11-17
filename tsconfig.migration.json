@@ -16,7 +16,8 @@
         "src/jswasm/utils/utf8/*.ts",
         "src/jswasm/utils/memory-utils/*.ts",
         "src/jswasm/utils/path/*.ts",
+        "src/jswasm/utils/create-wh-wasm-util-installer/*.ts",
         "src/jswasm/utils/sqlite3-init-wrapper/*.ts"
     ],
-    "exclude": ["src/**/*.test.ts", "src/**/*.d.ts"]
+    "exclude": ["src/**/*.test.ts"]
 }
