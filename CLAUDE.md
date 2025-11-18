@@ -8,6 +8,10 @@ This is **web-sqlite-v2**, a SQLite3 WebAssembly implementation optimized for br
 
 **Key Technology**: SQLite 3.50.4 compiled to WebAssembly using Emscripten SDK 3.1.70
 
+## Memory Bank Requirement
+
+Before writing or modifying any implementation code or tests, Claude Code **must** read every file inside `.memory-bank/`. This repository relies on the memory bank as the running source of truth for project context, so always refresh context from those files at the start of a session and whenever asked to update the memory bank.
+
 ## Development Commands
 
 ### Testing
