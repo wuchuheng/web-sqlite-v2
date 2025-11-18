@@ -267,7 +267,9 @@ The workflow below is the ordered TODO list.
   If the module was `src/jswasm/utils/utf8.mjs`, create `src/jswasm/utils/utf8/`.
 - Inside that folder add the new `utf8.ts` implementing the same exports, with type annotations guided by the original `.d.ts`.
 - Keep functions small and focused; break repeated/complex logic into helpers.
-- Add comments only where necessary for clarity.
+- Add standard doc comments (for example, TSDoc-style `/** ... */`) on each exported function and class method to explain its
+  intention and usage.
+- Keep other inline comments minimal and only where they significantly improve clarity.
 
 **AI/human protocol for Step 3**
 
@@ -366,8 +368,9 @@ The workflow below is the ordered TODO list.
 
 ### 7. Update runtime references.
 
-- Replace imports that pointed to `originalPath` with the new compiled `.js`
-  (e.g., change `./utf8.mjs` → `./utf8/utf8.js`).
+- Replace imports that pointed to `originalPath` with the new compiled module
+  (e.g., change `./utf8.mjs` → `./utf8/utf8` or `./utf8/utf8.js`; the `.js` suffix is optional and may be omitted when
+  supported by the bundler/runtime).
 - Verify the tests still pass; rerun `npm run test:unit` if needed.
 
 **AI/human protocol for Step 7**
