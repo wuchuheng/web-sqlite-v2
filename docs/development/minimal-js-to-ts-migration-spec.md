@@ -27,6 +27,7 @@ A complete request allows the AI to follow the minimal migration workflow end-to
 - Keep functions small, lines ≤ 120 characters, and naming consistent with existing code (camelCase for values/functions, PascalCase for classes).
 - Treat documentation as part of the public API: preserve or improve any existing JSDoc/TSDoc comments and plan how they will
   be carried over into the new TypeScript source.
+- **Claude Code requirement**: Claude must also read and honor `CLAUDE.md` plus any repo-level AI guidelines in AGENTS/Clinerules before executing the workflow below.
 
 ---
 
@@ -34,6 +35,9 @@ A complete request allows the AI to follow the minimal migration workflow end-to
 
 The numbered items under **Migration Workflow** are treated as an ordered TODO list.
 When an AI assistant is driving the migration, it **must obey all of the following rules**:
+
+> Claude Code compatibility note  
+> Claude’s `continue` / `proceed` affordance is enforced by tools. The agent must wait for an explicit user reply before touching the next step, even if the human only writes “continue”.
 
 1. **Strict ordering**
     - Work on **one numbered step at a time** (`1.`, then `2.`, then `3.`, …).
@@ -48,8 +52,8 @@ When an AI assistant is driving the migration, it **must obey all of the followi
             - `[ ] 2. Add a test harness`
             - …
 
-        - Ask the human explicitly:
-          **“Do you want me to proceed to step N+1: \*\***?”\*\*
+        - Ask the human explicitly, using this exact text so Claude Code is satisfied:
+          `Do you want me to proceed to step N+1: <step title>?`
 
     - The AI **must not** begin any work from the next step until the human explicitly agrees (any clear “yes / proceed / go ahead” is fine).
 
@@ -63,10 +67,11 @@ When an AI assistant is driving the migration, it **must obey all of the followi
 4. **Rollback / correction loop**
     - If the human is not satisfied with a step, they can request changes **within that step**.
     - The AI must stay on the same step, revising as needed, and only ask to proceed again once the updated version is summarized.
+    - If the human responds with “continue” (or any affirmative variant) *without* giving the agent new instructions, Claude Code should simply advance to the next step after re-asking the gating question.
 
-5. **Command echoing (optional but recommended)**
+5. **Command echoing (required for Claude Code)**
     - When a step involves commands (e.g., `npm run test:unit`, `npm run build:migration`), the AI should:
-        - Show the exact commands to run.
+        - Show the exact commands to run (Claude Code tooling requires literal commands with no shorthand).
         - Explain what success or failure looks like.
 
     - After the human runs the commands, they can paste logs back, and the AI remains within the same step until everything passes.
@@ -160,6 +165,7 @@ Rules:
         - Completed steps are marked as `[x]`.
         - The step currently being worked on may be `[x]` (just finished) or `[-]` (in progress), if you want to distinguish.
         - Future steps are `[ ]`.
+    - Make this `migration-checklist` block the **final fenced code block** in every response; Claude Code’s tooling parses the last fenced block only.
 
 - The exact text of each step label must match the titles in the **Migration Workflow**, so tools can parse them reliably.
 - Tools like Codex/Cline can parse this `migration-checklist` block from the last assistant message to know where the flow is.\
