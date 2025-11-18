@@ -18,6 +18,8 @@ Follow the repository ESLint config (`eslint.config.mts`) and rely on `pnpm lint
 
 Browser-driven tests live in `tests/index.html` and `tests/worker.js`; extend them when adding SQLite features or OPFS flows. Name new fixtures after the scenario they cover (`tests/css/opfs-sync.css`) and document manual steps in `tests/README.md`. When adding automation, ensure the served page logs success without console errors and capture key assertions in the README.
 
+**Claude Code enforcement:** Before any AI agent writes or modifies implementation code or tests, it must ensure there is a corresponding spec/test-plan file under `docs/development/` that explains how the feature will be validated. If the spec does not exist, the agent must create or update it—and get human approval—_before_ touching the source or Vitest files.
+
 ## Commit & Pull Request Guidelines
 
 Follow the existing `<type>: <description>` convention (`refactory:`, `docs:`). Keep messages imperative ("add OPFS sync adapter") and mention impacted modules when possible. Pull requests should summarize behavior changes, link related issues, and include screenshots or console transcripts for UI/worker updates. Confirm `pnpm lint` and `pnpm test` run clean before requesting review.
