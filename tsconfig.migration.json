@@ -22,6 +22,7 @@
         "src/jswasm/utils/struct-binder/struct-binder-helpers/*.ts",
         "src/jswasm/utils/struct-binder/struct-binder-accessors/*.ts",
         "src/jswasm/utils/struct-binder/struct-binder-signatures/*.ts",
+        "src/jswasm/utils/struct-binder/struct-binder-members/*.ts",
         "src/jswasm/utils/struct-binder/struct-binder-memory/*.ts"
     ],
     "exclude": ["src/**/*.test.ts"]

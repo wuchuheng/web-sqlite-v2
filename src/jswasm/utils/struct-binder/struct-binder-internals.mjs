@@ -2,10 +2,10 @@
  * @fileoverview Aggregates the StructBinder runtime pieces.
  */
 
-export * from "./struct-binder-helpers/struct-binder-helpers.js";
+export * from "./struct-binder-helpers/struct-binder-helpers";
 export * from "./struct-binder-context.mjs";
-export * from "./struct-binder-accessors/struct-binder-accessors.js";
+export * from "./struct-binder-accessors/struct-binder-accessors";
 export * from "./struct-binder-struct-type.mjs";
 export * from "./struct-binder-signatures/struct-binder-signatures";
 export * from "./struct-binder-memory/struct-binder-memory";
-export * from "./struct-binder-members.mjs";
+export * from "./struct-binder-members/struct-binder-members";

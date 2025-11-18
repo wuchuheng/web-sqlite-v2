@@ -8,7 +8,7 @@ import {
 } from "./struct-binder-helpers/struct-binder-helpers";
 import { createSignatureHelpers } from "./struct-binder-signatures/struct-binder-signatures";
 import { createMemoryHelpers } from "./struct-binder-memory/struct-binder-memory";
-import { createMemberHelpers } from "./struct-binder-members.mjs";
+import { createMemberHelpers } from "./struct-binder-members/struct-binder-members";
 
 const ensureConfig = (config) => {
     if (!config) toss("StructBinderFactory requires a config object.");
