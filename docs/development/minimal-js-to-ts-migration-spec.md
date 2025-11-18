@@ -25,6 +25,8 @@ A complete request allows the AI to follow the minimal migration workflow end-to
 - Read `AGENTS.md` and `.clinerules/base_rules.md` before touching the repo.
 - Confirm the Three-Phase Processing Pattern and the rule about numeric comments inside functions are observed while editing.
 - Keep functions small, lines ≤ 120 characters, and naming consistent with existing code (camelCase for values/functions, PascalCase for classes).
+- Treat documentation as part of the public API: preserve or improve any existing JSDoc/TSDoc comments and plan how they will
+  be carried over into the new TypeScript source.
 
 ---
 
@@ -207,6 +209,8 @@ The workflow below is the ordered TODO list.
 - Open `originalPath` and `dtsPath`. Record their exports, signatures, and edge cases.
 - Identify existing behavior that must remain unchanged (e.g., return types, overloads, TextDecoder fallbacks).
 - Note any runtime assumptions (e.g., running in a browser, availability of `TextDecoder`, polyfills, etc.).
+- Review any existing JSDoc or inline documentation on the `.mjs` and `.d.ts` pair so it can be reflected or refined in the
+  new TypeScript doc comments.
 
 **AI/human protocol for Step 1**
 
@@ -267,8 +271,12 @@ The workflow below is the ordered TODO list.
   If the module was `src/jswasm/utils/utf8.mjs`, create `src/jswasm/utils/utf8/`.
 - Inside that folder add the new `utf8.ts` implementing the same exports, with type annotations guided by the original `.d.ts`.
 - Keep functions small and focused; break repeated/complex logic into helpers.
-- Add standard doc comments (for example, TSDoc-style `/** ... */`) on each exported function and class method to explain its
-  intention and usage.
+- Add standard doc comments (for example, JSDoc/TSDoc-style `/** ... */`) on each exported function, class, and class method
+  to explain its intention and usage.
+    - At minimum, document parameters and return values (via tags such as `@param` and `@returns`) and call out important
+      invariants, side effects, and error conditions (for example, with `@throws` or a short description in the main text).
+    - Prefer updating or lifting any existing JSDoc from the original `.mjs`/`.d.ts` so behavior, types, and documentation stay
+      aligned.
 - Keep other inline comments minimal and only where they significantly improve clarity.
 
 **AI/human protocol for Step 3**
@@ -448,6 +456,8 @@ For each minimal migration unit:
 - A companion `moduleName.test.ts` that proves parity before and after migration.
 - Emitted `moduleName.js` and `moduleName.d.ts` ready for downstream imports.
 - Updated import paths for consumers and removal of the obsolete `.mjs`/`.d.ts`.
+- Well-structured JSDoc/TSDoc comments on the exported TypeScript API surface, reflecting (and, where useful, improving on)
+  the documentation that existed in the original `.mjs` and `.d.ts`.
 - Tests:
     - `npm run test:unit` (pre- and post-migration).
     - `pnpm test` (browser) during final verification.
