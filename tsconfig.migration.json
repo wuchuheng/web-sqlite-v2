@@ -19,13 +19,7 @@
         "src/jswasm/utils/create-wh-wasm-util-installer/*.ts",
         "src/jswasm/utils/sqlite3-init-wrapper/*.ts",
         "src/jswasm/utils/wasm-loader/*.ts",
-        "src/jswasm/utils/struct-binder/struct-binder-helpers/*.ts",
-        "src/jswasm/utils/struct-binder/struct-binder-accessors/*.ts",
-        "src/jswasm/utils/struct-binder/struct-binder-factory/*.ts",
-        "src/jswasm/utils/struct-binder/struct-binder-signatures/*.ts",
-        "src/jswasm/utils/struct-binder/struct-binder-members/*.ts",
-        "src/jswasm/utils/struct-binder/struct-binder-memory/*.ts",
-        "src/jswasm/utils/struct-binder/struct-binder-struct-type/*.ts"
+        "src/jswasm/utils/struct-binder/**/*.ts"
     ],
     "exclude": ["src/**/*.test.ts"]
 }

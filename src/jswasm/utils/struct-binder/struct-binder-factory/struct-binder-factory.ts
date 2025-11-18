@@ -28,7 +28,7 @@ import {
   createContext,
   type StructBinderContext,
   type StructBinderFactoryDebugSupport,
-} from "../struct-binder-context";
+} from "../struct-binder-context/struct-binder-context";
 
 type Mutable<T> = {
   -readonly [K in keyof T]: T[K];
