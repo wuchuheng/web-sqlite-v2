@@ -67,7 +67,7 @@ When an AI assistant is driving the migration, it **must obey all of the followi
 4. **Rollback / correction loop**
     - If the human is not satisfied with a step, they can request changes **within that step**.
     - The AI must stay on the same step, revising as needed, and only ask to proceed again once the updated version is summarized.
-    - If the human responds with “continue” (or any affirmative variant) *without* giving the agent new instructions, Claude Code should simply advance to the next step after re-asking the gating question.
+    - If the human responds with “continue” (or any affirmative variant) _without_ giving the agent new instructions, Claude Code should simply advance to the next step after re-asking the gating question.
 
 5. **Command echoing (required for Claude Code)**
     - When a step involves commands (e.g., `npm run test:unit`, `npm run build:migration`), the AI should:

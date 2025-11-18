@@ -1,4 +1,4 @@
-import { StructBinderFactory } from "../../utils/struct-binder/struct-binder-factory.mjs";
+import { StructBinderFactory } from "../../utils/struct-binder/struct-binder-factory/struct-binder-factory";
 import { createInstallOo1Initializer } from "../../api/install-oo1.mjs";
 import { createInstallOo1DbApiInitializer } from "../../api/install-oo1-db-api.mjs";
 import { createInstallOpfsVfsContext } from "../../vfs/opfs/installer/index.mjs";
