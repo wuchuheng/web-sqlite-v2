@@ -5,7 +5,7 @@
 /**
  * Populates xWrap argument/result adapters and associated helpers.
  *
- * @param {import("./installer-context.mjs").WhWasmInstallerContext} context
+ * @param {import("./installer-context/installer-context.js").WhWasmInstallerContext} context
  */
 export function attachXWrapAdapters(context) {
     const { target, cache, ptrIR } = context;

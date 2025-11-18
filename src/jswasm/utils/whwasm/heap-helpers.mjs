@@ -5,7 +5,7 @@
 /**
  * Installs the legacy `sizeofIR` helper on the target.
  *
- * @param {import("./installer-context.mjs").WhWasmInstallerContext} context
+ * @param {import("./installer-context/installer-context.js").WhWasmInstallerContext} context
  */
 export function attachSizeHelpers(context) {
     const { target, ptrSizeof } = context;
@@ -41,7 +41,7 @@ export function attachSizeHelpers(context) {
 /**
  * Adds memoised accessors for the WebAssembly heap buffers.
  *
- * @param {import("./installer-context.mjs").WhWasmInstallerContext} context
+ * @param {import("./installer-context/installer-context.js").WhWasmInstallerContext} context
  */
 export function attachHeapAccessors(context) {
     const { target } = context;

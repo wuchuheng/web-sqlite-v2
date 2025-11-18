@@ -7,7 +7,7 @@ import { assertAllocator } from "./utils.mjs";
 /**
  * Adds string conversion helpers (cstrlen, cstrToJs, etc.) to the target.
  *
- * @param {import("./installer-context.mjs").WhWasmInstallerContext} context
+ * @param {import("./installer-context/installer-context.js").WhWasmInstallerContext} context
  */
 export function attachStringUtilities(context) {
     const { target, cache } = context;

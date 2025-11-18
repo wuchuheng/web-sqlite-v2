@@ -1,4 +1,4 @@
-import type { WhWasmInstallerContext } from "./installer-context.d.ts";
+import type { WhWasmInstallerContext } from "./installer-context/installer-context.d.ts";
 
 /**
  * Adds pointer-aware peek and poke helpers to the target.

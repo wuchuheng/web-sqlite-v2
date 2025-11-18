@@ -5,7 +5,7 @@
 /**
  * Ensures the target exposes both `alloc` and `dealloc` helpers.
  *
- * @param {import("./installer-context.mjs").WhWasmInstallerContext} context
+ * @param {import("./installer-context/installer-context.js").WhWasmInstallerContext} context
  * @param {string} funcName - Name used in the error message for clarity.
  */
 export function assertAllocator(context, funcName) {

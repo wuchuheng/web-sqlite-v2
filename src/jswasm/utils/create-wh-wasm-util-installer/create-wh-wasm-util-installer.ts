@@ -1,7 +1,7 @@
-import type { WhWasmInstaller } from "../whwasm/installer-context.d.ts";
+import type { WhWasmInstaller } from "../whwasm/installer-context/installer-context";
 import type { YawlLoaderFactory } from "../whwasm/yawl-loader.d.ts";
 
-import { WhWasmInstallerContext } from "../whwasm/installer-context";
+import { WhWasmInstallerContext } from "../whwasm/installer-context/installer-context";
 import { applyDefaults } from "../whwasm/defaults/defaults";
 import { attachSizeHelpers, attachHeapAccessors } from "../whwasm/heap-helpers";
 import { attachFunctionTableUtilities } from "../whwasm/function-table-helpers";

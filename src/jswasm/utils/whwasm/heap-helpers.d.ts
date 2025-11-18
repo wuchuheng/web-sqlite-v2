@@ -1,4 +1,4 @@
-import type { WhWasmInstallerContext } from "./installer-context.d.ts";
+import type { WhWasmInstallerContext } from "./installer-context/installer-context.d.ts";
 
 /**
  * Installs the sizeof helpers on the target.

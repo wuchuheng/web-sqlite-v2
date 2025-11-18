@@ -5,7 +5,7 @@
 /**
  * Installs pointer-aware peek/poke helpers and numeric inspections.
  *
- * @param {import("./installer-context.mjs").WhWasmInstallerContext} context
+ * @param {import("./installer-context/installer-context.js").WhWasmInstallerContext} context
  */
 export function attachMemoryAccessors(context) {
     const { target, ptrIR } = context;

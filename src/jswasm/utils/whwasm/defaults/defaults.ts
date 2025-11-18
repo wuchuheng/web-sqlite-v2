@@ -2,7 +2,7 @@
  * @fileoverview Applies baseline defaults to the wh-wasm installer target.
  */
 
-import type { WhWasmInstallerContext } from "../installer-context.d";
+import type { WhWasmInstallerContext } from "../installer-context/installer-context";
 
 /**
  * Ensures the target exposes core metadata before additional helpers are attached.

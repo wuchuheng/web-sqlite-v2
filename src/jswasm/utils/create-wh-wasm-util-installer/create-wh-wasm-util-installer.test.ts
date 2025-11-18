@@ -1,4 +1,4 @@
-import type { WhWasmHelperTarget } from "../whwasm/installer-context.d.ts";
+import type { WhWasmHelperTarget } from "../whwasm/installer-context/installer-context";
 import { describe, expect, it } from "vitest";
 import { createWhWasmUtilInstaller } from "./create-wh-wasm-util-installer";
 
@@ -31,13 +31,13 @@ const createFakeTarget = (): FakeTargetBase => {
   target.bigIntEnabled = false;
   target.memory = memory;
   target.exports = exports;
-  target.alloc = (size) => {
+  target.alloc = (size: number) => {
     const ptr = nextPtr;
     nextPtr += Math.max(size, 1);
     return ptr;
   };
   target.dealloc = () => {};
-  target.isPtr = (value) => typeof value === "number" && value >= 0;
+  target.isPtr = (value: unknown) => typeof value === "number" && value >= 0;
   return target;
 };
 

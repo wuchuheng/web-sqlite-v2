@@ -6,7 +6,7 @@
  * Attaches helpers for manipulating the indirect function table and stores
  * the internal installer callback on the context.
  *
- * @param {import("./installer-context.mjs").WhWasmInstallerContext} context
+ * @param {import("./installer-context/installer-context.js").WhWasmInstallerContext} context
  */
 export function attachFunctionTableUtilities(context) {
     const { target, cache } = context;
@@ -127,7 +127,7 @@ export function attachFunctionTableUtilities(context) {
 /**
  * Creates the jsFuncToWasm adapter used by the original Emscripten glue.
  *
- * @param {import("./installer-context.mjs").WhWasmInstallerContext} context
+ * @param {import("./installer-context/installer-context.js").WhWasmInstallerContext} context
  * @returns {(func: Function|string, sig: string) => Function}
  */
 function createJsFuncToWasm(context) {

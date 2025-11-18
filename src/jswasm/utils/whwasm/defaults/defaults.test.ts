@@ -1,8 +1,7 @@
-import type { WhWasmHelperTarget } from "../installer-context.d";
+import type { WhWasmHelperTarget } from "../installer-context/installer-context";
 import { describe, expect, it, beforeEach } from "vitest";
-// @ts-expect-error - Importing from mjs file with available d.ts
-import { WhWasmInstallerContext } from "../installer-context.mjs";
-import type { WhWasmInstallerContext as WhWasmInstallerContextType } from "../installer-context.d";
+import { WhWasmInstallerContext } from "../installer-context/installer-context";
+import type { WhWasmInstallerContext as WhWasmInstallerContextType } from "../installer-context/installer-context";
 import { applyDefaults } from "./defaults";
 
 describe("applyDefaults", () => {

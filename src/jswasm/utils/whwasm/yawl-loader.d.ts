@@ -1,7 +1,7 @@
 import type {
   WhWasmHelperTarget,
   WhWasmInstaller,
-} from "./installer-context.d.ts";
+} from "./installer-context/installer-context.d.ts";
 
 /**
  * Configuration object accepted by the yawl() loader helper.
