@@ -20,7 +20,8 @@
         "src/jswasm/utils/sqlite3-init-wrapper/*.ts",
         "src/jswasm/utils/wasm-loader/*.ts",
         "src/jswasm/utils/struct-binder/**/*.ts",
-        "src/jswasm/utils/whwasm/installer-context/*.ts"
+        "src/jswasm/utils/whwasm/installer-context/*.ts",
+        "src/jswasm/utils/whwasm/function-table-helpers/*.ts"
     ],
     "exclude": ["src/**/*.test.ts"]
 }
