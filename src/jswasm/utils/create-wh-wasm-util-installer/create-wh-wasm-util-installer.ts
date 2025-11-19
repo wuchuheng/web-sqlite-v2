@@ -3,7 +3,10 @@ import type { YawlLoaderFactory } from "../whwasm/yawl-loader.d.ts";
 
 import { WhWasmInstallerContext } from "../whwasm/installer-context/installer-context";
 import { applyDefaults } from "../whwasm/defaults/defaults";
-import { attachSizeHelpers, attachHeapAccessors } from "../whwasm/heap-helpers";
+import {
+  attachSizeHelpers,
+  attachHeapAccessors,
+} from "../whwasm/heap-helpers/heap-helpers";
 import { attachFunctionTableUtilities } from "../whwasm/function-table-helpers/function-table-helpers";
 import { attachMemoryAccessors } from "../whwasm/memory-helpers";
 import { attachStringUtilities } from "../whwasm/string-helpers";
