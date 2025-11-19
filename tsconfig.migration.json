@@ -25,7 +25,8 @@
         "src/jswasm/utils/whwasm/heap-helpers/*.ts",
         "src/jswasm/utils/whwasm/memory-helpers/*.ts",
         "src/jswasm/utils/whwasm/scoped-alloc-helpers/*.ts",
-        "src/jswasm/utils/whwasm/utils/*.ts"
+        "src/jswasm/utils/whwasm/utils/*.ts",
+        "src/jswasm/utils/whwasm/string-helpers/*.ts"
     ],
     "exclude": ["src/**/*.test.ts"]
 }

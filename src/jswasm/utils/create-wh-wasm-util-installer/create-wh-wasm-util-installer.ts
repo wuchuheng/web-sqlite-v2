@@ -9,7 +9,7 @@ import {
 } from "../whwasm/heap-helpers/heap-helpers";
 import { attachFunctionTableUtilities } from "../whwasm/function-table-helpers/function-table-helpers";
 import { attachMemoryAccessors } from "../whwasm/memory-helpers/memory-helpers";
-import { attachStringUtilities } from "../whwasm/string-helpers";
+import { attachStringUtilities } from "../whwasm/string-helpers/string-helpers";
 import { attachScopedAllocators } from "../whwasm/scoped-alloc-helpers/scoped-alloc-helpers";
 import { attachXWrapAdapters } from "../whwasm/xwrap-helpers";
 import { createYawlLoader } from "../whwasm/yawl-loader";
