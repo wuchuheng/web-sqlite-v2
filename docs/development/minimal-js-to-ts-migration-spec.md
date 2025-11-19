@@ -1,7 +1,7 @@
 # Minimal JS → TS Migration Spec
 
 This checklist codifies the **minimal migration unit** for the JS/WASM bridge under `src/jswasm`.
-A requester should fill out the template below before asking for AI implementation; the AI should then proceed through each step **strictly in order**, with **human confirmation between steps**.
+A requester should fill out the template below before asking for AI implementation; the AI should then proceed through each step **strictly in order**, with **human confirmation between steps, starting from Step 2**.
 
 Our goal is to keep the library working at every stage while steadily replacing a `.mjs` + `.d.ts` pair with a typed subdirectory containing the `.ts` source, emitted `.js`, and regenerated `.d.ts`.
 
@@ -25,6 +25,9 @@ A complete request allows the AI to follow the minimal migration workflow end-to
 - Read `AGENTS.md` and `.clinerules/base_rules.md` before touching the repo.
 - Confirm the Three-Phase Processing Pattern and the rule about numeric comments inside functions are observed while editing.
 - Keep functions small, lines ≤ 120 characters, and naming consistent with existing code (camelCase for values/functions, PascalCase for classes).
+- Treat documentation as part of the public API: preserve or improve any existing JSDoc/TSDoc comments and plan how they will
+  be carried over into the new TypeScript source.
+- **Claude Code requirement**: Claude must also read and honor `CLAUDE.md` plus any repo-level AI guidelines in AGENTS/Clinerules before executing the workflow below.
 
 ---
 
@@ -33,23 +36,29 @@ A complete request allows the AI to follow the minimal migration workflow end-to
 The numbered items under **Migration Workflow** are treated as an ordered TODO list.
 When an AI assistant is driving the migration, it **must obey all of the following rules**:
 
+> Claude Code compatibility note
+> Claude’s `continue` / `proceed` affordance is enforced by tools. The agent must wait for an explicit user reply before touching the next step, even if the human only writes "continue". **Step 1 is a special case:** it does not require the standard proceed question; from **Step 2 onward**, the gating question is mandatory.
+
 1. **Strict ordering**
     - Work on **one numbered step at a time** (`1.`, then `2.`, then `3.`, …).
-    - Do not start any work that belongs to step _N+1_ before step _N_ is fully completed and approved.
+    - Do not start any work that belongs to step _N+1_ before step _N_ is fully completed and (for steps ≥ 2) approved.
     - Sub-bullets under a step are part of that step and must also be completed before moving on.
 
-2. **Explicit confirmation gate**
-    - At the end of each step, the AI must:
+2. **Explicit confirmation gate (Steps 2 and above)**
+    - At the end of each step **from Step 2 onward**, the AI must:
         - Summarize **what was done** in that step (files touched, commands to run, expected results).
+
         - List the **current TODO status**, for example:
             - `[x] 1. Analyze the originals`
             - `[ ] 2. Add a test harness`
             - …
 
-        - Ask the human explicitly:
-          **“Do you want me to proceed to step N+1: \*\***?”\*\*
+        - Ask the human explicitly, using this exact text so Claude Code is satisfied:
+          `Do you want me to proceed to step N+1: <step title>?`
 
-    - The AI **must not** begin any work from the next step until the human explicitly agrees (any clear “yes / proceed / go ahead” is fine).
+    - The AI **must not** begin any work from the next step (for steps ≥ 2) until the human explicitly agrees (any clear “yes / proceed / go ahead” is fine).
+
+    - **Step 1 exception:** Step 1 is analysis-only. After summarizing findings and showing the checklist, the AI does **not** need to ask the proceed question for Step 2. The flow can move into Step 2 as soon as the human sends any follow-up (e.g. “OK”, “continue”, extra instructions), or when the host tool advances the session.
 
 3. **No step-skipping or batching**
     - Do not batch multiple steps in one response (e.g., don’t analyze, write tests, and create TS files in a single pass).
@@ -61,10 +70,11 @@ When an AI assistant is driving the migration, it **must obey all of the followi
 4. **Rollback / correction loop**
     - If the human is not satisfied with a step, they can request changes **within that step**.
     - The AI must stay on the same step, revising as needed, and only ask to proceed again once the updated version is summarized.
+    - If the human responds with “continue” (or any affirmative variant) _without_ giving the agent new instructions, Claude Code should simply advance to the next step after re-asking the gating question (for steps ≥ 2).
 
-5. **Command echoing (optional but recommended)**
+5. **Command echoing (required for Claude Code)**
     - When a step involves commands (e.g., `npm run test:unit`, `npm run build:migration`), the AI should:
-        - Show the exact commands to run.
+        - Show the exact commands to run (Claude Code tooling requires literal commands with no shorthand).
         - Explain what success or failure looks like.
 
     - After the human runs the commands, they can paste logs back, and the AI remains within the same step until everything passes.
@@ -79,6 +89,7 @@ Some steps are **command-gated** (tests, build, lint): they cannot be marked as 
 
 - **Step 2 – Add a test harness**
     - `npm run test:unit` must be run against the existing `.mjs` implementation.
+
     - The AI must either:
         - Invoke the tests via tools (if available in the environment), **or**
         - Instruct the user to run `npm run test:unit` and wait for the result (logs or a clear “tests passed”).
@@ -126,10 +137,12 @@ Some steps are **command-gated** (tests, build, lint): they cannot be marked as 
 
 ## Standard Checklist Block & Gating Question
 
-At the end of **every step** in the Migration Workflow, the AI must:
+At the end of **every step from Step 2 onward** in the Migration Workflow, the AI must:
 
 1. Emit a machine-readable checklist block.
 2. Ask explicitly whether to proceed to the **next** step.
+
+At the end of **Step 1**, the AI must still emit the checklist block, but it should **not** ask the proceed question and may simply prepare to enter Step 2.
 
 ### Checklist block format
 
@@ -159,8 +172,11 @@ Rules:
         - The step currently being worked on may be `[x]` (just finished) or `[-]` (in progress), if you want to distinguish.
         - Future steps are `[ ]`.
 
+    - Make this `migration-checklist` block the **final fenced code block** in every response; Claude Code’s tooling parses the last fenced block only.
+
 - The exact text of each step label must match the titles in the **Migration Workflow**, so tools can parse them reliably.
-- Tools like Codex/Cline can parse this `migration-checklist` block from the last assistant message to know where the flow is.\
+
+- Tools like Codex/Cline can parse this `migration-checklist` block from the last assistant message to know where the flow is.
 
 **Example after finishing Step 1:**
 
@@ -179,21 +195,21 @@ steps:
 - [ ] 10. Document and hand over
 ```
 
-### Mandatory gating question
+### Mandatory gating question (Steps 2 and above)
 
-After the checklist block, the AI must always ask the human whether to proceed to the **next** step.
+After the checklist block, the AI must always ask the human whether to proceed to the **next** step **for steps 2 and above**.
 
 - The question format must be:
 
-    > Do you want me to proceed to step <N+1>: ?
+    > Do you want me to proceed to step <N+1>: <step title>?
 
 - Examples:
-    - After Step 1 is done:
-      `Do you want me to proceed to step 2: Add a test harness?`
+    - After Step 2 is done:
+      `Do you want me to proceed to step 3: Create the migration subdirectory?`
     - After Step 4 is done:
       `Do you want me to proceed to step 5: Compile the migration?`
 
-The AI **must not** start any work from step `N+1` until the user replies with clear consent (e.g. “Yes”, “Proceed”, “Go ahead”).
+For **Step 1**, the AI must **not** ask this question. It simply emits the checklist and gets ready for Step 2. The AI **must not** start any work from step `N+1` (for steps ≥ 2) until the user replies with clear consent (e.g. “Yes”, “Proceed”, “Go ahead”).
 
 ---
 
@@ -207,6 +223,8 @@ The workflow below is the ordered TODO list.
 - Open `originalPath` and `dtsPath`. Record their exports, signatures, and edge cases.
 - Identify existing behavior that must remain unchanged (e.g., return types, overloads, TextDecoder fallbacks).
 - Note any runtime assumptions (e.g., running in a browser, availability of `TextDecoder`, polyfills, etc.).
+- Review any existing JSDoc or inline documentation on the `.mjs` and `.d.ts` pair so it can be reflected or refined in the
+  new TypeScript doc comments.
 
 **AI/human protocol for Step 1**
 
@@ -214,10 +232,9 @@ The workflow below is the ordered TODO list.
     - Summarizes the public API and key behaviors.
     - Lists any uncertainties or edge cases found.
     - Shows updated checklist with step 1 marked as done.
-    - Asks:
-      _“Do you want me to proceed to step 2: Add a test harness?”_
+    - **Does not** ask the proceed question here.
 
-- Only after the human agrees does the AI move to Step 2.
+- After Step 1, the session is ready for Step 2. The host tool or the human can indicate when to actually begin Step 2 (for example, by saying "continue" or giving extra instructions), but the AI should not emit the standard proceed question for this step.
 
 ---
 
@@ -232,7 +249,9 @@ The workflow below is the ordered TODO list.
 
 - Before any `*.test.ts` is created:
     - Read all files in `.memory-bank/` (if present).
+
     - Analyze the target source and declaration.
+
     - Craft a short plan in `docs/development` describing:
         - Intended test cases.
         - Test data.
@@ -244,13 +263,16 @@ The workflow below is the ordered TODO list.
 
 - AI:
     - Presents the proposed `docs/development` test plan.
+
     - Waits for human approval of the plan.
+
     - After approval, writes the `*.test.ts` file and explains:
         - What cases were covered.
         - How the tests reference the existing `.mjs`.
         - How to run `npm run test:unit` and what passing looks like.
 
     - Shows updated checklist with step 2 marked as done (only after tests pass).
+
     - Asks:
       _“Do you want me to proceed to step 3: Create the migration subdirectory?”_
 
@@ -267,7 +289,14 @@ The workflow below is the ordered TODO list.
   If the module was `src/jswasm/utils/utf8.mjs`, create `src/jswasm/utils/utf8/`.
 - Inside that folder add the new `utf8.ts` implementing the same exports, with type annotations guided by the original `.d.ts`.
 - Keep functions small and focused; break repeated/complex logic into helpers.
-- Add comments only where necessary for clarity.
+- Add standard doc comments (for example, JSDoc/TSDoc-style `/** ... */`) on each exported function, class, and class method
+  to explain its intention and usage.
+    - At minimum, document parameters and return values (via tags such as `@param` and `@returns`) and call out important
+      invariants, side effects, and error conditions (for example, with `@throws` or a short description in the main text).
+    - Prefer updating or lifting any existing JSDoc from the original `.mjs`/`.d.ts` so behavior, types, and documentation stay
+      aligned.
+
+- Keep other inline comments minimal and only where they significantly improve clarity.
 
 **AI/human protocol for Step 3**
 
@@ -295,7 +324,7 @@ The workflow below is the ordered TODO list.
         import { something } from "./utf8.mjs";
         ```
 
-    - **After (Step 4 migration, inside \*\***`src/jswasm/utils/utf8/utf8.test.ts`\***\*):**
+    - **After (Step 4 migration, inside `src/jswasm/utils/utf8/utf8.test.ts`):**
 
         ```ts
         import { something } from "./utf8";
@@ -303,9 +332,10 @@ The workflow below is the ordered TODO list.
 
     - In other words:
         - Move the test next to the new TS module, and
-        - **Remove the \*\***`.mjs`\***\* suffix** so the tests import the module by its extension-less root path. This allows the same test file to exercise the compiled JS/TS implementation depending on the build and runner configuration.
+        - **Remove the `.mjs` suffix** so the tests import the module by its extension-less root path. This allows the same test file to exercise the compiled JS/TS implementation depending on the build and runner configuration.
 
 - Ensure Vitest resolves the extension-less path correctly for both the TS source (during migration) and the emitted JS (after `build:migration`).
+
 - Run `npm run test:unit` again until the tests pass against the TS implementation.
 
 **AI/human protocol for Step 4**
@@ -366,8 +396,9 @@ The workflow below is the ordered TODO list.
 
 ### 7. Update runtime references.
 
-- Replace imports that pointed to `originalPath` with the new compiled `.js`
-  (e.g., change `./utf8.mjs` → `./utf8/utf8.js`).
+- Replace imports that pointed to `originalPath` with the new compiled module
+  (e.g., change `./utf8.mjs` → `./utf8/utf8` or `./utf8/utf8.js`; the `.js` suffix is optional and may be omitted when
+  supported by the bundler/runtime).
 - Verify the tests still pass; rerun `npm run test:unit` if needed.
 
 **AI/human protocol for Step 7**
@@ -428,6 +459,7 @@ The workflow below is the ordered TODO list.
 
 - AI:
     - Proposes PR description text and any additional docs snippets.
+
     - Summarizes the entire migration, including:
         - Original and new module locations.
         - Key behavioral equivalence points.
@@ -445,6 +477,8 @@ For each minimal migration unit:
 - A companion `moduleName.test.ts` that proves parity before and after migration.
 - Emitted `moduleName.js` and `moduleName.d.ts` ready for downstream imports.
 - Updated import paths for consumers and removal of the obsolete `.mjs`/`.d.ts`.
+- Well-structured JSDoc/TSDoc comments on the exported TypeScript API surface, reflecting (and, where useful, improving on)
+  the documentation that existed in the original `.mjs` and `.d.ts`.
 - Tests:
     - `npm run test:unit` (pre- and post-migration).
     - `pnpm test` (browser) during final verification.
