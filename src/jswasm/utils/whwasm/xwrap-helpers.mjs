@@ -2,7 +2,7 @@
  * @fileoverview xWrap adapter wiring for the wh-wasm utilities.
  */
 
-import { createXWrapInternals } from "./xwrap-internals.mjs";
+import { createXWrapInternals } from "./xwrap-internals/xwrap-internals";
 
 /**
  * Populates xWrap argument/result adapters and associated helpers.

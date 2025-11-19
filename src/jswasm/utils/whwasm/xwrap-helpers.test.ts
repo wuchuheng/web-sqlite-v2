@@ -20,7 +20,10 @@ type InstalledXWrap = {
     resultType?: string | null,
     ...argTypes: unknown[]
   ): (...args: unknown[]) => unknown;
-  argAdapter: (typeName: string, adapter?: (value: unknown) => unknown) => unknown;
+  argAdapter: (
+    typeName: string,
+    adapter?: (value: unknown) => unknown,
+  ) => unknown;
   resultAdapter: (
     typeName: string,
     adapter?: (value: unknown) => unknown,
@@ -51,22 +54,22 @@ function createXWrapHarness(options?: {
     })
     .mockName("scopedAllocCString");
   const cstrToJs = vi
-    .fn<(ptr: number | bigint | null) => string | null>((ptr) =>
-      ptr === null || ptr === 0 ? null : `js:${ptr}`,
-    )
+    .fn<
+      (ptr: number | bigint | null) => string | null
+    >((ptr) => (ptr === null || ptr === 0 ? null : `js:${ptr}`))
     .mockName("cstrToJs");
   const dealloc = vi
     .fn<(ptr: number | bigint | null) => void>(() => undefined)
     .mockName("dealloc");
-  const scopedAllocPushMock = vi.fn<() => number[]>().mockName("scopedAllocPush");
+  const scopedAllocPushMock = vi
+    .fn<() => number[]>()
+    .mockName("scopedAllocPush");
   const scopedAllocPopMock = vi
     .fn<(scope: number[]) => void>()
     .mockName("scopedAllocPop");
   const functionEntry = vi
     .fn<
-      (
-        ptr: number | bigint,
-      ) => ((...args: unknown[]) => unknown) | undefined
+      (ptr: number | bigint) => ((...args: unknown[]) => unknown) | undefined
     >(() => undefined)
     .mockName("functionEntry");
   const xGet = vi
