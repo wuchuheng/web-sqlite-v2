@@ -1,6 +1,4 @@
 /**
- * TypeScript-friendly re-export for the runtime .mjs implementation so tests
- * and tooling can import typed helpers without custom module declarations.
+ * Backward-compatible export shim pointing at the migrated TypeScript module.
  */
-/// <reference path="./xwrap-helpers.mjs.d.ts" />
-export { attachXWrapAdapters } from "./xwrap-helpers.mjs";
+export { attachXWrapAdapters } from "./xwrap-helpers/xwrap-helpers";

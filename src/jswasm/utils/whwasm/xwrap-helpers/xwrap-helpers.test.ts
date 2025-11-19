@@ -3,8 +3,8 @@ import { beforeEach, describe, expect, it, vi } from "vitest";
 import type {
   WhWasmHelperTarget,
   WhWasmValue,
-} from "./installer-context/installer-context";
-import { WhWasmInstallerContext } from "./installer-context/installer-context";
+} from "../installer-context/installer-context";
+import { WhWasmInstallerContext } from "../installer-context/installer-context";
 import { attachXWrapAdapters } from "./xwrap-helpers";
 
 type ExtendedXWrapCache = WhWasmInstallerContext["cache"]["xWrap"] & {
