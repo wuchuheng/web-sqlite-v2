@@ -22,7 +22,7 @@ Verify that `wrapSqlite3InitModule` wires the Emscripten initializer into the ex
 - `globalThis.document.currentScript.src` pointing at a known path so the derived directories can be asserted.
 - `globalThis.location` set to a `URL` (e.g., `https://example.com/app/index.mjs?sqlite3.dir=/assets/&sqlite3.debugModule=1`) to exercise query-based branches.
 - `globalThis.sqlite3InitModuleState` is cleaned between tests to avoid leakage.
-- `console.warn` can remain the real implementation since `debugModule` only calls `console.warn` when enabled.
+- `console.warn` can remain the real implementation since `debugModule` only calls `console.warn` when enabled. Expect Vitest stderr noise from the debugModule logs; this is normal.
 
 ## Scaffolding
 

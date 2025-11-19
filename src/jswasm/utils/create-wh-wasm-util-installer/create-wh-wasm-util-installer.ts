@@ -1,5 +1,5 @@
 import type { WhWasmInstaller } from "../whwasm/installer-context/installer-context";
-import type { YawlLoaderFactory } from "../whwasm/yawl-loader.d.ts";
+import type { YawlLoaderFactory } from "../whwasm/yawl-loader/yawl-loader";
 
 import { WhWasmInstallerContext } from "../whwasm/installer-context/installer-context";
 import { applyDefaults } from "../whwasm/defaults/defaults";
@@ -11,8 +11,8 @@ import { attachFunctionTableUtilities } from "../whwasm/function-table-helpers/f
 import { attachMemoryAccessors } from "../whwasm/memory-helpers/memory-helpers";
 import { attachStringUtilities } from "../whwasm/string-helpers/string-helpers";
 import { attachScopedAllocators } from "../whwasm/scoped-alloc-helpers/scoped-alloc-helpers";
-import { attachXWrapAdapters } from "../whwasm/xwrap-helpers";
-import { createYawlLoader } from "../whwasm/yawl-loader";
+import { attachXWrapAdapters } from "../whwasm/xwrap-helpers/xwrap-helpers";
+import { createYawlLoader } from "../whwasm/yawl-loader/yawl-loader";
 
 type InstallerWithYawl = WhWasmInstaller & { yawl: YawlLoaderFactory };
 

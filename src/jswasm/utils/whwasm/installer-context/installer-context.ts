@@ -19,8 +19,10 @@ export type WhWasmValue =
   | { [key: string]: WhWasmValue }
   | ((...args: WhWasmValue[]) => WhWasmValue)
   | ((size: number) => number)
+  | ((ptr: number) => void)
   | WebAssembly.Memory
   | WebAssembly.Exports
+  | WebAssembly.Module
   | TextEncoder
   | TextDecoder;
 
