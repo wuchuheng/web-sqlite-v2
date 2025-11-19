@@ -2,7 +2,7 @@
  * @fileoverview String and UTF-8 helpers for the wh-wasm utilities.
  */
 
-import { assertAllocator } from "./utils.mjs";
+import { assertAllocator } from "./utils/utils";
 
 /**
  * Adds string conversion helpers (cstrlen, cstrToJs, etc.) to the target.
