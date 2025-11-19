@@ -25,9 +25,6 @@ A complete request allows the AI to follow the minimal migration workflow end-to
 - Read `AGENTS.md` and `.clinerules/base_rules.md` before touching the repo.
 - Confirm the Three-Phase Processing Pattern and the rule about numeric comments inside functions are observed while editing.
 - Keep functions small, lines ≤ 120 characters, and naming consistent with existing code (camelCase for values/functions, PascalCase for classes).
-- Treat documentation as part of the public API: preserve or improve any existing JSDoc/TSDoc comments and plan how they will
-  be carried over into the new TypeScript source.
-- **Claude Code requirement**: Claude must also read and honor `CLAUDE.md` plus any repo-level AI guidelines in AGENTS/Clinerules before executing the workflow below.
 
 ---
 
@@ -35,9 +32,6 @@ A complete request allows the AI to follow the minimal migration workflow end-to
 
 The numbered items under **Migration Workflow** are treated as an ordered TODO list.
 When an AI assistant is driving the migration, it **must obey all of the following rules**:
-
-> Claude Code compatibility note  
-> Claude’s `continue` / `proceed` affordance is enforced by tools. The agent must wait for an explicit user reply before touching the next step, even if the human only writes “continue”.
 
 1. **Strict ordering**
     - Work on **one numbered step at a time** (`1.`, then `2.`, then `3.`, …).
@@ -52,8 +46,8 @@ When an AI assistant is driving the migration, it **must obey all of the followi
             - `[ ] 2. Add a test harness`
             - …
 
-        - Ask the human explicitly, using this exact text so Claude Code is satisfied:
-          `Do you want me to proceed to step N+1: <step title>?`
+        - Ask the human explicitly:
+          **“Do you want me to proceed to step N+1: \*\***?”\*\*
 
     - The AI **must not** begin any work from the next step until the human explicitly agrees (any clear “yes / proceed / go ahead” is fine).
 
@@ -67,11 +61,10 @@ When an AI assistant is driving the migration, it **must obey all of the followi
 4. **Rollback / correction loop**
     - If the human is not satisfied with a step, they can request changes **within that step**.
     - The AI must stay on the same step, revising as needed, and only ask to proceed again once the updated version is summarized.
-    - If the human responds with “continue” (or any affirmative variant) _without_ giving the agent new instructions, Claude Code should simply advance to the next step after re-asking the gating question.
 
-5. **Command echoing (required for Claude Code)**
+5. **Command echoing (optional but recommended)**
     - When a step involves commands (e.g., `npm run test:unit`, `npm run build:migration`), the AI should:
-        - Show the exact commands to run (Claude Code tooling requires literal commands with no shorthand).
+        - Show the exact commands to run.
         - Explain what success or failure looks like.
 
     - After the human runs the commands, they can paste logs back, and the AI remains within the same step until everything passes.
@@ -165,7 +158,6 @@ Rules:
         - Completed steps are marked as `[x]`.
         - The step currently being worked on may be `[x]` (just finished) or `[-]` (in progress), if you want to distinguish.
         - Future steps are `[ ]`.
-    - Make this `migration-checklist` block the **final fenced code block** in every response; Claude Code’s tooling parses the last fenced block only.
 
 - The exact text of each step label must match the titles in the **Migration Workflow**, so tools can parse them reliably.
 - Tools like Codex/Cline can parse this `migration-checklist` block from the last assistant message to know where the flow is.\
@@ -215,8 +207,6 @@ The workflow below is the ordered TODO list.
 - Open `originalPath` and `dtsPath`. Record their exports, signatures, and edge cases.
 - Identify existing behavior that must remain unchanged (e.g., return types, overloads, TextDecoder fallbacks).
 - Note any runtime assumptions (e.g., running in a browser, availability of `TextDecoder`, polyfills, etc.).
-- Review any existing JSDoc or inline documentation on the `.mjs` and `.d.ts` pair so it can be reflected or refined in the
-  new TypeScript doc comments.
 
 **AI/human protocol for Step 1**
 
@@ -277,13 +267,7 @@ The workflow below is the ordered TODO list.
   If the module was `src/jswasm/utils/utf8.mjs`, create `src/jswasm/utils/utf8/`.
 - Inside that folder add the new `utf8.ts` implementing the same exports, with type annotations guided by the original `.d.ts`.
 - Keep functions small and focused; break repeated/complex logic into helpers.
-- Add standard doc comments (for example, JSDoc/TSDoc-style `/** ... */`) on each exported function, class, and class method
-  to explain its intention and usage.
-    - At minimum, document parameters and return values (via tags such as `@param` and `@returns`) and call out important
-      invariants, side effects, and error conditions (for example, with `@throws` or a short description in the main text).
-    - Prefer updating or lifting any existing JSDoc from the original `.mjs`/`.d.ts` so behavior, types, and documentation stay
-      aligned.
-- Keep other inline comments minimal and only where they significantly improve clarity.
+- Add comments only where necessary for clarity.
 
 **AI/human protocol for Step 3**
 
@@ -311,7 +295,7 @@ The workflow below is the ordered TODO list.
         import { something } from "./utf8.mjs";
         ```
 
-    - **After (Step 4 migration, inside `src/jswasm/utils/utf8/utf8.test.ts`):**
+    - **After (Step 4 migration, inside \*\***`src/jswasm/utils/utf8/utf8.test.ts`\***\*):**
 
         ```ts
         import { something } from "./utf8";
@@ -319,7 +303,7 @@ The workflow below is the ordered TODO list.
 
     - In other words:
         - Move the test next to the new TS module, and
-        - **Remove the `.mjs` suffix** so the tests import the module by its extension-less root path. This allows the same test file to exercise the compiled JS/TS implementation depending on the build and runner configuration.
+        - **Remove the \*\***`.mjs`\***\* suffix** so the tests import the module by its extension-less root path. This allows the same test file to exercise the compiled JS/TS implementation depending on the build and runner configuration.
 
 - Ensure Vitest resolves the extension-less path correctly for both the TS source (during migration) and the emitted JS (after `build:migration`).
 - Run `npm run test:unit` again until the tests pass against the TS implementation.
@@ -382,9 +366,8 @@ The workflow below is the ordered TODO list.
 
 ### 7. Update runtime references.
 
-- Replace imports that pointed to `originalPath` with the new compiled module
-  (e.g., change `./utf8.mjs` → `./utf8/utf8` or `./utf8/utf8.js`; the `.js` suffix is optional and may be omitted when
-  supported by the bundler/runtime).
+- Replace imports that pointed to `originalPath` with the new compiled `.js`
+  (e.g., change `./utf8.mjs` → `./utf8/utf8.js`).
 - Verify the tests still pass; rerun `npm run test:unit` if needed.
 
 **AI/human protocol for Step 7**
@@ -462,8 +445,6 @@ For each minimal migration unit:
 - A companion `moduleName.test.ts` that proves parity before and after migration.
 - Emitted `moduleName.js` and `moduleName.d.ts` ready for downstream imports.
 - Updated import paths for consumers and removal of the obsolete `.mjs`/`.d.ts`.
-- Well-structured JSDoc/TSDoc comments on the exported TypeScript API surface, reflecting (and, where useful, improving on)
-  the documentation that existed in the original `.mjs` and `.d.ts`.
 - Tests:
     - `npm run test:unit` (pre- and post-migration).
     - `pnpm test` (browser) during final verification.
