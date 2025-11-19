@@ -6,7 +6,7 @@ import type {
   Sqlite3StructDefinition,
   Sqlite3StructInstance,
   WasmPointer,
-} from "../../struct-binder-factory/types.d.ts";
+} from "../../../wasm/bootstrap/runtime/sqlite3-facade-namespace";
 import {
   INTERNAL_STRUCT_TOKEN,
   defineReadonly,
