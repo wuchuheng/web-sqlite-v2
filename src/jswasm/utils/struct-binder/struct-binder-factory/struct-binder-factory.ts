@@ -1,12 +1,3 @@
-import type {
-  Sqlite3DebugFlagController,
-  Sqlite3StructBinder,
-  Sqlite3StructBinderConfig,
-  Sqlite3StructConstructor,
-  Sqlite3StructDefinition,
-  Sqlite3StructInstance,
-  WasmPointer,
-} from "../../../wasm/bootstrap/runtime/sqlite3-facade-namespace";
 import {
   INTERNAL_STRUCT_TOKEN,
   defineReadonly,
@@ -29,6 +20,15 @@ import {
   type StructBinderContext,
   type StructBinderFactoryDebugSupport,
 } from "../struct-binder-context/struct-binder-context";
+import type {
+  Sqlite3DebugFlagController,
+  Sqlite3StructBinder,
+  Sqlite3StructBinderConfig,
+  Sqlite3StructConstructor,
+  Sqlite3StructDefinition,
+  Sqlite3StructInstance,
+  WasmPointer,
+} from "../../struct-binder-factory/types.d.ts";
 
 type Mutable<T> = {
   -readonly [K in keyof T]: T[K];
