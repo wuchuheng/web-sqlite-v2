@@ -6,7 +6,7 @@ import { createStreamOperations } from "./filesystem/stream-operations.mjs";
 import { createMountOperations } from "./filesystem/mount-operations.mjs";
 import { createNodeActions } from "./filesystem/node-actions.mjs";
 import { createStreamHelpers } from "./filesystem/stream-helpers.mjs";
-import { createInitializationHelpers } from "./filesystem/initialization.mjs";
+import { createInitializationHelpers } from "./filesystem/initialization/initialization";
 import { createLegacyHelpers } from "./filesystem/legacy-helpers.mjs";
 
 /**
