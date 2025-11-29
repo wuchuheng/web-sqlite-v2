@@ -32,7 +32,8 @@
         "src/jswasm/utils/whwasm/xwrap-helpers/**/*.ts",
         "src/jswasm/vfs/filesystem/base-state/*.ts",
         "src/jswasm/vfs/filesystem/initialization/*.ts",
-        "src/jswasm/vfs/filesystem/legacy-helpers/*.ts"
+        "src/jswasm/vfs/filesystem/legacy-helpers/*.ts",
+        "src/jswasm/vfs/filesystem/mode-operations/*.ts"
     ],
     "exclude": ["src/**/*.test.ts"]
 }
