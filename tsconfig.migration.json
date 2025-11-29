@@ -29,7 +29,8 @@
         "src/jswasm/utils/whwasm/string-helpers/*.ts",
         "src/jswasm/utils/whwasm/yawl-loader/*.ts",
         "src/jswasm/utils/whwasm/xwrap-internals/**/*.ts",
-        "src/jswasm/utils/whwasm/xwrap-helpers/**/*.ts"
+        "src/jswasm/utils/whwasm/xwrap-helpers/**/*.ts",
+        "src/jswasm/vfs/filesystem/base-state/*.ts"
     ],
     "exclude": ["src/**/*.test.ts"]
 }
