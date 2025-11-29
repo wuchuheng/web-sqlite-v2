@@ -4,7 +4,7 @@ import {
     MODE,
     OPEN_FLAGS,
     STREAM_STATE_MASK,
-} from "./constants.mjs";
+} from "./constants/constants";
 
 /**
  * Generates high-level node manipulation helpers (create, rename, open, etc.)

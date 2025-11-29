@@ -4,7 +4,7 @@ import {
     ERRNO_CODES,
     MODE,
     OPEN_FLAGS,
-} from "./constants.mjs";
+} from "./constants/constants";
 
 /**
  * Restores legacy compatibility helpers that mirror historical FS APIs used by

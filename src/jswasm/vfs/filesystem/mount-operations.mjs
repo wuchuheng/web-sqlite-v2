@@ -1,5 +1,5 @@
 import { PATH } from "../../utils/path/path";
-import { ERRNO_CODES } from "./constants.mjs";
+import { ERRNO_CODES } from "./constants/constants";
 
 /**
  * Provides helpers for managing mount points and device nodes within the

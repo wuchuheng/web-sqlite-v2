@@ -3,7 +3,11 @@ import {
     lengthBytesUTF8,
     stringToUTF8Array,
 } from "../../utils/utf8/utf8";
-import { ERRNO_CODES, OPEN_FLAGS, STREAM_STATE_MASK } from "./constants.mjs";
+import {
+    ERRNO_CODES,
+    OPEN_FLAGS,
+    STREAM_STATE_MASK,
+} from "./constants/constants";
 
 /** Write protection flag used with mmap/allocate helpers. */
 const PROT_WRITE = 0x2;

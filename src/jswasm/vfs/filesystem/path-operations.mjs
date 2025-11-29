@@ -1,5 +1,5 @@
 import { PATH } from "../../utils/path/path";
-import { ERRNO_CODES } from "./constants.mjs";
+import { ERRNO_CODES } from "./constants/constants";
 
 /**
  * Builds helpers for resolving and manipulating filesystem paths while keeping

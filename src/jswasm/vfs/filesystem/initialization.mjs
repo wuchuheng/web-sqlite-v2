@@ -1,4 +1,9 @@
-import { ERRNO_CODES, MODE, OPEN_FLAGS, MAX_OPEN_FDS } from "./constants.mjs";
+import {
+    ERRNO_CODES,
+    MODE,
+    OPEN_FLAGS,
+    MAX_OPEN_FDS,
+} from "./constants/constants";
 
 /**
  * Creates helper routines that bootstrap the filesystem and wire up default

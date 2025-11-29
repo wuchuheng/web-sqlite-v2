@@ -1,4 +1,4 @@
-import { ERRNO_CODES, MAX_OPEN_FDS } from "./constants.mjs";
+import { ERRNO_CODES, MAX_OPEN_FDS } from "./constants/constants";
 
 /**
  * Exposes low-level stream bookkeeping utilities used to manage file

@@ -3,7 +3,7 @@ import {
     OPEN_FLAGS,
     STREAM_STATE_MASK,
     PERMISSION,
-} from "./constants.mjs";
+} from "./constants/constants";
 
 /**
  * Creates the mutable filesystem state container that other helper modules

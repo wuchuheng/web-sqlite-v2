@@ -1,4 +1,4 @@
-import { ERRNO_CODES, MODE, OPEN_FLAGS } from "./constants.mjs";
+import { ERRNO_CODES, MODE, OPEN_FLAGS } from "./constants/constants";
 
 /**
  * Produces helpers for reasoning about POSIX mode bitmasks and validating
