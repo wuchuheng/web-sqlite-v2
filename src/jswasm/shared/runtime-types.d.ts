@@ -2,7 +2,7 @@ import type {
   FSStream,
   MutableFS,
   StreamOps,
-} from "../vfs/filesystem/base-state.d.ts";
+} from "../vfs/filesystem/base-state/base-state";
 
 /**
  * Recursive value hierarchy representing additional module state stored on the
@@ -16,6 +16,12 @@ export type ModuleValue =
   | symbol
   | LifecycleCallback
   | LifecycleCallback[]
+  | ((...args: string[]) => void)
+  | ((totalDependencies: number) => void)
+  | ((error: Error) => void)
+  | ((reason: unknown) => void)
+  | (() => void)
+  | ((path: string, prefix?: string) => string)
   | ((...args: ModuleValue[]) => ModuleValue)
   | WebAssembly.Memory
   | Int8Array

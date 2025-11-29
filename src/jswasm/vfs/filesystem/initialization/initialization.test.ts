@@ -2,7 +2,12 @@ import { describe, it, expect, beforeEach, vi } from "vitest";
 import { createInitializationHelpers } from "./initialization";
 import { createBaseState } from "../base-state/base-state";
 import * as constants from "../constants/constants.js";
-import type { StreamOps, FSNode, FileSystemMountType, FSStream } from "../base-state/base-state";
+import type {
+  StreamOps,
+  FSNode,
+  FileSystemMountType,
+  FSStream,
+} from "../base-state/base-state";
 import type { RuntimeModule } from "../../../shared/runtime-types";
 import type { MutableFS } from "./initialization";
 
@@ -37,7 +42,7 @@ describe("createInitializationHelpers", () => {
   beforeEach(() => {
     // Setup fresh filesystem for each test
     const baseState = createBaseState();
-    
+
     // Create the mock FS by combining base state with spy functions
     // casting to unknown first to avoid strict type checking during the merge
     fs = Object.assign(baseState, {
@@ -75,7 +80,10 @@ describe("createInitializationHelpers", () => {
     mockTTY = {
       register: vi.fn(),
       default_tty_ops: { read: vi.fn(), write: vi.fn() },
-      default_tty1_ops: { put_char: vi.fn() as unknown, fsync: vi.fn() } as unknown as StreamOps,
+      default_tty1_ops: {
+        put_char: vi.fn() as unknown,
+        fsync: vi.fn(),
+      } as unknown as StreamOps,
     };
 
     // Setup predictable random fill
@@ -96,7 +104,9 @@ describe("createInitializationHelpers", () => {
 
   describe("createDefaultDirectories", () => {
     it("should create standard directory hierarchy", () => {
-      const helpers = createInitializationHelpers(fs as unknown as MutableFS, { Module: mockModule as unknown as RuntimeModule });
+      const helpers = createInitializationHelpers(fs as unknown as MutableFS, {
+        Module: mockModule as unknown as RuntimeModule,
+      });
       helpers.createDefaultDirectories();
 
       // Verify directories were created by checking mkdir calls
@@ -111,10 +121,16 @@ describe("createInitializationHelpers", () => {
 
   describe("createDefaultDevices", () => {
     it("should create device directory structure", () => {
-      const helpers = createInitializationHelpers(fs as unknown as MutableFS, { Module: mockModule as unknown as RuntimeModule });
+      const helpers = createInitializationHelpers(fs as unknown as MutableFS, {
+        Module: mockModule as unknown as RuntimeModule,
+      });
       helpers.createDefaultDevices(
-        mockTTY as unknown as { register: (dev: number, ops: StreamOps) => void; default_tty_ops: StreamOps; default_tty1_ops: StreamOps },
-        mockRandomFill as (buffer: Uint8Array) => Uint8Array
+        mockTTY as unknown as {
+          register: (dev: number, ops: StreamOps) => void;
+          default_tty_ops: StreamOps;
+          default_tty1_ops: StreamOps;
+        },
+        mockRandomFill as (buffer: Uint8Array) => Uint8Array,
       );
 
       // Verify /dev directory was created
@@ -126,20 +142,26 @@ describe("createInitializationHelpers", () => {
     });
 
     it("should register TTY devices", () => {
-      const helpers = createInitializationHelpers(fs as unknown as MutableFS, { Module: mockModule as unknown as RuntimeModule });
+      const helpers = createInitializationHelpers(fs as unknown as MutableFS, {
+        Module: mockModule as unknown as RuntimeModule,
+      });
       helpers.createDefaultDevices(
-        mockTTY as unknown as { register: (dev: number, ops: StreamOps) => void; default_tty_ops: StreamOps; default_tty1_ops: StreamOps },
-        mockRandomFill as (buffer: Uint8Array) => Uint8Array
+        mockTTY as unknown as {
+          register: (dev: number, ops: StreamOps) => void;
+          default_tty_ops: StreamOps;
+          default_tty1_ops: StreamOps;
+        },
+        mockRandomFill as (buffer: Uint8Array) => Uint8Array,
       );
 
       // Verify TTY registration calls
       expect(mockTTY.register).toHaveBeenCalledWith(
         expect.any(Number), // dev number
-        mockTTY.default_tty_ops
+        mockTTY.default_tty_ops,
       );
       expect(mockTTY.register).toHaveBeenCalledWith(
         expect.any(Number), // dev number
-        mockTTY.default_tty1_ops
+        mockTTY.default_tty1_ops,
       );
 
       // Verify TTY device creation
@@ -148,28 +170,46 @@ describe("createInitializationHelpers", () => {
     });
 
     it("should setup random devices with buffer management", () => {
-      const helpers = createInitializationHelpers(fs as unknown as MutableFS, { Module: mockModule as unknown as RuntimeModule });
+      const helpers = createInitializationHelpers(fs as unknown as MutableFS, {
+        Module: mockModule as unknown as RuntimeModule,
+      });
       helpers.createDefaultDevices(
-        mockTTY as unknown as { register: (dev: number, ops: StreamOps) => void; default_tty_ops: StreamOps; default_tty1_ops: StreamOps },
-        mockRandomFill as (buffer: Uint8Array) => Uint8Array
+        mockTTY as unknown as {
+          register: (dev: number, ops: StreamOps) => void;
+          default_tty_ops: StreamOps;
+          default_tty1_ops: StreamOps;
+        },
+        mockRandomFill as (buffer: Uint8Array) => Uint8Array,
       );
 
       // Verify random device creation
-      expect(fs.createDevice).toHaveBeenCalledWith("/dev", "random", expect.any(Function));
-      expect(fs.createDevice).toHaveBeenCalledWith("/dev", "urandom", expect.any(Function));
+      expect(fs.createDevice).toHaveBeenCalledWith(
+        "/dev",
+        "random",
+        expect.any(Function),
+      );
+      expect(fs.createDevice).toHaveBeenCalledWith(
+        "/dev",
+        "urandom",
+        expect.any(Function),
+      );
       expect(fs.mkdir).toHaveBeenCalledWith("/dev/shm");
       expect(fs.mkdir).toHaveBeenCalledWith("/dev/shm/tmp");
 
       // Test random fill function behavior
       const testBuffer = new Uint8Array(16);
-      (mockRandomFill as unknown as (buffer: Uint8Array) => Uint8Array)(testBuffer);
+      (mockRandomFill as unknown as (buffer: Uint8Array) => Uint8Array)(
+        testBuffer,
+      );
       expect(mockRandomFill).toHaveBeenCalledWith(testBuffer);
     });
   });
 
   describe("createSpecialDirectories", () => {
     it("should create proc filesystem structure", () => {
-      const helpers = createInitializationHelpers(fs as unknown as MutableFS, { Module: mockModule as unknown as RuntimeModule });
+      const helpers = createInitializationHelpers(fs as unknown as MutableFS, {
+        Module: mockModule as unknown as RuntimeModule,
+      });
       helpers.createSpecialDirectories();
 
       // Verify /proc structure creation
@@ -183,12 +223,14 @@ describe("createInitializationHelpers", () => {
           mount: expect.any(Function),
         }),
         {},
-        "/proc/self/fd"
+        "/proc/self/fd",
       );
     });
 
     it("should setup fd lookup functionality", () => {
-      const helpers = createInitializationHelpers(fs as unknown as MutableFS, { Module: mockModule as unknown as RuntimeModule });
+      const helpers = createInitializationHelpers(fs as unknown as MutableFS, {
+        Module: mockModule as unknown as RuntimeModule,
+      });
       helpers.createSpecialDirectories();
 
       // Get the mount function and test it
@@ -213,22 +255,45 @@ describe("createInitializationHelpers", () => {
       const output = vi.fn();
       const error = vi.fn();
 
-      const helpers = createInitializationHelpers(fs as unknown as MutableFS, { Module: mockModule as unknown as RuntimeModule });
+      const helpers = createInitializationHelpers(fs as unknown as MutableFS, {
+        Module: mockModule as unknown as RuntimeModule,
+      });
       helpers.createStandardStreams(input, output, error);
 
       // Verify custom stream creation
       expect(fs.createDevice).toHaveBeenCalledWith("/dev", "stdin", input);
-      expect(fs.createDevice).toHaveBeenCalledWith("/dev", "stdout", null, output);
-      expect(fs.createDevice).toHaveBeenCalledWith("/dev", "stderr", null, error);
+      expect(fs.createDevice).toHaveBeenCalledWith(
+        "/dev",
+        "stdout",
+        null,
+        output,
+      );
+      expect(fs.createDevice).toHaveBeenCalledWith(
+        "/dev",
+        "stderr",
+        null,
+        error,
+      );
 
       // Verify stream opening
-      expect(fs.open).toHaveBeenCalledWith("/dev/stdin", constants.OPEN_FLAGS.O_RDONLY);
-      expect(fs.open).toHaveBeenCalledWith("/dev/stdout", constants.OPEN_FLAGS.O_WRONLY);
-      expect(fs.open).toHaveBeenCalledWith("/dev/stderr", constants.OPEN_FLAGS.O_WRONLY);
+      expect(fs.open).toHaveBeenCalledWith(
+        "/dev/stdin",
+        constants.OPEN_FLAGS.O_RDONLY,
+      );
+      expect(fs.open).toHaveBeenCalledWith(
+        "/dev/stdout",
+        constants.OPEN_FLAGS.O_WRONLY,
+      );
+      expect(fs.open).toHaveBeenCalledWith(
+        "/dev/stderr",
+        constants.OPEN_FLAGS.O_WRONLY,
+      );
     });
 
     it("should create symlinks when callbacks not provided", () => {
-      const helpers = createInitializationHelpers(fs as unknown as MutableFS, { Module: mockModule as unknown as RuntimeModule });
+      const helpers = createInitializationHelpers(fs as unknown as MutableFS, {
+        Module: mockModule as unknown as RuntimeModule,
+      });
       helpers.createStandardStreams(null, null, null);
 
       // Verify symlink creation for null callbacks
@@ -241,7 +306,9 @@ describe("createInitializationHelpers", () => {
     });
 
     it("should create symlinks when no callbacks provided", () => {
-      const helpers = createInitializationHelpers(fs as unknown as MutableFS, { Module: mockModule as unknown as RuntimeModule });
+      const helpers = createInitializationHelpers(fs as unknown as MutableFS, {
+        Module: mockModule as unknown as RuntimeModule,
+      });
       helpers.createStandardStreams();
 
       // When no callbacks provided, should create symlinks to TTY devices
@@ -251,25 +318,42 @@ describe("createInitializationHelpers", () => {
 
       // Verify stream opening
       expect(fs.open).toHaveBeenCalledTimes(3);
-      expect(fs.open).toHaveBeenCalledWith("/dev/stdin", constants.OPEN_FLAGS.O_RDONLY);
-      expect(fs.open).toHaveBeenCalledWith("/dev/stdout", constants.OPEN_FLAGS.O_WRONLY);
-      expect(fs.open).toHaveBeenCalledWith("/dev/stderr", constants.OPEN_FLAGS.O_WRONLY);
+      expect(fs.open).toHaveBeenCalledWith(
+        "/dev/stdin",
+        constants.OPEN_FLAGS.O_RDONLY,
+      );
+      expect(fs.open).toHaveBeenCalledWith(
+        "/dev/stdout",
+        constants.OPEN_FLAGS.O_WRONLY,
+      );
+      expect(fs.open).toHaveBeenCalledWith(
+        "/dev/stderr",
+        constants.OPEN_FLAGS.O_WRONLY,
+      );
     });
   });
 
   describe("staticInit", () => {
     it("should initialize filesystem backing store", () => {
       const mockMEMFS = {
-        mount: vi.fn(() => ({ mockNode: true } as unknown as FSNode)),
+        mount: vi.fn(() => ({ mockNode: true }) as unknown as FSNode),
       } as unknown as FileSystemMountType;
 
-      const helpers = createInitializationHelpers(fs as unknown as MutableFS, { Module: mockModule as unknown as RuntimeModule });
+      const helpers = createInitializationHelpers(fs as unknown as MutableFS, {
+        Module: mockModule as unknown as RuntimeModule,
+      });
       helpers.staticInit(mockMEMFS);
 
       // Verify error initialization
-      expect(fs.genericErrors).toHaveProperty(String(constants.ERRNO_CODES.ENOENT));
-      expect(fs.genericErrors[constants.ERRNO_CODES.ENOENT].name).toBe("ErrnoError");
-      expect(fs.genericErrors[constants.ERRNO_CODES.ENOENT].stack).toBe("<generic error, no stack>");
+      expect(fs.genericErrors).toHaveProperty(
+        String(constants.ERRNO_CODES.ENOENT),
+      );
+      expect(fs.genericErrors[constants.ERRNO_CODES.ENOENT].name).toBe(
+        "ErrnoError",
+      );
+      expect(fs.genericErrors[constants.ERRNO_CODES.ENOENT].stack).toBe(
+        "<generic error, no stack>",
+      );
 
       // Verify name table initialization
       expect(fs.nameTable).toHaveLength(constants.MAX_OPEN_FDS);
@@ -284,7 +368,9 @@ describe("createInitializationHelpers", () => {
 
   describe("init", () => {
     it("should mark filesystem as initialized and setup streams", () => {
-      const helpers = createInitializationHelpers(fs as unknown as MutableFS, { Module: mockModule as unknown as RuntimeModule });
+      const helpers = createInitializationHelpers(fs as unknown as MutableFS, {
+        Module: mockModule as unknown as RuntimeModule,
+      });
 
       helpers.init();
 
@@ -296,7 +382,9 @@ describe("createInitializationHelpers", () => {
       const customOutput = vi.fn();
       const customError = vi.fn();
 
-      const helpers = createInitializationHelpers(fs as unknown as MutableFS, { Module: mockModule as unknown as RuntimeModule });
+      const helpers = createInitializationHelpers(fs as unknown as MutableFS, {
+        Module: mockModule as unknown as RuntimeModule,
+      });
 
       helpers.init(customInput, customOutput, customError);
 
@@ -314,7 +402,9 @@ describe("createInitializationHelpers", () => {
         { close: vi.fn() } as unknown as FSStream, // fd 3 - valid stream
       ];
 
-      const helpers = createInitializationHelpers(fs as unknown as MutableFS, { Module: mockModule as unknown as RuntimeModule });
+      const helpers = createInitializationHelpers(fs as unknown as MutableFS, {
+        Module: mockModule as unknown as RuntimeModule,
+      });
       helpers.quit();
 
       expect(fs.initialized).toBe(false);
@@ -327,7 +417,9 @@ describe("createInitializationHelpers", () => {
 
     it("should handle empty streams array", () => {
       fs.streams = [];
-      const helpers = createInitializationHelpers(fs as unknown as MutableFS, { Module: mockModule as unknown as RuntimeModule });
+      const helpers = createInitializationHelpers(fs as unknown as MutableFS, {
+        Module: mockModule as unknown as RuntimeModule,
+      });
 
       expect(() => helpers.quit()).not.toThrow();
       expect(fs.initialized).toBe(false);
@@ -335,7 +427,9 @@ describe("createInitializationHelpers", () => {
 
     it("should handle all null streams", () => {
       fs.streams = [null, null, null];
-      const helpers = createInitializationHelpers(fs as unknown as MutableFS, { Module: mockModule as unknown as RuntimeModule });
+      const helpers = createInitializationHelpers(fs as unknown as MutableFS, {
+        Module: mockModule as unknown as RuntimeModule,
+      });
 
       helpers.quit();
 
@@ -348,7 +442,9 @@ describe("createInitializationHelpers", () => {
     it("should maintain consistency across full initialization lifecycle", () => {
       const mockMEMFS = { mount: vi.fn() } as unknown as FileSystemMountType;
 
-      const helpers = createInitializationHelpers(fs as unknown as MutableFS, { Module: mockModule as unknown as RuntimeModule });
+      const helpers = createInitializationHelpers(fs as unknown as MutableFS, {
+        Module: mockModule as unknown as RuntimeModule,
+      });
 
       // Run full initialization sequence
       helpers.staticInit(mockMEMFS);
@@ -356,8 +452,12 @@ describe("createInitializationHelpers", () => {
 
       helpers.createDefaultDirectories();
       helpers.createDefaultDevices(
-        mockTTY as unknown as { register: (dev: number, ops: StreamOps) => void; default_tty_ops: StreamOps; default_tty1_ops: StreamOps },
-        mockRandomFill as (buffer: Uint8Array) => Uint8Array
+        mockTTY as unknown as {
+          register: (dev: number, ops: StreamOps) => void;
+          default_tty_ops: StreamOps;
+          default_tty1_ops: StreamOps;
+        },
+        mockRandomFill as (buffer: Uint8Array) => Uint8Array,
       );
       helpers.createSpecialDirectories();
 

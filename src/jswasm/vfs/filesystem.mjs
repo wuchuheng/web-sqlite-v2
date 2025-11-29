@@ -7,7 +7,7 @@ import { createMountOperations } from "./filesystem/mount-operations.mjs";
 import { createNodeActions } from "./filesystem/node-actions.mjs";
 import { createStreamHelpers } from "./filesystem/stream-helpers.mjs";
 import { createInitializationHelpers } from "./filesystem/initialization/initialization";
-import { createLegacyHelpers } from "./filesystem/legacy-helpers.mjs";
+import { createLegacyHelpers } from "./filesystem/legacy-helpers/legacy-helpers";
 
 /**
  * Assembles the filesystem facade used by the SQLite WebAssembly bundle by

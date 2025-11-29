@@ -1,30 +1,30 @@
 {
-  "permissions": {
-    "allow": [
-      "Bash(pnpm run lint)",
-      "WebSearch",
-      "WebFetch(domain:sqlite.org)",
-      "Bash(pnpm test)",
-      "Bash(pkill:*)",
-      "Bash(lsof:*)",
-      "Bash(xargs kill:*)",
-      "Bash(pnpm list:*)",
-      "Bash(pnpm -w run --help)",
-      "Bash(pnpm -w run lint tests/src/worker.ts)",
-      "Bash(npx tsc:*)",
-      "Bash(pnpm -w run lint)",
-      "Bash(pnpm -w run lint tests/src/main.ts)",
-      "Bash(pnpm -w run lint tests/src)",
-      "Bash(pnpm add:*)",
-      "Bash(npm run test:unit)",
-      "Bash(npm run build:migration)",
-      "Bash(npm run format)",
-      "Bash(npm run lint)",
-      "Bash(xargs sed:*)",
-      "Bash(find:*)",
-      "Bash(npm run test:*)"
-    ],
-    "deny": [],
-    "ask": []
-  }
+    "permissions": {
+        "allow": [
+            "Bash(pnpm run lint)",
+            "WebSearch",
+            "WebFetch(domain:sqlite.org)",
+            "Bash(pnpm test)",
+            "Bash(pkill:*)",
+            "Bash(lsof:*)",
+            "Bash(xargs kill:*)",
+            "Bash(pnpm list:*)",
+            "Bash(pnpm -w run --help)",
+            "Bash(pnpm -w run lint tests/src/worker.ts)",
+            "Bash(npx tsc:*)",
+            "Bash(pnpm -w run lint)",
+            "Bash(pnpm -w run lint tests/src/main.ts)",
+            "Bash(pnpm -w run lint tests/src)",
+            "Bash(pnpm add:*)",
+            "Bash(npm run test:unit)",
+            "Bash(npm run build:migration)",
+            "Bash(npm run format)",
+            "Bash(npm run lint)",
+            "Bash(xargs sed:*)",
+            "Bash(find:*)",
+            "Bash(npm run test:*)"
+        ],
+        "deny": [],
+        "ask": []
+    }
 }
