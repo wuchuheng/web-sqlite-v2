@@ -186,6 +186,8 @@ export interface FSNode {
   isFolder: boolean;
   /** Indicates whether the node represents a device. */
   isDevice: boolean;
+  /** Next node in name table hash collision chain. */
+  name_next: FSNode | null;
 }
 
 /**
@@ -394,6 +396,7 @@ export function createBaseState(): MutableFS {
     public rdev: number;
     public readonly readMode = PERMISSION.READ_EXECUTE;
     public readonly writeMode = MODE.PERMISSION_WRITE;
+    public name_next: FSNode | null = null;
 
     constructor(parent: FSNode, name: string, mode: number, rdev: number) {
       // 4.1 Handle self-parenting for root nodes

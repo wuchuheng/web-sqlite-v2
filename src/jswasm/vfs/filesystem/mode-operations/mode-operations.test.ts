@@ -32,6 +32,7 @@ function createMockNode(overrides: Partial<FSNode> = {}): FSNode {
     write: true,
     isFolder: false,
     isDevice: false,
+    name_next: null,
     ...overrides,
   };
 }
