@@ -1,12 +1,14 @@
 import { describe, it, expect, beforeEach, vi } from "vitest";
 import { createLegacyHelpers } from "./legacy-helpers";
-import type {
-  ExtendedMutableFS,
-  ExtendedFSNode
-} from "./legacy-helpers";
+import type { ExtendedMutableFS, ExtendedFSNode } from "./legacy-helpers";
 import type { FSNode, FSStream } from "../base-state/base-state";
 import { createBaseState } from "../base-state/base-state";
-import { DEVICE_MAJOR_BASE, ERRNO_CODES, MODE, OPEN_FLAGS } from "../constants/constants";
+import {
+  DEVICE_MAJOR_BASE,
+  ERRNO_CODES,
+  MODE,
+  OPEN_FLAGS,
+} from "../constants/constants";
 
 // Mock the PATH module since the implementation uses it
 vi.mock("../../../utils/path/path", () => ({
@@ -25,7 +27,8 @@ vi.mock("../../../utils/path/path", () => ({
 
 describe("createLegacyHelpers", () => {
   let mockFS: ExtendedMutableFS;
-  let mockFS_getMode: ReturnType<typeof vi.fn> & ((canRead: boolean, canWrite: boolean) => number);
+  let mockFS_getMode: ReturnType<typeof vi.fn> &
+    ((canRead: boolean, canWrite: boolean) => number);
   let helpers: ReturnType<typeof createLegacyHelpers>;
 
   beforeEach(() => {
@@ -34,7 +37,10 @@ describe("createLegacyHelpers", () => {
 
     // Create mock FS_getMode function
     mockFS_getMode = vi.fn((canRead: boolean, canWrite: boolean) => {
-      return (canRead ? MODE.PERMISSION_READ : 0) | (canWrite ? MODE.PERMISSION_WRITE : 0);
+      return (
+        (canRead ? MODE.PERMISSION_READ : 0) |
+        (canWrite ? MODE.PERMISSION_WRITE : 0)
+      );
     });
 
     // Create base filesystem state for proper class constructors
@@ -157,12 +163,19 @@ describe("createLegacyHelpers", () => {
       const mockParentNode = { name: "parent" } as FSNode;
 
       // Step through the calls exactly as they happen in the implementation
-      const calls: Array<{ path: string; options: { parent?: boolean; follow?: boolean } | undefined }> = [];
+      const calls: Array<{
+        path: string;
+        options: { parent?: boolean; follow?: boolean } | undefined;
+      }> = [];
       vi.mocked(mockFS.lookupPath).mockImplementation((path, options) => {
         calls.push({ path, options });
 
         // 1. Initial attempt to resolve full path (line 176-178 in implementation)
-        if (path === "/parent/test" && options?.follow === true && calls.length === 1) {
+        if (
+          path === "/parent/test" &&
+          options?.follow === true &&
+          calls.length === 1
+        ) {
           return { path: "/parent/test", node: mockNode };
         }
 
@@ -172,7 +185,11 @@ describe("createLegacyHelpers", () => {
         }
 
         // 3. Full path lookup again (line 206)
-        if (path === "/parent/test" && options?.follow === true && calls.length > 2) {
+        if (
+          path === "/parent/test" &&
+          options?.follow === true &&
+          calls.length > 2
+        ) {
           return { path: "/parent/test", node: mockNode };
         }
 
@@ -195,12 +212,19 @@ describe("createLegacyHelpers", () => {
     });
 
     it("should return analysis with exists: false for non-existent paths", () => {
-      const calls: Array<{ path: string; options: { parent?: boolean; follow?: boolean } | undefined }> = [];
+      const calls: Array<{
+        path: string;
+        options: { parent?: boolean; follow?: boolean } | undefined;
+      }> = [];
       vi.mocked(mockFS.lookupPath).mockImplementation((path, options) => {
         calls.push({ path, options });
 
         // 1. Initial attempt to resolve full path - should fail
-        if (path === "/parent/nonexistent" && options?.follow === true && calls.length === 1) {
+        if (
+          path === "/parent/nonexistent" &&
+          options?.follow === true &&
+          calls.length === 1
+        ) {
           const error = new Error("ENOENT") as Error & { errno?: number };
           error.errno = ERRNO_CODES.ENOENT;
           throw error;
@@ -237,7 +261,10 @@ describe("createLegacyHelpers", () => {
 
     it("should handle root paths correctly", () => {
       const mockRootNode = { name: "/" } as FSNode;
-      const calls: Array<{ path: string; options: { parent?: boolean; follow?: boolean } | undefined }> = [];
+      const calls: Array<{
+        path: string;
+        options: { parent?: boolean; follow?: boolean } | undefined;
+      }> = [];
 
       vi.mocked(mockFS.lookupPath).mockImplementation((path, options) => {
         calls.push({ path, options });
@@ -337,7 +364,10 @@ describe("createLegacyHelpers", () => {
 
       const result = helpers.createFile("/parent", "test.txt", {}, true, false);
 
-      expect(mockFS.create).toHaveBeenCalledWith("/parent/test.txt", MODE.PERMISSION_READ);
+      expect(mockFS.create).toHaveBeenCalledWith(
+        "/parent/test.txt",
+        MODE.PERMISSION_READ,
+      );
       expect(result).toBe(mockNode);
     });
 
@@ -347,10 +377,19 @@ describe("createLegacyHelpers", () => {
       vi.mocked(mockFS.getPath).mockReturnValue("/parent");
       vi.mocked(mockFS.create).mockReturnValue(mockFileNode);
 
-      const result = helpers.createFile(mockParentNode, "test.txt", {}, false, true);
+      const result = helpers.createFile(
+        mockParentNode,
+        "test.txt",
+        {},
+        false,
+        true,
+      );
 
       expect(mockFS.getPath).toHaveBeenCalledWith(mockParentNode);
-      expect(mockFS.create).toHaveBeenCalledWith("/parent/test.txt", MODE.PERMISSION_WRITE);
+      expect(mockFS.create).toHaveBeenCalledWith(
+        "/parent/test.txt",
+        MODE.PERMISSION_WRITE,
+      );
       expect(result).toBe(mockFileNode);
     });
 
@@ -358,7 +397,10 @@ describe("createLegacyHelpers", () => {
       helpers.createFile("/parent", "test.txt", {}, true, true);
 
       expect(mockFS_getMode).toHaveBeenCalledWith(true, true);
-      expect(mockFS.create).toHaveBeenCalledWith("/parent/test.txt", MODE.PERMISSION_READ | MODE.PERMISSION_WRITE);
+      expect(mockFS.create).toHaveBeenCalledWith(
+        "/parent/test.txt",
+        MODE.PERMISSION_READ | MODE.PERMISSION_WRITE,
+      );
     });
   });
 
@@ -376,9 +418,18 @@ describe("createLegacyHelpers", () => {
     it("should create file with string data content", () => {
       helpers.createDataFile("/parent", "test.txt", "Hello World", true, false);
 
-      expect(mockFS.create).toHaveBeenCalledWith("/parent/test.txt", MODE.PERMISSION_READ);
-      expect(mockFS.chmod).toHaveBeenCalledWith(mockNode, MODE.PERMISSION_READ | MODE.PERMISSION_WRITE);
-      expect(mockFS.open).toHaveBeenCalledWith(mockNode, OPEN_FLAGS.O_WRONLY | OPEN_FLAGS.O_CREAT | OPEN_FLAGS.O_TRUNC);
+      expect(mockFS.create).toHaveBeenCalledWith(
+        "/parent/test.txt",
+        MODE.PERMISSION_READ,
+      );
+      expect(mockFS.chmod).toHaveBeenCalledWith(
+        mockNode,
+        MODE.PERMISSION_READ | MODE.PERMISSION_WRITE,
+      );
+      expect(mockFS.open).toHaveBeenCalledWith(
+        mockNode,
+        OPEN_FLAGS.O_WRONLY | OPEN_FLAGS.O_CREAT | OPEN_FLAGS.O_TRUNC,
+      );
 
       // Check that string data was converted to character array
       expect(mockFS.write).toHaveBeenCalledWith(
@@ -387,24 +438,37 @@ describe("createLegacyHelpers", () => {
         0,
         11,
         0,
-        undefined
+        undefined,
       );
 
       expect(mockFS.close).toHaveBeenCalledWith(mockStream);
-      expect(mockFS.chmod).toHaveBeenLastCalledWith(mockNode, MODE.PERMISSION_READ);
+      expect(mockFS.chmod).toHaveBeenLastCalledWith(
+        mockNode,
+        MODE.PERMISSION_READ,
+      );
     });
 
     it("should create file with ArrayLike data content", () => {
       const data = new Uint8Array([1, 2, 3, 4, 5]);
       helpers.createDataFile("/parent", "test.txt", data, true, true);
 
-      expect(mockFS.write).toHaveBeenCalledWith(mockStream, data, 0, 5, 0, undefined);
+      expect(mockFS.write).toHaveBeenCalledWith(
+        mockStream,
+        data,
+        0,
+        5,
+        0,
+        undefined,
+      );
     });
 
     it("should create empty file when data is null", () => {
       helpers.createDataFile("/parent", "test.txt", null, true, false);
 
-      expect(mockFS.create).toHaveBeenCalledWith("/parent/test.txt", MODE.PERMISSION_READ);
+      expect(mockFS.create).toHaveBeenCalledWith(
+        "/parent/test.txt",
+        MODE.PERMISSION_READ,
+      );
       expect(mockFS.open).not.toHaveBeenCalled();
       expect(mockFS.write).not.toHaveBeenCalled();
       expect(mockFS.close).not.toHaveBeenCalled();
@@ -412,10 +476,16 @@ describe("createLegacyHelpers", () => {
 
     it("should handle parent path construction correctly", () => {
       helpers.createDataFile("/parent", "test.txt", "data", true, false);
-      expect(mockFS.create).toHaveBeenCalledWith("/parent/test.txt", MODE.PERMISSION_READ);
+      expect(mockFS.create).toHaveBeenCalledWith(
+        "/parent/test.txt",
+        MODE.PERMISSION_READ,
+      );
 
       helpers.createDataFile(null, "/full/path.txt", "data", true, false);
-      expect(mockFS.create).toHaveBeenLastCalledWith("/full/path.txt", MODE.PERMISSION_READ);
+      expect(mockFS.create).toHaveBeenLastCalledWith(
+        "/full/path.txt",
+        MODE.PERMISSION_READ,
+      );
     });
 
     it("should handle canOwn parameter correctly", () => {
@@ -427,7 +497,7 @@ describe("createLegacyHelpers", () => {
         0,
         expect.any(Number),
         0,
-        true
+        true,
       );
     });
   });
@@ -448,17 +518,24 @@ describe("createLegacyHelpers", () => {
       const mockInput = vi.fn().mockReturnValue(65); // 'A'
       const mockOutput = vi.fn();
 
-      const result = helpers.createDevice("/parent", "mydevice", mockInput, mockOutput);
+      const result = helpers.createDevice(
+        "/parent",
+        "mydevice",
+        mockInput,
+        mockOutput,
+      );
 
-      expect(mockFS.mkdev).toHaveBeenCalledWith("/parent/mydevice",
+      expect(mockFS.mkdev).toHaveBeenCalledWith(
+        "/parent/mydevice",
         MODE.PERMISSION_READ | MODE.PERMISSION_WRITE,
-        expect.any(Number)
+        expect.any(Number),
       );
       expect(result).toBe(mockDeviceNode);
 
       // Check device registration
       expect(mockFS.registerDevice).toHaveBeenCalled();
-      const deviceDef = vi.mocked(mockFS.registerDevice).mock.calls[0][1] as Record<string, unknown>;
+      const deviceDef = vi.mocked(mockFS.registerDevice).mock
+        .calls[0][1] as Record<string, unknown>;
 
       // Check stream operations
       expect(typeof deviceDef.open).toBe("function");
@@ -489,16 +566,26 @@ describe("createLegacyHelpers", () => {
 
       expect(mockFS.createDevice.major).toBe(DEVICE_MAJOR_BASE + 2);
       expect(mockFS.makedev).toHaveBeenNthCalledWith(1, DEVICE_MAJOR_BASE, 0);
-      expect(mockFS.makedev).toHaveBeenNthCalledWith(2, DEVICE_MAJOR_BASE + 1, 0);
+      expect(mockFS.makedev).toHaveBeenNthCalledWith(
+        2,
+        DEVICE_MAJOR_BASE + 1,
+        0,
+      );
     });
 
     it("should register device with correct stream operations", () => {
       const mockInput = vi.fn().mockReturnValue(65);
       const mockOutput = vi.fn();
-      const mockStream = { shared: {}, seekable: true, node: mockDeviceNode, ungotten: [] } as unknown as FSStream;
+      const mockStream = {
+        shared: {},
+        seekable: true,
+        node: mockDeviceNode,
+        ungotten: [],
+      } as unknown as FSStream;
 
       helpers.createDevice("/parent", "mydevice", mockInput, mockOutput);
-      const deviceDef = vi.mocked(mockFS.registerDevice).mock.calls[0][1] as Record<string, unknown>;
+      const deviceDef = vi.mocked(mockFS.registerDevice).mock
+        .calls[0][1] as Record<string, unknown>;
 
       // Test open operation
       (deviceDef.open as (stream: FSStream) => void)(mockStream as FSStream);
@@ -512,23 +599,27 @@ describe("createLegacyHelpers", () => {
       // Test read operation
       mockStream.node = mockDeviceNode;
       const buffer = new Uint8Array(10);
-      (deviceDef.read as (stream: FSStream, buffer: Uint8Array, offset: number, length: number) => number)(
-        mockStream as FSStream,
-        buffer,
-        0,
-        5
-      );
+      (
+        deviceDef.read as (
+          stream: FSStream,
+          buffer: Uint8Array,
+          offset: number,
+          length: number,
+        ) => number
+      )(mockStream as FSStream, buffer, 0, 5);
       expect(mockInput).toHaveBeenCalledTimes(5);
       expect((mockDeviceNode as ExtendedFSNode).timestamp).toBeDefined();
 
       // Test write operation
       const writeBuffer = new Uint8Array([72, 73]);
-      (deviceDef.write as (stream: FSStream, buffer: ArrayLike<number>, offset: number, length: number) => number)(
-        mockStream as FSStream,
-        writeBuffer,
-        0,
-        2
-      );
+      (
+        deviceDef.write as (
+          stream: FSStream,
+          buffer: ArrayLike<number>,
+          offset: number,
+          length: number,
+        ) => number
+      )(mockStream as FSStream, writeBuffer, 0, 2);
       expect(mockOutput).toHaveBeenCalledWith(72);
       expect(mockOutput).toHaveBeenCalledWith(73); // Corrected from 83 to 73
     });
@@ -541,14 +632,19 @@ describe("createLegacyHelpers", () => {
       const buffer = new Uint8Array(10);
 
       helpers.createDevice("/parent", "device", mockInput, null);
-      const deviceDef = vi.mocked(mockFS.registerDevice).mock.calls[0][1] as Record<string, unknown>;
+      const deviceDef = vi.mocked(mockFS.registerDevice).mock
+        .calls[0][1] as Record<string, unknown>;
 
-      expect(() => (deviceDef.read as (stream: FSStream, buffer: Uint8Array, offset: number, length: number) => number)(
-        mockStream,
-        buffer,
-        0,
-        5
-      )).toThrow();
+      expect(() =>
+        (
+          deviceDef.read as (
+            stream: FSStream,
+            buffer: Uint8Array,
+            offset: number,
+            length: number,
+          ) => number
+        )(mockStream, buffer, 0, 5),
+      ).toThrow();
     });
 
     it("should handle EOF conditions correctly", () => {
@@ -557,15 +653,20 @@ describe("createLegacyHelpers", () => {
       const buffer = new Uint8Array(10);
 
       helpers.createDevice("/parent", "device", mockInput, null);
-      const deviceDef = vi.mocked(mockFS.registerDevice).mock.calls[0][1] as Record<string, unknown>;
+      const deviceDef = vi.mocked(mockFS.registerDevice).mock
+        .calls[0][1] as Record<string, unknown>;
 
       // The implementation throws FS.ErrnoError(ERRNO_CODES.ENXIO)
-      expect(() => (deviceDef.read as (stream: FSStream, buffer: Uint8Array, offset: number, length: number) => number)(
-        mockStream,
-        buffer,
-        0,
-        5
-      )).toThrow(); // Just check that it throws, not specific message
+      expect(() =>
+        (
+          deviceDef.read as (
+            stream: FSStream,
+            buffer: Uint8Array,
+            offset: number,
+            length: number,
+          ) => number
+        )(mockStream, buffer, 0, 5),
+      ).toThrow(); // Just check that it throws, not specific message
     });
   });
 
@@ -586,22 +687,34 @@ describe("createLegacyHelpers", () => {
     });
 
     it("should return true for nodes with existing contents", () => {
-      const mockFileNode = { contents: new Uint8Array([1, 2, 3]) } as ExtendedFSNode;
+      const mockFileNode = {
+        contents: new Uint8Array([1, 2, 3]),
+      } as ExtendedFSNode;
       expect(helpers.forceLoadFile(mockFileNode)).toBe(true);
     });
 
     it("should throw EIO error for regular files without contents when XMLHttpRequest is undefined", () => {
-      const mockFileNode = { isDevice: false, isFolder: false, link: undefined, contents: undefined } as ExtendedFSNode;
+      const mockFileNode = {
+        isDevice: false,
+        isFolder: false,
+        link: undefined,
+        contents: undefined,
+      } as ExtendedFSNode;
 
       expect(() => helpers.forceLoadFile(mockFileNode)).toThrow();
     });
 
     it("should throw specific error message when XMLHttpRequest is available", () => {
       vi.stubGlobal("XMLHttpRequest", class {});
-      const mockFileNode = { isDevice: false, isFolder: false, link: undefined, contents: undefined } as ExtendedFSNode;
+      const mockFileNode = {
+        isDevice: false,
+        isFolder: false,
+        link: undefined,
+        contents: undefined,
+      } as ExtendedFSNode;
 
       expect(() => helpers.forceLoadFile(mockFileNode)).toThrow(
-        "Lazy loading should have been performed"
+        "Lazy loading should have been performed",
       );
     });
   });
@@ -609,7 +722,7 @@ describe("createLegacyHelpers", () => {
   describe("createLazyFile", () => {
     it("should always throw with deprecation message", () => {
       expect(() => helpers.createLazyFile()).toThrow(
-        "createLazyFile is deprecated. Use --embed-file or --preload-file in emcc."
+        "createLazyFile is deprecated. Use --embed-file or --preload-file in emcc.",
       );
     });
   });
@@ -650,7 +763,7 @@ describe("createLegacyHelpers", () => {
         0,
         10000,
         0,
-        undefined
+        undefined,
       );
     });
   });
