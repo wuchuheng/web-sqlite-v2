@@ -5,7 +5,7 @@ import { createModeOperations } from "./filesystem/mode-operations/mode-operatio
 import { createStreamOperations } from "./filesystem/stream-operations/stream-operations";
 import { createMountOperations } from "./filesystem/mount-operations/mount-operations";
 import { createNodeActions } from "./filesystem/node-actions/node-actions";
-import { createStreamHelpers } from "./filesystem/stream-helpers.mjs";
+import { createStreamHelpers } from "./filesystem/stream-helpers/stream-helpers";
 import { createInitializationHelpers } from "./filesystem/initialization/initialization";
 import { createLegacyHelpers } from "./filesystem/legacy-helpers/legacy-helpers";
 
