@@ -5,11 +5,13 @@
 
 import { describe, it, expect, beforeEach, vi } from "vitest";
 import { createStreamHelpers } from "./stream-helpers";
-import type { MutableFS, FSStream, FSNode, FileSystemMount } from "../base-state/base-state";
-import {
-  ERRNO_CODES,
-  OPEN_FLAGS,
-} from "../constants/constants";
+import type {
+  MutableFS,
+  FSStream,
+  FSNode,
+  FileSystemMount,
+} from "../base-state/base-state";
+import { ERRNO_CODES, OPEN_FLAGS } from "../constants/constants";
 
 // Mock UTF8 utilities
 vi.mock("../../../utils/utf8/utf8", () => ({
@@ -40,12 +42,28 @@ interface MutableFSWithCloseStream extends MutableFS {
   isDir: (mode: number) => boolean;
   isFile: (mode: number) => boolean;
   nodePermissions: (node: FSNode, perm: string) => number;
-  lookupPath: (path: string, options?: Record<string, unknown>) => { path: string; node: FSNode | null };
+  lookupPath: (
+    path: string,
+    options?: Record<string, unknown>,
+  ) => { path: string; node: FSNode | null };
   open: (path: string, flags: number, mode?: number) => FSStream;
   stat: (path: string) => { size: number; mode: number };
   close: (stream: FSStream) => void;
-  read: (stream: FSStream, buffer: Uint8Array, offset: number, length: number, position?: number) => number;
-  write: (stream: FSStream, buffer: Uint8Array | ArrayLike<number>, offset: number, length: number, position?: number, canOwn?: boolean) => number;
+  read: (
+    stream: FSStream,
+    buffer: Uint8Array,
+    offset: number,
+    length: number,
+    position?: number,
+  ) => number;
+  write: (
+    stream: FSStream,
+    buffer: Uint8Array | ArrayLike<number>,
+    offset: number,
+    length: number,
+    position?: number,
+    canOwn?: boolean,
+  ) => number;
   llseek: (stream: FSStream, offset: number, whence: number) => number;
 }
 
@@ -125,15 +143,22 @@ function createMockFS(): MutableFS {
     hashName: vi.fn(() => 0),
     hashAddNode: vi.fn(),
     hashRemoveNode: vi.fn(),
-    lookupNode: vi.fn((_parent: FSNode, _name: string) => new MockFSNode() as FSNode),
-    createNode: vi.fn((_parent: FSNode, _name: string, _mode: number, _rdev: number) => new MockFSNode() as FSNode),
+    lookupNode: vi.fn(
+      (_parent: FSNode, _name: string) => new MockFSNode() as FSNode,
+    ),
+    createNode: vi.fn(
+      (_parent: FSNode, _name: string, _mode: number, _rdev: number) =>
+        new MockFSNode() as FSNode,
+    ),
     destroyNode: vi.fn((_node: FSNode) => {}),
     isRoot: vi.fn((_node: FSNode) => false),
     isMountpoint: vi.fn((_node: FSNode) => false),
     isLink: vi.fn((_mode: number) => false),
     readlink: vi.fn((_path: string) => ""),
     mayLookup: vi.fn((_parent: FSNode) => 0),
-    lookup: vi.fn((_parent: FSNode, _name: string) => new MockFSNode() as FSNode),
+    lookup: vi.fn(
+      (_parent: FSNode, _name: string) => new MockFSNode() as FSNode,
+    ),
 
     // Stream management
     closeStream: vi.fn((_fd: number) => {
@@ -183,7 +208,10 @@ function createMockFS(): MutableFS {
       if (!node) {
         throw new MockErrnoError(ERRNO_CODES.ENOENT);
       }
-      return { size: (node as FSNode & { size?: number }).size || 0, mode: node.mode };
+      return {
+        size: (node as FSNode & { size?: number }).size || 0,
+        mode: node.mode,
+      };
     }),
 
     close: vi.fn((stream: FSStream) => {
@@ -251,7 +279,12 @@ function createMockFS(): MutableFS {
     // Error constructors
     ErrnoError: MockErrnoError,
     FSStream: MockFSStream as new () => FSStream,
-    FSNode: MockFSNode as new (parent: FSNode, name: string, mode: number, rdev: number) => FSNode,
+    FSNode: MockFSNode as new (
+      parent: FSNode,
+      name: string,
+      mode: number,
+      rdev: number,
+    ) => FSNode,
   };
 
   return mockFS as MutableFSWithCloseStream as MutableFS;
@@ -391,7 +424,9 @@ describe("stream-helpers", () => {
       // 3. Verify stream is marked as closed
       expect(stream.fd).toBeNull();
       expect(stream.getdents).toBeNull();
-      expect((fs as MutableFSWithCloseStream).closeStream).toHaveBeenCalledWith(1);
+      expect((fs as MutableFSWithCloseStream).closeStream).toHaveBeenCalledWith(
+        1,
+      );
       expect(stream.stream_ops.close).toHaveBeenCalledWith(stream);
     });
 

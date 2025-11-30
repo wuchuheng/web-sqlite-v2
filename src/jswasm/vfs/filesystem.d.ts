@@ -9,7 +9,7 @@ import type { StreamOperations } from "./filesystem/stream-operations.d.ts";
 import type {
   MountOperations,
   MountOperationsOptions,
-} from "./filesystem/mount-operations.d.ts";
+} from "./filesystem/mount-operations/mount-operations";
 import type {
   NodeActions,
   NodeActionsOptions,
