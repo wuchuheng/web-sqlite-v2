@@ -22,7 +22,9 @@
             "Bash(npm run lint)",
             "Bash(xargs sed:*)",
             "Bash(find:*)",
-            "Bash(npm run test:*)"
+            "Bash(npm run test:*)",
+            "Bash(npm run test:unit:*)",
+            "Bash(npx eslint:*)"
         ],
         "deny": [],
         "ask": []
