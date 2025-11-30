@@ -3,7 +3,7 @@
         "target": "ES2022",
         "useDefineForClassFields": true,
         "module": "ESNext",
-        "lib": ["ES2022", "DOM", "DOM.Iterable"],
+        "lib": ["ES2022", "DOM", "DOM.Iterable", "WebWorker"],
         "types": ["vite/client", "node"],
         "skipLibCheck": true,
 
@@ -11,7 +11,7 @@
         "moduleResolution": "bundler",
         "allowImportingTsExtensions": true,
         "verbatimModuleSyntax": true,
-        "moduleDetection": "force",
+        "moduleDetection": "auto",
         "noEmit": true,
 
         /* Linting */
