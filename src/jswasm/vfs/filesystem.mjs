@@ -2,7 +2,7 @@ import { createPathFS } from "../utils/path/path";
 import { createBaseState } from "./filesystem/base-state/base-state";
 import { createPathOperations } from "./filesystem/path-operations/path-operations";
 import { createModeOperations } from "./filesystem/mode-operations/mode-operations";
-import { createStreamOperations } from "./filesystem/stream-operations.mjs";
+import { createStreamOperations } from "./filesystem/stream-operations/stream-operations";
 import { createMountOperations } from "./filesystem/mount-operations/mount-operations";
 import { createNodeActions } from "./filesystem/node-actions/node-actions";
 import { createStreamHelpers } from "./filesystem/stream-helpers.mjs";

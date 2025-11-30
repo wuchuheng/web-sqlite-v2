@@ -24,7 +24,8 @@
             "Bash(find:*)",
             "Bash(npm run test:*)",
             "Bash(npm run test:unit:*)",
-            "Bash(npx eslint:*)"
+            "Bash(npx eslint:*)",
+            "Bash(npm run typecheck)"
         ],
         "deny": [],
         "ask": []

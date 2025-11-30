@@ -36,11 +36,3 @@ export interface MountOperations {
   /** Creates a special node under the supplied path. */
   mknod(path: string, mode: number, dev: number): FSNode;
 }
-
-/**
- * Produces the mount helper facade tied to the filesystem state.
- */
-export function createMountOperations(
-  FS: MutableFS,
-  options: MountOperationsOptions,
-): MountOperations;
