@@ -17,6 +17,7 @@ import type {
   FSStats,
   FileSystemMount,
   FSStreamShared,
+  MutableFS,
 } from "./base-state/base-state";
 import type { NodeActionsOptions } from "./node-actions";
 import type { ErrnoError } from "./base-state/base-state";
@@ -166,7 +167,10 @@ describe("Node Actions", () => {
       getPathFS: () => mockPathFS,
       Module: { logReadFiles: false },
     };
-    nodeActions = createNodeActions(mockFS, mockOptions);
+    nodeActions = createNodeActions(
+      mockFS as unknown as MutableFS,
+      mockOptions,
+    );
   });
 
   describe("File Creation Operations", () => {

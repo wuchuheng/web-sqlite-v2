@@ -1,4 +1,4 @@
-import { createCoreOperations } from "./node-core-operations.mjs";
+import { createCoreOperations } from "./node-core-operations/node-core-operations";
 import { createMetadataOperations } from "./node-metadata-operations.mjs";
 
 /**
