@@ -1,7 +1,7 @@
 import { PATH } from "../../../utils/path/path";
 import { ERRNO_CODES, MODE } from "../constants/constants";
 import type { MutableFS, FSNode } from "../base-state/base-state";
-import type { NodeActionsOptions } from "../node-actions.d";
+import type { NodeActionsOptions } from "../node-actions/node-actions";
 
 /**
  * Extended MutableFS interface that includes the methods required by core operations.

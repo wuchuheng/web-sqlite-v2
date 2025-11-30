@@ -4,7 +4,7 @@ import { createPathOperations } from "./filesystem/path-operations.mjs";
 import { createModeOperations } from "./filesystem/mode-operations/mode-operations";
 import { createStreamOperations } from "./filesystem/stream-operations.mjs";
 import { createMountOperations } from "./filesystem/mount-operations/mount-operations";
-import { createNodeActions } from "./filesystem/node-actions.mjs";
+import { createNodeActions } from "./filesystem/node-actions/node-actions";
 import { createStreamHelpers } from "./filesystem/stream-helpers.mjs";
 import { createInitializationHelpers } from "./filesystem/initialization/initialization";
 import { createLegacyHelpers } from "./filesystem/legacy-helpers/legacy-helpers";

@@ -14,7 +14,7 @@ import type {
   FSStreamShared,
   MutableFS,
 } from "../base-state/base-state";
-import type { NodeActionsOptions } from "../node-actions";
+import type { NodeActionsOptions } from "../node-actions/node-actions";
 import type { ErrnoError } from "../base-state/base-state";
 
 // Helper to create a mock filesystem mount
@@ -208,6 +208,7 @@ function createMockOptions(): NodeActionsOptions {
     getPathFS: vi.fn(),
     Module: {
       logReadFiles: false,
+      wasmMemory: {} as WebAssembly.Memory,
     },
   };
 }

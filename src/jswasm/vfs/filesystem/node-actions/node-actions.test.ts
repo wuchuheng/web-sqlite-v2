@@ -1,5 +1,5 @@
 /**
- * Tests for node-actions.mjs
+ * Tests for node-actions TypeScript implementation
  *
  * These tests validate high-level filesystem node operations like file creation,
  * directory manipulation, symlinks, and file metadata operations.
@@ -9,8 +9,8 @@
 
 import { describe, test, expect, vi, beforeEach, type Mock } from "vitest";
 import { createNodeActions } from "./node-actions";
-import type { NodeActions } from "./node-actions";
-import { ERRNO_CODES, MODE, OPEN_FLAGS } from "./constants/constants";
+import type { NodeActions, NodeActionsOptions } from "./node-actions";
+import { ERRNO_CODES, MODE, OPEN_FLAGS } from "../constants/constants";
 import type {
   FSNode,
   FSStream,
@@ -18,9 +18,8 @@ import type {
   FileSystemMount,
   FSStreamShared,
   MutableFS,
-} from "./base-state/base-state";
-import type { NodeActionsOptions } from "./node-actions";
-import type { ErrnoError } from "./base-state/base-state";
+  ErrnoError,
+} from "../base-state/base-state";
 
 // Helper to create a mock filesystem mount
 function createMockMount(): FileSystemMount {
@@ -165,7 +164,7 @@ describe("Node Actions", () => {
     mockOptions = {
       FS_modeStringToFlags: vi.fn().mockReturnValue(OPEN_FLAGS.O_RDONLY),
       getPathFS: () => mockPathFS,
-      Module: { logReadFiles: false },
+      Module: { logReadFiles: false, wasmMemory: {} as WebAssembly.Memory },
     };
     nodeActions = createNodeActions(
       mockFS as unknown as MutableFS,

@@ -58,7 +58,7 @@ const createMockOptions = () => {
   return {
     getPathFS: () => mockPathFS,
     FS_modeStringToFlags: vi.fn().mockReturnValue(0),
-    Module: {},
+    Module: { wasmMemory: {} as WebAssembly.Memory },
   };
 };
 

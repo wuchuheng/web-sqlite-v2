@@ -78,6 +78,10 @@ export interface EmscriptenModule {
    * calls to the runtime initialization sequence.
    */
   calledRun?: boolean;
+  /**
+   * Log read files functionality.
+   */
+  logReadFiles?: boolean;
 }
 
 /**

@@ -11,9 +11,7 @@ import type {
   FSStats,
   MutableFS,
 } from "../base-state/base-state";
-import type { NodeActionsOptions } from "../node-actions";
-// import type { PathFsUtilities } from "../../../utils/path/types.d.ts";
-// import type { RuntimeModule } from "../../../shared/runtime-types.d.ts";
+import type { NodeActionsOptions } from "../node-actions/node-actions";
 
 /**
  * Extended MutableFS interface that includes the methods required by metadata operations.
