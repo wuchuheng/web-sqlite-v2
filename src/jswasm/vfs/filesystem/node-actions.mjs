@@ -1,5 +1,5 @@
 import { createCoreOperations } from "./node-core-operations/node-core-operations";
-import { createMetadataOperations } from "./node-metadata-operations.mjs";
+import { createMetadataOperations } from "./node-metadata-operations/node-metadata-operations";
 
 /**
  * Generates high-level node manipulation helpers (create, rename, open, etc.)
