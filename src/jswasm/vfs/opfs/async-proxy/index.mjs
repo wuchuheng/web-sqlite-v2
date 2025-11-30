@@ -30,7 +30,7 @@ const resolveUrl = (path) => new URL(path, baseUrl).href;
 
 importScripts(
     resolveUrl("environment.mjs"),
-    resolveUrl("logging.mjs"),
+    resolveUrl("logging/logging.js"),
     resolveUrl("serialization-buffer.mjs"),
     resolveUrl("sync-handle-error.mjs"),
     resolveUrl("state.mjs"),
