@@ -244,6 +244,8 @@ The workflow below is the ordered TODO list.
 - Cover the behaviors exposed by the `.mjs` file and `.d.ts` types using Vitest (the repo already has `vitest.config.ts`).
 - Point the tests at the existing `.mjs` implementation and run `npm run test:unit`. Tests must pass to establish the baseline.
 - Before the tests target the new `.ts`, add the new migration entry to `tsconfig.migration.json` so the `build:migration` output can emit the paired `.js` and `.d.ts`.
+- The AI assistant should execute the created test file (running `npm run test:unit` via tools when possible) and must stay
+  on this step until the baseline tests pass.
 
 **Unit-test gating**
 
@@ -287,6 +289,8 @@ The workflow below is the ordered TODO list.
 
 - Mirror the original path inside a new folder:
   If the module was `src/jswasm/utils/utf8.mjs`, create `src/jswasm/utils/utf8/`.
+- Before writing the new `.ts`, re-open the original `.d.ts` and any related type helpers to lift precise signatures and
+  reduce reliance on fallback types such as `any`, `unknown`, or `null`.
 - Inside that folder add the new `utf8.ts` implementing the same exports, with type annotations guided by the original `.d.ts`.
 - Keep functions small and focused; break repeated/complex logic into helpers.
 - Add standard doc comments (for example, JSDoc/TSDoc-style `/** ... */`) on each exported function, class, and class method
@@ -397,8 +401,8 @@ The workflow below is the ordered TODO list.
 ### 7. Update runtime references.
 
 - Replace imports that pointed to `originalPath` with the new compiled module
-  (e.g., change `./utf8.mjs` → `./utf8/utf8` or `./utf8/utf8.js`; the `.js` suffix is optional and may be omitted when
-  supported by the bundler/runtime).
+  (e.g., change `./utf8.mjs` → `./utf8/utf8`) and remove any `.js` suffix so downstream imports stay extension-less even
+  though the compiled output is JavaScript.
 - Verify the tests still pass; rerun `npm run test:unit` if needed.
 
 **AI/human protocol for Step 7**
@@ -416,6 +420,8 @@ The workflow below is the ordered TODO list.
 ### 8. Remove now-unused artifacts.
 
 - Delete the original `.mjs` and `.d.ts` files once the new JS and declaration outputs are proven equivalent.
+- Before deletion, re-read the new migration files and the original `.mjs`/`.d.ts` side by side to confirm every exported item
+  and behavior has been migrated.
 
 **AI/human protocol for Step 8**
 
