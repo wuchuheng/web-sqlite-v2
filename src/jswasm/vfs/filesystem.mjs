@@ -1,6 +1,6 @@
 import { createPathFS } from "../utils/path/path";
 import { createBaseState } from "./filesystem/base-state/base-state";
-import { createPathOperations } from "./filesystem/path-operations.mjs";
+import { createPathOperations } from "./filesystem/path-operations/path-operations";
 import { createModeOperations } from "./filesystem/mode-operations/mode-operations";
 import { createStreamOperations } from "./filesystem/stream-operations.mjs";
 import { createMountOperations } from "./filesystem/mount-operations/mount-operations";

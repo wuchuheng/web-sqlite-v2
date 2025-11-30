@@ -36,7 +36,8 @@
         "src/jswasm/vfs/filesystem/mode-operations/*.ts",
         "src/jswasm/vfs/filesystem/mount-operations/*.ts",
         "src/jswasm/vfs/filesystem/node-core-operations/*.ts",
-        "src/jswasm/vfs/filesystem/node-metadata-operations/*.ts"
+        "src/jswasm/vfs/filesystem/node-metadata-operations/*.ts",
+        "src/jswasm/vfs/filesystem/path-operations/*.ts"
     ],
     "exclude": ["src/**/*.test.ts"]
 }

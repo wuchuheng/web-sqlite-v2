@@ -13,42 +13,45 @@ import { ERRNO_CODES } from "../constants/constants";
 import { PATH } from "../../../utils/path/path";
 
 // Mock implementations
-const createMockFS = (): MountOperationsFS => ({
-  root: null,
-  mounts: [],
-  devices: {},
-  streams: [],
-  nextInode: 1,
-  nameTable: [null],
-  currentPath: "/",
-  initialized: false,
-  ignorePermissions: false,
-  ErrnoError: class extends Error {
-    errno: number;
-    constructor(errno: number) {
-      super(`ErrnoError: ${errno}`);
-      this.errno = errno;
-      this.name = "ErrnoError";
-    }
-  } as new (errno: number) => ErrnoError,
-  genericErrors: {},
-  filesystems: null,
-  syncFSRequests: 0,
-  readFiles: {},
-  FSStream: class {} as unknown as new () => FSStream,
-  FSNode: class {} as unknown as new (
-    parent: FSNode,
-    name: string,
-    mode: number,
-    rdev: number,
-  ) => FSNode,
-  getMounts: vi.fn(),
-  lookupPath: vi.fn(),
-  isMountpoint: vi.fn(),
-  isDir: vi.fn(),
-  mayCreate: vi.fn(),
-  destroyNode: vi.fn(),
-});
+const createMockFS = (): MountOperationsFS =>
+  ({
+    root: null,
+    mounts: [],
+    devices: {},
+    streams: [],
+    nextInode: 1,
+    nameTable: [null],
+    currentPath: "/",
+    initialized: false,
+    ignorePermissions: false,
+    ErrnoError: class extends Error {
+      errno: number;
+      constructor(errno: number) {
+        super(`ErrnoError: ${errno}`);
+        this.errno = errno;
+        this.name = "ErrnoError";
+      }
+    } as new (errno: number) => ErrnoError,
+    genericErrors: {},
+    filesystems: null,
+    syncFSRequests: 0,
+    readFiles: {},
+    FSStream: class {} as unknown as new () => FSStream,
+    FSNode: class {} as unknown as new (
+      parent: FSNode,
+      name: string,
+      mode: number,
+      rdev: number,
+    ) => FSNode,
+    getMounts: vi.fn(),
+    lookupPath: vi.fn(),
+    isMountpoint: vi.fn(),
+    isDir: vi.fn(),
+    mayCreate: vi.fn(),
+    // ... (rest of the mock object)
+    destroyNode: vi.fn(),
+    // ...({} as any), // Satisfy remaining MutableFS properties
+  }) as any;
 
 const createMockNode = (overrides: Partial<FSNode> = {}): FSNode => ({
   parent: null as any,

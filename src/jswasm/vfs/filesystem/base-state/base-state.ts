@@ -5,6 +5,11 @@ import {
   PERMISSION,
 } from "../constants/constants";
 
+import type {
+  LookupPathOptions,
+  PathLookupResult,
+} from "../path-operations/path-operations"; // Import new types
+
 /**
  * Error subtype thrown by filesystem helpers when an errno is required.
  */
@@ -267,6 +272,22 @@ export interface MutableFS {
     mode: number,
     rdev: number,
   ) => FSNode;
+
+  // Methods added by path-operations that are called on the FS object itself
+  lookupPath(path: string, opts?: LookupPathOptions): PathLookupResult;
+  getPath(node: FSNode): string;
+  hashName(parentId: number, name: string): number;
+  hashAddNode(node: FSNode): void;
+  hashRemoveNode(node: FSNode): void;
+  lookupNode(parent: FSNode, name: string): FSNode;
+  createNode(parent: FSNode, name: string, mode: number, rdev: number): FSNode;
+  destroyNode(node: FSNode): void;
+  isRoot(node: FSNode): boolean;
+  isMountpoint(node: FSNode): boolean;
+  isLink(mode: number): boolean; // From test mocks
+  readlink(path: string): string; // From test mocks
+  mayLookup(parent: FSNode): number; // From test mocks
+  lookup(parent: FSNode, name: string): FSNode; // From test mocks
 }
 
 /**
