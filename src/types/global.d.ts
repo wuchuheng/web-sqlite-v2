@@ -47,32 +47,6 @@ declare global {
   // -------------------------------------------------------------------------
 
   /**
-   * Posts a message to the worker controller.
-   * Defined in `src/jswasm/vfs/opfs/async-proxy/environment.mjs`.
-   */
-  var wPost: ((type: string, ...payload: any[]) => void) | undefined;
-
-  /**
-   * Utility to throw an error from joined string parts.
-   */
-  var toss: ((...parts: any[]) => never) | undefined;
-
-  /**
-   * Detects issues with the OPFS environment (e.g. missing headers).
-   */
-  var detectEnvironmentIssue: (() => string[]) | undefined;
-
-  /**
-   * Resolves a path to its components.
-   */
-  var getResolvedPath: ((filename: string) => string[]) | undefined;
-
-  /**
-   * Checks for little-endian architecture.
-   */
-  var detectLittleEndian: (() => boolean) | undefined;
-
-  /**
    * The AsyncProxyWorker class constructor.
    * Defined in `src/jswasm/vfs/opfs/async-proxy/async-proxy-worker.mjs`.
    */
