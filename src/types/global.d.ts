@@ -1,6 +1,12 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
-// Type definitions for global variables
-// This file defines properties attached to globalThis across the application.
+/**
+ * Global ambient declarations for the JS/WASM runtime and OPFS worker.
+ * These types document properties attached to `globalThis` by worker scripts
+ * (e.g., environment utilities, async proxy classes) and runtime helpers.
+ * No module exports are used; consumers access the symbols via `globalThis`.
+ *
+ * Note: Web Worker lib types are provided via tsconfig `lib` settings.
+ */
 
 // Now handled by tsconfig.json's lib array: /// <reference lib="webworker" />
 
@@ -112,17 +118,56 @@ declare global {
 
   /**
    * The SerializationBuffer class attached by the worker script for cross-thread payload serialization.
+   * Provides methods to write a header and payload into a SharedArrayBuffer-backed region
+   * and to read them back in order. Implementations must avoid decoding directly from
+   * shared views when using `TextDecoder`.
    */
   var SerializationBuffer: {
+    /**
+     * Constructs a new serializer bound to a region inside a SharedArrayBuffer.
+     *
+     * @param options - Construction options for the buffer view and behaviour.
+     * @param options.sharedBuffer - The backing `SharedArrayBuffer` containing the region.
+     * @param options.offset - Byte offset into `sharedBuffer` where the region starts.
+     * @param options.size - Size in bytes of the serialization region.
+     * @param options.littleEndian - Whether to use little-endian ordering for numeric IO.
+     * @param options.exceptionVerbosity - Threshold controlling `storeException` output.
+     */
     new (options: {
+      /** The backing `SharedArrayBuffer` used by the serializer. */
       readonly sharedBuffer: SharedArrayBuffer;
+      /** Byte offset where the serialization region begins. */
       readonly offset: number;
+      /** Size in bytes of the region used for header and payload. */
       readonly size: number;
+      /** Controls numeric endianness when reading/writing values. */
       readonly littleEndian: boolean;
+      /** Exception verbosity threshold; lower numbers are higher priority. */
       readonly exceptionVerbosity: number;
     }): {
-      serialize(...values: ReadonlyArray<string | number | bigint | boolean>): void;
+      /**
+       * Encodes values into the shared buffer using a header of type ids
+       * followed by value payloads.
+       *
+       * @param values - Values to write; supported kinds are `string`, `number`, `bigint`, `boolean`.
+       */
+      serialize(
+        ...values: ReadonlyArray<string | number | bigint | boolean>
+      ): void;
+      /**
+       * Reads values previously written by `serialize()`.
+       *
+       * @param clear - When true, marks the buffer empty after reading.
+       * @returns Values reconstructed in the original write order.
+       */
       deserialize(clear?: boolean): Array<string | number | bigint | boolean>;
+      /**
+       * Conditionally serializes a human-readable error message based on
+       * the configured verbosity threshold.
+       *
+       * @param priority - Smaller numbers represent higher priority.
+       * @param error - Error-like payload (e.g., `Error`, `DOMException`, string) to stringify.
+       */
       storeException(priority: number, error: unknown): void;
     };
   } | undefined;
