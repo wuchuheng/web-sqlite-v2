@@ -3,9 +3,7 @@ import { playwright } from "@vitest/browser-playwright";
 
 export default defineConfig({
   test: {
-    include: ["src/**/*.test.ts"],
-    globals: false,
-    reporters: ["default"],
+    include: ["src/jswasm/vfs/opfs/opfs-worker-init.test.ts"],
     browser: {
       enabled: true,
       instances: [
@@ -14,7 +12,7 @@ export default defineConfig({
         },
       ],
       provider: playwright(),
-      headless: false,
+      headless: false, // Set to false so you can see the browser and debug
     },
   },
 });

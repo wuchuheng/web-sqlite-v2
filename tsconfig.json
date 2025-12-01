@@ -3,17 +3,23 @@
         "target": "ES2022",
         "useDefineForClassFields": true,
         "module": "ESNext",
-        "lib": ["ES2022", "DOM", "DOM.Iterable", "WebWorker"],
-        "types": ["vite/client", "node"],
+        "lib": [
+            "ES2022",
+            "DOM",
+            "DOM.Iterable",
+            "WebWorker"
+        ],
+        "types": [
+            "vite/client",
+            "node"
+        ],
         "skipLibCheck": true,
-
         /* Bundler mode */
         "moduleResolution": "bundler",
         "allowImportingTsExtensions": true,
         "verbatimModuleSyntax": true,
         "moduleDetection": "auto",
         "noEmit": true,
-
         /* Linting */
         "strict": true,
         "noUnusedLocals": true,
@@ -22,5 +28,10 @@
         "noFallthroughCasesInSwitch": true,
         "noUncheckedSideEffectImports": true
     },
-    "include": ["src"]
+    "include": [
+        "src",
+        "tests",
+        "vitest.config.ts",
+        "vitest.debug.config.ts"
+    ]
 }

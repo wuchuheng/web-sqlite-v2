@@ -5,6 +5,7 @@
         "scripts",
         "vite.config.ts",
         "vitest.config.ts",
+        "vitest.debug.config.ts",
         "eslint.config.mts"
     ]
 }
