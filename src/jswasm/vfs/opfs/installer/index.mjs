@@ -38,7 +38,7 @@
  * await installOpfsVfs({
  *     verbose: 2,
  *     sanityChecks: true,
- *     proxyUri: "../async-proxy/index.mjs", // Relative to installer/ directory
+ *     proxyUri: "../async-proxy/index.js", // Relative to installer/ directory
  * });
  * ```
  *
