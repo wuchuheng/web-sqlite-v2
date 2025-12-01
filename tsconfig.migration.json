@@ -43,6 +43,8 @@
         "src/jswasm/vfs/opfs/async-proxy/logging/*.ts",
         "src/jswasm/vfs/opfs/async-proxy/environment/*.ts",
         "src/jswasm/vfs/opfs/async-proxy/serialization-buffer/*.ts",
+        "src/jswasm/vfs/opfs/async-proxy/state/*.ts",
+        "src/jswasm/vfs/opfs/async-proxy/state/types.d.ts",
         "src/types/global.d.ts"
     ],
     "exclude": ["src/**/*.test.ts"]

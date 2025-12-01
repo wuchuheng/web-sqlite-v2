@@ -1,4 +1,8 @@
-import type { SerializationBuffer } from "./serialization-buffer.d.ts";
+export interface SerializationBuffer {
+  serialize(...values: readonly (string | number | bigint | boolean)[]): void;
+  deserialize(clear?: boolean): (string | number | bigint | boolean)[];
+  storeException(priority: number, error: unknown): void;
+}
 
 export interface SQLiteErrorCodes {
   readonly SQLITE_IOERR: number;

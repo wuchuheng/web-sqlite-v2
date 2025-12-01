@@ -33,7 +33,7 @@ importScripts(
     resolveUrl("logging/logging.js"),
     resolveUrl("serialization-buffer/serialization-buffer.js"),
     resolveUrl("sync-handle-error.mjs"),
-    resolveUrl("state.mjs"),
+    resolveUrl("state/state.js"),
     resolveUrl("async-proxy-worker.mjs"),
 );
 

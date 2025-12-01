@@ -1,6 +1,6 @@
 "use strict";
 
-/** @typedef {import("./state.d.ts").SQLiteErrorCodes} SQLiteErrorCodes */
+/** @typedef {import("./state/types.d.ts").SQLiteErrorCodes} SQLiteErrorCodes */
 
 /**
  * Error wrapper signalling repeated failures while requesting a sync access handle.

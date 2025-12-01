@@ -18,14 +18,23 @@ describe("serialization-buffer.mjs baseline", () => {
       readonly size: number;
       readonly littleEndian: boolean;
       readonly exceptionVerbosity: number;
-    }) => any;
-    return new Ctor({
+    }) => unknown;
+    const instance = new Ctor({
       sharedBuffer: sab,
       offset: 0,
       size: 1024,
       littleEndian: true,
       exceptionVerbosity: 2,
     });
+    return instance as unknown as {
+      serialize: (
+        ...values: ReadonlyArray<string | number | bigint | boolean>
+      ) => void;
+      deserialize: (
+        clear?: boolean,
+      ) => Array<string | number | bigint | boolean>;
+      storeException: (priority: number, error: unknown) => void;
+    };
   }
 
   it("serializes and deserializes number", () => {

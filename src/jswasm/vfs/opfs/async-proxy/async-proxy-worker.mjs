@@ -3,7 +3,7 @@
 /* global GetSyncHandleError, SerializationBuffer, WorkerLogger, createDefaultState, getResolvedPath, toss */
 
 /** @typedef {import("./environment.d.ts").WorkerPostFn} WorkerPostFn */
-/** @typedef {import("./state.d.ts").AsyncProxyState} AsyncProxyState */
+/** @typedef {import("./state/types.d.ts").AsyncProxyState} AsyncProxyState */
 /** @typedef {import("./async-proxy-worker.d.ts").WorkerInitOptions} WorkerInitOptions */
 /** @typedef {import("./async-proxy-worker.d.ts").AsyncFileRecord} AsyncFileRecord */
 /** @typedef {import("./async-proxy-worker.d.ts").AsyncOperationImplementation} AsyncOperationImplementation */
