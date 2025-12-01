@@ -45,6 +45,7 @@
         "src/jswasm/vfs/opfs/async-proxy/serialization-buffer/*.ts",
         "src/jswasm/vfs/opfs/async-proxy/state/*.ts",
         "src/jswasm/vfs/opfs/async-proxy/state/types.d.ts",
+        "src/jswasm/vfs/opfs/async-proxy/sync-handle-error/*.ts",
         "src/types/global.d.ts"
     ],
     "exclude": ["src/**/*.test.ts"]

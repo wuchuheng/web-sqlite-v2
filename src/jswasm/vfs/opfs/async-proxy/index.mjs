@@ -32,7 +32,7 @@ importScripts(
     resolveUrl("environment/environment.js"),
     resolveUrl("logging/logging.js"),
     resolveUrl("serialization-buffer/serialization-buffer.js"),
-    resolveUrl("sync-handle-error.mjs"),
+    resolveUrl("sync-handle-error/sync-handle-error.js"),
     resolveUrl("state/state.js"),
     resolveUrl("async-proxy-worker.mjs"),
 );
