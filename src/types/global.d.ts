@@ -111,6 +111,23 @@ declare global {
   function toss(...parts: ReadonlyArray<ErrorPart>): never;
 
   /**
+   * The SerializationBuffer class attached by the worker script for cross-thread payload serialization.
+   */
+  var SerializationBuffer: {
+    new (options: {
+      readonly sharedBuffer: SharedArrayBuffer;
+      readonly offset: number;
+      readonly size: number;
+      readonly littleEndian: boolean;
+      readonly exceptionVerbosity: number;
+    }): {
+      serialize(...values: ReadonlyArray<string | number | bigint | boolean>): void;
+      deserialize(clear?: boolean): Array<string | number | bigint | boolean>;
+      storeException(priority: number, error: unknown): void;
+    };
+  } | undefined;
+
+  /**
    * Checks the current environment for missing requirements (e.g., SharedArrayBuffer, Atomics, OPFS).
    *
    * @returns An array of error message strings describing missing features. Returns an empty array if the environment is valid.

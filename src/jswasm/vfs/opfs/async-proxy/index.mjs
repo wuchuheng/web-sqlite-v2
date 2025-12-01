@@ -31,7 +31,7 @@ const resolveUrl = (path) => new URL(path, baseUrl).href;
 importScripts(
     resolveUrl("environment/environment.js"),
     resolveUrl("logging/logging.js"),
-    resolveUrl("serialization-buffer.mjs"),
+    resolveUrl("serialization-buffer/serialization-buffer.js"),
     resolveUrl("sync-handle-error.mjs"),
     resolveUrl("state.mjs"),
     resolveUrl("async-proxy-worker.mjs"),
