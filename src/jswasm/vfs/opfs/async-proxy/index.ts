@@ -26,7 +26,7 @@
 
 const baseUrl =
   globalThis.__opfsAsyncProxyBaseUrl ?? new URL("./", self.location.href);
-const resolveUrl = (path) => new URL(path, baseUrl).href;
+const resolveUrl = (path: string) => new URL(path, baseUrl).href;
 
 importScripts(
   resolveUrl("environment/environment.js"),

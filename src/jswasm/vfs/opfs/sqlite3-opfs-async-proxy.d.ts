@@ -9,11 +9,3 @@ export type AsyncProxyBaseUrl = URL | undefined;
  * single-file OPFS async proxy bootstrapper.
  */
 export {};
-
-declare global {
-  /**
-   * Base URL broadcast to the modular async proxy loader so it can resolve
-   * the supporting worker modules when executed via `importScripts()`.
-   */
-  var __opfsAsyncProxyBaseUrl: AsyncProxyBaseUrl;
-}
