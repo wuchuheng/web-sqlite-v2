@@ -2,6 +2,12 @@ import { defineConfig } from "vitest/config";
 import { playwright } from "@vitest/browser-playwright";
 
 export default defineConfig({
+  server: {
+    headers: {
+      "Cross-Origin-Opener-Policy": "same-origin",
+      "Cross-Origin-Embedder-Policy": "require-corp",
+    },
+  },
   test: {
     include: ["src/jswasm/vfs/opfs/sqlite3-opfs-async-proxy.test.ts"],
     browser: {
