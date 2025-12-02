@@ -13,7 +13,9 @@
     },
     "scripts": {
         "build": "vite build --watch",
-        "test": "pnpm --filter @wuchuheng/web-sqlite-tests exec vite --port 50001 --host 0.0.0.0",
+        "test": "vitest run --config tests/vitest.config.ts",
+        "test:ui": "vitest --ui --config tests/vitest.config.ts",
+        "test:legacy": "pnpm --filter @wuchuheng/web-sqlite-tests exec vite --port 50001 --host 0.0.0.0",
         "test:browser": "vitest run --config vitest.debug.config.ts",
         "build:opfs:async-proxy": "vite build -c vite.config.opfs-async-proxy.ts",
         "test:unit": "vitest run",
@@ -45,6 +47,7 @@
         "@types/node": "^24.7.1",
         "@vitest/browser": "^4.0.14",
         "@vitest/browser-playwright": "^4.0.14",
+        "@vitest/ui": "^4.0.14",
         "@wuchuheng/helper": "^1.3.0",
         "commander": "^14.0.1",
         "eslint": "^9.37.0",
