@@ -3,7 +3,7 @@ import { playwright } from "@vitest/browser-playwright";
 
 export default defineConfig({
   test: {
-    include: ["src/jswasm/vfs/opfs/opfs-worker-init.test.ts"],
+    include: ["src/jswasm/vfs/opfs/sqlite3-opfs-async-proxy.test.ts"],
     browser: {
       enabled: true,
       instances: [
