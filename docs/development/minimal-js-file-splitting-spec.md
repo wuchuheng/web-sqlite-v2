@@ -3,7 +3,7 @@
 This checklist defines the **minimal refactoring unit** for splitting a large JS/WASM bridge module (a `.mjs` file) into smaller `.mjs` modules under `src/jswasm` (or similar directories).
 
 The goal is to **reduce file size and improve readability** while keeping runtime behavior unchanged.
-A requester should fill out the template below before asking for AI implementation; the AI should then proceed through each step **strictly in order**, with **human confirmation between steps**.
+A requester should fill out the template below before asking for AI implementation; the AI should then proceed through each step **strictly in order**, with **human confirmation at two critical approval gates** (test plan approval and final verification approval).
 
 ---
 
@@ -58,43 +58,43 @@ Before touching the repo, the AI must:
 
 ## Interactive, Step-by-step Execution Model
 
-The numbered items under **Refactoring Workflow** are the ordered TODO list.
-
+The numbered items under **Refactoring Workflow** are treated as an ordered TODO list.
 When an AI assistant is driving the split, it **must obey all of the following rules**:
 
 1. **Strict ordering**
-    - Work on **one numbered step at a time** (`1.`, then `2.`, then `3.`, …).
-    - Do not start any work that belongs to step `N+1` before step `N` is fully completed and approved.
-    - Sub-bullets inside a step are part of that step and must be done before moving on.
+    - Work on **one numbered step at a time**.
+    - Do not start any work that belongs to step _N+1_ before step _N_ is fully completed.
 
-2. **Explicit confirmation gate**
-    - At the end of each step, the AI must:
-        - Summarize **what was done** (files changed, logic moved, commands to run).
-        - Emit the **checklist block** (see "Standard Checklist Block & Gating Question").
-        - Ask the human explicitly:
+2. **Approval Gates & Autonomous Zones**
+   To streamline the process, we define specific "Autonomous Zones" where the AI proceeds without asking for permission between steps, and "Approval Gates" where human confirmation is mandatory.
+    - **Gate 1: Test Plan Approval (Start of Step 2)**
+        - The AI must analyze the code and generate a **Test Plan/Spec file** in `docs/development`.
+        - The AI **stops** and asks the developer to inspect and approve this test plan.
+        - **Once the test plan is approved**, the AI enters **Autonomous Zone A**.
 
-            > Do you want me to proceed to step N+1: <step title>?
+    - **Autonomous Zone A (Steps 2 Implementation -> End of Step 6)**
+        - The AI automatically executes Steps 2, 3, 4, 5, and 6 in sequence.
+        - **Test Loop:** In Step 2 (and others), the AI operates in a loop: `Generate Code/Test` -> `Run npm run test:unit` -> `If Fail, Fix & Retry` -> `If Pass, Next Step`.
+        - The AI does **not** ask "Do you want me to proceed?" between these steps. It simply reports progress, updates the checklist, and moves to the next step immediately upon success.
 
-    - The AI **must not** start any work from the next step until the human clearly agrees
-      (e.g., "Yes", "Proceed", "Go ahead").
+    - **Gate 2: Final Verification Approval (End of Step 6 / Start of Step 7)**
+        - At the end of Step 6 (before executing Step 7), the AI **stops**.
+        - It must **summarize** the split outcome: which files were created, which were modified, and test results.
+        - It asks: `Do you want me to proceed to step 7: Final verification?`
+
+    - **Autonomous Zone B (Step 7 -> Step 8)**
+        - Once Step 7 is approved, the AI proceeds through Step 7 and Step 8 automatically.
+        - It runs final verifications and documents the handover without further stopping, assuming tests pass.
 
 3. **No step-skipping or batching**
-    - Do not combine multiple steps in a single response.
-    - If the human asks to skip ahead, the AI must:
-        - State which steps are being skipped.
-        - Ask for explicit confirmation that skipping is intentional.
-        - Only then work on the requested later step.
+    - Even in Autonomous Zones, the AI must complete the logic of each step fully before starting the next.
+    - Checklist updates should be emitted at the completion of each step (or batched if the AI completes multiple in one turn, though granular reporting is preferred).
 
 4. **Rollback / correction loop**
-    - If the human is not satisfied with a step, they can request changes.
-    - The AI must stay in that step, update code or plan, and only ask to proceed again after summarizing the updated work.
+    - If `npm run test:unit` or other commands fail at any point, the AI stays in the current step, diagnoses, fixes, and re-runs tests until they pass.
 
 5. **Command echoing**
-    - When a step involves commands (tests, format, lint), the AI must:
-        - Print the exact commands to run.
-        - Explain what success or failure looks like.
-
-    - The AI must wait for confirmation or logs before declaring a command-gated step "done".
+    - Always show the commands being run (`npm run test:unit`, etc.) and their output (or ask the user to run them if the environment restricts execution).
 
 ---
 
@@ -149,11 +149,11 @@ Some steps are **command-gated**: they cannot be marked completed, and the AI mu
 - **Step 7 – Final verification**
     - Command:
       `pnpm test`
-    - Purpose: run browser/integration flows (e.g., SQLite demos) and manual checks.
+    - Purpose: run browser/integration flows (e.g., SQLite demos). The e2e tests use Vitest + Playwright, which automatically opens the browser and captures console output.
     - Requirements:
-        - The AI must only mark Step 7 as done after the user confirms:
+        - The AI must only mark Step 7 as done after confirming:
             - `pnpm test` succeeds.
-            - No blocking errors appear in the browser console for flows depending on the refactored module.
+            - No blocking errors appear in the terminal output (Playwright captures browser console errors automatically).
 
 ### General rules for commands
 
@@ -172,12 +172,9 @@ Some steps are **command-gated**: they cannot be marked completed, and the AI mu
 
 ---
 
-## Standard Checklist Block & Gating Question
+## Standard Checklist Block
 
-At the end of **every step** in the Refactoring Workflow, the AI must:
-
-1. Emit a machine-readable checklist block.
-2. Ask explicitly whether to proceed to the **next step**.
+At the end of **every step** (or every response in an autonomous zone), the AI must emit the machine-readable checklist block.
 
 ### Checklist block format
 
@@ -221,21 +218,6 @@ steps:
 - [ ] 8. Document and hand over
 ```
 
-### Mandatory gating question
-
-After the checklist block, the AI must always ask:
-
-> Do you want me to proceed to step <N+1>: <step title>?
-
-Examples:
-
-- After Step 1:
-  `Do you want me to proceed to step 2: Add or update test coverage?`
-- After Step 5:
-  `Do you want me to proceed to step 6: Update runtime references?`
-
-The AI **must not** begin any work from step `N+1` until the user explicitly says yes.
-
 ---
 
 ## Refactoring Workflow
@@ -246,10 +228,14 @@ The workflow below is the ordered TODO list.
 ### 1. Analyze the original module.
 
 - Open `originalPath` (the large `.mjs` file).
+- **Wiki Analysis:** Specifically check the repository wiki in `.qoder/` for any relevant documentation, architectural notes, or known issues related to the module being split.
 - Record:
     - All **exports**: functions, constants, classes, default exports.
-    - Important **internal helpers**.
-    - Dependencies
+    - Important **internal helpers** and how they group functionally.
+    - Dependencies (both imports and modules that depend on this file).
+    - Existing behavior that must remain unchanged (return types, error handling, performance characteristics).
+    - Any existing JSDoc or inline documentation that should be preserved.
+- **Output:** Summary of analysis. Proceed immediately to generating the Test Plan (Step 2).
 
 ---
 
@@ -294,9 +280,21 @@ You can record this as the `extractionPlan` when filling the Request Template.
 
 ---
 
-### 2. Add or update test coverage (Step 2)
+### 2. Add or update test coverage.
 
-Before splitting, Step 2 should ensure there are unit tests that exercise:
+**Phase 1: Test Plan Generation (Gate 1)**
+
+- **Action:** Create a Test Plan/Spec file in `docs/development` describing:
+    - Selected test type(s): Unit (`*.unit.test.ts`) or E2E (`*.e2e.test.ts`).
+    - Intended test cases and coverage (focus on public API behavior).
+    - Test data and scenarios.
+    - Scaffolding (e.g., helpers, fixtures, mocks).
+
+- **Stop:** Ask developer to inspect and approve this test plan.
+
+**Phase 2: Implementation (Autonomous Start)**
+
+Before splitting, ensure there are unit tests that exercise:
 
 - That `StructBinderFactory(config)` throws on bad configs (invalid `heap`, missing `alloc` / `dealloc`, etc.).
 - That a simple struct definition produces a working constructor:
@@ -313,11 +311,16 @@ Concretely, you might:
     import { StructBinderFactory } from "./struct-binder-factory.mjs";
     ```
 
-- Run `npm run test:unit` and keep iterating until tests pass. Only then proceed to Step 3.
+- Run `npm run test:unit` and keep iterating until tests pass.
+- **Test Loop:**
+    1. Write/Update test file.
+    2. Run `npm run test:unit`.
+    3. **If Fail:** Analyze error, fix test or code, repeat loop.
+    4. **If Pass:** Mark Step 2 done, **automatically proceed to Step 3**.
 
 ---
 
-### 3. Create the new module file and directory (Step 3)
+### 3. Create the new module file and directory.
 
 For this file, a reasonable split is:
 
@@ -374,9 +377,11 @@ export function StructBinderFactory(config) {
 
 At the end of Step 3, the new module exists and contains the moved helpers, but behavior has not changed yet from the outside: callers still import only `StructBinderFactory` from the original file.
 
+- **Status:** Report creation. **Automatically proceed to Step 4.**
+
 ---
 
-### 4. Extract logic and rewire the original file (Step 4)
+### 4. Extract logic and rewire the original file.
 
 For `struct-binder-factory.mjs`, Step 3 and Step 4 often blend together:
 
@@ -386,8 +391,11 @@ For `struct-binder-factory.mjs`, Step 3 and Step 4 often blend together:
 
 Once rewiring is done:
 
-- Run `npm run test:unit`.
-- Fix any regressions until tests pass.
+- **Test Loop:**
+    1. Complete extraction and import rewiring.
+    2. Run `npm run test:unit`.
+    3. **If Fail:** Fix, repeat.
+    4. **If Pass:** Mark Step 4 done, **automatically proceed to Step 5**.
 
 The original file should now be much shorter and focus on:
 
@@ -399,7 +407,7 @@ Most of the pointer math, DataView access, and signature logic lives in `struct-
 
 ---
 
-### 5. Format and lint (Step 5)
+### 5. Format and lint.
 
 After moving the helpers:
 
@@ -413,11 +421,12 @@ After moving the helpers:
     - `struct-binder-factory.mjs`
     - `struct-binder-internals.mjs`
 
-Only after this passes should Step 5 be marked as complete.
+- **Loop:** If fails, fix and retry.
+- **Status:** Once clean, **automatically proceed to Step 6**.
 
 ---
 
-### 6. Update runtime references (Step 6)
+### 6. Update runtime references.
 
 In this example, the new module `struct-binder-internals.mjs` is **internal only**:
 
@@ -431,9 +440,18 @@ So Step 6 mainly confirms:
 
 Then run `npm run test:unit` again to confirm everything still passes.
 
+- **Test Loop:**
+    1. Verify import references.
+    2. Run `npm run test:unit`.
+    3. **If Fail:** Fix, repeat.
+    4. **If Pass:** Mark Step 6 done.
+- **Stop (Gate 2):**
+    - **Summarize:** Files created, files modified, test results.
+    - **Ask:** "Do you want me to proceed to step 7: Final verification?"
+
 ---
 
-### 7. Final verification (Step 7)
+### 7. Final verification.
 
 Run the full higher‑level tests:
 
@@ -441,14 +459,22 @@ Run the full higher‑level tests:
 pnpm test
 ```
 
-Follow the repo’s browser‑based flow (e.g., open the SQLite demo page) and ensure:
+The e2e tests use Vitest + Playwright, which automatically:
 
-- Structs still allocate, read, and write correctly.
-- No new errors appear in the console related to `StructBinderFactory`.
+- Opens the browser in the background.
+- Executes the SQLite flows (e.g., struct allocation, read/write operations).
+- Captures browser console errors and prints them to the terminal.
+
+Review the terminal output to ensure:
+
+- All tests pass.
+- No errors related to `StructBinderFactory` appear in the captured console logs.
+
+- **Status:** If pass, **automatically proceed to Step 8**.
 
 ---
 
-### 8. Document and hand over (Step 8)
+### 8. Document and hand over.
 
 For this specific split, your PR notes might say something like:
 

@@ -1,7 +1,7 @@
 # Minimal JS → TS Migration Spec
 
 This checklist codifies the **minimal migration unit** for the JS/WASM bridge under `src/jswasm`.
-A requester should fill out the template below before asking for AI implementation; the AI should then proceed through each step **strictly in order**, with **human confirmation between steps, starting from Step 2**.
+A requester should fill out the template below before asking for AI implementation; the AI should then proceed through each step **strictly in order**, with **human confirmation at two critical approval gates** (test plan approval and deletion approval).
 
 Our goal is to keep the library working at every stage while steadily replacing a `.mjs` + `.d.ts` pair with a typed subdirectory containing the `.ts` source, emitted `.js`, and regenerated `.d.ts`.
 
@@ -36,123 +36,52 @@ A complete request allows the AI to follow the minimal migration workflow end-to
 The numbered items under **Migration Workflow** are treated as an ordered TODO list.
 When an AI assistant is driving the migration, it **must obey all of the following rules**:
 
-> Claude Code compatibility note
-> Claude’s `continue` / `proceed` affordance is enforced by tools. The agent must wait for an explicit user reply before touching the next step, even if the human only writes "continue". **Step 1 is a special case:** it does not require the standard proceed question; from **Step 2 onward**, the gating question is mandatory.
-
 1. **Strict ordering**
-    - Work on **one numbered step at a time** (`1.`, then `2.`, then `3.`, …).
-    - Do not start any work that belongs to step _N+1_ before step _N_ is fully completed and (for steps ≥ 2) approved.
-    - Sub-bullets under a step are part of that step and must also be completed before moving on.
+    - Work on **one numbered step at a time**.
+    - Do not start any work that belongs to step _N+1_ before step _N_ is fully completed.
 
-2. **Explicit confirmation gate (Steps 2 and above)**
-    - At the end of each step **from Step 2 onward**, the AI must:
-        - Summarize **what was done** in that step (files touched, commands to run, expected results).
+2. **Approval Gates & Autonomous Zones**
+   To streamline the process, we define specific "Autonomous Zones" where the AI proceeds without asking for permission between steps, and "Approval Gates" where human confirmation is mandatory.
+    - **Gate 1: Spec/Test Plan Approval (Start of Step 2)**
+        - The AI must analyze the code and generate a **Spec File** (Test Plan) in `docs/development`.
+        - The AI **stops** and asks the developer to inspect and approve this spec.
+        - **Once the spec is approved**, the AI enters **Autonomous Zone A**.
 
-        - List the **current TODO status**, for example:
-            - `[x] 1. Analyze the originals`
-            - `[ ] 2. Add a test harness`
-            - …
+    - **Autonomous Zone A (Steps 2 Implementation -> End of Step 7)**
+        - The AI automatically executes Steps 2, 3, 4, 5, 6, and 7 in sequence.
+        - **Test Loop:** In Step 2 (and others), the AI operates in a loop: `Generate Code/Test` -> `Run npm run test` -> `If Fail, Fix & Retry` -> `If Pass, Next Step`.
+        - The AI does **not** ask "Do you want me to proceed?" between these steps. It simply reports progress, updates the checklist, and moves to the next step immediately upon success.
 
-        - Ask the human explicitly, using this exact text so Claude Code is satisfied:
-          `Do you want me to proceed to step N+1: <step title>?`
+    - **Gate 2: Deletion Approval (End of Step 7 / Start of Step 8)**
+        - At the end of Step 7 (before executing Step 8), the AI **stops**.
+        - It must **summarize** exactly which files will be removed (e.g., `.mjs`, `.d.ts`) and updated.
+        - It asks: `Do you want me to proceed to step 8: Remove now-unused artifacts?`
 
-    - The AI **must not** begin any work from the next step (for steps ≥ 2) until the human explicitly agrees (any clear “yes / proceed / go ahead” is fine).
-
-    - **Step 1 exception:** Step 1 is analysis-only. After summarizing findings and showing the checklist, the AI does **not** need to ask the proceed question for Step 2. The flow can move into Step 2 as soon as the human sends any follow-up (e.g. “OK”, “continue”, extra instructions), or when the host tool advances the session.
+    - **Autonomous Zone B (Step 8 -> Step 10)**
+        - Once Step 8 is approved, the AI proceeds through Step 8, Step 9, and Step 10 automatically.
+        - It runs final verifications and documents the handover without further stopping, assuming tests pass.
 
 3. **No step-skipping or batching**
-    - Do not batch multiple steps in one response (e.g., don’t analyze, write tests, and create TS files in a single pass).
-    - If the human asks to “jump ahead”, the AI should:
-        - Point out which earlier steps are being skipped.
-        - Ask for explicit confirmation that skipping is intentional.
-        - Only then execute the requested later step.
+    - Even in Autonomous Zones, the AI must complete the logic of each step fully before starting the next.
+    - Checklist updates should be emitted at the completion of each step (or batched if the AI completes multiple in one turn, though granular reporting is preferred).
 
 4. **Rollback / correction loop**
-    - If the human is not satisfied with a step, they can request changes **within that step**.
-    - The AI must stay on the same step, revising as needed, and only ask to proceed again once the updated version is summarized.
-    - If the human responds with “continue” (or any affirmative variant) _without_ giving the agent new instructions, Claude Code should simply advance to the next step after re-asking the gating question (for steps ≥ 2).
+    - If `npm run test` fails at any point, the AI stays in the current step, diagnoses, fixes, and re-runs tests until they pass.
 
-5. **Command echoing (required for Claude Code)**
-    - When a step involves commands (e.g., `npm run test:unit`, `npm run build:migration`), the AI should:
-        - Show the exact commands to run (Claude Code tooling requires literal commands with no shorthand).
-        - Explain what success or failure looks like.
-
-    - After the human runs the commands, they can paste logs back, and the AI remains within the same step until everything passes.
+5. **Command echoing**
+    - Always show the commands being run (`npm run test`, etc.) and their output (or ask the user to run them if the environment restricts execution).
 
 ---
 
-## Test Execution Contract
+## Standard Checklist Block
 
-Some steps are **command-gated** (tests, build, lint): they cannot be marked as completed in the checklist, and the AI must not ask to proceed to the next step, until the relevant commands have been run and confirmed passing.
-
-**Command-gated steps:**
-
-- **Step 2 – Add a test harness**
-    - `npm run test:unit` must be run against the existing `.mjs` implementation.
-
-    - The AI must either:
-        - Invoke the tests via tools (if available in the environment), **or**
-        - Instruct the user to run `npm run test:unit` and wait for the result (logs or a clear “tests passed”).
-
-    - If tests fail, the AI must stay in Step 2, help debug, and only mark Step 2 as `[x]` once tests pass.
-
-- **Step 4 – Redirect tests to the new TypeScript source**
-    - `npm run test:unit` must be run again, now targeting the TS implementation.
-    - The AI must **not**:
-        - Mark Step 4 as completed in the checklist, or
-        - Ask to proceed to Step 5,
-          until `npm run test:unit` has been run and confirmed passing.
-
-- **Step 6 – Build, format, and lint**
-    - `npm run build:migration && npm run format && npm run lint` must be run.
-    - The AI must stay in Step 6 until this combined command completes successfully.
-    - If build or lint fails, the AI must help fix the issues in the new TS module and tests, then rerun the command.
-
-- **Step 7 – Update runtime references**
-    - After updating imports, `npm run test:unit` must be run once more.
-    - The AI must stay in Step 7 until the unit tests pass with the new import paths.
-
-- **Step 9 – Final verification**
-    - `pnpm test` must be run, and the manual browser checks completed.
-    - The AI must only mark Step 9 as done after the user confirms that:
-        - `pnpm test` succeeded, and
-        - No blocking errors appear in the browser console for the SQLite flows.
-
-**General rules for commands/tests:**
-
-- The AI must always:
-    - Print the exact commands to run (`npm run test:unit`, `npm run build:migration && npm run format && npm run lint`, `pnpm test`, etc.).
-    - Ask the user to run them and share results, unless the environment allows the AI to run them directly.
-
-- The AI must **not**:
-    - Assume commands or tests have passed without explicit confirmation (logs or a clear user statement).
-    - Mark a command-gated step as `[x]` in the checklist or ask to move on until the commands are confirmed passing.
-
-- If any command fails at a gated step:
-    - The AI remains in the same step.
-    - It helps iterate on code and/or tests until the commands pass.
-    - Only then may it update the checklist and ask to proceed.
-
----
-
-## Standard Checklist Block & Gating Question
-
-At the end of **every step from Step 2 onward** in the Migration Workflow, the AI must:
-
-1. Emit a machine-readable checklist block.
-2. Ask explicitly whether to proceed to the **next** step.
-
-At the end of **Step 1**, the AI must still emit the checklist block, but it should **not** ask the proceed question and may simply prepare to enter Step 2.
-
-### Checklist block format
-
-The AI must append the following fenced code block at the end of its message:
+At the end of **every step** (or every response in an autonomous zone), the AI must emit the machine-readable checklist block.
 
 ```migration-checklist
-currentStep: <N>   # integer, the step just completed or currently being worked on
+currentStep: <N>
 steps:
 - [ ] 1. Analyze the originals
-- [ ] 2. Add a test harness
+- [ ] 2. Add a test harness (Spec & Implementation)
 - [ ] 3. Create the migration subdirectory
 - [ ] 4. Redirect tests to the new TypeScript source
 - [ ] 5. Compile the migration
@@ -162,126 +91,46 @@ steps:
 - [ ] 9. Final verification
 - [ ] 10. Document and hand over
 ```
-
-Rules:
-
-- The AI must:
-    - Set `currentStep` to the step it is **currently finishing**.
-    - Update the checkboxes in `steps` so that:
-        - Completed steps are marked as `[x]`.
-        - The step currently being worked on may be `[x]` (just finished) or `[-]` (in progress), if you want to distinguish.
-        - Future steps are `[ ]`.
-
-    - Make this `migration-checklist` block the **final fenced code block** in every response; Claude Code’s tooling parses the last fenced block only.
-
-- The exact text of each step label must match the titles in the **Migration Workflow**, so tools can parse them reliably.
-
-- Tools like Codex/Cline can parse this `migration-checklist` block from the last assistant message to know where the flow is.
-
-**Example after finishing Step 1:**
-
-```migration-checklist
-currentStep: 1
-steps:
-- [x] 1. Analyze the originals
-- [ ] 2. Add a test harness
-- [ ] 3. Create the migration subdirectory
-- [ ] 4. Redirect tests to the new TypeScript source
-- [ ] 5. Compile the migration
-- [ ] 6. Build, format, and lint
-- [ ] 7. Update runtime references
-- [ ] 8. Remove now-unused artifacts
-- [ ] 9. Final verification
-- [ ] 10. Document and hand over
-```
-
-### Mandatory gating question (Steps 2 and above)
-
-After the checklist block, the AI must always ask the human whether to proceed to the **next** step **for steps 2 and above**.
-
-- The question format must be:
-
-    > Do you want me to proceed to step <N+1>: <step title>?
-
-- Examples:
-    - After Step 2 is done:
-      `Do you want me to proceed to step 3: Create the migration subdirectory?`
-    - After Step 4 is done:
-      `Do you want me to proceed to step 5: Compile the migration?`
-
-For **Step 1**, the AI must **not** ask this question. It simply emits the checklist and gets ready for Step 2. The AI **must not** start any work from step `N+1` (for steps ≥ 2) until the user replies with clear consent (e.g. “Yes”, “Proceed”, “Go ahead”).
 
 ---
 
 ## Migration Workflow
 
-The workflow below is the ordered TODO list.
-**The AI must obey the Interactive Execution Model above while executing these steps.**
-
 ### 1. Analyze the originals.
 
 - Open `originalPath` and `dtsPath`. Record their exports, signatures, and edge cases.
+- **Wiki Analysis:** Specifically check the repository wiki in `.qoder/` for any relevant documentation, architectural notes, or known issues related to the module being migrated.
 - Identify existing behavior that must remain unchanged (e.g., return types, overloads, TextDecoder fallbacks).
 - Note any runtime assumptions (e.g., running in a browser, availability of `TextDecoder`, polyfills, etc.).
 - Review any existing JSDoc or inline documentation on the `.mjs` and `.d.ts` pair so it can be reflected or refined in the
   new TypeScript doc comments.
-
-**AI/human protocol for Step 1**
-
-- AI:
-    - Summarizes the public API and key behaviors.
-    - Lists any uncertainties or edge cases found.
-    - Shows updated checklist with step 1 marked as done.
-    - **Does not** ask the proceed question here.
-
-- After Step 1, the session is ready for Step 2. The host tool or the human can indicate when to actually begin Step 2 (for example, by saying "continue" or giving extra instructions), but the AI should not emit the standard proceed question for this step.
+- **Output:** Summary of analysis. Proceed immediately to generating the Spec (Step 2).
 
 ---
 
 ### 2. Add a test harness.
 
-- Create `*.test.ts` next to `originalPath` (same directory, same stem).
+**Phase 1: Spec Generation (Gate 1)**
+
+- **Action:** Create a Test Plan/Spec file in `docs/development` describing:
+    - Selected test type(s): Unit (`*.unit.test.ts`) or E2E (`*.e2e.test.ts`).
+    - Intended test cases and coverage.
+    - Test data.
+    - Scaffolding (e.g., helpers, fixtures).
+
+- **Stop:** Ask developer to inspect and approve this spec.
+
+**Phase 2: Implementation (Autonomous Start)**
+
+- **Action:** Create `*.test.ts` next to `originalPath` (same directory, same stem).
 - Cover the behaviors exposed by the `.mjs` file and `.d.ts` types using Vitest (the repo already has `vitest.config.ts`).
-- Point the tests at the existing `.mjs` implementation and run `npm run test:unit`. Tests must pass to establish the baseline.
+- Point the tests at the existing `.mjs` implementation and run `npm run test`. Tests must pass to establish the baseline.
 - Before the tests target the new `.ts`, add the new migration entry to `tsconfig.migration.json` so the `build:migration` output can emit the paired `.js` and `.d.ts`.
-- The AI assistant should execute the created test file (running `npm run test:unit` via tools when possible) and must stay
-  on this step until the baseline tests pass.
-
-**Unit-test gating**
-
-- Before any `*.test.ts` is created:
-    - Read all files in `.memory-bank/` (if present).
-
-    - Analyze the target source and declaration.
-
-    - Craft a short plan in `docs/development` describing:
-        - Intended test cases.
-        - Test data.
-        - Scaffolding (e.g., helpers, fixtures).
-
-    - **Pause for developer approval before writing the actual test file.**
-
-**AI/human protocol for Step 2**
-
-- AI:
-    - Presents the proposed `docs/development` test plan.
-
-    - Waits for human approval of the plan.
-
-    - After approval, writes the `*.test.ts` file and explains:
-        - What cases were covered.
-        - How the tests reference the existing `.mjs`.
-        - How to run `npm run test:unit` and what passing looks like.
-
-    - Shows updated checklist with step 2 marked as done (only after tests pass).
-
-    - Asks:
-      _“Do you want me to proceed to step 3: Create the migration subdirectory?”_
-
-- AI stays in Step 2 until:
-    - The human confirms the test plan, and
-    - The human is satisfied with the test file, and
-    - `npm run test:unit` has passed at least once against the `.mjs` baseline.
+- **Test Loop:**
+    1. Write/Update test file.
+    2. Run `npm run test`.
+    3. **If Fail:** Analyze error, fix test or code, repeat loop.
+    4. **If Pass:** Mark Step 2 done, **automatically proceed to Step 3**.
 
 ---
 
@@ -301,16 +150,7 @@ The workflow below is the ordered TODO list.
       aligned.
 
 - Keep other inline comments minimal and only where they significantly improve clarity.
-
-**AI/human protocol for Step 3**
-
-- AI:
-    - Describes the new folder layout.
-    - Shows the new TypeScript API surface (types and signatures).
-    - Explains any internal helper functions introduced.
-    - Shows updated checklist with step 3 marked as done.
-    - Asks:
-      _“Do you want me to proceed to step 4: Redirect tests to the new TypeScript source?”_
+- **Status:** Report creation. **Automatically proceed to Step 4.**
 
 ---
 
@@ -318,8 +158,8 @@ The workflow below is the ordered TODO list.
 
 - **Move the test file into the new migration subdirectory** so implementation and tests live together.
     - Example for `src/jswasm/utils/utf8.mjs`:
-        - **Before (Step 2 location):** `src/jswasm/utils/utf8.test.ts`
-        - **After (Step 4 location):** `src/jswasm/utils/utf8/utf8.test.ts`
+        - **Before (Step 2 location):** `src/jswasm/utils/utf8.unit.test.ts` (or `utf8.e2e.test.ts`)
+        - **After (Step 4 location):** `src/jswasm/utils/utf8/utf8.unit.test.ts`
 
 - Inside the moved `*.test.ts`, update imports so they no longer point at the `.mjs` file.
     - **Before (Step 2 baseline):**
@@ -328,7 +168,7 @@ The workflow below is the ordered TODO list.
         import { something } from "./utf8.mjs";
         ```
 
-    - **After (Step 4 migration, inside `src/jswasm/utils/utf8/utf8.test.ts`):**
+    - **After (Step 4 migration, inside `src/jswasm/utils/utf8/utf8.unit.test.ts`):**
 
         ```ts
         import { something } from "./utf8";
@@ -340,17 +180,11 @@ The workflow below is the ordered TODO list.
 
 - Ensure Vitest resolves the extension-less path correctly for both the TS source (during migration) and the emitted JS (after `build:migration`).
 
-- Run `npm run test:unit` again until the tests pass against the TS implementation.
-
-**AI/human protocol for Step 4**
-
-- AI:
-    - Shows the new location of the test file and the updated imports (from `*.mjs` to the extension-less module path next to the TS file).
-    - Lists any test failures and the fixes made in the TS implementation.
-    - Confirms that `npm run test:unit` passes (based on logs shared by the human).
-    - Shows updated checklist with step 4 marked as done.
-    - Asks:
-      _“Do you want me to proceed to step 5: Compile the migration?”_
+- **Test Loop:**
+    1. Update imports.
+    2. Run `npm run test`.
+    3. **If Fail:** Fix, repeat.
+    4. **If Pass:** Mark Step 4 done, **automatically proceed to Step 5.**
 
 ---
 
@@ -360,16 +194,8 @@ The workflow below is the ordered TODO list.
 - Confirm the generated `.d.ts` matches the public API surface from the original manual declaration; adjust the TS source until it does.
 - Each migration entry must be reflected inside `tsconfig.migration.json`'s `include` (the current example lives under `src/jswasm/utils/utf8/*.ts`).
 - Keep the include list tightly scoped, and once the migration is complete and the original files removed, delete the migration entry so the config only covers active work.
-
-**AI/human protocol for Step 5**
-
-- AI:
-    - Shows the added/updated `include` entries in `tsconfig.migration.json`.
-    - Describes differences (if any) between the generated `.d.ts` and the original.
-    - Suggests TS source adjustments to align the signatures.
-    - Shows updated checklist with step 5 marked as done.
-    - Asks:
-      _“Do you want me to proceed to step 6: Build, format, and lint?”_
+- **Verify:** Check `.d.ts` output.
+- **Status:** Report result. **Automatically proceed to Step 6.**
 
 ---
 
@@ -385,16 +211,8 @@ The workflow below is the ordered TODO list.
     - `npm run build:migration` succeeds without errors.
     - `npm run format` completes (and you commit the formatting changes if this is a PR).
     - `npm run lint` passes with no errors; address any reported issues in the new TS module and tests, or clearly justify any remaining warnings.
-
-**AI/human protocol for Step 6**
-
-- AI:
-    - Prints the combined command and explains the purpose of each sub-command.
-    - Waits for the user to run it and share outcomes (especially any lint/build failures).
-    - If the command fails, stays in Step 6 and iterates on the code until it passes.
-    - Once everything passes, shows updated checklist with step 6 marked as done.
-    - Asks:
-      _“Do you want me to proceed to step 7: Update runtime references?”_
+- **Loop:** If fails, fix and retry.
+- **Status:** Once clean, **automatically proceed to Step 7.**
 
 ---
 
@@ -403,17 +221,14 @@ The workflow below is the ordered TODO list.
 - Replace imports that pointed to `originalPath` with the new compiled module
   (e.g., change `./utf8.mjs` → `./utf8/utf8`) and remove any `.js` suffix so downstream imports stay extension-less even
   though the compiled output is JavaScript.
-- Verify the tests still pass; rerun `npm run test:unit` if needed.
-
-**AI/human protocol for Step 7**
-
-- AI:
-    - Lists all files where imports were changed.
-    - Shows an example diff for one or two representative imports.
-    - Confirms `npm run test:unit` still passes, based on human logs.
-    - Shows updated checklist with step 7 marked as done.
-    - Asks:
-      _“Do you want me to proceed to step 8: Remove now-unused artifacts?”_
+- **Test Loop:**
+    1. Update imports.
+    2. Run `npm run test`.
+    3. **If Fail:** Fix, repeat.
+    4. **If Pass:** Mark Step 7 done.
+- **Stop (Gate 2):**
+    - **Summarize:** List files to be removed (Step 8) and updated.
+    - **Ask:** "Do you want me to proceed to step 8: Remove now-unused artifacts?"
 
 ---
 
@@ -422,32 +237,16 @@ The workflow below is the ordered TODO list.
 - Delete the original `.mjs` and `.d.ts` files once the new JS and declaration outputs are proven equivalent.
 - Before deletion, re-read the new migration files and the original `.mjs`/`.d.ts` side by side to confirm every exported item
   and behavior has been migrated.
-
-**AI/human protocol for Step 8**
-
-- AI:
-    - Lists the exact files removed.
-    - Confirms that no remaining imports point at the old `.mjs` or `.d.ts`.
-    - Shows updated checklist with step 8 marked as done.
-    - Asks:
-      _“Do you want me to proceed to step 9: Final verification?”_
+- **Status:** Report deletion. **Automatically proceed to Step 9.**
 
 ---
 
 ### 9. Final verification.
 
-- Run `pnpm test` to exercise the browser-based SQLite flows.
-  This step often requires human interaction to open `http://127.0.0.1:50001` and check for console errors.
-- Keep notes about any windows or manual steps the human tester must follow.
-
-**AI/human protocol for Step 9**
-
-- AI:
-    - Provides clear instructions for running `pnpm test` and manual browser checks.
-    - Helps interpret any console or test failures and suggests fixes (which may loop back into earlier steps for this module).
-    - Once everything passes, shows updated checklist with step 9 marked as done.
-    - Asks:
-      _“Do you want me to proceed to step 10: Document and hand over?”_
+- Run `npm run test` to exercise the browser-based SQLite flows.
+  The e2e tests use Vitest + Playwright, which automatically opens the browser and prints logs to the terminal.
+- Review the terminal output for any test failures or console errors captured by Playwright.
+- **Status:** If pass, **automatically proceed to Step 10**.
 
 ---
 
@@ -460,18 +259,7 @@ The workflow below is the ordered TODO list.
 
 - Note any deviations from the base rules or workflows in the final message
   (e.g., if a numeric comment outside a function was necessary).
-
-**AI/human protocol for Step 10**
-
-- AI:
-    - Proposes PR description text and any additional docs snippets.
-
-    - Summarizes the entire migration, including:
-        - Original and new module locations.
-        - Key behavioral equivalence points.
-        - Test commands and their status.
-
-    - Marks all checklist items as `[x]` and indicates the migration unit is complete.
+- **Status:** Mark all done.
 
 ---
 
@@ -486,8 +274,8 @@ For each minimal migration unit:
 - Well-structured JSDoc/TSDoc comments on the exported TypeScript API surface, reflecting (and, where useful, improving on)
   the documentation that existed in the original `.mjs` and `.d.ts`.
 - Tests:
-    - `npm run test:unit` (pre- and post-migration).
-    - `pnpm test` (browser) during final verification.
+    - All tests passing at each verification step (unit and e2e).
+    - Final browser-based e2e verification via Vitest + Playwright.
 
 ---
 
