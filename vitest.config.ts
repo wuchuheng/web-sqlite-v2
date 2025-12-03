@@ -1,11 +1,26 @@
+// import { defineConfig } from "vitest/config";
+
+// export default defineConfig({
+//   test: {
+//     include: ["src/**/*.test.ts"],
+//     globals: false,
+//     reporters: ["default"],
+//   },
+// });
+
 import { defineConfig } from "vitest/config";
 import { playwright } from "@vitest/browser-playwright";
 
 export default defineConfig({
+  server: {
+    headers: {
+      "Cross-Origin-Opener-Policy": "same-origin",
+      "Cross-Origin-Embedder-Policy": "require-corp",
+    },
+  },
   test: {
+    // include: ["src/jswasm/vfs/opfs/sqlite3-opfs-async-proxy.test.ts"],
     include: ["src/**/*.test.ts"],
-    globals: false,
-    reporters: ["default"],
     browser: {
       enabled: true,
       instances: [
@@ -14,7 +29,7 @@ export default defineConfig({
         },
       ],
       provider: playwright(),
-      headless: false,
+      headless: false, // Set to false so you can see the browser and debug
     },
   },
 });

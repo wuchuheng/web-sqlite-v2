@@ -6,6 +6,7 @@
         "vite.config.ts",
         "vitest.config.ts",
         "vitest.debug.config.ts",
-        "eslint.config.mts"
+        "eslint.config.mts",
+        "vitest.e2e.config.ts"
     ]
 }
