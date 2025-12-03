@@ -20,7 +20,7 @@ export default defineConfig({
   },
   test: {
     // include: ["src/jswasm/vfs/opfs/sqlite3-opfs-async-proxy.test.ts"],
-    include: ["src/**/*.test.ts"],
+    include: ["src/**/*.unit.test.ts"],
     browser: {
       enabled: true,
       instances: [
