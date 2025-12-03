@@ -14,7 +14,7 @@
     "scripts": {
         "build": "vite build --watch",
         "test": "npm run test:unit ; npm run test:e2e",
-        "test:uint": "vitest run --config vitest.config.ts",
+        "test:unit": "vitest run --config vitest.unit.config.ts",
         "test:e2e": "vitest run --config vitest.e2e.config.ts",
         "typecheck:watch": "tsc --watch -p tsconfig.json",
         "typecheck:migration:watch": "tsc --watch -p tsconfig.migration.json",
