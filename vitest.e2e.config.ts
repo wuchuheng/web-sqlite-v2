@@ -14,7 +14,7 @@ export default defineConfig({
     // Include both OPFS and browser E2E tests
     include: [
       // "src/jswasm/vfs/opfs/*.e2e-test.ts",
-      "tests/e2e/*.e2e.test.ts",
+      "**/*.e2e.test.ts",
       // "src/**/*.test.ts",
     ],
 

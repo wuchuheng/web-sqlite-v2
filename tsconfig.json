@@ -31,7 +31,7 @@
     "include": [
         "src",
         "tests",
-        "vitest.config.ts",
+        "vitest.unit.config.ts",
         "vitest.debug.config.ts"
     ]
 }
