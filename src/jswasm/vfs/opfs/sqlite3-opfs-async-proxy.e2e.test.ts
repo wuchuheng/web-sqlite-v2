@@ -326,16 +326,6 @@ class OpfsProxyClient {
   }
 
   private async waitForTurnaround(): Promise<void> {
-    if (typeof Atomics.waitAsync === "function") {
-      await Atomics.waitAsync(
-        this.sabOPView,
-        this.opIds.rc,
-        this.pendingRc,
-        10,
-      ).value;
-      return;
-    }
-
     await new Promise((resolve) => setTimeout(resolve, 5));
   }
 }

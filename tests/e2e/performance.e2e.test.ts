@@ -13,22 +13,7 @@ describe("Performance Tests", () => {
     }
     insertValues = insertValues.slice(0, -1); // Remove last comma
 
-    const sql = `
-      CREATE TABLE ${tableName} (id INTEGER, value TEXT);
-      BEGIN TRANSACTION;
-      INSERT INTO ${tableName} VALUES ${insertValues};
-      COMMIT;
-      SELECT COUNT(*) as cnt FROM ${tableName};
-    `;
-    // Note: Passing huge SQL string might be slow but it tests the DB engine mostly.
-    // Ideally we use bind params in loop, but our worker helper is simple.
-    // A single multi-value INSERT is faster than 1000 INSERT statements, but for 1000 rows it's fine.
-    // Wait, the original test loop: `stmt.bind(...)`.
-    // Emulating loop in SQL string:
-    // `INSERT INTO t VALUES (..); INSERT INTO t VALUES (..);` x 1000 might be too large for a string passed to worker?
-    // 1000 * 30 chars = 30KB. It's fine.
-
-    // Let's try to use the loop generation to generate 1000 insert statements
+    // Let's try to use the loop generation to generate 1000 insert statements.
     let inserts = "";
     for (let i = 0; i < 1000; i++) {
       inserts += `INSERT INTO ${tableName} VALUES (${i}, 'value_${i}');\n`;

@@ -3,6 +3,7 @@ import globals from "globals";
 import tseslint from "typescript-eslint";
 import { defineConfig } from "eslint/config";
 import { dirname } from "node:path";
+import { existsSync } from "node:fs";
 import { fileURLToPath } from "node:url";
 
 // Resolve repository root for tsconfigRootDir
@@ -60,7 +61,9 @@ const config = defineConfig([
         files: ["**/*.{ts,mts,cts}"],
         languageOptions: {
             parserOptions: {
-                project: ["./tsconfig.eslint.json", "./test2/tsconfig.json"],
+        project: ["./tsconfig.eslint.json", "./test2/tsconfig.json"].filter(
+            (configPath) => existsSync(new URL(configPath, import.meta.url)),
+        ),
                 // Ensure type-aware lint uses the right tsconfig roots
                 tsconfigRootDir: __dirname,
             },

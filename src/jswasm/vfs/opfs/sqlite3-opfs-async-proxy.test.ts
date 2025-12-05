@@ -16,6 +16,11 @@ export interface OpfsProxyOptions {
   asyncS11nExceptions: number;
 }
 
+const normalizeResponse = (
+  response: number | { rc: number; results: unknown[] },
+): { rc: number; results: unknown[] } =>
+  typeof response === "number" ? { rc: response, results: [] } : response;
+
 export class OpfsProxyClient {
   private worker: Worker;
   private sabIO: SharedArrayBuffer;
@@ -90,7 +95,7 @@ export class OpfsProxyClient {
   }
 
   async init(): Promise<void> {
-    return new Promise((resolve, reject) => {
+    return new Promise((resolve) => {
       const handler = (e: MessageEvent) => {
         if (e.data.type === "opfs-async-loaded") {
           // Worker is loaded, send init
@@ -151,7 +156,7 @@ export class OpfsProxyClient {
   }
 
   // Serialize arguments into the shared buffer
-  private serialize(args: any[]): void {
+  private serialize(args: unknown[]): void {
     const viewDV = new DataView(
       this.sabIO,
       this.sabS11nOffset,
@@ -201,7 +206,7 @@ export class OpfsProxyClient {
   }
 
   // Deserialize return values (mostly for output parameters)
-  private deserialize(): any[] {
+  private deserialize(): unknown[] {
     const viewDV = new DataView(
       this.sabIO,
       this.sabS11nOffset,
@@ -212,9 +217,9 @@ export class OpfsProxyClient {
 
     if (argc === 0) return [];
 
-    const result = [];
+    const result: unknown[] = [];
     let offset = 1;
-    const typeIds = [];
+    const typeIds: number[] = [];
 
     // Read type IDs
     for (let i = 0; i < argc; i++) {
@@ -248,7 +253,10 @@ export class OpfsProxyClient {
     return result;
   }
 
-  async send(op: string, args: any[] = []): Promise<any> {
+  async send(
+    op: string,
+    args: unknown[] = [],
+  ): Promise<number | { rc: number; results: unknown[] }> {
     const opId = this.opIds[op];
     if (!opId) throw new Error(`Unknown operation: ${op}`);
 
@@ -438,7 +446,7 @@ describe("OPFS Async Proxy Tests", () => {
     await client.send("xWrite", [fid, 10, 0]);
 
     // Check size
-    const resSize = await client.send("xFileSize", [fid]);
+    const resSize = normalizeResponse(await client.send("xFileSize", [fid]));
     // xFileSize returns { rc, results: [size] }
     expect(resSize.rc).toBe(OpfsProxyClient.SQLITE_OK);
     expect(resSize.results[0]).toBe(10);
@@ -448,12 +456,12 @@ describe("OPFS Async Proxy Tests", () => {
     expect(rcTrunc).toBe(OpfsProxyClient.SQLITE_OK);
 
     // Check size again
-    const resSize2 = await client.send("xFileSize", [fid]);
+    const resSize2 = normalizeResponse(await client.send("xFileSize", [fid]));
     expect(resSize2.results[0]).toBe(5);
 
     // Extend (truncate to larger)
     await client.send("xTruncate", [fid, 20]);
-    const resSize3 = await client.send("xFileSize", [fid]);
+    const resSize3 = normalizeResponse(await client.send("xFileSize", [fid]));
     expect(resSize3.results[0]).toBe(20);
 
     // Close and Cleanup

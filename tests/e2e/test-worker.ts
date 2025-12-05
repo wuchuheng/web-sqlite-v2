@@ -1,6 +1,11 @@
 import sqlite3InitModule from "@wuchuheng/web-sqlite";
 import type { SQLite3API } from "@wuchuheng/web-sqlite";
+// @ts-expect-error The installer is JavaScript-only and ships without type declarations.
 import { createInstallOpfsVfsContext } from "../../src/jswasm/vfs/opfs/installer/index.mjs";
+
+type SQLite3WithOpfs = SQLite3API & {
+  opfs?: { unlink: (path: string) => Promise<void> };
+};
 
 // Worker interface for test execution
 self.onmessage = async (e) => {
@@ -28,7 +33,7 @@ self.onmessage = async (e) => {
 
       // 3. Run the specific test operation
       // We'll pass the test logic/name in the payload
-      const { testName, dbFile, sql, skipCleanup, checkEnv } = payload;
+      const { testName: _testName, dbFile, sql, skipCleanup, checkEnv } = payload;
 
       if (checkEnv) {
         const vfs = sqlite3.capi.sqlite3_vfs_find("opfs");
@@ -61,8 +66,9 @@ self.onmessage = async (e) => {
 
       // Cleanup
       // Only delete the file if skipCleanup is NOT true
-      if (sqlite3.opfs && !skipCleanup) {
-        await sqlite3.opfs.unlink(dbFile);
+      const sqlite3WithOpfs = sqlite3 as SQLite3WithOpfs;
+      if (sqlite3WithOpfs.opfs && !skipCleanup) {
+        await sqlite3WithOpfs.opfs.unlink(dbFile);
       }
 
       self.postMessage({ type: "test-success", result });

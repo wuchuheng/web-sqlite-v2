@@ -7,6 +7,7 @@
         "vitest.config.ts",
         "vitest.debug.config.ts",
         "eslint.config.mts",
-        "vitest.e2e.config.ts"
+        "vitest.e2e.config.ts",
+        "vitest.unit.config.ts"
     ]
 }
