@@ -11,6 +11,7 @@
 </cite>
 
 ## Table of Contents
+
 1. [Introduction](#introduction)
 2. [Runtime Architecture Overview](#runtime-architecture-overview)
 3. [Lifecycle Manager](#lifecycle-manager)
@@ -23,6 +24,7 @@
 10. [Performance Implications](#performance-implications)
 
 ## Introduction
+
 The runtime management system in web-sqlite-v2 provides a comprehensive framework for initializing, configuring, and managing the lifecycle of the WebAssembly SQLite module. This system ensures stable execution across different browser environments by coordinating four key components: the lifecycle manager, module configurator, environment detector, and memory manager. These components work together to handle module instantiation, memory allocation, environment-specific configuration, and resource cleanup. The architecture follows Emscripten's runtime initialization patterns while extending them with custom functionality for SQLite-specific requirements.
 
 ## Runtime Architecture Overview
@@ -46,10 +48,12 @@ L --> M[API Availability]
 ```
 
 **Diagram sources**
+
 - [sqlite3.mjs](file://src/jswasm/sqlite3.mjs#L85-L474)
 - [lifecycle-manager.mjs](file://src/jswasm/runtime/lifecycle-manager.mjs#L16-L267)
 
 **Section sources**
+
 - [sqlite3.mjs](file://src/jswasm/sqlite3.mjs#L85-L474)
 
 ## Lifecycle Manager
@@ -57,15 +61,17 @@ L --> M[API Availability]
 The lifecycle manager coordinates the initialization phases of the WebAssembly module, handling preRun, initRuntime, and postRun phases while tracking dependencies. It implements a state machine that ensures proper sequencing of initialization steps and prevents premature execution.
 
 The manager maintains three callback arrays for different initialization phases:
-- __ATPRERUN__: Callbacks executed before runtime initialization
-- __ATINIT__: Callbacks executed during runtime initialization 
-- __ATPOSTRUN__: Callbacks executed after runtime initialization
+
+- **ATPRERUN**: Callbacks executed before runtime initialization
+- **ATINIT**: Callbacks executed during runtime initialization
+- **ATPOSTRUN**: Callbacks executed after runtime initialization
 
 It also tracks run dependencies through a counter mechanism, where `addRunDependency` increments the counter and `removeRunDependency` decrements it. When the counter reaches zero, all dependencies are considered fulfilled, triggering the completion of initialization.
 
 The `run` function orchestrates the entire initialization sequence, first checking for pending dependencies, then executing the preRun phase, initializing the runtime environment (including file system and TTY), and finally executing the postRun phase. The manager integrates with Emscripten's module system by calling the `onRuntimeInitialized` hook and resolving the ready promise upon successful initialization.
 
 **Section sources**
+
 - [lifecycle-manager.mjs](file://src/jswasm/runtime/lifecycle-manager.mjs#L16-L267)
 
 ## Module Configurator
@@ -81,6 +87,7 @@ The configurator also manages console output through `setupConsoleOutput`, which
 Additionally, the configurator handles module initialization and override management through `initializeModule` and `applyModuleOverrides`, which allow for temporary configuration changes during initialization.
 
 **Section sources**
+
 - [module-configurator.mjs](file://src/jswasm/runtime/module-configurator.mjs#L14-L190)
 
 ## Environment Detector
@@ -88,6 +95,7 @@ Additionally, the configurator handles module initialization and override manage
 The environment detector identifies the JavaScript execution context and provides appropriate file reading functions. It determines whether the code is running in a web browser, web worker, or other environment by checking for the presence of global objects like window and importScripts.
 
 The `detectEnvironment` function returns an object with three properties:
+
 - ENVIRONMENT_IS_WEB: true if running in a web browser (window object exists)
 - ENVIRONMENT_IS_WORKER: true if running in a web worker (importScripts function exists)
 - scriptDirectory: the base directory for resolving relative paths
@@ -99,6 +107,7 @@ The `createFileReaders` function generates appropriate file reading functions ba
 This detection mechanism ensures that the runtime can adapt to different execution contexts while maintaining consistent file loading behavior.
 
 **Section sources**
+
 - [environment-detector.mjs](file://src/jswasm/runtime/environment-detector.mjs#L13-L82)
 
 ## Memory Manager
@@ -114,6 +123,7 @@ The `growMemory` function attempts to grow the WebAssembly memory by the require
 The `initializeWasmMemory` function creates the initial WebAssembly memory instance, either using an existing memory object from the module or creating a new one with a default initial size of 16MB. The memory is configured with a maximum size of 2GB (32768 pages of 64KB each).
 
 **Section sources**
+
 - [memory-manager.mjs](file://src/jswasm/runtime/memory-manager.mjs#L17-L173)
 
 ## Component Interaction Patterns
@@ -151,10 +161,12 @@ Init-->>User : readyPromise
 ```
 
 **Diagram sources**
+
 - [sqlite3.mjs](file://src/jswasm/sqlite3.mjs#L85-L474)
 - [lifecycle-manager.mjs](file://src/jswasm/runtime/lifecycle-manager.mjs#L16-L267)
 
 **Section sources**
+
 - [sqlite3.mjs](file://src/jswasm/sqlite3.mjs#L85-L474)
 
 The interaction follows a dependency injection pattern where each component is initialized with references to the module and other required services. The lifecycle manager receives references to the file system and TTY implementations, while the memory manager receives the WebAssembly memory instance and module reference.
@@ -197,9 +209,11 @@ Y --> Z[Ready Promise Resolution]
 ```
 
 **Diagram sources**
+
 - [sqlite3.mjs](file://src/jswasm/sqlite3.mjs#L85-L474)
 
 **Section sources**
+
 - [sqlite3.mjs](file://src/jswasm/sqlite3.mjs#L85-L474)
 
 The flow begins with environment detection to determine the execution context and set up appropriate file readers. The module configurator then processes user-provided configuration, setting up file location resolution, console output handlers, and the abort function.
@@ -219,6 +233,7 @@ Finally, the post-load initialization function is attached, and the ready promis
 The runtime system implements several mechanisms for error recovery and handling initialization issues. The abort function serves as the primary error handling mechanism, providing a consistent way to handle fatal errors during initialization.
 
 When an error occurs, the abort function:
+
 1. Calls the Module's onAbort hook if present
 2. Formats an error message with context
 3. Sets the ABORT flag to prevent further execution
@@ -239,6 +254,7 @@ Dependency tracking prevents race conditions by ensuring that initialization doe
 Configuration errors are handled gracefully by using default values when possible and providing clear error messages when configuration is invalid. The system avoids throwing errors for optional configuration properties while ensuring required functionality is available.
 
 **Section sources**
+
 - [module-configurator.mjs](file://src/jswasm/runtime/module-configurator.mjs#L112-L138)
 - [memory-manager.mjs](file://src/jswasm/runtime/memory-manager.mjs#L76-L122)
 - [sqlite3.mjs](file://src/jswasm/sqlite3.mjs#L426-L447)
@@ -262,6 +278,7 @@ The use of Emscripten's runtime initialization patterns provides compatibility w
 Cache considerations are addressed through the use of import.meta.url for file resolution, which can leverage browser caching mechanisms for the WASM binary and other resources.
 
 **Section sources**
+
 - [memory-manager.mjs](file://src/jswasm/runtime/memory-manager.mjs#L56-L122)
 - [sqlite3.mjs](file://src/jswasm/sqlite3.mjs#L124-L131)
 - [environment-detector.mjs](file://src/jswasm/runtime/environment-detector.mjs#L53-L82)

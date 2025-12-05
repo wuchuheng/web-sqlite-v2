@@ -18,6 +18,7 @@
 </cite>
 
 ## Table of Contents
+
 1. [Introduction](#introduction)
 2. [Architecture Overview](#architecture-overview)
 3. [Core Components](#core-components)
@@ -35,6 +36,7 @@ The web-sqlite-v2 library provides a WebAssembly-powered SQLite3 implementation 
 The library enables developers to use SQLite3 in web applications with full ACID compliance, transaction support, and persistent storage through OPFS. It uses Emscripten to compile SQLite3 to WebAssembly, providing near-native performance while maintaining compatibility with the full SQLite3 feature set.
 
 **Section sources**
+
 - [package.json](file://package.json#L1-L62)
 
 ## Architecture Overview
@@ -58,10 +60,12 @@ style D fill:#f96,stroke:#333
 ```
 
 **Diagram sources**
+
 - [index.ts](file://src/index.ts#L1-L92)
 - [sqliteWorker.ts](file://src/sqliteWorker.ts#L1-L243)
 
 **Section sources**
+
 - [index.ts](file://src/index.ts#L1-L92)
 - [sqliteWorker.ts](file://src/sqliteWorker.ts#L1-L243)
 
@@ -74,6 +78,7 @@ The API layer provides the high-level interface that application developers use 
 The Web Worker component runs the actual SQLite3 engine in a separate thread to prevent blocking the main UI thread. Communication between the main thread and worker occurs through message passing, with a defined protocol for database operations.
 
 **Section sources**
+
 - [index.ts](file://src/index.ts#L1-L92)
 - [sqliteWorker.ts](file://src/sqliteWorker.ts#L1-L243)
 
@@ -104,10 +109,12 @@ Note over Runtime,SQLite : Synchronous initialization sequence
 ```
 
 **Diagram sources**
+
 - [lifecycle-manager.mjs](file://src/jswasm/runtime/lifecycle-manager.mjs#L1-L268)
 - [default-bootstrap-state.mjs](file://src/jswasm/wasm/bootstrap/default-bootstrap-state.mjs#L1-L78)
 
 **Section sources**
+
 - [lifecycle-manager.mjs](file://src/jswasm/runtime/lifecycle-manager.mjs#L1-L268)
 - [util-factory.mjs](file://src/jswasm/wasm/bootstrap/util-factory.mjs#L1-L146)
 
@@ -146,10 +153,12 @@ style M fill:#9f9,stroke:#333
 ```
 
 **Diagram sources**
+
 - [vfs-integration.mjs](file://src/jswasm/vfs/opfs/installer/wrappers/vfs-integration.mjs#L1-L74)
 - [syscalls.mjs](file://src/jswasm/system/syscalls.mjs#L1-L155)
 
 **Section sources**
+
 - [vfs-integration.mjs](file://src/jswasm/vfs/opfs/installer/wrappers/vfs-integration.mjs#L1-L74)
 - [syscalls.mjs](file://src/jswasm/system/syscalls.mjs#L1-L155)
 
@@ -209,11 +218,13 @@ end
 ```
 
 **Diagram sources**
+
 - [install-oo1-db-api.mjs](file://src/jswasm/api/install-oo1-db-api.mjs#L1-L40)
 - [index.mjs](file://src/jswasm/api/oo1-db/db-statement/index.mjs#L1-L72)
 - [context.mjs](file://src/jswasm/api/oo1-db/context.mjs#L1-L48)
 
 **Section sources**
+
 - [install-oo1-db-api.mjs](file://src/jswasm/api/install-oo1-db-api.mjs#L1-L40)
 - [index.mjs](file://src/jswasm/api/oo1-db/db-statement/index.mjs#L1-L72)
 
@@ -246,10 +257,12 @@ Note over WASM : SQLite3 engine with OPFS VFS
 ```
 
 **Diagram sources**
+
 - [index.ts](file://src/index.ts#L1-L92)
 - [sqliteWorker.ts](file://src/sqliteWorker.ts#L1-L243)
 
 **Section sources**
+
 - [index.ts](file://src/index.ts#L1-L92)
 - [sqliteWorker.ts](file://src/sqliteWorker.ts#L1-L243)
 
@@ -281,10 +294,12 @@ style E fill:#f99,stroke:#333
 ```
 
 **Diagram sources**
+
 - [transactions.e2e.test.ts](file://tests/e2e/transactions.e2e.test.ts#L1-L130)
 - [sqliteWorker.ts](file://src/sqliteWorker.ts#L112-L166)
 
 **Section sources**
+
 - [transactions.e2e.test.ts](file://tests/e2e/transactions.e2e.test.ts#L1-L130)
 - [crud-operations.e2e.test.ts](file://tests/e2e/crud-operations.e2e.test.ts#L1-L143)
 
@@ -317,9 +332,11 @@ style M fill:#f9f,stroke:#333
 ```
 
 **Diagram sources**
+
 - [crud-operations.e2e.test.ts](file://tests/e2e/crud-operations.e2e.test.ts#L1-L143)
 - [transactions.e2e.test.ts](file://tests/e2e/transactions.e2e.test.ts#L1-L130)
 
 **Section sources**
+
 - [crud-operations.e2e.test.ts](file://tests/e2e/crud-operations.e2e.test.ts#L1-L143)
 - [transactions.e2e.test.ts](file://tests/e2e/transactions.e2e.test.ts#L1-L130)

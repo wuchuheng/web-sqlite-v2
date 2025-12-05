@@ -12,6 +12,7 @@
 </cite>
 
 ## Table of Contents
+
 1. [Introduction](#introduction)
 2. [Core Node Operations](#core-node-operations)
 3. [Directory Operations](#directory-operations)
@@ -30,6 +31,7 @@ The Virtual File System (VFS) layer in web-sqlite-v2 provides a POSIX-like files
 The VFS implementation follows a modular design where node actions are composed from core operations and metadata operations, providing a comprehensive filesystem interface. The system handles path resolution, permission checks, and error propagation in a manner consistent with POSIX standards, while translating these operations to OPFS-compatible calls through synchronous access handles.
 
 **Section sources**
+
 - [node-actions.ts](file://src/jswasm/vfs/filesystem/node-actions/node-actions.ts#L23-L78)
 - [node-core-operations.ts](file://src/jswasm/vfs/filesystem/node-core-operations/node-core-operations.ts#L49-L78)
 
@@ -97,11 +99,13 @@ NodeActions ..> "Factory" createNodeActions : "created by"
 ```
 
 **Diagram sources **
+
 - [node-actions.ts](file://src/jswasm/vfs/filesystem/node-actions/node-actions.ts#L21-L78)
 - [node-core-operations.ts](file://src/jswasm/vfs/filesystem/node-core-operations/node-core-operations.ts#L49-L78)
 - [node-metadata-operations.ts](file://src/jswasm/vfs/filesystem/node-metadata-operations/node-metadata-operations.ts#L76-L117)
 
 **Section sources**
+
 - [node-actions.ts](file://src/jswasm/vfs/filesystem/node-actions/node-actions.ts#L21-L78)
 - [node-core-operations.ts](file://src/jswasm/vfs/filesystem/node-core-operations/node-core-operations.ts#L49-L78)
 
@@ -136,6 +140,7 @@ end
 ```
 
 **Diagram sources **
+
 - [node-core-operations.ts](file://src/jswasm/vfs/filesystem/node-core-operations/node-core-operations.ts#L104-L112)
 - [path-operations.ts](file://src/jswasm/vfs/filesystem/path-operations/path-operations.ts#L125-L183)
 
@@ -144,6 +149,7 @@ end
 The `rmdir` operation removes an empty directory after performing several validation checks. The process begins with path lookup to resolve the parent directory and target directory name, followed by permission validation through the `mayDelete` function.
 
 Critical validation steps include:
+
 - Ensuring the target is a directory (not a file)
 - Verifying the directory is empty
 - Checking that the directory is not a mount point
@@ -161,9 +167,11 @@ style Return fill:#4CAF50,stroke:#388E3C
 ```
 
 **Diagram sources **
+
 - [node-core-operations.ts](file://src/jswasm/vfs/filesystem/node-core-operations/node-core-operations.ts#L259-L283)
 
 **Section sources**
+
 - [node-core-operations.ts](file://src/jswasm/vfs/filesystem/node-core-operations/node-core-operations.ts#L104-L139)
 - [node-core-operations.ts](file://src/jswasm/vfs/filesystem/node-core-operations/node-core-operations.ts#L259-L283)
 
@@ -172,6 +180,7 @@ style Return fill:#4CAF50,stroke:#388E3C
 The `unlink` operation removes a file or symbolic link from the filesystem. This operation follows a similar pattern to `rmdir` but is designed for non-directory entries. The implementation includes comprehensive validation to ensure the operation is performed safely and consistently with POSIX semantics.
 
 The unlink process involves:
+
 1. Path resolution to locate the parent directory and target filename
 2. Permission validation to ensure the caller can delete from the parent directory
 3. Verification that the target is not a mount point
@@ -208,9 +217,11 @@ end
 ```
 
 **Diagram sources **
+
 - [node-core-operations.ts](file://src/jswasm/vfs/filesystem/node-core-operations/node-core-operations.ts#L299-L326)
 
 **Section sources**
+
 - [node-core-operations.ts](file://src/jswasm/vfs/filesystem/node-core-operations/node-core-operations.ts#L299-L326)
 
 ## Validation and Error Handling
@@ -240,6 +251,7 @@ style K fill:#4CAF50,stroke:#388E3C
 ```
 
 **Diagram sources **
+
 - [path-operations.ts](file://src/jswasm/vfs/filesystem/path-operations/path-operations.ts#L125-L183)
 - [node-core-operations.ts](file://src/jswasm/vfs/filesystem/node-core-operations/node-core-operations.ts#L180-L189)
 
@@ -248,6 +260,7 @@ style K fill:#4CAF50,stroke:#388E3C
 The system implements a robust permission checking mechanism through the `mayCreate` and `mayDelete` functions. These functions validate that the calling process has appropriate permissions to perform the requested operation on a directory.
 
 Common error codes returned by validation checks include:
+
 - **EACCES**: Permission denied
 - **ENOENT**: No such file or directory
 - **ENOTDIR**: Not a directory
@@ -257,6 +270,7 @@ Common error codes returned by validation checks include:
 - **ENOTEMPTY**: Directory not empty
 
 **Section sources**
+
 - [node-core-operations.ts](file://src/jswasm/vfs/filesystem/node-core-operations/node-core-operations.ts#L28-L30)
 - [node-core-operations.ts](file://src/jswasm/vfs/filesystem/node-core-operations/node-core-operations.ts#L29-L30)
 - [constants.ts](file://src/jswasm/vfs/filesystem/constants/constants.ts)
@@ -315,6 +329,7 @@ OpfsSAHPool --> FileSystemHandle : "uses"
 ```
 
 **Diagram sources **
+
 - [io-sync-wrappers.mjs](file://src/jswasm/vfs/opfs/installer/wrappers/io-sync-wrappers.mjs)
 - [opfs-sahpool-vfs.mjs](file://src/jswasm/vfs/opfs/opfs-sahpool-vfs.mjs)
 
@@ -336,9 +351,11 @@ OpfsVfs-->>SQLite : SQLITE_OK
 ```
 
 **Diagram sources **
+
 - [opfs-sahpool-vfs.mjs](file://src/jswasm/vfs/opfs/opfs-sahpool-vfs.mjs#L224-L234)
 
 **Section sources**
+
 - [opfs-sahpool-vfs.mjs](file://src/jswasm/vfs/opfs/opfs-sahpool-vfs.mjs#L224-L234)
 - [io-sync-wrappers.mjs](file://src/jswasm/vfs/opfs/installer/wrappers/io-sync-wrappers.mjs#L224-L235)
 
@@ -376,6 +393,7 @@ SQLiteEngine-->>SQLParser : Table dropped successfully
 ```
 
 The translation process involves:
+
 1. Schema validation to confirm the table exists
 2. Transaction initiation to ensure atomicity
 3. File deletion through the `unlink` operation
@@ -385,6 +403,7 @@ The translation process involves:
 This process ensures that the `DROP TABLE` command adheres to ACID properties, with the VFS layer providing the necessary filesystem operations to support these guarantees.
 
 **Section sources**
+
 - [node-core-operations.ts](file://src/jswasm/vfs/filesystem/node-core-operations/node-core-operations.ts#L299-L326)
 - [opfs-sahpool-vfs.mjs](file://src/jswasm/vfs/opfs/opfs-sahpool-vfs.mjs#L224-L234)
 
@@ -429,11 +448,13 @@ VFS-->>Thread2 : Execute query
 ```
 
 The implementation also includes protection against common race conditions, such as:
+
 - **TOCTOU (Time-of-Check to Time-of-Use)**: Path resolution and validation are performed atomically
 - **Concurrent Deletes**: The `unlink` operation checks file existence and permissions in a single atomic operation
 - **Directory Modification**: Directory operations use hash table management to prevent corruption during concurrent access
 
 **Section sources**
+
 - [node-core-operations.ts](file://src/jswasm/vfs/filesystem/node-core-operations/node-core-operations.ts#L249-L256)
 - [opfs-sahpool-vfs.mjs](file://src/jswasm/vfs/opfs/opfs-sahpool-vfs.mjs#L77-L93)
 
@@ -472,6 +493,7 @@ Hard links are not supported in this OPFS-based implementation due to the follow
 The system explicitly prevents hard link creation by not implementing the necessary operations and returning appropriate error codes when such operations are attempted.
 
 **Section sources**
+
 - [node-core-operations.ts](file://src/jswasm/vfs/filesystem/node-core-operations/node-core-operations.ts#L153-L177)
 - [node-core-operations.ts](file://src/jswasm/vfs/filesystem/node-core-operations/node-core-operations.ts#L328-L347)
 
@@ -480,6 +502,7 @@ The system explicitly prevents hard link creation by not implementing the necess
 The node actions implementation in web-sqlite-v2's VFS layer provides a robust and POSIX-compliant interface for filesystem operations on top of the Origin Private File System. By combining core operations, metadata operations, and path operations, the system delivers the functionality required by SQLite while adapting to the constraints of web storage APIs.
 
 Key aspects of the implementation include:
+
 - Comprehensive validation checks for parent directory existence and permissions
 - Proper error propagation following POSIX error code conventions
 - Atomic operations through OPFS synchronous access handles

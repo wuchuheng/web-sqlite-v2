@@ -33,7 +33,13 @@ self.onmessage = async (e) => {
 
       // 3. Run the specific test operation
       // We'll pass the test logic/name in the payload
-      const { testName: _testName, dbFile, sql, skipCleanup, checkEnv } = payload;
+      const {
+        testName: _testName,
+        dbFile,
+        sql,
+        skipCleanup,
+        checkEnv,
+      } = payload;
 
       if (checkEnv) {
         const vfs = sqlite3.capi.sqlite3_vfs_find("opfs");

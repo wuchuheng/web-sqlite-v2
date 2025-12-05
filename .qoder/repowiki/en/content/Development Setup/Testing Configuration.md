@@ -18,6 +18,7 @@
 </cite>
 
 ## Table of Contents
+
 1. [Introduction](#introduction)
 2. [Project Structure](#project-structure)
 3. [Core Components](#core-components)
@@ -29,6 +30,7 @@
 9. [Conclusion](#conclusion)
 
 ## Introduction
+
 This document provides comprehensive guidance on the testing configuration for web-sqlite-v2 using Vitest. It covers the distinct configurations for unit and end-to-end tests, environment setup for browser-like testing, handling of Web Workers and OPFS APIs in test environments, coverage reporting, test file inclusion patterns, and best practices for writing effective tests. The documentation also addresses common testing issues and performance optimization strategies for efficient test execution during development.
 
 ## Project Structure
@@ -56,12 +58,14 @@ WorkerClient --> E2ETests
 ```
 
 **Diagram sources**
+
 - [vitest.unit.config.ts](file://vitest.unit.config.ts#L23)
 - [vitest.e2e.config.ts](file://vitest.e2e.config.ts#L17)
 - [tests/e2e/test-worker.ts](file://tests/e2e/test-worker.ts)
 - [tests/e2e/worker-client.ts](file://tests/e2e/worker-client.ts)
 
 **Section sources**
+
 - [vitest.unit.config.ts](file://vitest.unit.config.ts)
 - [vitest.e2e.config.ts](file://vitest.e2e.config.ts)
 - [package.json](file://package.json)
@@ -73,6 +77,7 @@ The web-sqlite-v2 testing framework is built around two primary configuration fi
 The testing architecture leverages Web Workers to simulate the actual runtime environment where OPFS (Origin Private File System) APIs are available, as these APIs require worker contexts. The `test-worker.ts` and `worker-client.ts` files form a critical communication layer that enables tests to execute within worker contexts while maintaining a clean interface for test authors.
 
 **Section sources**
+
 - [vitest.unit.config.ts](file://vitest.unit.config.ts)
 - [vitest.e2e.config.ts](file://vitest.e2e.config.ts)
 - [tests/e2e/test-worker.ts](file://tests/e2e/test-worker.ts)
@@ -113,6 +118,7 @@ E2ETests
 ```
 
 **Diagram sources**
+
 - [vitest.unit.config.ts](file://vitest.unit.config.ts)
 - [vitest.e2e.config.ts](file://vitest.e2e.config.ts#L22-L31)
 - [tests/e2e/worker-client.ts](file://tests/e2e/worker-client.ts)
@@ -142,11 +148,13 @@ UnitConfig
 ```
 
 **Diagram sources**
+
 - [vitest.unit.config.ts](file://vitest.unit.config.ts#L23)
 - [src/jswasm/utils/async-utils/async-utils.unit.test.ts](file://src/jswasm/utils/async-utils/async-utils.unit.test.ts)
 - [src/jswasm/utils/wasm-loader/wasm-loader.unit.test.ts](file://src/jswasm/utils/wasm-loader/wasm-loader.unit.test.ts)
 
 **Section sources**
+
 - [vitest.unit.config.ts](file://vitest.unit.config.ts)
 - [src/jswasm/utils/async-utils/async-utils.unit.test.ts](file://src/jswasm/utils/async-utils/async-utils.unit.test.ts)
 - [src/jswasm/utils/wasm-loader/wasm-loader.unit.test.ts](file://src/jswasm/utils/wasm-loader/wasm-loader.unit.test.ts)
@@ -178,11 +186,13 @@ E2EConfig
 ```
 
 **Diagram sources**
+
 - [vitest.e2e.config.ts](file://vitest.e2e.config.ts#L17)
 - [tests/e2e/environment.e2e.test.ts](file://tests/e2e/environment.e2e.test.ts)
 - [tests/e2e/crud-operations.e2e.test.ts](file://tests/e2e/crud-operations.e2e.test.ts)
 
 **Section sources**
+
 - [vitest.e2e.config.ts](file://vitest.e2e.config.ts)
 - [tests/e2e/environment.e2e.test.ts](file://tests/e2e/environment.e2e.test.ts)
 - [tests/e2e/crud-operations.e2e.test.ts](file://tests/e2e/crud-operations.e2e.test.ts)
@@ -216,11 +226,13 @@ Validation[Environment Validation]
 ```
 
 **Diagram sources**
+
 - [src/jswasm/vfs/opfs/installer/core/environment-validation.mjs](file://src/jswasm/vfs/opfs/installer/core/environment-validation.mjs)
 - [tests/e2e/test-worker.ts](file://tests/e2e/test-worker.ts)
 - [tests/e2e/worker-client.ts](file://tests/e2e/worker-client.ts)
 
 **Section sources**
+
 - [src/jswasm/vfs/opfs/installer/core/environment-validation.mjs](file://src/jswasm/vfs/opfs/installer/core/environment-validation.mjs)
 - [tests/e2e/test-worker.ts](file://tests/e2e/test-worker.ts)
 
@@ -249,11 +261,13 @@ Client-->>Test : resolve(result)
 ```
 
 **Diagram sources**
+
 - [tests/e2e/worker-client.ts](file://tests/e2e/worker-client.ts#L1)
 - [tests/e2e/test-worker.ts](file://tests/e2e/test-worker.ts#L6)
 - [src/sqliteWorker.ts](file://src/sqliteWorker.ts)
 
 **Section sources**
+
 - [tests/e2e/worker-client.ts](file://tests/e2e/worker-client.ts)
 - [tests/e2e/test-worker.ts](file://tests/e2e/test-worker.ts)
 - [src/sqliteWorker.ts](file://src/sqliteWorker.ts)
@@ -294,12 +308,14 @@ E2EFiles
 ```
 
 **Diagram sources**
+
 - [vitest.unit.config.ts](file://vitest.unit.config.ts#L23)
 - [vitest.e2e.config.ts](file://vitest.e2e.config.ts#L17)
 - [src/jswasm/utils/async-utils/async-utils.unit.test.ts](file://src/jswasm/utils/async-utils/async-utils.unit.test.ts)
 - [tests/e2e/crud-operations.e2e.test.ts](file://tests/e2e/crud-operations.e2e.test.ts)
 
 **Section sources**
+
 - [vitest.unit.config.ts](file://vitest.unit.config.ts)
 - [vitest.e2e.config.ts](file://vitest.e2e.config.ts)
 - [src/jswasm/utils/async-utils/async-utils.unit.test.ts](file://src/jswasm/utils/async-utils/async-utils.unit.test.ts)
@@ -326,6 +342,7 @@ test --> test:unit ; test:e2e
 ```
 
 **Diagram sources**
+
 - [vitest.unit.config.ts](file://vitest.unit.config.ts)
 - [vitest.e2e.config.ts](file://vitest.e2e.config.ts)
 - [package.json](file://package.json#L17-L18)
@@ -333,6 +350,7 @@ test --> test:unit ; test:e2e
 - [tests/e2e/worker-client.ts](file://tests/e2e/worker-client.ts)
 
 **Section sources**
+
 - [vitest.unit.config.ts](file://vitest.unit.config.ts)
 - [vitest.e2e.config.ts](file://vitest.e2e.config.ts)
 - [package.json](file://package.json)
@@ -348,6 +366,7 @@ For end-to-end tests, the configuration balances thoroughness with practical exe
 The framework's modular design allows developers to run specific test suites based on their needs, reducing overall execution time. Unit tests can be run independently for quick verification of isolated components, while E2E tests can be executed for comprehensive validation of complete workflows.
 
 **Section sources**
+
 - [vitest.unit.config.ts](file://vitest.unit.config.ts)
 - [vitest.e2e.config.ts](file://vitest.e2e.config.ts)
 
@@ -368,6 +387,7 @@ Common testing issues in the web-sqlite-v2 framework typically relate to environ
 The framework addresses these issues through its configuration and architecture, with explicit header settings in both configuration files and proper worker management in the test client.
 
 **Section sources**
+
 - [vitest.unit.config.ts](file://vitest.unit.config.ts#L16-L19)
 - [vitest.e2e.config.ts](file://vitest.e2e.config.ts#L42-L48)
 - [src/jswasm/vfs/opfs/installer/core/environment-validation.mjs](file://src/jswasm/vfs/opfs/installer/core/environment-validation.mjs)

@@ -17,6 +17,7 @@
 </cite>
 
 ## Table of Contents
+
 1. [Browser Compatibility and OPFS Support](#browser-compatibility-and-opfs-support)
 2. [Differences from Other SQLite WASM Solutions](#differences-from-other-sqlite-wasm-solutions)
 3. [Migration from Previous Versions](#migration-from-previous-versions)
@@ -29,6 +30,7 @@
 **Q: Which browsers are supported by web-sqlite-v2?**
 
 web-sqlite-v2 supports modern browsers with OPFS (Origin Private File System) and SharedArrayBuffer capabilities. The supported browsers include:
+
 - Chrome/Chromium 86+
 - Firefox 111+
 - Safari 15.4+ (with limited OPFS support)
@@ -37,6 +39,7 @@ web-sqlite-v2 supports modern browsers with OPFS (Origin Private File System) an
 **Q: What are the requirements for OPFS support?**
 
 OPFS support requires several key features and configurations:
+
 - SharedArrayBuffer and Atomics must be available
 - OPFS APIs must be present (FileSystemHandle, FileSystemDirectoryHandle, FileSystemFileHandle)
 - The application must run in a secure context (HTTPS or localhost)
@@ -49,6 +52,7 @@ The OPFS VFS cannot run in the main thread because it requires `Atomics.wait()`,
 **Q: How is OPFS environment validation performed?**
 
 The environment validation checks for the presence of required APIs and features:
+
 - SharedArrayBuffer and Atomics availability
 - WorkerGlobalScope existence
 - OPFS API support (FileSystemHandle, createSyncAccessHandle, etc.)
@@ -57,6 +61,7 @@ The environment validation checks for the presence of required APIs and features
 If any of these requirements are not met, an appropriate error is returned explaining the missing feature.
 
 **Section sources**
+
 - [CLAUDE.md](file://CLAUDE.md#L175-L194)
 - [src/jswasm/vfs/opfs/installer/core/environment-validation.mjs](file://src/jswasm/vfs/opfs/installer/core/environment-validation.mjs#L6-L37)
 
@@ -77,6 +82,7 @@ web-sqlite-v2 offers several key advantages over other SQLite WASM solutions:
 **Q: What are the advantages of using OPFS over IndexedDB for SQLite storage?**
 
 OPFS offers several advantages:
+
 - Better performance for database operations due to synchronous-like access patterns
 - Larger storage capacity compared to IndexedDB limits
 - More efficient file I/O operations
@@ -86,12 +92,14 @@ OPFS offers several advantages:
 **Q: How does the web worker implementation improve performance?**
 
 Running SQLite in a web worker provides:
+
 - Non-blocking UI during database operations
 - Ability to perform long-running queries without affecting page responsiveness
 - True parallel execution of database operations
 - Better memory isolation between the database engine and application code
 
 **Section sources**
+
 - [CLAUDE.md](file://CLAUDE.md#L7-L14)
 - [GEMINI.md](file://GEMINI.md#L9-L10)
 - [AGENTS.md](file://AGENTS.md#L5-L6)
@@ -116,11 +124,13 @@ Yes, existing SQLite databases are fully compatible with web-sqlite-v2. The impl
 **Q: How do I handle the transition from synchronous to asynchronous operations?**
 
 To transition from synchronous to asynchronous operations:
+
 - Wrap database operations in async functions or use .then() chains
 - Update error handling to use try/catch with async/await or .catch() with promises
 - Consider using the provided convenience methods like `selectObjects()` and `selectArrays()` which handle the async operations internally
 
 **Section sources**
+
 - [src/index.ts](file://src/index.ts#L64-L87)
 - [src/sqliteWorker.ts](file://src/sqliteWorker.ts#L68-L206)
 - [src/jswasm/sqlite3.d.ts](file://src/jswasm/sqlite3.d.ts#L567-L658)
@@ -132,16 +142,19 @@ To transition from synchronous to asynchronous operations:
 Performance varies by operation type and dataset size:
 
 **Small Datasets (< 10,000 rows)**:
+
 - Simple queries: < 10ms
 - Inserts/updates: < 5ms
 - Transactions: < 15ms
 
 **Medium Datasets (10,000 - 100,000 rows)**:
+
 - Indexed queries: 10-50ms
 - Bulk inserts: 50-200ms for 1,000 rows
 - Complex joins: 50-200ms
 
 **Large Datasets (> 100,000 rows)**:
+
 - Full table scans: 200ms - 2s
 - Aggregations: 100-500ms
 - Index creation: 500ms - 5s
@@ -159,6 +172,7 @@ However, OPFS provides much better performance than alternatives like IndexedDB 
 **Q: What factors influence performance in web-sqlite-v2?**
 
 Key performance factors include:
+
 - Dataset size and complexity
 - Query optimization and indexing
 - Network conditions (for initial WASM loading)
@@ -166,6 +180,7 @@ Key performance factors include:
 - Complexity of JavaScript-WASM interop
 
 **Section sources**
+
 - [src/jswasm/vfs/opfs/installer/wrappers/io-sync-wrappers.mjs](file://src/jswasm/vfs/opfs/installer/wrappers/io-sync-wrappers.mjs#L136-L156)
 - [src/jswasm/sqlite3.d.ts](file://src/jswasm/sqlite3.d.ts#L500-L522)
 - [src/sqliteWorker.ts](file://src/sqliteWorker.ts#L138-L147)
@@ -177,6 +192,7 @@ Key performance factors include:
 The implementation uses a sophisticated memory management system:
 
 **WebAssembly Memory**: The SQLite engine runs in a WebAssembly memory space with a maximum size of 2GB. The memory manager handles:
+
 - Dynamic memory growth as needed
 - Proper alignment of memory operations
 - Efficient heap management
@@ -206,6 +222,7 @@ Garbage collection operates as follows:
 **Resource Cleanup**: The implementation includes finalize() methods and proper cleanup in close() operations to ensure resources are released promptly.
 
 **Section sources**
+
 - [src/jswasm/runtime/memory-manager.mjs](file://src/jswasm/runtime/memory-manager.mjs#L17-L150)
 - [src/jswasm/sqlite3.d.ts](file://src/jswasm/sqlite3.d.ts#L721-L795)
 - [src/sqliteWorker.ts](file://src/sqliteWorker.ts#L177-L183)
@@ -229,8 +246,11 @@ Type safety is implemented through:
 **Parameter Typing**: Bind values are typed with the BindValue union type, supporting null, number, string, boolean, and ArrayBuffer types.
 
 **Result Typing**: Query methods support generics to specify the expected result structure:
+
 ```typescript
-const users = await db.selectObjects<{ id: number; name: string }>("SELECT id, name FROM users");
+const users = await db.selectObjects<{ id: number; name: string }>(
+    "SELECT id, name FROM users",
+);
 ```
 
 **Configuration Typing**: Options objects are strongly typed with interfaces like ExecOptions and CreateFunctionOptions.
@@ -238,6 +258,7 @@ const users = await db.selectObjects<{ id: number; name: string }>("SELECT id, n
 **Q: Can I use TypeScript with the worker interface?**
 
 Yes, TypeScript integration is fully supported. The worker interface is defined with proper types:
+
 - RequestMessage and ResponseMessage interfaces
 - Action codes as a const enum
 - Payload typing based on the action type
@@ -245,6 +266,7 @@ Yes, TypeScript integration is fully supported. The worker interface is defined 
 The type definitions ensure type safety across the main thread and worker boundary.
 
 **Section sources**
+
 - [src/jswasm/sqlite3.d.ts](file://src/jswasm/sqlite3.d.ts#L486-L522)
 - [src/index.ts](file://src/index.ts#L1-L92)
 - [src/sqliteWorker.ts](file://src/sqliteWorker.ts#L1-L243)

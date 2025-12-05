@@ -17,6 +17,7 @@
 </cite>
 
 ## Table of Contents
+
 1. [Introduction](#introduction)
 2. [Vite Build Configuration](#vite-build-configuration)
 3. [TypeScript Configuration](#typescript-configuration)
@@ -29,13 +30,16 @@
 10. [Performance Optimization](#performance-optimization)
 
 ## Introduction
+
 The web-sqlite-v2 library is a SQLite3 WebAssembly implementation with OPFS (Origin Private File System) support, built using Vite as the build tool. This documentation provides comprehensive details about the build configuration, focusing on TypeScript compilation, WebAssembly module bundling, type declaration generation, Web Workers integration, and OPFS functionality. The build system is designed to create an efficient, tree-shakeable ESM (ECMAScript Module) output while properly handling the complex requirements of WebAssembly and Web Workers.
 
 **Section sources**
+
 - [vite.config.ts](file://vite.config.ts)
 - [package.json](file://package.json)
 
 ## Vite Build Configuration
+
 The Vite build configuration is defined in `vite.config.ts` and is specifically tailored for library development. The configuration creates an ESM (ECMAScript Module) build with the following key settings:
 
 - **Library Mode**: The build is configured in library mode with `build.lib`, specifying `src/index.ts` as the entry point.
@@ -59,14 +63,17 @@ H["OPFS Integration"] --> B
 ```
 
 **Diagram sources **
+
 - [vite.config.ts](file://vite.config.ts#L5-L35)
 - [package.json](file://package.json#L1-L62)
 
 **Section sources**
+
 - [vite.config.ts](file://vite.config.ts#L1-L36)
 - [package.json](file://package.json#L1-L62)
 
 ## TypeScript Configuration
+
 The TypeScript configuration is managed through `tsconfig.json` and is optimized for modern JavaScript development with ESM support. Key configuration options include:
 
 - **Target**: ES2022, ensuring compatibility with modern JavaScript features.
@@ -80,11 +87,13 @@ The TypeScript configuration is managed through `tsconfig.json` and is optimized
 The configuration also extends `tsconfig.eslint.json` for linting purposes and `tsconfig.migration.json` for migration tasks, ensuring consistent type checking across different contexts.
 
 **Section sources**
+
 - [tsconfig.json](file://tsconfig.json#L1-L37)
 - [tsconfig.eslint.json](file://tsconfig.eslint.json#L1-L12)
 - [tsconfig.migration.json](file://tsconfig.migration.json#L33-L52)
 
 ## WebAssembly Module Integration
+
 The integration of the WebAssembly module is a critical aspect of the build configuration. The library includes a WebAssembly binary (`sqlite3.wasm`) that is loaded and instantiated at runtime. The build process handles this through several mechanisms:
 
 - **WASM Loader**: The `wasm-loader.ts` utility provides a comprehensive loader for the WebAssembly module, handling both streaming and ArrayBuffer instantiation with appropriate fallbacks.
@@ -115,16 +124,19 @@ Loader->>App : Resolve with exports
 ```
 
 **Diagram sources **
+
 - [src/jswasm/utils/wasm-loader/wasm-loader.ts](file://src/jswasm/utils/wasm-loader/wasm-loader.ts#L1-L210)
 - [src/jswasm/runtime/environment-detector.mjs](file://src/jswasm/runtime/environment-detector.mjs#L1-L82)
 - [src/jswasm/sqlite3.mjs](file://src/jswasm/sqlite3.mjs#L1-L474)
 
 **Section sources**
+
 - [src/jswasm/utils/wasm-loader/wasm-loader.ts](file://src/jswasm/utils/wasm-loader/wasm-loader.ts#L1-L210)
 - [src/jswasm/runtime/environment-detector.mjs](file://src/jswasm/runtime/environment-detector.mjs#L1-L82)
 - [src/jswasm/sqlite3.mjs](file://src/jswasm/sqlite3.mjs#L1-L474)
 
 ## Web Workers and OPFS Integration
+
 The build configuration includes specialized handling for Web Workers and OPFS (Origin Private File System) integration, which are essential for the library's functionality:
 
 - **Web Worker**: The `sqliteWorker.ts` file is configured as a Web Worker using Vite's worker import syntax (`?worker&inline`). This allows the SQLite operations to run in a separate thread, preventing blocking of the main UI thread.
@@ -175,51 +187,58 @@ SqliteWorkerImpl --> ResponseMessage : receives
 ```
 
 **Diagram sources **
+
 - [src/index.ts](file://src/index.ts#L1-L92)
 - [src/sqliteWorker.ts](file://src/sqliteWorker.ts#L1-L243)
 - [src/sqliteWorker.d.ts](file://src/sqliteWorker.d.ts#L1-L115)
 - [src/jswasm/vfs/opfs/installer/wrappers/vfs-integration.mjs](file://src/jswasm/vfs/opfs/installer/wrappers/vfs-integration.mjs#L1-L74)
 
 **Section sources**
+
 - [src/index.ts](file://src/index.ts#L1-L92)
 - [src/sqliteWorker.ts](file://src/sqliteWorker.ts#L1-L243)
 - [src/sqliteWorker.d.ts](file://src/sqliteWorker.d.ts#L1-L115)
 
 ## Type Declaration Generation
+
 The build configuration includes robust type declaration generation to provide TypeScript support for library consumers:
 
 - **vite-plugin-dts**: The build uses the `vite-plugin-dts` plugin to generate type declaration files (.d.ts) from the TypeScript source code.
 - **Configuration**: The plugin is configured to:
-  - Use `src` as the entry root (`entryRoot: "src"`)
-  - Output declarations to the `dist` directory (`outDir: "dist"`)
-  - Include only the main entry point (`include: ["src/index.ts"]`)
-  - Insert a types entry in package.json (`insertTypesEntry: true`)
-  - Copy .d.ts files alongside the bundle (`copyDtsFiles: true`)
+    - Use `src` as the entry root (`entryRoot: "src"`)
+    - Output declarations to the `dist` directory (`outDir: "dist"`)
+    - Include only the main entry point (`include: ["src/index.ts"]`)
+    - Insert a types entry in package.json (`insertTypesEntry: true`)
+    - Copy .d.ts files alongside the bundle (`copyDtsFiles: true`)
 - **Multiple Declaration Files**: The configuration keeps multiple .d.ts files rather than rolling them up into a single index.d.ts file, preserving the module structure.
 
 This approach ensures that consumers of the library get accurate type information and IntelliSense support in their IDEs, improving developer experience and reducing errors.
 
 **Section sources**
+
 - [vite.config.ts](file://vite.config.ts#L23-L34)
 - [package.json](file://package.json#L7-L12)
 
 ## Testing Configuration
+
 The testing configuration is managed through Vitest, with separate configurations for unit and E2E (end-to-end) tests:
 
 - **E2E Configuration**: The `vitest.e2e.config.ts` file configures browser-based E2E tests using Playwright, with support for Chromium and appropriate headers for OPFS and SharedArrayBuffer functionality.
 - **Unit Configuration**: The `vitest.unit.config.ts` file configures unit tests with support for browser environments and appropriate headers for cross-origin policies.
 - **Headers**: Both configurations include the necessary headers for OPFS functionality:
-  - `Cross-Origin-Opener-Policy: same-origin`
-  - `Cross-Origin-Embedder-Policy: require-corp`
+    - `Cross-Origin-Opener-Policy: same-origin`
+    - `Cross-Origin-Embedder-Policy: require-corp`
 - **Test Inclusion**: The configurations specify which test files to include, with E2E tests focusing on `.e2e.test.ts` files and unit tests on `.unit.test.ts` files.
 
 The testing setup ensures that both the core functionality and browser-specific features like OPFS are thoroughly tested across different environments.
 
 **Section sources**
+
 - [vitest.e2e.config.ts](file://vitest.e2e.config.ts#L1-L67)
 - [vitest.unit.config.ts](file://vitest.unit.config.ts#L1-L36)
 
 ## Build Customization and Optimization
+
 The build configuration provides several options for customization and optimization:
 
 - **Environment Variables**: The build can be customized through environment variables and configuration options passed to the build process.
@@ -231,10 +250,12 @@ The build configuration provides several options for customization and optimizat
 For production builds, additional optimization can be achieved by enabling minification and other production-specific optimizations, though these are disabled in the default configuration to prioritize development experience.
 
 **Section sources**
+
 - [vite.config.ts](file://vite.config.ts#L1-L36)
 - [package.json](file://package.json#L15-L30)
 
 ## Common Build Issues and Solutions
+
 Several common build issues may arise when working with this configuration, along with their solutions:
 
 - **WASM Loading Failures**: These can occur due to incorrect paths or CORS issues. Ensure the WASM file is properly referenced and served with appropriate headers.
@@ -246,11 +267,13 @@ Several common build issues may arise when working with this configuration, alon
 Addressing these issues typically involves verifying the build configuration, ensuring proper file references, and checking server headers for browser-specific features.
 
 **Section sources**
+
 - [vite.config.ts](file://vite.config.ts#L1-L36)
 - [vitest.e2e.config.ts](file://vitest.e2e.config.ts#L40-L48)
 - [src/jswasm/utils/wasm-loader/wasm-loader.ts](file://src/jswasm/utils/wasm-loader/wasm-loader.ts#L1-L210)
 
 ## Performance Optimization
+
 The build configuration includes several performance optimization strategies:
 
 - **Code Splitting**: The ESM output format enables effective code splitting, reducing initial load times.
@@ -263,6 +286,7 @@ The build configuration includes several performance optimization strategies:
 These optimizations ensure that the library performs efficiently in both development and production environments, providing a smooth experience for both developers and end users.
 
 **Section sources**
+
 - [vite.config.ts](file://vite.config.ts#L1-L36)
 - [src/jswasm/utils/wasm-loader/wasm-loader.ts](file://src/jswasm/utils/wasm-loader/wasm-loader.ts#L1-L210)
 - [src/jswasm/sqlite3.mjs](file://src/jswasm/sqlite3.mjs#L1-L474)

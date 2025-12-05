@@ -80,7 +80,8 @@ W.postMessage({ type: "opfs-async-init", args: stateForWorker });
 **File:** `index.mjs` line 331
 
 ```javascript
-installOpfsVfs.defaultProxyUri = "../sqlite3-opfs-async-proxy/sqlite3-opfs-async-proxy.js";
+installOpfsVfs.defaultProxyUri =
+    "../sqlite3-opfs-async-proxy/sqlite3-opfs-async-proxy.js";
 // Now correctly points to parent opfs/ directory
 ```
 
@@ -316,7 +317,7 @@ Worker communication protocol:
 | "How does serialization work?"  | `core/serialization.mjs`           |
 | "What utilities are available?" | `utils/opfs-util.mjs`              |
 | "Browser support checks?"       | `core/environment-validation.mjs`  |
-| "Configuration parsing?"        | `core/config-setup.mjs`            |
+| "Configuration parsing?"        | `core/config-setup/config-setup.ts`            |
 | "Worker communication?"         | `utils/worker-message-handler.mjs` |
 | "VFS validation tests?"         | `utils/sanity-check.mjs`           |
 
@@ -693,7 +694,7 @@ Each module has comprehensive JSDoc:
 | Need to...                 | Check...                           |
 | -------------------------- | ---------------------------------- |
 | Validate browser support   | `core/environment-validation.mjs`  |
-| Configure options          | `core/config-setup.mjs`            |
+| Configure options          | `core/config-setup/config-setup.ts`            |
 | Understand serialization   | `core/serialization.mjs`           |
 | Add file I/O method        | `wrappers/io-sync-wrappers.mjs`    |
 | Add VFS method             | `wrappers/vfs-sync-wrappers.mjs`   |

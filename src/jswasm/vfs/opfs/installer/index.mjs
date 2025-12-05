@@ -65,7 +65,7 @@ import {
     validateOpfsEnvironment,
     thisThreadHasOPFS,
 } from "./core/environment-validation.mjs";
-import { prepareOpfsConfig } from "./core/config-setup.mjs";
+import { prepareOpfsConfig } from "./core/config-setup/config-setup";
 import { createSerializer } from "./core/serialization.mjs";
 import {
     initializeOpfsState,
@@ -328,7 +328,8 @@ export function createInstallOpfsVfsContext(sqlite3) {
         return thePromise;
     };
 
-    installOpfsVfs.defaultProxyUri = "../sqlite3-opfs-async-proxy/sqlite3-opfs-async-proxy.js";
+    installOpfsVfs.defaultProxyUri =
+        "../sqlite3-opfs-async-proxy/sqlite3-opfs-async-proxy.js";
 
     /**
      * Initializer function for OPFS VFS.

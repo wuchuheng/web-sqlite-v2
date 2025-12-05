@@ -14,6 +14,7 @@
 </cite>
 
 ## Table of Contents
+
 1. [Introduction](#introduction)
 2. [Worker Architecture Overview](#worker-architecture-overview)
 3. [Message Passing Efficiency](#message-passing-efficiency)
@@ -26,9 +27,11 @@
 10. [Conclusion](#conclusion)
 
 ## Introduction
+
 This document provides a comprehensive analysis of worker optimization in the web-sqlite-v2 project, focusing on the architecture and performance characteristics of the SQLite Web Worker implementation. The system leverages Web Workers to execute SQLite operations off the main thread, preventing UI blocking during database operations. The optimization strategy centers around efficient message passing, task batching, lifecycle management, and non-blocking operations to maximize throughput and minimize latency in database interactions.
 
 **Section sources**
+
 - [sqliteWorker.ts](file://src/sqliteWorker.ts#L1-L243)
 
 ## Worker Architecture Overview
@@ -46,11 +49,13 @@ B --> |Response Message| A
 ```
 
 **Diagram sources**
+
 - [sqliteWorker.ts](file://src/sqliteWorker.ts#L1-L243)
 - [lifecycle-manager.mjs](file://src/jswasm/runtime/lifecycle-manager.mjs#L1-L268)
 - [worker-message-handler.mjs](file://src/jswasm/vfs/opfs/installer/utils/worker-message-handler.mjs#L1-L126)
 
 **Section sources**
+
 - [sqliteWorker.ts](file://src/sqliteWorker.ts#L1-L243)
 - [lifecycle-manager.mjs](file://src/jswasm/runtime/lifecycle-manager.mjs#L1-L268)
 
@@ -80,10 +85,12 @@ Worker->>MainThread : ResponseMessage (success : true)
 ```
 
 **Diagram sources**
+
 - [sqliteWorker.ts](file://src/sqliteWorker.ts#L7-L243)
 - [index.ts](file://src/index.ts#L6-L10)
 
 **Section sources**
+
 - [sqliteWorker.ts](file://src/sqliteWorker.ts#L7-L243)
 
 ## Task Batching and Serialization
@@ -109,10 +116,12 @@ J --> K[Return Result]
 The serialization.mjs module implements a custom serialization protocol that supports numbers, bigints, booleans, and strings. The protocol uses type identifiers and efficient encoding to minimize the size of serialized data. For strings, it uses TextEncoder/TextDecoder for UTF-8 encoding, while numeric types are written directly to the DataView for maximum performance.
 
 **Diagram sources**
+
 - [serialization.mjs](file://src/jswasm/vfs/opfs/installer/core/serialization.mjs#L1-L150)
 - [state-initialization.mjs](file://src/jswasm/vfs/opfs/installer/core/state-initialization.mjs#L1-L127)
 
 **Section sources**
+
 - [serialization.mjs](file://src/jswasm/vfs/opfs/installer/core/serialization.mjs#L1-L150)
 - [state-initialization.mjs](file://src/jswasm/vfs/opfs/installer/core/state-initialization.mjs#L1-L127)
 
@@ -146,9 +155,11 @@ Callbacks --> [*]
 The manager implements a robust dependency tracking system with addRunDependency and removeRunDependency functions. When the dependency count reaches zero, any pending callbacks are executed, allowing for proper sequencing of initialization tasks. This system is critical for ensuring that the SQLite WASM module is fully initialized before any database operations are attempted.
 
 **Diagram sources**
+
 - [lifecycle-manager.mjs](file://src/jswasm/runtime/lifecycle-manager.mjs#L1-L268)
 
 **Section sources**
+
 - [lifecycle-manager.mjs](file://src/jswasm/runtime/lifecycle-manager.mjs#L1-L268)
 
 ## Async Utilities and Promise Handling
@@ -179,9 +190,11 @@ Worker->>MainThread : Module ready
 The async utilities also provide proper error handling for failed resource loading operations. If a resource fails to load, the system either calls the provided onerror callback or throws an error, ensuring that initialization failures are properly reported and handled.
 
 **Diagram sources**
+
 - [async-utils.ts](file://src/jswasm/utils/async-utils/async-utils.ts#L1-L66)
 
 **Section sources**
+
 - [async-utils.ts](file://src/jswasm/utils/async-utils/async-utils.ts#L1-L66)
 
 ## Performance Optimization Strategies
@@ -212,10 +225,12 @@ K --> P[Responsive UI]
 The architecture optimizes CPU utilization by ensuring that the worker thread is only active when processing database operations. During idle periods, the worker thread waits for messages without consuming CPU resources. This design pattern maximizes efficiency and prevents unnecessary resource consumption.
 
 **Diagram sources**
+
 - [performance.e2e.test.ts](file://tests/e2e/performance.e2e.test.ts#L1-L119)
 - [sqliteWorker.ts](file://src/sqliteWorker.ts#L1-L243)
 
 **Section sources**
+
 - [performance.e2e.test.ts](file://tests/e2e/performance.e2e.test.ts#L1-L119)
 
 ## Common Performance Bottlenecks
@@ -247,10 +262,12 @@ Excessive serialization overhead can occur when large amounts of data are transf
 Memory pressure can build up when large result sets are returned from database queries. The architecture mitigates this by streaming results when possible and encouraging applications to use pagination for large datasets.
 
 **Diagram sources**
+
 - [sqliteWorker.ts](file://src/sqliteWorker.ts#L1-L243)
 - [serialization.mjs](file://src/jswasm/vfs/opfs/installer/core/serialization.mjs#L1-L150)
 
 **Section sources**
+
 - [sqliteWorker.ts](file://src/sqliteWorker.ts#L1-L243)
 - [performance.e2e.test.ts](file://tests/e2e/performance.e2e.test.ts#L1-L119)
 
@@ -268,17 +285,19 @@ B --> E[Slow Performance]
 D --> F[Fast Performance]
 ```
 
-Structure queries to return only the data that is needed, avoiding SELECT * statements when specific columns are required. This reduces the amount of data that must be serialized and transferred between threads.
+Structure queries to return only the data that is needed, avoiding SELECT \* statements when specific columns are required. This reduces the amount of data that must be serialized and transferred between threads.
 
 For large datasets, implement pagination rather than retrieving all results at once. This prevents memory pressure and keeps the UI responsive. Use LIMIT and OFFSET clauses or cursor-based pagination to retrieve data in manageable chunks.
 
 Minimize the frequency of worker communication by batching related operations together. Instead of making multiple round trips to the worker, combine related database operations into a single request when possible.
 
 **Section sources**
+
 - [sqliteWorker.ts](file://src/sqliteWorker.ts#L1-L243)
 - [performance.e2e.test.ts](file://tests/e2e/performance.e2e.test.ts#L1-L119)
 
 ## Conclusion
+
 The worker optimization architecture in web-sqlite-v2 demonstrates a sophisticated approach to database operations in web applications. By leveraging Web Workers, SharedArrayBuffer, and efficient serialization techniques, the system achieves high performance while maintaining a responsive user interface.
 
 The key optimization strategies—efficient message passing, task batching, lifecycle management, and non-blocking operations—work together to create a robust and performant database solution. The architecture effectively addresses common performance bottlenecks and provides a solid foundation for building data-intensive web applications.

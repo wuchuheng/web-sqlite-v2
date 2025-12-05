@@ -439,7 +439,12 @@ export interface OpfsFlags {
  * Performance metrics for operations
  */
 export interface OpfsMetrics {
-  [operationName: string]: OperationMetric;
+  [operationName: string]:
+    | OperationMetric
+    | {
+        serialize: OperationMetric;
+        deserialize: OperationMetric;
+      };
   s11n: {
     serialize: OperationMetric;
     deserialize: OperationMetric;

@@ -18,6 +18,7 @@
 </cite>
 
 ## Table of Contents
+
 1. [Worker Initialization Failures](#worker-initialization-failures)
 2. [OPFS Access Errors](#opfs-access-errors)
 3. [WASM Loading Problems](#wasm-loading-problems)
@@ -53,10 +54,12 @@ end
 ```
 
 **Diagram sources**
+
 - [sqliteWorker.ts](file://src/sqliteWorker.ts#L47-L56)
 - [test-worker.ts](file://tests/e2e/test-worker.ts#L12-L15)
 
 **Section sources**
+
 - [sqliteWorker.ts](file://src/sqliteWorker.ts#L31-L243)
 - [test-worker.ts](file://tests/e2e/test-worker.ts#L1-L74)
 
@@ -65,6 +68,7 @@ end
 OPFS (Origin Private File System) access errors occur when the application cannot access the browser's file system APIs required for persistent storage. These errors are primarily governed by the environment validation logic in `environment-validation.mjs`, which checks for the necessary conditions before attempting to use OPFS.
 
 The validation process checks for several critical requirements:
+
 1. Presence of SharedArrayBuffer and Atomics APIs
 2. Running in a worker context (not the main thread)
 3. Availability of OPFS-specific APIs like FileSystemHandle and createSyncAccessHandle
@@ -93,10 +97,12 @@ Success --> End
 ```
 
 **Diagram sources**
+
 - [environment-validation.mjs](file://src/jswasm/vfs/opfs/installer/core/environment-validation.mjs#L6-L38)
 - [worker-message-handler.mjs](file://src/jswasm/vfs/opfs/installer/utils/worker-message-handler.mjs#L26-L31)
 
 **Section sources**
+
 - [environment-validation.mjs](file://src/jswasm/vfs/opfs/installer/core/environment-validation.mjs#L1-L53)
 - [worker-message-handler.mjs](file://src/jswasm/vfs/opfs/installer/utils/worker-message-handler.mjs#L1-L31)
 
@@ -107,6 +113,7 @@ WASM loading problems can occur at various stages of the WebAssembly module init
 The WASM loading process is managed by the `wasm-loader.ts` module, which attempts to load the SQLite3 WASM binary using the most efficient method available. The loader first attempts to use `WebAssembly.instantiateStreaming()` for optimal performance, but falls back to `WebAssembly.instantiate()` with an ArrayBuffer if streaming compilation fails.
 
 Common WASM loading issues include:
+
 - Network failures preventing the WASM file download
 - Browser security policies blocking WASM execution
 - Memory allocation failures during instantiation
@@ -139,10 +146,12 @@ end
 ```
 
 **Diagram sources**
+
 - [wasm-loader.ts](file://src/jswasm/utils/wasm-loader/wasm-loader.ts#L170-L209)
 - [wasm-loader.unit.test.ts](file://src/jswasm/utils/wasm-loader/wasm-loader.unit.test.ts#L100-L126)
 
 **Section sources**
+
 - [wasm-loader.ts](file://src/jswasm/utils/wasm-loader/wasm-loader.ts#L1-L209)
 - [wasm-loader.unit.test.ts](file://src/jswasm/utils/wasm-loader/wasm-loader.unit.test.ts#L1-L148)
 
@@ -153,6 +162,7 @@ Connection timeouts and query execution errors are handled through the worker me
 When a query execution error occurs, the system captures both the error message and the full stack trace, which is then split into an array of strings for transmission back to the main thread. This allows developers to see exactly where the error originated, whether it was during SQL parsing, execution, or result processing.
 
 Common query execution errors include:
+
 - Invalid SQL syntax
 - Non-existent tables or columns
 - Constraint violations (unique, not null, foreign key)
@@ -176,10 +186,12 @@ J --> K[Return: {success: false, error: message, errorStack: array}]
 ```
 
 **Diagram sources**
+
 - [sqliteWorker.ts](file://src/sqliteWorker.ts#L112-L166)
 - [error-handling.e2e.test.ts](file://tests/e2e/error-handling.e2e.test.ts#L7-L39)
 
 **Section sources**
+
 - [sqliteWorker.ts](file://src/sqliteWorker.ts#L112-L166)
 - [error-handling.e2e.test.ts](file://tests/e2e/error-handling.e2e.test.ts#L1-L51)
 
@@ -192,6 +204,7 @@ The system uses a custom `WasmAllocError` class to represent memory allocation f
 The memory manager implements a growth strategy that calculates the required number of memory pages (64KB each) and attempts to grow the heap using `wasmMemory.grow()`. If this operation fails, the system returns undefined, which is then handled by the calling code as a memory allocation failure.
 
 Key aspects of memory management:
+
 - Initial heap size configuration
 - Dynamic memory growth when needed
 - 2GB maximum heap size for 32-bit addressing
@@ -211,10 +224,12 @@ H --> I[Set resultCode: SQLITE_NOMEM]
 ```
 
 **Diagram sources**
+
 - [memory-manager.mjs](file://src/jswasm/runtime/memory-manager.mjs#L56-L69)
 - [error-utils.mjs](file://src/jswasm/wasm/bootstrap/error-utils.mjs#L72-L92)
 
 **Section sources**
+
 - [memory-manager.mjs](file://src/jswasm/runtime/memory-manager.mjs#L28-L69)
 - [error-utils.mjs](file://src/jswasm/wasm/bootstrap/error-utils.mjs#L66-L92)
 
@@ -227,6 +242,7 @@ The `createSQLite3Error` function creates a custom error class that captures bot
 Stack traces are particularly valuable for debugging because they show the complete call path from the point of error occurrence back to the original API call. In the worker environment, stack traces are split into arrays of strings for transmission between threads, preserving the hierarchical structure of the call stack.
 
 Common error patterns to recognize:
+
 - "syntax error" - Invalid SQL syntax
 - "no such table" - Table does not exist
 - "no such column" - Column does not exist in table
@@ -264,10 +280,12 @@ ResultCodeStringifier --> WasmAllocError : creates
 ```
 
 **Diagram sources**
+
 - [error-utils.mjs](file://src/jswasm/wasm/bootstrap/error-utils.mjs#L8-L64)
 - [error-handling.e2e.test.ts](file://tests/e2e/error-handling.e2e.test.ts#L13-L37)
 
 **Section sources**
+
 - [error-utils.mjs](file://src/jswasm/wasm/bootstrap/error-utils.mjs#L1-L93)
 - [error-handling.e2e.test.ts](file://tests/e2e/error-handling.e2e.test.ts#L1-L51)
 
@@ -276,6 +294,7 @@ ResultCodeStringifier --> WasmAllocError : creates
 Browser compatibility and CORS (Cross-Origin Resource Sharing) issues are critical for the proper functioning of the web-sqlite-v2 system, particularly when using OPFS and SharedArrayBuffer. The `http-server.ts` script provides the necessary headers to enable these features in development environments.
 
 The most important headers for proper functionality are:
+
 - `Cross-Origin-Embedder-Policy: require-corp` - Required for SharedArrayBuffer
 - `Cross-Origin-Opener-Policy: same-origin` - Required for SharedArrayBuffer
 - `Access-Control-Allow-Origin: *` - Enables CORS for development
@@ -284,6 +303,7 @@ The most important headers for proper functionality are:
 Without these headers, browsers will block access to SharedArrayBuffer and OPFS APIs due to security restrictions. The server implementation in `http-server.ts` automatically includes these headers to ensure that the application can function properly in development.
 
 Browser compatibility considerations:
+
 - OPFS is only available in Chromium-based browsers (Chrome, Edge, etc.)
 - Firefox has limited OPFS support behind flags
 - Safari does not currently support OPFS
@@ -309,10 +329,12 @@ style J fill:#bdf8bf,stroke:#333
 ```
 
 **Diagram sources**
+
 - [http-server.ts](file://scripts/http-server.ts#L144-L154)
 - [environment-validation.mjs](file://src/jswasm/vfs/opfs/installer/core/environment-validation.mjs#L9-L14)
 
 **Section sources**
+
 - [http-server.ts](file://scripts/http-server.ts#L103-L285)
 - [environment-validation.mjs](file://src/jswasm/vfs/opfs/installer/core/environment-validation.mjs#L1-L53)
 
@@ -323,6 +345,7 @@ Concurrency problems and transaction deadlocks can occur when multiple operation
 The `concurrency.e2e.test.ts` file demonstrates how the system handles multiple sequential operations on the same database. While the current implementation uses sequential execution to avoid SQLITE_BUSY errors, the underlying VFS is designed to handle concurrent access through proper locking mechanisms.
 
 Transaction management is implemented according to SQLite's standard behavior:
+
 - BEGIN TRANSACTION starts a transaction
 - COMMIT commits all changes
 - ROLLBACK rolls back all changes
@@ -332,6 +355,7 @@ Transaction management is implemented according to SQLite's standard behavior:
 The `transactions.e2e.test.ts` file verifies that transactions work correctly, including successful commits, explicit rollbacks, and nested savepoints. When a ROLLBACK TO savepoint is executed, all changes after that savepoint are undone, but changes before it are preserved.
 
 Deadlock prevention strategies:
+
 - Setting appropriate busy timeouts (10 seconds by default)
 - Using non-blocking operations when possible
 - Implementing retry logic for transient conflicts
@@ -364,10 +388,12 @@ end
 ```
 
 **Diagram sources**
+
 - [transactions.e2e.test.ts](file://tests/e2e/transactions.e2e.test.ts#L7-L37)
 - [concurrency.e2e.test.ts](file://tests/e2e/concurrency.e2e.test.ts#L6-L28)
 
 **Section sources**
+
 - [transactions.e2e.test.ts](file://tests/e2e/transactions.e2e.test.ts#L1-L130)
 - [concurrency.e2e.test.ts](file://tests/e2e/concurrency.e2e.test.ts#L1-L29)
 
@@ -376,6 +402,7 @@ end
 The web-sqlite-v2 system provides several debugging tools and techniques for both development and production environments. These tools help developers diagnose issues, optimize performance, and understand the internal operation of the system.
 
 Development debugging features:
+
 - Query parameter `?sqlite3.debugModule=1` enables debug logging
 - Console warnings for module initialization issues
 - Detailed error messages with stack traces
@@ -383,6 +410,7 @@ Development debugging features:
 - HTTP server with COOP/COEP headers for development
 
 Production debugging considerations:
+
 - Minimized error information to prevent information leakage
 - Structured error reporting without sensitive details
 - Performance monitoring through timing metrics
@@ -431,11 +459,13 @@ style L fill:#ffebbb,stroke:#333
 ```
 
 **Diagram sources**
+
 - [sqlite3-init-wrapper.unit.test.ts](file://src/jswasm/utils/sqlite3-init-wrapper/sqlite3-init-wrapper.unit.test.ts#L130-L147)
 - [error-handling.e2e.test.ts](file://tests/e2e/error-handling.e2e.test.ts#L7-L51)
 - [http-server.ts](file://scripts/http-server.ts#L256-L285)
 
 **Section sources**
+
 - [sqlite3-init-wrapper.unit.test.ts](file://src/jswasm/utils/sqlite3-init-wrapper/sqlite3-init-wrapper.unit.test.ts#L1-L151)
 - [error-handling.e2e.test.ts](file://tests/e2e/error-handling.e2e.test.ts#L1-L51)
 - [http-server.ts](file://scripts/http-server.ts#L103-L285)

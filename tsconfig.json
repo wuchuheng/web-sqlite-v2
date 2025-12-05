@@ -3,16 +3,8 @@
         "target": "ES2022",
         "useDefineForClassFields": true,
         "module": "ESNext",
-        "lib": [
-            "ES2022",
-            "DOM",
-            "DOM.Iterable",
-            "WebWorker"
-        ],
-        "types": [
-            "vite/client",
-            "node"
-        ],
+        "lib": ["ES2022", "DOM", "DOM.Iterable", "WebWorker"],
+        "types": ["vite/client", "node"],
         "skipLibCheck": true,
         /* Bundler mode */
         "moduleResolution": "bundler",

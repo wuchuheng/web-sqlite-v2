@@ -18,6 +18,7 @@
 </cite>
 
 ## Table of Contents
+
 1. [Installation](#installation)
 2. [Browser Environment Requirements](#browser-environment-requirements)
 3. [Initialization and Database Opening](#initialization-and-database-opening)
@@ -44,6 +45,7 @@ pnpm add @wuchuheng/web-sqlite
 The package is configured as an ES module with the entry point defined in package.json under the "main" field pointing to ./src/jswasm/sqlite3.mjs. The package exports are properly defined to support modern JavaScript module resolution.
 
 **Section sources**
+
 - [package.json](file://package.json#L1-L62)
 
 ## Browser Environment Requirements
@@ -57,6 +59,7 @@ web-sqlite-v2 requires specific browser capabilities to function properly, parti
 The environment validation is performed in the environment-validation.mjs file, which checks for these capabilities and provides descriptive error messages when requirements are not met.
 
 **Section sources**
+
 - [src/jswasm/vfs/opfs/installer/core/environment-validation.mjs](file://src/jswasm/vfs/opfs/installer/core/environment-validation.mjs#L1-L52)
 
 ## Initialization and Database Opening
@@ -64,9 +67,9 @@ The environment validation is performed in the environment-validation.mjs file, 
 The main entry point for web-sqlite-v2 is the `open()` function exported from the package. This function initializes a SQLite database connection and returns a Promise that resolves to a SqliteWorkerI instance.
 
 ```typescript
-import open from '@wuchuheng/web-sqlite';
+import open from "@wuchuheng/web-sqlite";
 
-const db = await open('my-database.db');
+const db = await open("my-database.db");
 ```
 
 The `open()` function creates a Web Worker to handle database operations, ensuring that database operations do not block the main thread. The database name is passed as a parameter and is used to create or connect to a database file in the OPFS storage.
@@ -74,6 +77,7 @@ The `open()` function creates a Web Worker to handle database operations, ensuri
 Internally, the worker uses a message-passing system to communicate between the main thread and the worker thread. The worker handles three primary actions: Open, Close, and Sql, each identified by numeric codes.
 
 **Section sources**
+
 - [src/index.ts](file://src/index.ts#L1-L92)
 - [src/sqliteWorker.ts](file://src/sqliteWorker.ts#L1-L243)
 
@@ -101,7 +105,7 @@ await db.sql(`
 ```typescript
 // Query data with type safety
 const users = await db.sql<{ id: number; name: string; email: string }>(
-  'SELECT id, name, email FROM users'
+    "SELECT id, name, email FROM users",
 );
 console.log(users);
 ```
@@ -114,13 +118,18 @@ For operations that need to be executed as a single atomic unit, use the `transa
 
 ```typescript
 await db.transaction(async (tx) => {
-  await tx.sql("INSERT INTO users (name, email) VALUES ('Alice', 'alice@example.com')");
-  await tx.sql("INSERT INTO users (name, email) VALUES ('Bob', 'bob@example.com')");
-  // If an error occurs, the transaction will be automatically rolled back
+    await tx.sql(
+        "INSERT INTO users (name, email) VALUES ('Alice', 'alice@example.com')",
+    );
+    await tx.sql(
+        "INSERT INTO users (name, email) VALUES ('Bob', 'bob@example.com')",
+    );
+    // If an error occurs, the transaction will be automatically rolled back
 });
 ```
 
 **Section sources**
+
 - [src/sqliteWorker.d.ts](file://src/sqliteWorker.d.ts#L1-L115)
 - [tests/e2e/crud-operations.e2e.test.ts](file://tests/e2e/crud-operations.e2e.test.ts#L1-L143)
 
@@ -137,6 +146,7 @@ The project is configured to work with Vite, as shown in the vite.config.ts file
 The configuration ensures that the package is properly bundled as an ES module with type definitions, making it easy to import and use in modern JavaScript applications.
 
 **Section sources**
+
 - [vite.config.ts](file://vite.config.ts#L1-L36)
 
 ## Common Setup Issues
@@ -159,6 +169,7 @@ Worker instantiation may fail if the server does not properly serve the worker s
 The runtime environment detection in environment-detector.mjs identifies whether the code is running in a web browser, web worker, or other environment. This detection is crucial for determining the appropriate file loading strategy and script directory resolution.
 
 **Section sources**
+
 - [scripts/http-server.ts](file://scripts/http-server.ts#L151-L285)
 - [src/jswasm/runtime/environment-detector.mjs](file://src/jswasm/runtime/environment-detector.mjs#L1-L81)
 - [src/jswasm/utils/wasm-loader/wasm-loader.ts](file://src/jswasm/utils/wasm-loader/wasm-loader.ts#L126-L168)
@@ -183,6 +194,7 @@ db.on("ready", () => console.log("Database adapter ready"));
 These events provide visibility into the database operations and can be invaluable for debugging and monitoring application behavior.
 
 **Section sources**
+
 - [src/sqliteWorker.d.ts](file://src/sqliteWorker.d.ts#L70-L86)
 
 ## Complete Working Example
@@ -190,20 +202,20 @@ These events provide visibility into the database operations and can be invaluab
 The following example demonstrates a complete implementation of web-sqlite-v2 in a web application:
 
 ```typescript
-import open from '@wuchuheng/web-sqlite';
+import open from "@wuchuheng/web-sqlite";
 
 async function initializeDatabase() {
-  try {
-    // Open database connection
-    const db = await open('example.db');
-    
-    // Set up event handlers
-    db.on("log", (msg) => console.log("[db]", msg));
-    db.on("error", (err) => console.error("DB error:", err));
-    
-    // Create table and insert data
-    await db.transaction(async (tx) => {
-      await tx.sql(`
+    try {
+        // Open database connection
+        const db = await open("example.db");
+
+        // Set up event handlers
+        db.on("log", (msg) => console.log("[db]", msg));
+        db.on("error", (err) => console.error("DB error:", err));
+
+        // Create table and insert data
+        await db.transaction(async (tx) => {
+            await tx.sql(`
         CREATE TABLE IF NOT EXISTS products (
           id INTEGER PRIMARY KEY,
           name TEXT NOT NULL,
@@ -211,28 +223,29 @@ async function initializeDatabase() {
           created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
         )
       `);
-      
-      await tx.sql(`
+
+            await tx.sql(`
         INSERT INTO products (name, price) VALUES 
         ('Laptop', 999.99),
         ('Mouse', 25.50),
         ('Keyboard', 75.00)
       `);
-    });
-    
-    // Query data
-    const products = await db.sql<{ id: number; name: string; price: number }>(
-      'SELECT id, name, price FROM products ORDER BY name'
-    );
-    
-    console.log('Products:', products);
-    
-    // Clean up
-    await db.close();
-    
-  } catch (error) {
-    console.error('Database operation failed:', error);
-  }
+        });
+
+        // Query data
+        const products = await db.sql<{
+            id: number;
+            name: string;
+            price: number;
+        }>("SELECT id, name, price FROM products ORDER BY name");
+
+        console.log("Products:", products);
+
+        // Clean up
+        await db.close();
+    } catch (error) {
+        console.error("Database operation failed:", error);
+    }
 }
 
 // Run the example
@@ -242,6 +255,7 @@ initializeDatabase();
 This example demonstrates the complete workflow: opening a database, setting up event handlers, creating a table within a transaction, inserting data, querying records, and properly closing the connection.
 
 **Section sources**
+
 - [src/index.ts](file://src/index.ts#L64-L87)
 - [src/sqliteWorker.ts](file://src/sqliteWorker.ts#L68-L243)
 - [tests/e2e/crud-operations.e2e.test.ts](file://tests/e2e/crud-operations.e2e.test.ts#L1-L143)

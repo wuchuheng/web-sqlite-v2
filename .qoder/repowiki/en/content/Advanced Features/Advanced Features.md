@@ -18,6 +18,7 @@
 </cite>
 
 ## Table of Contents
+
 1. [Transaction Implementation](#transaction-implementation)
 2. [Prepared Statements Functionality](#prepared-statements-functionality)
 3. [Error Handling System](#error-handling-system)
@@ -64,10 +65,12 @@ Database-->>Application : Transaction committed
 ```
 
 **Diagram sources**
+
 - [transactions.e2e.test.ts](file://tests/e2e/transactions.e2e.test.ts#L102-L128)
 - [sqliteWorker.ts](file://src/sqliteWorker.ts#L138-L142)
 
 **Section sources**
+
 - [transactions.e2e.test.ts](file://tests/e2e/transactions.e2e.test.ts)
 - [sqliteWorker.ts](file://src/sqliteWorker.ts#L138-L142)
 
@@ -95,11 +98,13 @@ HandleNoResults --> FinalizeStatement
 ```
 
 **Diagram sources**
+
 - [prepared-statements.e2e.test.ts](file://tests/e2e/prepared-statements.e2e.test.ts)
 - [binding.mjs](file://src/jswasm/api/oo1-db/db-statement/binding.mjs)
 - [statement.mjs](file://src/jswasm/api/oo1-db/db-statement/statement.mjs)
 
 **Section sources**
+
 - [prepared-statements.e2e.test.ts](file://tests/e2e/prepared-statements.e2e.test.ts)
 - [binding.mjs](file://src/jswasm/api/oo1-db/db-statement/binding.mjs#L106-L197)
 - [statement.mjs](file://src/jswasm/api/oo1-db/db-statement/statement.mjs#L75-L96)
@@ -133,11 +138,13 @@ Application --> Idle : Error handled
 ```
 
 **Diagram sources**
+
 - [error-handling.e2e.test.ts](file://tests/e2e/error-handling.e2e.test.ts)
 - [error-utils.mjs](file://src/jswasm/wasm/bootstrap/error-utils.mjs)
 - [validation.mjs](file://src/jswasm/api/oo1-db/db-statement/validation.mjs)
 
 **Section sources**
+
 - [error-handling.e2e.test.ts](file://tests/e2e/error-handling.e2e.test.ts)
 - [error-utils.mjs](file://src/jswasm/wasm/bootstrap/error-utils.mjs)
 - [validation.mjs](file://src/jswasm/api/oo1-db/db-statement/validation.mjs#L28-L42)
@@ -151,6 +158,7 @@ Bulk operations are optimized through the use of prepared statements and transac
 The query execution system includes optimizations for result set handling, including configurable row modes (array, object, or statement) and efficient memory management. For large result sets, the system provides streaming capabilities through the step() method, allowing applications to process results incrementally without loading the entire dataset into memory.
 
 **Section sources**
+
 - [prepared-statements.e2e.test.ts](file://tests/e2e/prepared-statements.e2e.test.ts)
 - [execution.mjs](file://src/jswasm/api/oo1-db/db-statement/execution.mjs#L26-L61)
 - [statement.mjs](file://src/jswasm/api/oo1-db/db-statement/statement.mjs#L209-L231)
@@ -164,6 +172,7 @@ The library provides robust support for schema evolution, including adding colum
 Special consideration is given to schema operations in the context of OPFS (Origin Private File System), ensuring that file locks and concurrent access are properly managed during schema changes. The implementation also includes validation to prevent common schema-related errors, such as creating tables with invalid column types or violating constraints.
 
 **Section sources**
+
 - [schema-operations.e2e.test.ts](file://tests/e2e/schema-operations.e2e.test.ts)
 - [sqliteWorker.ts](file://src/sqliteWorker.ts#L138-L142)
 - [execution.mjs](file://src/jswasm/api/oo1-db/db-statement/execution.mjs)
@@ -197,11 +206,13 @@ ErrorHandling --> JS
 ```
 
 **Diagram sources**
+
 - [io-sync-wrappers.mjs](file://src/jswasm/vfs/opfs/installer/wrappers/io-sync-wrappers.mjs)
 - [sqliteWorker.ts](file://src/sqliteWorker.ts)
 - [index.ts](file://src/index.ts)
 
 **Section sources**
+
 - [io-sync-wrappers.mjs](file://src/jswasm/vfs/opfs/installer/wrappers/io-sync-wrappers.mjs)
 - [sqliteWorker.ts](file://src/sqliteWorker.ts)
 - [index.ts](file://src/index.ts)
@@ -217,6 +228,7 @@ Statement finalization is crucial for preventing memory leaks in the WASM enviro
 Error propagation from WASM requires careful handling, as errors must be translated from SQLite result codes to JavaScript Error objects. The error handling system in web-sqlite-v2 provides this translation, but applications should implement additional error boundaries to prevent unhandled exceptions from crashing the application.
 
 **Section sources**
+
 - [io-sync-wrappers.mjs](file://src/jswasm/vfs/opfs/installer/wrappers/io-sync-wrappers.mjs)
 - [statement.mjs](file://src/jswasm/api/oo1-db/db-statement/statement.mjs#L57-L69)
 - [error-utils.mjs](file://src/jswasm/wasm/bootstrap/error-utils.mjs)
@@ -232,6 +244,7 @@ Prepared statement reuse provides significant performance benefits for repetitiv
 Memory management optimizations include using appropriate row modes (array vs object) based on access patterns, processing large result sets incrementally using the step() method, and ensuring timely finalization of prepared statements. For bulk operations, consider using parameter arrays to minimize JavaScript-to-WASM boundary crossings.
 
 **Section sources**
+
 - [prepared-statements.e2e.test.ts](file://tests/e2e/prepared-statements.e2e.test.ts)
 - [execution.mjs](file://src/jswasm/api/oo1-db/db-statement/execution.mjs)
 - [statement.mjs](file://src/jswasm/api/oo1-db/db-statement/statement.mjs)
@@ -247,6 +260,7 @@ Structure database interactions to minimize JavaScript-to-WASM boundary crossing
 Monitor performance using the library's built-in capabilities and implement logging to track query execution times and resource usage. This helps identify bottlenecks and optimize critical paths in the application.
 
 **Section sources**
+
 - [index.ts](file://src/index.ts)
 - [sqliteWorker.ts](file://src/sqliteWorker.ts)
 - [statement.mjs](file://src/jswasm/api/oo1-db/db-statement/statement.mjs)

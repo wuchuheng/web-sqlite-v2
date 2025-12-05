@@ -327,7 +327,11 @@ const installAsyncProxy = (): void => {
       storeAndNotify(opName, rc);
     },
     xDelete: async (filename: string, syncDir = 0, recursive = false) => {
-      const rc = (await vfsAsyncImpls.xDeleteNoWait(filename, syncDir, recursive)) as number;
+      const rc = (await vfsAsyncImpls.xDeleteNoWait(
+        filename,
+        syncDir,
+        recursive,
+      )) as number;
       storeAndNotify("xDelete", rc);
     },
     xDeleteNoWait: async (
@@ -548,12 +552,27 @@ const installAsyncProxy = (): void => {
     if (state.s11n) return state.s11n;
     const textDecoder = new TextDecoder();
     const textEncoder = new TextEncoder();
-    const viewU8 = new Uint8Array(state.sabIO, state.sabS11nOffset, state.sabS11nSize);
-    const viewDV = new DataView(state.sabIO, state.sabS11nOffset, state.sabS11nSize);
+    const viewU8 = new Uint8Array(
+      state.sabIO,
+      state.sabS11nOffset,
+      state.sabS11nSize,
+    );
+    const viewDV = new DataView(
+      state.sabIO,
+      state.sabS11nOffset,
+      state.sabS11nSize,
+    );
     const s11n: SerializationHelpers = Object.create(null);
     state.s11n = s11n;
-    const typeIdsByName: Record<string, { id: number; size?: number; getter?: keyof DataView; setter?: keyof DataView }> =
-      Object.create(null);
+    const typeIdsByName: Record<
+      string,
+      {
+        id: number;
+        size?: number;
+        getter?: keyof DataView;
+        setter?: keyof DataView;
+      }
+    > = Object.create(null);
     typeIdsByName.number = {
       id: 1,
       size: 8,
@@ -574,10 +593,16 @@ const installAsyncProxy = (): void => {
     };
     typeIdsByName.string = { id: 4 };
     const getTypeId = (v: SerializationValue) =>
-      typeIdsByName[typeof v] || toss("Maintenance required: this value type cannot be serialized.", v);
+      typeIdsByName[typeof v] ||
+      toss("Maintenance required: this value type cannot be serialized.", v);
     const getTypeIdById = (
       tid: number,
-    ): { id: number; size?: number; getter?: keyof DataView; setter?: keyof DataView } => {
+    ): {
+      id: number;
+      size?: number;
+      getter?: keyof DataView;
+      setter?: keyof DataView;
+    } => {
       switch (tid) {
         case typeIdsByName.number.id:
           return typeIdsByName.number;
@@ -638,7 +663,12 @@ const installAsyncProxy = (): void => {
       const argc = viewU8[0];
       const rc: SerializationValue[] = [];
       if (argc) {
-        const typeIds: Array<{ id: number; size?: number; getter?: keyof DataView; setter?: keyof DataView }> = [];
+        const typeIds: Array<{
+          id: number;
+          size?: number;
+          getter?: keyof DataView;
+          setter?: keyof DataView;
+        }> = [];
         let offset = 1;
         for (let i = 0; i < argc; ++i, ++offset) {
           typeIds.push(getTypeIdById(viewU8[offset]));
@@ -664,7 +694,12 @@ const installAsyncProxy = (): void => {
     };
     s11n.serialize = function (...args: SerializationValue[]): void {
       if (args.length) {
-        const typeIds: Array<{ id: number; size?: number; getter?: keyof DataView; setter?: keyof DataView }> = [];
+        const typeIds: Array<{
+          id: number;
+          size?: number;
+          getter?: keyof DataView;
+          setter?: keyof DataView;
+        }> = [];
         let offset = 1;
         viewU8[0] = args.length & 0xff;
         for (let i = 0; i < args.length; ++i, ++offset) {

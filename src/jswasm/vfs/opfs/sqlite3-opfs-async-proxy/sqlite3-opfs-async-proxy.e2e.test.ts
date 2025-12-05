@@ -336,7 +336,8 @@ class OpfsProxyClient {
   }
 }
 
-const workerUrl = new URL("./sqlite3-opfs-async-proxy.ts", import.meta.url).href;
+const workerUrl = new URL("./sqlite3-opfs-async-proxy.ts", import.meta.url)
+  .href;
 
 describe("OPFS Async Proxy E2E Tests", () => {
   let client: OpfsProxyClient;

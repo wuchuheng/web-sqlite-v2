@@ -14,6 +14,7 @@
 </cite>
 
 ## Table of Contents
+
 1. [Introduction](#introduction)
 2. [Bootstrap Initialization Sequence](#bootstrap-initialization-sequence)
 3. [Configuration Management](#configuration-management)
@@ -26,6 +27,7 @@
 10. [Performance and Compatibility Considerations](#performance-and-compatibility-considerations)
 
 ## Introduction
+
 The WASM bootstrap process in web-sqlite-v2 establishes the foundation for running SQLite3 in web environments through WebAssembly. This documentation details the initialization sequence starting from sqlite3Apibootstrap.mjs, covering configuration resolution, state setup, utility creation, and facade construction. The process orchestrates the integration of an Emscripten-compiled SQLite3 module with JavaScript abstractions, creating a cohesive API surface while managing memory, error handling, and runtime dependencies. The bootstrap sequence ensures compatibility across browsers and provides extensibility points for custom initializers and virtual file system (VFS) integrations.
 
 ## Bootstrap Initialization Sequence
@@ -33,6 +35,7 @@ The WASM bootstrap process in web-sqlite-v2 establishes the foundation for runni
 The bootstrap process begins with the `runSQLite3PostLoadInit` function in sqlite3Apibootstrap.mjs, which serves as the entry point after the WebAssembly module is instantiated. This function establishes the `sqlite3ApiBootstrap` global function that applications use to initialize the SQLite3 JavaScript bindings. The initialization sequence follows a strict order: configuration resolution, error utility setup, utility factory creation, WASM runtime initialization, C API helper construction, and finally facade creation. The process prevents re-initialization by caching the sqlite3 instance after the first successful bootstrap. Synchronous initializers are executed during facade creation, while asynchronous initializers (such as OPFS VFS setup) are deferred to the `asyncPostInit` method. This phased approach ensures that dependencies are available when needed while accommodating both immediate and deferred initialization requirements.
 
 **Section sources**
+
 - [sqlite3Apibootstrap.mjs](file://src/jswasm/wasm/sqlite3Apibootstrap.mjs#L28-L183)
 
 ## Configuration Management
@@ -50,9 +53,11 @@ Complete --> End([Configuration Ready])
 ```
 
 **Diagram sources**
+
 - [configuration.mjs](file://src/jswasm/wasm/bootstrap/configuration.mjs#L12-L63)
 
 **Section sources**
+
 - [configuration.mjs](file://src/jswasm/wasm/bootstrap/configuration.mjs#L12-L63)
 - [sqlite3Apibootstrap.mjs](file://src/jswasm/wasm/sqlite3Apibootstrap.mjs#L54-L60)
 
@@ -71,9 +76,11 @@ OPFS --> Complete["Return"]
 ```
 
 **Diagram sources**
+
 - [default-bootstrap-state.mjs](file://src/jswasm/wasm/bootstrap/default-bootstrap-state.mjs#L31-L57)
 
 **Section sources**
+
 - [default-bootstrap-state.mjs](file://src/jswasm/wasm/bootstrap/default-bootstrap-state.mjs#L31-L57)
 - [sqlite3Apibootstrap.mjs](file://src/jswasm/wasm/sqlite3Apibootstrap.mjs#L146-L147)
 
@@ -104,10 +111,12 @@ Utilities --> ErrorConstructors : "uses toss3"
 ```
 
 **Diagram sources**
+
 - [util-factory.mjs](file://src/jswasm/wasm/bootstrap/util-factory.mjs#L10-L145)
 - [error-utils.mjs](file://src/jswasm/wasm/bootstrap/error-utils.mjs#L8-L92)
 
 **Section sources**
+
 - [util-factory.mjs](file://src/jswasm/wasm/bootstrap/util-factory.mjs#L10-L145)
 - [error-utils.mjs](file://src/jswasm/wasm/bootstrap/error-utils.mjs#L8-L92)
 - [sqlite3Apibootstrap.mjs](file://src/jswasm/wasm/sqlite3Apibootstrap.mjs#L68-L71)
@@ -135,10 +144,12 @@ Module-->>Bootstrap : WASM components
 ```
 
 **Diagram sources**
+
 - [wasm-runtime.mjs](file://src/jswasm/wasm/bootstrap/runtime/wasm-runtime.mjs#L16-L312)
 - [sqlite3Apibootstrap.mjs](file://src/jswasm/wasm/sqlite3Apibootstrap.mjs#L108-L117)
 
 **Section sources**
+
 - [wasm-runtime.mjs](file://src/jswasm/wasm/bootstrap/runtime/wasm-runtime.mjs#L16-L312)
 - [sqlite3Apibootstrap.mjs](file://src/jswasm/wasm/sqlite3Apibootstrap.mjs#L84-L103)
 
@@ -158,10 +169,12 @@ Cleanup --> Return["Return sqlite3 Facade"]
 ```
 
 **Diagram sources**
+
 - [create-sqlite3-facade.mjs](file://src/jswasm/wasm/bootstrap/runtime/create-sqlite3-facade.mjs#L14-L82)
 - [sqlite3Apibootstrap.mjs](file://src/jswasm/wasm/sqlite3Apibootstrap.mjs#L132-L143)
 
 **Section sources**
+
 - [create-sqlite3-facade.mjs](file://src/jswasm/wasm/bootstrap/runtime/create-sqlite3-facade.mjs#L14-L82)
 - [sqlite3Apibootstrap.mjs](file://src/jswasm/wasm/sqlite3Apibootstrap.mjs#L132-L143)
 
@@ -190,10 +203,12 @@ F --> |asyncPostInit| A
 ```
 
 **Diagram sources**
+
 - [capi-helpers.mjs](file://src/jswasm/wasm/bootstrap/runtime/capi-helpers.mjs#L15-L591)
 - [default-bootstrap-state.mjs](file://src/jswasm/wasm/bootstrap/default-bootstrap-state.mjs#L51-L55)
 
 **Section sources**
+
 - [capi-helpers.mjs](file://src/jswasm/wasm/bootstrap/runtime/capi-helpers.mjs#L15-L591)
 - [default-bootstrap-state.mjs](file://src/jswasm/wasm/bootstrap/default-bootstrap-state.mjs#L51-L55)
 
@@ -202,6 +217,7 @@ F --> |asyncPostInit| A
 Common bootstrapping failures typically stem from configuration issues, missing WASM exports, or environmental constraints. Key failure points include: missing or invalid `config.exports` or `config.memory` references, which prevent access to the WASM module's functionality; invalid `wasmfsOpfsDir` values that don't conform to the required '/dir-name' format; and BigInt64Array support detection failures in environments without BigInt support. The bootstrap process includes validation for these conditions, throwing descriptive errors through the `toss3` function. Other common issues include missing required WASM exports (detected by `requireExport`), allocation failures during memory operations, and initialization order violations (attempting to use the API before bootstrap completion). The error handling system ensures these failures are reported with actionable messages, including the specific missing export or invalid configuration parameter.
 
 **Section sources**
+
 - [sqlite3Apibootstrap.mjs](file://src/jswasm/wasm/sqlite3Apibootstrap.mjs#L94-L98)
 - [configuration.mjs](file://src/jswasm/wasm/bootstrap/configuration.mjs#L73-L77)
 - [wasm-runtime.mjs](file://src/jswasm/wasm/bootstrap/runtime/wasm-runtime.mjs#L27-L32)
@@ -211,6 +227,7 @@ Common bootstrapping failures typically stem from configuration issues, missing 
 Performance and compatibility considerations are central to the bootstrap design, ensuring efficient initialization and broad browser support. The bootstrap process minimizes overhead by caching the sqlite3 instance after first initialization and using lazy property access for expensive operations. Memory management is optimized through the pstack temporary allocation system, reducing garbage collection pressure. The configuration system supports both standard malloc/free and SQLite's memory management functions, allowing optimization based on use case. Compatibility is maintained through feature detection (BigInt support, OPFS availability) and graceful degradation when advanced features are unavailable. The separation of synchronous and asynchronous initialization allows the core API to become available quickly while deferring potentially slow operations like OPFS setup. The modular design enables tree-shaking in bundlers, reducing payload size when certain features are not needed.
 
 **Section sources**
+
 - [sqlite3Apibootstrap.mjs](file://src/jswasm/wasm/sqlite3Apibootstrap.mjs#L44-L49)
 - [configuration.mjs](file://src/jswasm/wasm/bootstrap/configuration.mjs#L20-L25)
 - [create-sqlite3-facade.mjs](file://src/jswasm/wasm/bootstrap/runtime/create-sqlite3-facade.mjs#L35-L66)
