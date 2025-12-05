@@ -53,7 +53,7 @@ The codebase follows a modular architecture where the monolithic SQLite3 WASM co
 src/jswasm/
 ├── sqlite3.mjs                  # Main entry point and Emscripten glue code
 ├── sqlite3Apibootstrap.mjs      # SQLite3 API initialization and bootstrap
-├── vfs/opfs/sqlite3-opfs-async-proxy.js  # Worker entry delegating to async-proxy/
+├── vfs/opfs/sqlite3-opfs-async-proxy/sqlite3-opfs-async-proxy.js  # Worker entry delegating to async-proxy/
 ├── vfs/opfs/async-proxy/        # OPFS async proxy implementation modules
 ├── memfs.mjs                    # In-memory file system implementation
 ├── syscalls.mjs                 # System call implementations
@@ -95,7 +95,7 @@ src/jswasm/
 - Configuration management
 - Memory allocation utilities (malloc/free wrappers)
 
-**5. OPFS Integration** (`vfs/opfs/sqlite3-opfs-async-proxy.js`, `async-proxy/index.mjs`)
+**5. OPFS Integration** (`vfs/opfs/sqlite3-opfs-async-proxy/sqlite3-opfs-async-proxy.js`, `async-proxy/index.mjs`)
 
 - Asynchronous OPFS (Origin Private File System) proxy
 - Worker thread coordination for persistent storage

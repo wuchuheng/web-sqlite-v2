@@ -328,7 +328,7 @@ export function createInstallOpfsVfsContext(sqlite3) {
         return thePromise;
     };
 
-    installOpfsVfs.defaultProxyUri = "../sqlite3-opfs-async-proxy.js";
+    installOpfsVfs.defaultProxyUri = "../sqlite3-opfs-async-proxy/sqlite3-opfs-async-proxy.js";
 
     /**
      * Initializer function for OPFS VFS.

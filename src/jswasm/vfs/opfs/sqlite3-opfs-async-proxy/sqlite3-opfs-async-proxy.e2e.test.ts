@@ -101,7 +101,9 @@ class OpfsProxyClient {
     return new Promise((resolve, reject) => {
       const timer = setTimeout(() => {
         this.worker.removeEventListener("message", handler);
-        reject(new Error("Timed out waiting for OPFS async proxy to initialize"));
+        reject(
+          new Error("Timed out waiting for OPFS async proxy to initialize"),
+        );
       }, workerInitTimeoutMs);
 
       const handler = (event: MessageEvent) => {
@@ -121,7 +123,11 @@ class OpfsProxyClient {
 
         if (event.data.type === "opfs-unavailable") {
           cleanup();
-          reject(new Error("OPFS unavailable: " + (event.data.payload || "").toString()));
+          reject(
+            new Error(
+              "OPFS unavailable: " + (event.data.payload || "").toString(),
+            ),
+          );
         }
       };
 
@@ -330,7 +336,7 @@ class OpfsProxyClient {
   }
 }
 
-const workerUrl = new URL("./sqlite3-opfs-async-proxy.js", import.meta.url).href;
+const workerUrl = new URL("./sqlite3-opfs-async-proxy.ts", import.meta.url).href;
 
 describe("OPFS Async Proxy E2E Tests", () => {
   let client: OpfsProxyClient;
@@ -417,7 +423,9 @@ describe("OPFS Async Proxy E2E Tests", () => {
     const shortReadRc = await client.send("xRead", [fid, paddedLength, 0]);
     expect(shortReadRc.rc).toBe(OpfsProxyClient.SQLITE_IOERR_SHORT_READ);
     const paddedBuffer = client.getFileBuffer(paddedLength);
-    expect(Array.from(paddedBuffer.slice(data.length))).toEqual([0, 0, 0, 0, 0]);
+    expect(Array.from(paddedBuffer.slice(data.length))).toEqual([
+      0, 0, 0, 0, 0,
+    ]);
 
     const partialRc = await client.send("xRead", [fid, 6, 7]);
     expect(partialRc.rc).toBe(OpfsProxyClient.SQLITE_OK);
@@ -472,13 +480,15 @@ describe("OPFS Async Proxy E2E Tests", () => {
     const fid = nextFid();
 
     expect(
-      (await client.send("xOpen", [
-        fid,
-        filename,
-        OpfsProxyClient.SQLITE_OPEN_CREATE |
-          OpfsProxyClient.SQLITE_OPEN_READWRITE,
-        0,
-      ])).rc,
+      (
+        await client.send("xOpen", [
+          fid,
+          filename,
+          OpfsProxyClient.SQLITE_OPEN_CREATE |
+            OpfsProxyClient.SQLITE_OPEN_READWRITE,
+          0,
+        ])
+      ).rc,
     ).toBe(OpfsProxyClient.SQLITE_OK);
 
     expect(
@@ -505,13 +515,15 @@ describe("OPFS Async Proxy E2E Tests", () => {
     const readwriteFid = nextFid();
 
     expect(
-      (await client.send("xOpen", [
-        readwriteFid,
-        filename,
-        OpfsProxyClient.SQLITE_OPEN_CREATE |
-          OpfsProxyClient.SQLITE_OPEN_READWRITE,
-        0,
-      ])).rc,
+      (
+        await client.send("xOpen", [
+          readwriteFid,
+          filename,
+          OpfsProxyClient.SQLITE_OPEN_CREATE |
+            OpfsProxyClient.SQLITE_OPEN_READWRITE,
+          0,
+        ])
+      ).rc,
     ).toBe(OpfsProxyClient.SQLITE_OK);
 
     const message = new TextEncoder().encode("immutable");
@@ -523,12 +535,14 @@ describe("OPFS Async Proxy E2E Tests", () => {
 
     const readonlyFid = nextFid();
     expect(
-      (await client.send("xOpen", [
-        readonlyFid,
-        filename,
-        OpfsProxyClient.SQLITE_OPEN_READONLY,
-        0,
-      ])).rc,
+      (
+        await client.send("xOpen", [
+          readonlyFid,
+          filename,
+          OpfsProxyClient.SQLITE_OPEN_READONLY,
+          0,
+        ])
+      ).rc,
     ).toBe(OpfsProxyClient.SQLITE_OK);
 
     client.setFileBuffer(new Uint8Array(message.length));
@@ -566,9 +580,9 @@ describe("OPFS Async Proxy E2E Tests", () => {
 
     const payload = new Uint8Array([1, 2, 3, 4]);
     client.setFileBuffer(payload);
-    expect(
-      (await client.send("xWrite", [fid, payload.length, 0])).rc,
-    ).toBe(OpfsProxyClient.SQLITE_OK);
+    expect((await client.send("xWrite", [fid, payload.length, 0])).rc).toBe(
+      OpfsProxyClient.SQLITE_OK,
+    );
 
     await client.closeFile(fid);
 

@@ -75,12 +75,12 @@ W.postMessage({ type: "opfs-async-init", args: stateForWorker });
 
 #### 2. Proxy Worker Path (Fixed ✅)
 
-**Problem:** Incorrect relative path to `sqlite3-opfs-async-proxy.js`  
+**Problem:** Incorrect relative path to `sqlite3-opfs-async-proxy/sqlite3-opfs-async-proxy.js`  
 **Solution:** Updated path to be relative to `installer/` directory  
 **File:** `index.mjs` line 331
 
 ```javascript
-installOpfsVfs.defaultProxyUri = "../sqlite3-opfs-async-proxy.js";
+installOpfsVfs.defaultProxyUri = "../sqlite3-opfs-async-proxy/sqlite3-opfs-async-proxy.js";
 // Now correctly points to parent opfs/ directory
 ```
 
@@ -196,7 +196,7 @@ const { installOpfsVfs, installOpfsVfsInitializer } =
 await installOpfsVfs({
     verbose: 2,
     sanityChecks: true,
-    proxyUri: "../sqlite3-opfs-async-proxy.js", // Relative to installer/ directory
+    proxyUri: "../sqlite3-opfs-async-proxy/sqlite3-opfs-async-proxy.js", // Relative to installer/ directory
 });
 ```
 
@@ -512,7 +512,7 @@ because its MIME type ('text/html') is not executable.
 
 **Solution:** ✅ Already fixed in `index.mjs`
 
-- Changed `defaultProxyUri` from `"sqlite3-opfs-async-proxy.js"` to `"../async-proxy/index.mjs"`
+- Changed `defaultProxyUri` from `"sqlite3-opfs-async-proxy.js"` to `"../sqlite3-opfs-async-proxy/sqlite3-opfs-async-proxy.js"`
 - The path is now correctly relative to the `installer/` directory
 
 **Verification:** Check `index.mjs` line 331 for the correct relative path

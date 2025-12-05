@@ -135,7 +135,7 @@ describe("OPFS Async Proxy", () => {
 
     beforeAll(async () => {
         client = new OpfsProxyClient(
-            new URL("./sqlite3-opfs-async-proxy.js", import.meta.url).href,
+            new URL("./sqlite3-opfs-async-proxy.ts", import.meta.url).href,
         );
         await client.init();
     });
