@@ -49,7 +49,7 @@ When an AI assistant is driving the migration, it **must obey all of the followi
 
     - **Autonomous Zone A (Steps 2 Implementation -> End of Step 7)**
         - The AI automatically executes Steps 2, 3, 4, 5, 6, and 7 in sequence.
-        - **Test Loop:** In Step 2 (and others), the AI operates in a loop: `Generate Code/Test` -> `Run npm run test` -> `If Fail, Fix & Retry` -> `If Pass, Next Step`.
+        - **Test Loop:** In Step 2 (and others), the AI operates in a loop: `Generate Code/Test` -> `Run npm run test` -> `Check Coverage (≥ 80%)` -> `If Fail/Low Coverage, Fix & Retry` -> `If Pass & Coverage OK, Next Step`.
         - The AI does **not** ask "Do you want me to proceed?" between these steps. It simply reports progress, updates the checklist, and moves to the next step immediately upon success.
 
     - **Gate 2: Deletion Approval (End of Step 7 / Start of Step 8)**
@@ -125,12 +125,14 @@ steps:
 - **Action:** Create `*.test.ts` next to `originalPath` (same directory, same stem).
 - Cover the behaviors exposed by the `.mjs` file and `.d.ts` types using Vitest (the repo already has `vitest.config.ts`).
 - Point the tests at the existing `.mjs` implementation and run `npm run test`. Tests must pass to establish the baseline.
+- **Coverage Goal:** Ensure the target file has a test coverage of **≥ 80%**.
 - Before the tests target the new `.ts`, add the new migration entry to `tsconfig.migration.json` so the `build:migration` output can emit the paired `.js` and `.d.ts`.
 - **Test Loop:**
     1. Write/Update test file.
-    2. Run `npm run test`.
-    3. **If Fail:** Analyze error, fix test or code, repeat loop.
-    4. **If Pass:** Mark Step 2 done, **automatically proceed to Step 3**.
+    2. Run `npm run test` (ensure coverage reporting is active if needed).
+    3. Check coverage for the target file.
+    4. **If Fail or Coverage < 80%:** Analyze error or coverage gaps, add tests or fix code, then repeat loop.
+    5. **If Pass and Coverage ≥ 80%:** Mark Step 2 done, **automatically proceed to Step 3**.
 
 ---
 
