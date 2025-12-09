@@ -66,7 +66,7 @@ import {
     thisThreadHasOPFS,
 } from "./core/environment-validation/environment-validation";
 import { prepareOpfsConfig } from "./core/config-setup/config-setup";
-import { createSerializer } from "./core/serialization.mjs";
+import { createSerializer } from "./core/serialization/serialization";
 import {
     initializeOpfsState,
     initializeMetrics,

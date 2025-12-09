@@ -2,7 +2,7 @@ import { describe, it, expect, vi, beforeEach, type Mock } from "vitest";
 import {
   createOperationRunner,
   createOperationTimer,
-} from "./operation-runner.js";
+} from "./operation-runner";
 import type {
   OpfsState,
   OpfsMetrics,

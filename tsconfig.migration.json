@@ -48,6 +48,7 @@
         "src/jswasm/vfs/opfs/async-proxy/sync-handle-error/*.ts",
         "src/jswasm/vfs/opfs/installer/core/config-setup/*.ts",
         "src/jswasm/vfs/opfs/installer/core/operation-runner/*.ts",
+        "src/jswasm/vfs/opfs/installer/core/serialization/*.ts",
         "src/jswasm/vfs/opfs/sqlite3-opfs-async-proxy/*.ts",
         "src/types/global.d.ts"
     ],
