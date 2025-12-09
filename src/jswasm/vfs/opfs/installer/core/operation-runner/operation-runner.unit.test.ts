@@ -6,11 +6,11 @@ import {
 import type {
   OpfsState,
   OpfsMetrics,
-  OpfsOperationIds,
+  OpfsOpIds,
   SerializerInterface,
   SQLiteConstants,
   OpfsFlags,
-} from "../../../../../shared/opfs-vfs-installer.js";
+} from "../../../../../shared/opfs-vfs-installer";
 
 describe("operation-runner", () => {
   describe("createOperationRunner", () => {
@@ -19,7 +19,7 @@ describe("operation-runner", () => {
     let error: (...args: unknown[]) => void;
     let toss: (...args: unknown[]) => never;
     let sab: SharedArrayBuffer;
-    let opIds: OpfsOperationIds;
+    let opIds: OpfsOpIds;
     let s11n: {
       serialize: Mock;
       deserialize: Mock;
@@ -48,7 +48,7 @@ describe("operation-runner", () => {
         xUnlock: 17,
         xWrite: 18,
         mkdir: 19,
-        // @ts-expect-error -- testOp is not in the OpfsOperationIds interface
+        // @ts-expect-error -- testOp is not in the OpfsOpIds interface
         testOp: 2,
       };
 

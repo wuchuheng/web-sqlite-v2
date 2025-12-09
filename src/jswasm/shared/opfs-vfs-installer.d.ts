@@ -358,7 +358,7 @@ export interface OpfsState {
   sabS11nSize: number;
   sabIO: SharedArrayBuffer;
   sabOP: SharedArrayBuffer;
-  opIds: OpfsOperationIds;
+  opIds: OpfsOpIds;
   sq3Codes: SQLiteConstants;
   opfsFlags: OpfsFlags;
   sabOPView?: Int32Array;
@@ -370,7 +370,7 @@ export interface OpfsState {
 /**
  * Operation IDs for atomic communication
  */
-export interface OpfsOperationIds {
+export interface OpfsOpIds {
   whichOp: number;
   rc: number;
   xAccess: number;
@@ -424,6 +424,7 @@ export interface SQLiteConstants {
   SQLITE_OPEN_DELETEONCLOSE: number;
   SQLITE_OPEN_MAIN_DB: number;
   SQLITE_OPEN_READONLY: number;
+  [key: string]: number;
 }
 
 /**
@@ -440,21 +441,20 @@ export interface OpfsFlags {
  */
 export interface OpfsMetrics {
   [operationName: string]:
-    | OperationMetric
-    | {
-        serialize: OperationMetric;
-        deserialize: OperationMetric;
-      };
-  s11n: {
-    serialize: OperationMetric;
-    deserialize: OperationMetric;
-  };
+    | OpfsMetricSet
+    | OpfsS11nMetrics;
+  s11n: OpfsS11nMetrics;
+}
+
+export interface OpfsS11nMetrics {
+  serialize: OpfsMetricSet;
+  deserialize: OpfsMetricSet;
 }
 
 /**
  * Individual operation metric
  */
-export interface OperationMetric {
+export interface OpfsMetricSet {
   count: number;
   time: number;
   wait: number;

@@ -70,7 +70,7 @@ import { createSerializer } from "./core/serialization/serialization";
 import {
     initializeOpfsState,
     initializeMetrics,
-} from "./core/state-initialization.mjs";
+} from "./core/state-initialization/state-initialization";
 import {
     createOperationRunner,
     createOperationTimer,
