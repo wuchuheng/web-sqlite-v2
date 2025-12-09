@@ -1,5 +1,5 @@
 import { describe, it, expect, vi, beforeEach } from "vitest";
-import { createVfsSyncWrappers } from "./vfs-sync-wrappers/vfs-sync-wrappers";
+import { createVfsSyncWrappers } from "./vfs-sync-wrappers";
 // import type { VfsSyncWrapperDeps } from "../../../shared/opfs-vfs-installer";
 
 describe("vfs-sync-wrappers", () => {
