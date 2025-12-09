@@ -311,15 +311,15 @@ Worker communication protocol:
 
 ### Finding Code
 
-| Looking for...                  | Found in...                        |
-| ------------------------------- | ---------------------------------- |
-| "Where is xRead?"               | `wrappers/io-sync-wrappers.mjs`    |
-| "How does serialization work?"  | `core/serialization.mjs`           |
-| "What utilities are available?" | `utils/opfs-util.mjs`              |
-| "Browser support checks?"       | `core/environment-validation.mjs`  |
-| "Configuration parsing?"        | `core/config-setup/config-setup.ts`            |
-| "Worker communication?"         | `utils/worker-message-handler.mjs` |
-| "VFS validation tests?"         | `utils/sanity-check.mjs`           |
+| Looking for...                  | Found in...                         |
+| ------------------------------- | ----------------------------------- |
+| "Where is xRead?"               | `wrappers/io-sync-wrappers.mjs`     |
+| "How does serialization work?"  | `core/serialization.mjs`            |
+| "What utilities are available?" | `utils/opfs-util.mjs`               |
+| "Browser support checks?"       | `core/environment-validation.mjs`   |
+| "Configuration parsing?"        | `core/config-setup/config-setup.ts` |
+| "Worker communication?"         | `utils/worker-message-handler.mjs`  |
+| "VFS validation tests?"         | `utils/sanity-check.mjs`            |
 
 ### Common Tasks
 
@@ -691,16 +691,16 @@ Each module has comprehensive JSDoc:
 
 ### Quick Reference
 
-| Need to...                 | Check...                           |
-| -------------------------- | ---------------------------------- |
-| Validate browser support   | `core/environment-validation.mjs`  |
-| Configure options          | `core/config-setup/config-setup.ts`            |
-| Understand serialization   | `core/serialization.mjs`           |
-| Add file I/O method        | `wrappers/io-sync-wrappers.mjs`    |
-| Add VFS method             | `wrappers/vfs-sync-wrappers.mjs`   |
-| Add filesystem utility     | `utils/opfs-util.mjs`              |
-| Understand worker protocol | `utils/worker-message-handler.mjs` |
-| Run validation tests       | `utils/sanity-check.mjs`           |
+| Need to...                 | Check...                            |
+| -------------------------- | ----------------------------------- |
+| Validate browser support   | `core/environment-validation.mjs`   |
+| Configure options          | `core/config-setup/config-setup.ts` |
+| Understand serialization   | `core/serialization.mjs`            |
+| Add file I/O method        | `wrappers/io-sync-wrappers.mjs`     |
+| Add VFS method             | `wrappers/vfs-sync-wrappers.mjs`    |
+| Add filesystem utility     | `utils/opfs-util.mjs`               |
+| Understand worker protocol | `utils/worker-message-handler.mjs`  |
+| Run validation tests       | `utils/sanity-check.mjs`            |
 
 ### Architecture Highlights
 

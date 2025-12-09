@@ -213,7 +213,7 @@ steps:
     - `npm run build:migration` succeeds without errors.
     - `npm run format` completes (and you commit the formatting changes if this is a PR).
     - `npm run lint` passes with no errors; address any reported issues in the new TS module and tests, or clearly justify any remaining warnings.
-- **Iterative Lint-Fix Loop:** If `npm run lint` reports errors, the AI assistant *must* attempt to fix the reported issues. After attempting a fix, the AI assistant *must* re-run `npm run lint` and repeat this fix-and-re-lint cycle until no linting errors are reported.
+- **Iterative Lint-Fix Loop:** If `npm run lint` reports errors, the AI assistant _must_ attempt to fix the reported issues. After attempting a fix, the AI assistant _must_ re-run `npm run lint` and repeat this fix-and-re-lint cycle until no linting errors are reported.
 - **Status:** Once clean, **automatically proceed to Step 7.**
 
 ---

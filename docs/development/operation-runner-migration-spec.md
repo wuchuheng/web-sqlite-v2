@@ -1,10 +1,12 @@
 # Migration Spec: operation-runner
 
 ## 1. Target module
+
 - **Path:** `src/jswasm/vfs/opfs/installer/core/operation-runner.mjs`
 - **Declaration:** `src/jswasm/vfs/opfs/installer/core/operation-runner.d.ts`
 
 ## 2. Analysis
+
 - **Exports:**
     - `createOperationRunner(state, metrics, error, toss)`: Returns a function that executes operations via Atomics.
     - `createOperationTimer(metrics)`: Returns an object with `mTimeStart(op)` and `mTimeEnd()` for performance tracking.
@@ -21,6 +23,7 @@
     - `toss` and `error` are utility functions.
 
 ## 3. Test Plan
+
 - **Type:** Unit tests (`operation-runner.unit.test.ts`)
 - **Location:** `src/jswasm/vfs/opfs/installer/core/operation-runner.unit.test.ts` (initially), then move to `src/jswasm/vfs/opfs/installer/core/operation-runner/operation-runner.unit.test.ts`.
 - **Test Cases:**
@@ -38,6 +41,7 @@
         - `mTimeEnd` should update total time.
 
 ## 4. Migration Steps
+
 1.  **Test Harness:** Create `operation-runner.unit.test.ts` testing the current `.mjs` implementation.
 2.  **Migration Subdirectory:** Create `src/jswasm/vfs/opfs/installer/core/operation-runner/` and implementation `operation-runner.ts`.
 3.  **Redirect Tests:** Move tests to subdirectory and point to new `.ts`.

@@ -78,7 +78,7 @@ import {
 import { createIoSyncWrappers } from "./wrappers/io-sync-wrappers.mjs";
 import { createVfsSyncWrappers } from "./wrappers/vfs-sync-wrappers.mjs";
 import { createOpfsUtil } from "./utils/opfs-util.mjs";
-import { runSanityCheck } from "./utils/sanity-check.mjs";
+import { runSanityCheck } from "./utils/sanity-check/sanity-check";
 import { createWorkerMessageHandler } from "./utils/worker-message-handler.mjs";
 import {
     setupOptionalVfsMethods,
