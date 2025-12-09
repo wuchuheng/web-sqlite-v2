@@ -202,7 +202,7 @@ export function createOpfsUtil(deps: OpfsUtilDeps): OpfsUtilInterface {
       tgt.dirs = [];
       tgt.files = [];
       // @ts-ignore - values() iterator types might be missing in some environments
-      for await (const handle of dirHandle.values()) {
+      for await (const handle of (dirHandle as any).values()) {
         if ("directory" === handle.kind) {
           const subDir = Object.create(null) as TreeListEntry;
           tgt.dirs.push(subDir);
@@ -224,7 +224,7 @@ export function createOpfsUtil(deps: OpfsUtilDeps): OpfsUtilInterface {
     const dir = opfsUtil.rootDirectory!;
     const opt = { recurse: true };
     // @ts-ignore
-    for await (const handle of dir.values()) {
+    for await (const handle of (dir as any).values()) {
       // @ts-ignore - removeEntry options might differ in types
       dir.removeEntry(handle.name, opt);
     }
@@ -285,9 +285,10 @@ export function createOpfsUtil(deps: OpfsUtilDeps): OpfsUtilInterface {
       dirHandle: FileSystemDirectoryHandle,
       depth: number,
     ): Promise<boolean | void> {
-      // @ts-expect-error dirHandle.values is valid for DirectoryHandle
-      for await (const handle of dirHandle.values()) {
-        if (false === finalOpt.callback(handle, dirHandle, depth)) return false;
+      // @ts-ignore
+      for await (const handle of (dirHandle as any).values()) {
+        if (false === (await finalOpt.callback(handle, dirHandle, depth)))
+          return false;
         else if (finalOpt.recursive && "directory" === handle.kind) {
           if (
             false ===
@@ -385,7 +386,7 @@ export function createOpfsUtil(deps: OpfsUtilDeps): OpfsUtilInterface {
       const hFile = await hDir.getFileHandle(fnamePart, { create: true });
       const sah = await hFile.createSyncAccessHandle();
       sah.truncate(0);
-      nWrote = sah.write(bytes, { at: 0 });
+      nWrote = sah.write(bytes as any, { at: 0 });
       if (nWrote !== n) {
         throw new Error(`Expected to write ${n} bytes but wrote ${nWrote}.`);
       }

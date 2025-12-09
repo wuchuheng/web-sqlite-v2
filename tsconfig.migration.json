@@ -52,7 +52,10 @@
         "src/jswasm/vfs/opfs/installer/core/state-initialization/*.ts",
         "src/jswasm/vfs/opfs/installer/utils/sanity-check/*.ts",
         "src/jswasm/vfs/opfs/sqlite3-opfs-async-proxy/*.ts",
+        "src/jswasm/vfs/opfs/installer/utils/opfs-util/opfs-util.ts",
         "src/types/global.d.ts"
     ],
-    "exclude": ["src/**/*.test.ts"]
+    "exclude": [
+        "src/**/*.test.ts"
+    ]
 }
