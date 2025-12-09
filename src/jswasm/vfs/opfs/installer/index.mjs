@@ -75,7 +75,7 @@ import {
     createOperationRunner,
     createOperationTimer,
 } from "./core/operation-runner/operation-runner";
-import { createIoSyncWrappers } from "./wrappers/io-sync-wrappers.mjs";
+import { createIoSyncWrappers } from "./wrappers/io-sync-wrappers/io-sync-wrappers";
 import { createVfsSyncWrappers } from "./wrappers/vfs-sync-wrappers.mjs";
 import { createOpfsUtil } from "./utils/opfs-util/opfs-util";
 import { runSanityCheck } from "./utils/sanity-check/sanity-check";
