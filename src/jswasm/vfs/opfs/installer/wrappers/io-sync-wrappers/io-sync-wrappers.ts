@@ -91,16 +91,13 @@ export function createIoSyncWrappers(deps: IoSyncWrapperDeps): IoSyncWrappers {
         try {
           if (!state.s11n) throw new Error("state.s11n is not defined");
 
-          // eslint-disable-next-line @typescript-eslint/ban-ts-comment
-          // @ts-ignore
-          const sz = state.s11n!.deserialize(true)[0];
+          const sz = state.s11n!.deserialize(true);
 
-          // eslint-disable-next-line @typescript-eslint/ban-ts-comment
-          // @ts-ignore
-          if (sz === undefined) {
+          if (sz === undefined || sz?.length === 0) {
             throw new Error("Failed to deserialize file size");
           }
-          wasm.poke(pSz64, BigInt(sz), "i64");
+          const firstItem = sz![0]!;
+          wasm.poke(pSz64, BigInt(firstItem), "i64");
         } catch (e) {
           error("Unexpected error reading xFileSize() result:", e);
           rc = state.sq3Codes.SQLITE_IOERR;
