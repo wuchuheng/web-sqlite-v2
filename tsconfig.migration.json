@@ -54,6 +54,7 @@
         "src/jswasm/vfs/opfs/sqlite3-opfs-async-proxy/*.ts",
         "src/jswasm/vfs/opfs/installer/utils/opfs-util/opfs-util.ts",
         "src/jswasm/vfs/opfs/installer/wrappers/io-sync-wrappers/*.ts",
+        "src/jswasm/vfs/opfs/installer/wrappers/vfs-sync-wrappers/*.ts",
         "src/jswasm/vfs/opfs/installer/wrappers/vfs-integration/vfs-integration.ts",
         "src/types/global.d.ts"
     ],
