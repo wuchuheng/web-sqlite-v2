@@ -83,7 +83,7 @@ import { createWorkerMessageHandler } from "./utils/worker-message-handler/worke
 import {
     setupOptionalVfsMethods,
     integrateWithOo1,
-} from "./wrappers/vfs-integration.mjs";
+} from "./wrappers/vfs-integration/vfs-integration";
 
 /**
  * Creates OPFS VFS installer context for SQLite.
