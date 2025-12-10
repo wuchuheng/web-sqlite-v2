@@ -25,7 +25,11 @@ export function validateOpfsEnvironment(
   }
 
   // 1.2 Check worker environment
-  if ("undefined" === typeof WorkerGlobalScope) {
+  if (
+    typeof globalThis === "undefined" ||
+    typeof (globalThis as { WorkerGlobalScope?: unknown }).WorkerGlobalScope ===
+      "undefined"
+  ) {
     return new Error(
       "The OPFS sqlite3_vfs cannot run in the main thread " +
         "because it requires Atomics.wait().",
@@ -61,8 +65,8 @@ export function thisThreadHasOPFS(): boolean {
     globalThis.FileSystemHandle &&
     globalThis.FileSystemDirectoryHandle &&
     globalThis.FileSystemFileHandle &&
-    // @ts-expect-error - createSyncAccessHandle might be undefined or not callable in types
-    globalThis.FileSystemFileHandle.prototype.createSyncAccessHandle &&
+    typeof globalThis.FileSystemFileHandle.prototype.createSyncAccessHandle ===
+      "function" &&
     globalThis.navigator?.storage?.getDirectory
   );
 }

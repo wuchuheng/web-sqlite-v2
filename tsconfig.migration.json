@@ -57,7 +57,10 @@
         "src/jswasm/vfs/opfs/installer/wrappers/vfs-sync-wrappers/*.ts",
         "src/jswasm/vfs/opfs/installer/wrappers/vfs-integration/vfs-integration.ts",
         "src/jswasm/vfs/opfs/installer/utils/worker-message-handler/worker-message-handler.ts",
-        "src/types/global.d.ts"
+        "src/types/global.d.ts",
+        "src/jswasm/vfs/opfs/installer/core/environment-validation/environment-validation.ts"
     ],
-    "exclude": ["src/**/*.test.ts"]
+    "exclude": [
+        "src/**/*.test.ts"
+    ]
 }
