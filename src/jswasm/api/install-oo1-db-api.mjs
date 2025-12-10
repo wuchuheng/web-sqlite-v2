@@ -11,29 +11,22 @@ import {
 } from "./oo1-db/db-statement/index.mjs";
 import { attachJsStorageDb } from "./oo1-db/js-storage-db.mjs";
 
-/**
- * Creates the OO1 DB API installer.
- *
- * @returns {(sqlite3: import("@wuchuheng/web-sqlite").SQLite3API) => void}
- */
-export function createInstallOo1DbApiInitializer() {
-    return function installOo1DbApi(sqlite3) {
-        const context = createOo1Context(sqlite3);
-        const dbCtorHelper = createDbCtorHelper(context);
-        const { Database, Statement, ensureDbOpen } = createDbClasses(
-            context,
-            dbCtorHelper,
-        );
+export function installOo1DbApi(sqlite3) {
+    const context = createOo1Context(sqlite3);
+    const dbCtorHelper = createDbCtorHelper(context);
+    const { Database, Statement, ensureDbOpen } = createDbClasses(
+        context,
+        dbCtorHelper,
+    );
 
-        definePointerAccessors(context, Database, Statement);
+    definePointerAccessors(context, Database, Statement);
 
-        sqlite3.oo1 = {
-            DB: Database,
-            Stmt: Statement,
-        };
-
-        if (context.util.isUIThread()) {
-            attachJsStorageDb(context, Database, dbCtorHelper, ensureDbOpen);
-        }
+    sqlite3.oo1 = {
+        DB: Database,
+        Stmt: Statement,
     };
+
+    if (context.util.isUIThread()) {
+        attachJsStorageDb(context, Database, dbCtorHelper, ensureDbOpen);
+    }
 }

@@ -13,35 +13,24 @@
  */
 
 /**
- * Provides a factory for the default worker API initializer. The initializer
- * wires the legacy Worker-based RPC helpers onto the sqlite3 instance during
- * bootstrap so host applications can opt into the structured messaging API.
+ * Binds the Worker1 API helpers to the supplied sqlite3 facade.
  *
- * @returns {Sqlite3Initializer}
- *          Bootstrap initializer that installs the worker helpers on the
- *          supplied sqlite3 facade.
+ * @param {Sqlite3Facade} sqlite3
+ *        The sqlite3 API object exposed to consumers during bootstrap.
  */
-export function createWorker1ApiInitializer() {
-    /**
-     * Binds the Worker1 API helpers to the supplied sqlite3 facade.
-     *
-     * @param {Sqlite3Facade} sqlite3
-     *        The sqlite3 API object exposed to consumers during bootstrap.
-     */
-    return function initializeWorker1Api(sqlite3) {
-        sqlite3.initWorker1API = function initWorker1API() {
-            const toss = (...args) => {
-                throw new Error(args.join(" "));
-            };
-            if (!(globalThis.WorkerGlobalScope instanceof Function)) {
-                toss("initWorker1API() must be run from a Worker thread.");
-            }
-            const sqlite3Instance =
-                this.sqlite3 || toss("Missing this.sqlite3 object.");
-            const runtime = new Worker1Runtime(sqlite3Instance, toss);
-            runtime.install();
-        }.bind({ sqlite3 });
-    };
+export function initializeWorker1Api(sqlite3) {
+    sqlite3.initWorker1API = function initWorker1API() {
+        const toss = (...args) => {
+            throw new Error(args.join(" "));
+        };
+        if (!(globalThis.WorkerGlobalScope instanceof Function)) {
+            toss("initWorker1API() must be run from a Worker thread.");
+        }
+        const sqlite3Instance =
+            this.sqlite3 || toss("Missing this.sqlite3 object.");
+        const runtime = new Worker1Runtime(sqlite3Instance, toss);
+        runtime.install();
+    }.bind({ sqlite3 });
 }
 
 /**

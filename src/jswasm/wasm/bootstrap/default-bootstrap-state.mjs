@@ -1,12 +1,12 @@
 import { StructBinderFactory } from "../../utils/struct-binder/struct-binder-factory/struct-binder-factory";
 import { createInstallOo1Initializer } from "../../api/install-oo1.mjs";
-import { createInstallOo1DbApiInitializer } from "../../api/install-oo1-db-api.mjs";
+import { installOo1DbApi } from "../../api/install-oo1-db-api.mjs";
 import { createInstallOpfsVfsContext } from "../../vfs/opfs/installer/index.mjs";
-import { createOpfsSahpoolInitializer } from "../../vfs/opfs/opfs-sahpool-vfs.mjs";
-import { createWorker1ApiInitializer } from "./worker1-api-initializer.mjs";
+import { initializeOpfsSahpool } from "../../vfs/opfs/opfs-sahpool-vfs.mjs";
+import { initializeWorker1Api } from "./worker1-api-initializer.mjs";
 import {
-    createVfsInitializer,
-    createVtabInitializer,
+    initializeVtabUtilities,
+    initializeVfsUtilities,
 } from "./vfs-initializers.mjs";
 
 /**
@@ -43,35 +43,25 @@ export function applyDefaultBootstrapState(sqlite3ApiBootstrap) {
     globalThis.Jaccwabyt = StructBinderFactory;
 
     sqlite3ApiBootstrap.initializers.push(createInstallOo1Initializer());
-    sqlite3ApiBootstrap.initializers.push(createVersionInitializer());
-    sqlite3ApiBootstrap.initializers.push(createInstallOo1DbApiInitializer());
-    sqlite3ApiBootstrap.initializers.push(createWorker1ApiInitializer());
-    sqlite3ApiBootstrap.initializers.push(createVfsInitializer());
-    sqlite3ApiBootstrap.initializers.push(createVtabInitializer());
+    sqlite3ApiBootstrap.initializers.push(initializeVersion);
+    sqlite3ApiBootstrap.initializers.push(installOo1DbApi);
+    sqlite3ApiBootstrap.initializers.push(initializeWorker1Api);
+    sqlite3ApiBootstrap.initializers.push(initializeVfsUtilities);
+    sqlite3ApiBootstrap.initializers.push(initializeVtabUtilities);
     sqlite3ApiBootstrap.initializers.push((sqlite3) => {
         const { installOpfsVfsInitializer } =
             createInstallOpfsVfsContext(sqlite3);
         sqlite3ApiBootstrap.initializersAsync.push(installOpfsVfsInitializer);
     });
-    sqlite3ApiBootstrap.initializers.push(createOpfsSahpoolInitializer());
+    sqlite3ApiBootstrap.initializers.push(initializeOpfsSahpool);
 }
 
-/**
- * Creates the initializer responsible for setting the metadata about the
- * embedded SQLite build. Having it encapsulated makes it easy for tooling to
- * update the version numbers without touching the main bootstrap script.
- *
- * @returns {Sqlite3Initializer}
- *          Initializer that annotates the sqlite3 facade with version info.
- */
-function createVersionInitializer() {
-    return function initializeVersion(sqlite3) {
-        sqlite3.version = {
-            libVersion: "3.50.4",
-            libVersionNumber: 3050004,
-            sourceId:
-                "2025-07-30 19:33:53 4d8adfb30e03f9cf27f800a2c1ba3c48fb4ca1b08b0f5ed59a4d5ecbf45e20a3",
-            downloadVersion: 3500400,
-        };
+function initializeVersion(sqlite3) {
+    sqlite3.version = {
+        libVersion: "3.50.4",
+        libVersionNumber: 3050004,
+        sourceId:
+            "2025-07-30 19:33:53 4d8adfb30e03f9cf27f800a2c1ba3c48fb4ca1b08b0f5ed59a4d5ecbf45e20a3",
+        downloadVersion: 3500400,
     };
 }
