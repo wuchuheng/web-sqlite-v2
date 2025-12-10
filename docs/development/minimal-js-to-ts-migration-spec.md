@@ -27,6 +27,7 @@ A complete request allows the AI to follow the minimal migration workflow end-to
 - Keep functions small, lines ≤ 120 characters, and naming consistent with existing code (camelCase for values/functions, PascalCase for classes).
 - Treat documentation as part of the public API: preserve or improve any existing JSDoc/TSDoc comments and plan how they will
   be carried over into the new TypeScript source.
+- **Efficiency**: Do not read the same file multiple times; cache content in context if needed.
 - **Claude Code requirement**: Claude must also read and honor `CLAUDE.md` plus any repo-level AI guidelines in AGENTS/Clinerules before executing the workflow below.
 
 ---
@@ -99,6 +100,7 @@ steps:
 ### 1. Analyze the originals.
 
 - Open `originalPath` and `dtsPath`. Record their exports, signatures, and edge cases.
+- **Deep Analysis:** Analyze the target JS file and relevant source code to understand the full context. Identify existing reference types to strictly avoid `any`.
 - **Wiki Analysis:** Specifically check the repository wiki in `.qoder/` for any relevant documentation, architectural notes, or known issues related to the module being migrated.
 - Identify existing behavior that must remain unchanged (e.g., return types, overloads, TextDecoder fallbacks).
 - Note any runtime assumptions (e.g., running in a browser, availability of `TextDecoder`, polyfills, etc.).
@@ -112,8 +114,11 @@ steps:
 
 **Phase 1: Spec Generation (Gate 1)**
 
-- **Action:** Create a Test Plan/Spec file in `docs/development` describing:
-    - Selected test type(s): Unit (`*.unit.test.ts`) or E2E (`*.e2e.test.ts`).
+- **Action:** Create a Test Plan/Spec file in `docs/development` (using `docs/development/migration-spec-template.md` as a guide) describing:
+    - **Test Strategy:** Analyze the target file to select the most appropriate approach:
+      - **E2E (`*.e2e.test.ts`):** Must be used if the file contains numerous browser interfaces (DOM, Window, etc.).
+      - **Unit (`*.unit.test.ts`):** Must be used if the file does not heavily rely on the browser environment.
+    - Selected test type(s): Unit or E2E based on the strategy above.
     - Intended test cases and coverage.
     - Test data.
     - Scaffolding (e.g., helpers, fixtures).
@@ -213,6 +218,7 @@ steps:
     - `npm run build:migration` succeeds without errors.
     - `npm run format` completes (and you commit the formatting changes if this is a PR).
     - `npm run lint` passes with no errors; address any reported issues in the new TS module and tests, or clearly justify any remaining warnings.
+- **Type Refinement:** If reference types were insufficient during migration, ensure corrected types are defined here to strictly avoid `any`. This includes refining types that caused linting errors.
 - **Iterative Lint-Fix Loop:** If `npm run lint` reports errors, the AI assistant _must_ attempt to fix the reported issues. After attempting a fix, the AI assistant _must_ re-run `npm run lint` and repeat this fix-and-re-lint cycle until no linting errors are reported.
 - **Status:** Once clean, **automatically proceed to Step 7.**
 
