@@ -66,7 +66,7 @@ export interface MutableFS extends BaseMutableFS {
     mountpoint: string,
   ): void;
   close(stream: FSStream): void;
-  getStreamChecked(fd: number): { path: string };
+  getStreamChecked(fd: number): FSStream;
   createNode(parent: FSNode, name: string, mode: number, rdev: number): FSNode;
 
   // Helper methods added by other modules
@@ -191,7 +191,7 @@ export function createInitializationHelpers(
                   parent: null as unknown as FSNode,
                   mount: { mountpoint: "fake" },
                   node_ops: {
-                    readlink: () => stream.path,
+                    readlink: () => stream.path || "",
                   },
                 };
 

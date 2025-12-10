@@ -51,7 +51,12 @@ export interface ExtendedMutableFS extends MutableFS {
   /** Close a stream. */
   close(stream: FSStream): void;
   /** Create device registry for major number tracking. */
-  createDevice: { major?: number };
+  createDevice: ((
+    parent: string | FSNode,
+    name: string,
+    input?: (() => number | null | undefined) | null,
+    output?: ((value: number) => void) | null,
+  ) => FSNode) & { major?: number };
   /** Make a device number. */
   makedev(major: number, minor: number): number;
   /** Register a device with the filesystem. */

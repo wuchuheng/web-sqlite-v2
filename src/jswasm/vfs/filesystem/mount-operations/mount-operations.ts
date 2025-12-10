@@ -19,7 +19,7 @@ export interface MountOperationsFS extends MutableFS {
     path: string,
     options?: { follow_mount?: boolean; parent?: boolean },
   ): {
-    node: FSNode;
+    node: FSNode | null;
     path: string;
   };
   /** Checks if a node represents a mount point. */
@@ -173,7 +173,7 @@ export function createMountOperations(
       // 1. Input handling - validate mount configuration
       const root = mountpoint === "/";
       const pseudo = !mountpoint;
-      let node: FSNode | undefined;
+      let node: FSNode | null = null;
 
       if (root && FS.root) {
         throw new FS.ErrnoError(ERRNO_CODES.EBUSY);
@@ -183,6 +183,10 @@ export function createMountOperations(
         });
         mountpoint = lookup.path;
         node = lookup.node;
+
+        if (!node) {
+          throw new FS.ErrnoError(ERRNO_CODES.ENOENT);
+        }
 
         if (FS.isMountpoint(node)) {
           throw new FS.ErrnoError(ERRNO_CODES.EBUSY);
@@ -226,7 +230,7 @@ export function createMountOperations(
     unmount(mountpoint: string): void {
       // 1. Input handling - validate mountpoint
       const lookup = FS.lookupPath(mountpoint, { follow_mount: false });
-      if (!FS.isMountpoint(lookup.node)) {
+      if (!lookup.node || !FS.isMountpoint(lookup.node)) {
         throw new FS.ErrnoError(ERRNO_CODES.EINVAL);
       }
 
@@ -286,6 +290,10 @@ export function createMountOperations(
       const lookup = FS.lookupPath(path, { parent: true });
       const parent = lookup.node;
       const name = PATH.basename(path);
+
+      if (!parent) {
+        throw new FS.ErrnoError(ERRNO_CODES.ENOENT);
+      }
 
       if (!name || name === "." || name === "..") {
         throw new FS.ErrnoError(ERRNO_CODES.EINVAL);

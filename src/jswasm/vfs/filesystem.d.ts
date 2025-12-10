@@ -1,11 +1,11 @@
-import type { PathFsUtilities } from "../utils/path/types.d.ts";
-import type { MutableFS, FSNode } from "./filesystem/base-state.d.ts";
+import type { PathFsUtilities } from "../utils/path/types";
+import type { MutableFS, FSNode } from "./filesystem/base-state/base-state";
 import type {
   PathOperations,
   PathOperationsOptions,
-} from "./filesystem/path-operations.d.ts";
-import type { ModeOperations } from "./filesystem/mode-operations.d.ts";
-import type { StreamOperations } from "./filesystem/stream-operations.d.ts";
+} from "./filesystem/path-operations/path-operations";
+import type { ModeOperations } from "./filesystem/mode-operations/mode-operations";
+import type { StreamOperations } from "./filesystem/stream-operations/stream-operations";
 import type {
   MountOperations,
   MountOperationsOptions,
@@ -13,24 +13,24 @@ import type {
 import type {
   NodeActions,
   NodeActionsOptions,
-} from "./filesystem/node-actions.d.ts";
-import type { StreamHelpers } from "./filesystem/stream-helpers.d.ts";
+} from "./filesystem/node-actions/node-actions";
+import type { StreamHelpers } from "./filesystem/stream-helpers/stream-helpers";
 import type {
   InitializationHelpers,
   InitializationOptions,
-} from "./filesystem/initialization.d.ts";
+} from "./filesystem/initialization/initialization";
 import type {
   LegacyHelpers,
   LegacyHelpersOptions,
-} from "./filesystem/legacy-helpers.d.ts";
+} from "./filesystem/legacy-helpers/legacy-helpers";
 
 /**
  * Comprehensive configuration required to assemble the filesystem facade.
  */
 export interface FilesystemOptions
   extends PathOperationsOptions,
-    NodeActionsOptions,
-    MountOperationsOptions,
+    Omit<NodeActionsOptions, "Module">,
+    Omit<MountOperationsOptions, "err">,
     LegacyHelpersOptions,
     InitializationOptions {
   FS_createPreloadedFile(

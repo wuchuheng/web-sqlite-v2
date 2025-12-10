@@ -58,7 +58,7 @@ describe("createLegacyHelpers", () => {
       open: vi.fn(),
       write: vi.fn(),
       close: vi.fn(),
-      createDevice: { major: undefined },
+      createDevice: Object.assign(vi.fn(), { major: undefined }),
       makedev: vi.fn(),
       registerDevice: vi.fn(),
       mkdev: vi.fn(),

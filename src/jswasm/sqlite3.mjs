@@ -43,7 +43,7 @@ import { createTTY } from "./system/tty-operations.mjs";
 import { createMEMFS } from "./vfs/memfs.mjs";
 import { createSYSCALLS } from "./system/syscalls.mjs";
 import { createWASIFunctions } from "./system/wasi-functions.mjs";
-import { createFS as createFileSystem } from "./vfs/filesystem.mjs";
+import { createFS as createFileSystem } from "./vfs/filesystem/filesystem.js";
 import {
     randomFill as randomFillUtil,
     zeroMemory,

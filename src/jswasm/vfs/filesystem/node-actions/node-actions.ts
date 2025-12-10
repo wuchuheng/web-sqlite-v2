@@ -15,7 +15,7 @@ import type { EmscriptenModule } from "../../../wasm/emscripten-module";
 export interface NodeActionsOptions {
   getPathFS: () => PathFsUtilities;
   FS_modeStringToFlags: (mode: string) => number;
-  Module: EmscriptenModule;
+  Module: Partial<EmscriptenModule>;
 }
 
 export interface NodeActions extends CoreOperations, MetadataOperations {}

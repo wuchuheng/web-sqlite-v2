@@ -37,6 +37,7 @@
         "src/jswasm/vfs/filesystem/mount-operations/*.ts",
         "src/jswasm/vfs/filesystem/node-core-operations/*.ts",
         "src/jswasm/vfs/filesystem/node-metadata-operations/*.ts",
+        "src/jswasm/vfs/filesystem/*.ts",
         "src/jswasm/vfs/filesystem/path-operations/*.ts",
         "src/jswasm/vfs/filesystem/stream-helpers/*.ts",
         "src/jswasm/vfs/filesystem/stream-operations/*.ts",
