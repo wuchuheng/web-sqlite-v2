@@ -14,14 +14,89 @@ import {
   createLegacyHelpers,
   type ExtendedMutableFS,
 } from "./legacy-helpers/legacy-helpers";
-import type {
-  AssembledFilesystem,
-  FilesystemBundle,
-  FilesystemOptions,
-} from "../filesystem";
 import type { PathFsUtilities } from "../../utils/path/types";
 import type { EmscriptenModule } from "../../wasm/emscripten-module";
 import type { RuntimeModule } from "../../shared/runtime-types";
+
+import type { MutableFS, FSNode } from "./base-state/base-state";
+import type {
+  PathOperations,
+  PathOperationsOptions,
+} from "./path-operations/path-operations";
+import type { ModeOperations } from "./mode-operations/mode-operations";
+import type { StreamOperations } from "./stream-operations/stream-operations";
+import type {
+  MountOperations,
+  MountOperationsOptions,
+} from "./mount-operations/mount-operations";
+import type {
+  NodeActions,
+  NodeActionsOptions,
+} from "./node-actions/node-actions";
+import type { StreamHelpers } from "./stream-helpers/stream-helpers";
+import type {
+  InitializationHelpers,
+  InitializationOptions,
+} from "./initialization/initialization";
+import type {
+  LegacyHelpers,
+  LegacyHelpersOptions,
+} from "./legacy-helpers/legacy-helpers";
+
+/**
+ * Comprehensive configuration required to assemble the filesystem facade.
+ */
+interface FilesystemOptions
+  extends PathOperationsOptions,
+    Omit<NodeActionsOptions, "Module">,
+    Omit<MountOperationsOptions, "err">,
+    LegacyHelpersOptions,
+    InitializationOptions {
+  FS_createPreloadedFile(
+    parent: string | FSNode,
+    name: string,
+    url: string,
+    canRead?: boolean,
+    canWrite?: boolean,
+    onload?: (() => void) | null,
+    onerror?: ((error: Error) => void) | null,
+    dontCreateFile?: boolean,
+    canOwn?: boolean,
+  ): void;
+  FS_createDataFile?(
+    parent: string | FSNode,
+    name: string,
+    data: string | ArrayLike<number> | null,
+    canRead: boolean,
+    canWrite: boolean,
+    canOwn?: boolean,
+  ): void;
+  FS_modeStringToFlags(mode: string): number;
+  FS_getMode(canRead: boolean, canWrite: boolean): number;
+  out?: (message: string) => void;
+  err?: (message: string) => void;
+}
+
+/**
+ * Aggregate type representing the composed filesystem helper modules.
+ */
+type AssembledFilesystem = MutableFS &
+  PathOperations &
+  ModeOperations &
+  StreamOperations &
+  MountOperations &
+  NodeActions &
+  StreamHelpers &
+  InitializationHelpers &
+  LegacyHelpers & {
+    createPreloadedFile: FilesystemOptions["FS_createPreloadedFile"];
+  };
+
+/** Structured return value containing the filesystem facade. */
+interface FilesystemBundle {
+  FS: AssembledFilesystem;
+  PATH_FS: PathFsUtilities;
+}
 
 /**
  * Assembles the filesystem facade used by the SQLite WebAssembly bundle by
