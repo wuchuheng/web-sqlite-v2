@@ -116,8 +116,8 @@ steps:
 
 - **Action:** Create a Test Plan/Spec file in `docs/development` (using `docs/development/migration-spec-template.md` as a guide) describing:
     - **Test Strategy:** Analyze the target file to select the most appropriate approach:
-      - **E2E (`*.e2e.test.ts`):** Must be used if the file contains numerous browser interfaces (DOM, Window, etc.).
-      - **Unit (`*.unit.test.ts`):** Must be used if the file does not heavily rely on the browser environment.
+        - **E2E (`*.e2e.test.ts`):** Must be used if the file contains numerous browser interfaces (DOM, Window, etc.).
+        - **Unit (`*.unit.test.ts`):** Must be used if the file does not heavily rely on the browser environment.
     - Selected test type(s): Unit or E2E based on the strategy above.
     - Intended test cases and coverage.
     - Test data.
