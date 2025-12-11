@@ -4,8 +4,6 @@
  */
 
 // We need to define types that were previously implicit or in missing .d.ts files
-/* eslint-disable @typescript-eslint/no-explicit-any */
-/* eslint-disable @typescript-eslint/ban-ts-comment */
 export interface OpfsUtilDeps {
   state: {
     opIds: Record<string, unknown>;
@@ -23,6 +21,36 @@ export interface OpfsUtilDeps {
     };
     [key: string]: unknown;
   };
+}
+
+interface FileSystemSyncAccessHandle {
+  read(buffer: BufferSource | Uint8Array, options?: { at: number }): number;
+  write(buffer: BufferSource | Uint8Array, options?: { at: number }): number;
+  flush(): void;
+  truncate(newSize: number): void;
+  getSize(): number | Promise<number>;
+  close(): void | Promise<void>;
+}
+
+interface MetricStats {
+  count: number;
+  time: number;
+  wait: number;
+  avgTime?: number;
+  avgWait?: number;
+}
+
+interface SerializationMetrics {
+  count: number;
+  time: number;
+  serialize?: { count: number; time: number };
+  deserialize?: { count: number; time: number };
+  [key: string]: unknown;
+}
+
+interface OpfsMetrics {
+  s11n: SerializationMetrics;
+  [opId: string]: MetricStats | SerializationMetrics;
 }
 
 export interface TreeListEntry {
@@ -54,15 +82,15 @@ export interface OpfsUtilInterface {
     bytes: ArrayBuffer | Uint8Array | (() => Promise<Uint8Array | undefined>),
   ) => Promise<number>;
   metrics: {
-    dump: (metrics: any, W: Worker) => void;
-    reset: (metrics: any) => void;
+    dump: (metrics: OpfsMetrics, W: Worker) => void;
+    reset: (metrics: OpfsMetrics) => void;
   };
   debug: {
     asyncShutdown: (
       opRun: (op: string) => void,
-      warn: (...args: any[]) => void,
+      warn: (...args: unknown[]) => void,
     ) => void;
-    asyncRestart: (W: Worker, warn: (...args: any[]) => void) => void;
+    asyncRestart: (W: Worker, warn: (...args: unknown[]) => void) => void;
   };
 }
 
@@ -201,8 +229,12 @@ export function createOpfsUtil(deps: OpfsUtilDeps): OpfsUtilInterface {
       tgt.name = dirHandle.name;
       tgt.dirs = [];
       tgt.files = [];
-      // @ts-ignore - values() iterator types might be missing in some environments
-      for await (const handle of (dirHandle as any).values()) {
+      const iterator = (
+        dirHandle as unknown as {
+          values: () => AsyncIterable<FileSystemHandle>;
+        }
+      ).values();
+      for await (const handle of iterator) {
         if ("directory" === handle.kind) {
           const subDir = Object.create(null) as TreeListEntry;
           tgt.dirs.push(subDir);
@@ -222,10 +254,11 @@ export function createOpfsUtil(deps: OpfsUtilDeps): OpfsUtilInterface {
    */
   opfsUtil.rmfr = async function (): Promise<void> {
     const dir = opfsUtil.rootDirectory!;
-    const opt = { recurse: true };
-    // @ts-ignore
-    for await (const handle of (dir as any).values()) {
-      // @ts-ignore - removeEntry options might differ in types
+    const opt = { recursive: true };
+    const iterator = (
+      dir as unknown as { values: () => AsyncIterable<FileSystemHandle> }
+    ).values();
+    for await (const handle of iterator) {
       dir.removeEntry(handle.name, opt);
     }
   };
@@ -249,7 +282,7 @@ export function createOpfsUtil(deps: OpfsUtilDeps): OpfsUtilInterface {
       );
       await hDir.removeEntry(filenamePart, { recursive });
       return true;
-    } catch (e: any) {
+    } catch (e: unknown) {
       if (throwOnError) {
         throw new Error(
           "unlink(" +
@@ -285,8 +318,12 @@ export function createOpfsUtil(deps: OpfsUtilDeps): OpfsUtilInterface {
       dirHandle: FileSystemDirectoryHandle,
       depth: number,
     ): Promise<boolean | void> {
-      // @ts-ignore
-      for await (const handle of (dirHandle as any).values()) {
+      const iterator = (
+        dirHandle as unknown as {
+          values: () => AsyncIterable<FileSystemHandle>;
+        }
+      ).values();
+      for await (const handle of iterator) {
         if (false === (await finalOpt.callback(handle, dirHandle, depth)))
           return false;
         else if (finalOpt.recursive && "directory" === handle.kind) {
@@ -316,22 +353,23 @@ export function createOpfsUtil(deps: OpfsUtilDeps): OpfsUtilInterface {
     // 1. Input handling
     const [hDir, fnamePart] = await opfsUtil.getDirForFilename!(filename, true);
     const hFile = await hDir.getFileHandle(fnamePart, { create: true });
-    // @ts-ignore - createSyncAccessHandle types
-    let sah: any = await hFile.createSyncAccessHandle();
+    let sah = (await hFile.createSyncAccessHandle()) as unknown as
+      | FileSystemSyncAccessHandle
+      | undefined;
 
     // 2. Core processing
     let nWrote = 0;
     let chunk: Uint8Array | undefined;
     let checkedHeader = false;
     try {
-      sah.truncate(0);
+      sah!.truncate(0);
       while (undefined !== (chunk = await callback())) {
         if (chunk instanceof ArrayBuffer) chunk = new Uint8Array(chunk);
         if (0 === nWrote && chunk!.byteLength >= 15) {
           util.affirmDbHeader(chunk!);
           checkedHeader = true;
         }
-        sah.write(chunk, { at: nWrote });
+        sah!.write(chunk, { at: nWrote });
         nWrote += chunk!.byteLength;
       }
       if (nWrote < 512 || 0 !== nWrote % 512) {
@@ -341,10 +379,10 @@ export function createOpfsUtil(deps: OpfsUtilDeps): OpfsUtilInterface {
       }
       if (!checkedHeader) {
         const header = new Uint8Array(20);
-        sah.read(header, { at: 0 });
+        sah!.read(header, { at: 0 });
         util.affirmDbHeader(header);
       }
-      sah.write(new Uint8Array([1, 1]), { at: 18 });
+      sah!.write(new Uint8Array([1, 1]), { at: 18 });
 
       // 3. Output handling
       return nWrote;
@@ -380,13 +418,14 @@ export function createOpfsUtil(deps: OpfsUtilDeps): OpfsUtilInterface {
 
     // 2. Core processing
     const [hDir, fnamePart] = await opfsUtil.getDirForFilename!(filename, true);
-    let sah: any;
+    let sah: FileSystemSyncAccessHandle | undefined;
     let nWrote = 0;
     try {
       const hFile = await hDir.getFileHandle(fnamePart, { create: true });
-      const sah = await hFile.createSyncAccessHandle();
+      sah =
+        (await hFile.createSyncAccessHandle()) as unknown as FileSystemSyncAccessHandle;
       sah.truncate(0);
-      nWrote = sah.write(bytes as any, { at: 0 });
+      nWrote = sah.write(bytes as Uint8Array, { at: 0 });
       if (nWrote !== n) {
         throw new Error(`Expected to write ${n} bytes but wrote ${nWrote}.`);
       }
@@ -413,12 +452,12 @@ export function createOpfsUtil(deps: OpfsUtilDeps): OpfsUtilInterface {
     /**
      * Dumps metrics to console.
      */
-    dump: function (metrics: any, W: Worker) {
+    dump: function (metrics: OpfsMetrics, W: Worker) {
       let n = 0;
       let t = 0;
       let w = 0;
       for (const k in state.opIds) {
-        const m = metrics[k];
+        const m = metrics[k] as MetricStats;
         n += m.count;
         t += m.time;
         w += m.wait;
@@ -444,8 +483,8 @@ export function createOpfsUtil(deps: OpfsUtilDeps): OpfsUtilInterface {
     /**
      * Resets metrics counters.
      */
-    reset: function (metrics: any) {
-      const r = (m: any) => (m.count = m.time = m.wait = 0);
+    reset: function (metrics: OpfsMetrics) {
+      const r = (m: MetricStats) => (m.count = m.time = m.wait = 0);
       for (const k in state.opIds) {
         r((metrics[k] = Object.create(null)));
       }
@@ -463,14 +502,14 @@ export function createOpfsUtil(deps: OpfsUtilDeps): OpfsUtilInterface {
   opfsUtil.debug = {
     asyncShutdown: function (
       opRun: (op: string) => void,
-      warn: (...args: any[]) => void,
+      warn: (...args: unknown[]) => void,
     ) {
       warn(
         "Shutting down OPFS async listener. The OPFS VFS will no longer work.",
       );
       opRun("opfs-async-shutdown");
     },
-    asyncRestart: function (W: Worker, warn: (...args: any[]) => void) {
+    asyncRestart: function (W: Worker, warn: (...args: unknown[]) => void) {
       warn(
         "Attempting to restart OPFS VFS async listener. Might work, might not.",
       );

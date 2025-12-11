@@ -82,7 +82,8 @@ export interface XWrapInternals {
 class BaseFuncPtrAdapter extends AbstractArgAdapter {
   public static warnOnUse = false;
   public static debugFuncInstall = false;
-  public static debugOut = console.debug.bind(console);
+  public static debugOut: (...args: unknown[]) => void =
+    console.debug.bind(console);
   public static bindScopes: FuncPtrBindScope[] = [
     "transient",
     "context",

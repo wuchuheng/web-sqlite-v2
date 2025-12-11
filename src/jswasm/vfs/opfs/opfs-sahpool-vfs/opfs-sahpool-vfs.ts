@@ -80,12 +80,7 @@ interface Sqlite3Vfs {
 }
 
 interface Sqlite3VfsMethods {
-  xAccess: (
-    pVfs: number,
-    zName: number,
-    flags: number,
-    pOut: number,
-  ) => number;
+  xAccess: (pVfs: number, zName: number, flags: number, pOut: number) => number;
   xCurrentTime: (pVfs: number, pOut: number) => number;
   xCurrentTimeInt64: (pVfs: number, pOut: number) => number;
   xDelete: (pVfs: number, zName: number, doSyncDir: number) => number;
@@ -121,6 +116,15 @@ interface Sqlite3Oo1 {
       call: (ctx: unknown, opt: unknown) => void;
     };
   };
+}
+
+interface FileSystemSyncAccessHandle {
+  read(buffer: BufferSource | Uint8Array, options?: { at: number }): number;
+  write(buffer: BufferSource | Uint8Array, options?: { at: number }): number;
+  flush(): void;
+  truncate(newSize: number): void;
+  getSize(): number | Promise<number>;
+  close(): void | Promise<void>;
 }
 
 interface OpfsFile {
@@ -293,8 +297,7 @@ export function initializeOpfsSahpool(sqlite3: Sqlite3) {
       pool.log(`xFileSize`);
       const file = pool.getOFileForS3File(pFile);
       if (!file) return capi.SQLITE_IOERR;
-      const size =
-        (file.sah.getSize() as number) - HEADER_OFFSET_DATA;
+      const size = (file.sah.getSize() as number) - HEADER_OFFSET_DATA;
 
       wasm.poke64(pSz64, BigInt(size));
       return 0;
@@ -321,12 +324,9 @@ export function initializeOpfsSahpool(sqlite3: Sqlite3) {
       if (!file) return capi.SQLITE_IOERR;
       pool.log(`xRead ${file.path} ${n} @ ${offset64}`);
       try {
-        const nRead = file.sah.read(
-          wasm.heap8u().subarray(pDest, pDest + n) as unknown as Uint8Array,
-          {
-            at: HEADER_OFFSET_DATA + Number(offset64),
-          },
-        );
+        const nRead = file.sah.read(wasm.heap8u().subarray(pDest, pDest + n), {
+          at: HEADER_OFFSET_DATA + Number(offset64),
+        });
         if (nRead < n) {
           wasm.heap8u().fill(0, pDest + nRead, pDest + n);
           return capi.SQLITE_IOERR_SHORT_READ;
@@ -390,12 +390,9 @@ export function initializeOpfsSahpool(sqlite3: Sqlite3) {
       if (!file) return capi.SQLITE_IOERR;
       pool.log(`xWrite ${file.path} ${n} ${offset64}`);
       try {
-        const nBytes = file.sah.write(
-          wasm.heap8u().subarray(pSrc, pSrc + n) as unknown as Uint8Array,
-          {
-            at: HEADER_OFFSET_DATA + Number(offset64),
-          },
-        );
+        const nBytes = file.sah.write(wasm.heap8u().subarray(pSrc, pSrc + n), {
+          at: HEADER_OFFSET_DATA + Number(offset64),
+        });
         return n === nBytes ? 0 : toss("Unknown write() failure.");
       } catch (e: unknown) {
         return pool.storeErr(e as SqliteError, capi.SQLITE_IOERR);
@@ -688,8 +685,9 @@ export function initializeOpfsSahpool(sqlite3: Sqlite3) {
     async acquireAccessHandles(clearFiles = false) {
       const files: [string, FileSystemHandle][] = [];
       if (!this.#dhOpaque) return;
-      // @ts-expect-error - async iterator on FileSystemDirectoryHandle
-      for await (const [name, h] of this.#dhOpaque) {
+      for await (const [name, h] of this.#dhOpaque as unknown as AsyncIterable<
+        [string, FileSystemHandle]
+      >) {
         if ("file" === h.kind) {
           files.push([name, h]);
         }
@@ -1032,7 +1030,7 @@ export function initializeOpfsSahpool(sqlite3: Sqlite3) {
           toss("Input does not contain an SQLite database header.");
         }
       }
-      const nWrote = sah.write(b as unknown as Uint8Array, {
+      const nWrote = sah.write(b, {
         at: HEADER_OFFSET_DATA,
       });
       if (nWrote != n) {
@@ -1132,7 +1130,7 @@ export function initializeOpfsSahpool(sqlite3: Sqlite3) {
     const close = ah.close();
     await close;
     await dh.removeEntry(fn);
-    if (close?.then) {
+    if ((close as Promise<void>)?.then) {
       toss(
         "The local OPFS API is too old for opfs-sahpool:",
         "it has an async FileSystemSyncAccessHandle.close() method.",
@@ -1186,7 +1184,10 @@ export function initializeOpfsSahpool(sqlite3: Sqlite3) {
             if (sqlite3.oo1) {
               const oo1 = sqlite3.oo1;
               const theVfs = thePool.getVfs();
-              const OpfsSAHPoolDb = function (this: unknown, ...args: unknown[]) {
+              const OpfsSAHPoolDb = function (
+                this: unknown,
+                ...args: unknown[]
+              ) {
                 const opt = oo1.DB.dbCtorHelper.normalizeArgs(...args);
                 opt.vfs = theVfs.$zName;
                 oo1.DB.dbCtorHelper.call(this, opt);

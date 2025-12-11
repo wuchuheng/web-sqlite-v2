@@ -203,7 +203,7 @@ describe("opfs-util", () => {
 
       await opfsUtil.rmfr();
       expect(mockRootDirectory.removeEntry).toHaveBeenCalledWith("f1", {
-        recurse: true,
+        recursive: true,
       });
     });
   });

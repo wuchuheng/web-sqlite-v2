@@ -1,7 +1,5 @@
 import sqlite3InitModule, { type SQLite3API } from "./jswasm/sqlite3";
 
-type AnyObject = Record<string, unknown>;
-
 // Local action codes mirror the declaration-only enum in sqliteWorkder.d.ts.
 // Numeric values map as: 0 = Open, 1 = Close, 2 = Sql.
 const ActionCodes = {
@@ -36,8 +34,11 @@ function normalizeAction(
   a: RequestMessage<unknown>["action"],
 ): ActionValue | null {
   // 1. Input validation
-  if (typeof a === "string")
-    return (ActionCodes as AnyObject)[a] as ActionValue;
+  if (typeof a === "string") {
+    return Object.prototype.hasOwnProperty.call(ActionCodes, a)
+      ? ActionCodes[a as ActionName]
+      : null;
+  }
   if (typeof a === "number") return a as ActionValue;
 
   // 3. Output
@@ -169,7 +170,7 @@ async function handleClose(
   req: RequestMessage<{ unlink?: boolean } | undefined>,
 ) {
   // 1. Input validation
-  const unlink = !!(req?.payload && (req.payload as AnyObject)["unlink"]);
+  const unlink = !!req?.payload?.unlink;
   const filename = db?.filename;
 
   try {
