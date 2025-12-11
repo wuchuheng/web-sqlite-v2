@@ -18,7 +18,7 @@ export interface WorkerMessageHandlerDeps {
   /** Promise reject function */
   promiseReject: (error: Error) => void;
   /** Flag tracking if promise was rejected */
-  promiseWasRejected: { value: boolean };
+  promiseWasRejected: { value: boolean | undefined };
   /** SQLite3 module instance */
   sqlite3: SQLite3Module;
   /** OPFS VFS instance */

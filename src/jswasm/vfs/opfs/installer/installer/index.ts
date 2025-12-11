@@ -5,60 +5,7 @@
  * Virtual File System (VFS) for SQLite in WebAssembly environments. It coordinates all installer
  * components to enable persistent, high-performance storage in modern browsers.
  *
- * ## Architecture Overview
- *
- * The installer has been refactored from a 1164-line monolithic file into 12 focused modules:
- *
- * ### Core Modules (5)
- * - **environment-validation.mjs** - Validates browser OPFS API support
- * - **config-setup.mjs** - Normalizes options and parses URL parameters
- * - **serialization.mjs** - SharedArrayBuffer serialization for cross-thread communication
- * - **state-initialization.mjs** - Initializes shared state and performance metrics
- * - **operation-runner.mjs** - Executes atomic operations with timing
- *
- * ### Wrappers (3)
- * - **io-sync-wrappers.mjs** - File I/O operations (read, write, sync, truncate, lock)
- * - **vfs-sync-wrappers.mjs** - VFS operations (open, access, delete, fullPathname)
- * - **vfs-integration.mjs** - Optional VFS methods and OO1 API integration
- *
- * ### Utils (3)
- * - **opfs-util.mjs** - Filesystem utilities (mkdir, unlink, traverse, importDb, metrics)
- * - **sanity-check.mjs** - Comprehensive VFS validation tests
- * - **worker-message-handler.mjs** - Async worker communication protocol
- *
- * ## Usage Example
- *
- * ```js
- * import { createInstallOpfsVfsContext } from './installer/index.mjs';
- *
- * const { installOpfsVfs, installOpfsVfsInitializer } =
- *     createInstallOpfsVfsContext(sqlite3);
- *
- * // Install with options
- * await installOpfsVfs({
- *     verbose: 2,
- *     sanityChecks: true,
- *     proxyUri: "../async-proxy/index.js", // Relative to installer/ directory
- * });
- * ```
- *
- * ## Benefits of Refactored Structure
- *
- * - **Readability**: Average module size is 125 lines vs. 1164-line monolith
- * - **Maintainability**: Each module has a single, well-defined responsibility
- * - **Testability**: Modules can be unit-tested independently
- * - **Discoverability**: 10x faster to locate specific functionality
- * - **Documentation**: Comprehensive JSDoc with 1/2/3 phase pattern
- *
- * ## Technical Details
- *
- * - Uses SharedArrayBuffer and Atomics for synchronous cross-thread communication
- * - Web Worker handles async OPFS operations on behalf of main thread
- * - Maintains 100% API compatibility with original monolithic implementation
- * - Requires COOP/COEP headers for SharedArrayBuffer support
- *
  * @module opfs-vfs-installer
- * @see README.md - Comprehensive documentation with migration guide
  */
 
 import {
@@ -85,14 +32,33 @@ import {
   integrateWithOo1,
 } from "../wrappers/vfs-integration/vfs-integration";
 import type {
+  OpfsUtilInterface,
   SQLite3Module,
-  InstallOpfsVfsContext,
   InstallOpfsVfs,
-  InstallOpfsVfsInitializer,
   OpfsConfig,
-  // OpfsState,
-  // @ts-expect-error: Shared types might be missing in dev environment
-} from "../../../shared/opfs-vfs-installer";
+  OpfsFileHandle,
+  PromiseWasRejected,
+  OpfsInstallerOptions,
+} from "../../../../shared/opfs-vfs-installer";
+
+/**
+ * Initializer function for OPFS VFS that configures default proxy URI
+ * and installs the VFS with error handling.
+ */
+export type InstallOpfsVfsInitializer = (
+  sqlite3: SQLite3Module,
+) => Promise<void>;
+
+/**
+ * Context object returned by createInstallOpfsVfsContext containing
+ * both the installer function and initializer function.
+ */
+export interface InstallOpfsVfsContext {
+  /** Main installer function for OPFS VFS */
+  installOpfsVfs: InstallOpfsVfs;
+  /** Initializer function that sets up defaults and calls installer */
+  installOpfsVfsInitializer: InstallOpfsVfsInitializer;
+}
 
 /**
  * Creates OPFS VFS installer context for SQLite.
@@ -114,8 +80,8 @@ export function createInstallOpfsVfsContext(
    * @param options - Configuration options
    * @returns Resolves with sqlite3 instance
    */
-  const installOpfsVfs: InstallOpfsVfs = function callee(
-    options?: Partial<OpfsConfig>,
+  const installOpfsVfs = function callee(
+    options?: OpfsInstallerOptions,
   ): Promise<SQLite3Module> {
     // 1. Input handling
     // 1.1 Validate environment
@@ -125,13 +91,12 @@ export function createInstallOpfsVfsContext(
     }
 
     // 1.2 Prepare configuration
-    const config = prepareOpfsConfig(
-      options,
-      callee.defaultProxyUri,
-    ) as OpfsConfig;
+    const config = prepareOpfsConfig(options, installOpfsVfs.defaultProxyUri);
     if (config.disabled) {
       return Promise.resolve(sqlite3);
     }
+    // Narrow type after check - config is now fully OpfsConfig
+    const activeConfig = config as OpfsConfig;
 
     // 2. Core processing
     const thePromise = new Promise<SQLite3Module>(function (
@@ -144,12 +109,16 @@ export function createInstallOpfsVfsContext(
         sqlite3.config.warn,
         sqlite3.config.log,
       ];
+
       const logImpl = (level: number, ...args: unknown[]) => {
-        // @ts-ignore
-        if (config.verbose > level) loggers[level]("OPFS syncer:", ...args);
+        if (activeConfig.verbose > level)
+          loggers[level]("OPFS syncer:", ...args);
       };
+
       const log = (...args: unknown[]) => logImpl(2, ...args);
+
       const warn = (...args: unknown[]) => logImpl(1, ...args);
+
       const error = (...args: unknown[]) => logImpl(0, ...args);
       const toss = sqlite3.util.toss;
       const capi = sqlite3.capi;
@@ -164,11 +133,8 @@ export function createInstallOpfsVfsContext(
       );
 
       // 2.3 Set up promise state tracking
-      const promiseWasRejected: { value: boolean } = {
-        value: false,
-      };
+      const promiseWasRejected: PromiseWasRejected = { value: undefined };
       const promiseReject = (err: Error) => {
-        if (promiseWasRejected.value) return;
         promiseWasRejected.value = true;
         opfsVfs.dispose();
         return promiseReject_(err);
@@ -179,18 +145,22 @@ export function createInstallOpfsVfsContext(
       };
 
       // 2.4 Initialize worker
-      const W = new Worker(new URL(config.proxyUri, import.meta.url));
+      const W = new Worker(new URL(activeConfig.proxyUri, import.meta.url));
       setTimeout(() => {
-        if (!promiseWasRejected.value) {
+        if (undefined === promiseWasRejected.value) {
           promiseReject(
             new Error("Timeout while waiting for OPFS async proxy worker."),
           );
         }
       }, 4000);
 
-      // @ts-ignore
-      W._originalOnError = W.onerror;
-      W.onerror = function (err) {
+      // Cast to allow assignment of _originalOnError which is not on standard Worker
+      const W_ = W as Worker & {
+        _originalOnError?: (ev: ErrorEvent) => unknown;
+      };
+
+      W_._originalOnError = W.onerror as (ev: ErrorEvent) => unknown;
+      W.onerror = function (err: ErrorEvent) {
         error("Error initializing OPFS asyncer:", err);
         promiseReject(
           new Error("Loading OPFS async Worker failed for unknown reasons."),
@@ -221,7 +191,7 @@ export function createInstallOpfsVfsContext(
 
       // 2.7 Initialize state and metrics
       const state = initializeOpfsState(opfsVfs, capi, toss);
-      state.verbose = config.verbose;
+      state.verbose = activeConfig.verbose;
       const metrics = initializeMetrics(state);
 
       // 2.8 Create operation runner and timer
@@ -229,26 +199,22 @@ export function createInstallOpfsVfsContext(
       const { mTimeStart, mTimeEnd } = createOperationTimer(metrics);
 
       // 2.9 Set up file tracking
-      const __openFiles = Object.create(null);
+      const __openFiles = Object.create(null) as Record<number, OpfsFileHandle>;
 
       // 2.10 Generate random filename utility
-      const randomFilename = function f(len = 16): string {
-        // @ts-ignore
-        if (!f._chars) {
-          // @ts-ignore
-          f._chars =
+      const randomFilename = function f(len = 16) {
+        const func = f as unknown as { _chars: string; _n: number };
+        if (!func._chars) {
+          func._chars =
             "abcdefghijklmnopqrstuvwxyz" +
             "ABCDEFGHIJKLMNOPQRSTUVWXYZ" +
             "012346789";
-          // @ts-ignore
-          f._n = f._chars.length;
+          func._n = func._chars.length;
         }
         const a = [];
         for (let i = 0; i < len; ++i) {
-          // @ts-ignore
-          const ndx = (Math.random() * (f._n * 64)) % f._n | 0;
-          // @ts-ignore
-          a[i] = f._chars[ndx];
+          const ndx = (Math.random() * (func._n * 64)) % func._n | 0;
+          a[i] = func._chars[ndx];
         }
         return a.join("");
       };
@@ -283,40 +249,46 @@ export function createInstallOpfsVfsContext(
         opfsVfs,
         dVfs,
         wasm,
-        state: state as any,
+        state,
       });
       Object.assign(vfsSyncWrappers, optionalMethods);
 
       // 2.13 Create OPFS utilities
-      const opfsUtil = createOpfsUtil({ state: state as any, util, sqlite3 });
+      const opfsUtil = createOpfsUtil({
+        state,
+        util,
+        sqlite3,
+      });
 
       // 2.14 Bind metrics and debug methods
       const boundMetrics = {
         dump: () => opfsUtil.metrics.dump(metrics, W),
         reset: () => opfsUtil.metrics.reset(metrics),
       };
-      // @ts-ignore
       opfsUtil.metrics = boundMetrics;
 
       const boundDebug = {
         asyncShutdown: () => opfsUtil.debug.asyncShutdown(opRun, warn),
         asyncRestart: () => opfsUtil.debug.asyncRestart(W, warn),
       };
-      // @ts-ignore
       opfsUtil.debug = boundDebug;
 
       // 2.15 Initialize serialization
       state.s11n = createSerializer(state, toss);
 
       // 2.16 Integrate with OO1 API
-      integrateWithOo1({ sqlite3, opfsVfs, opfsUtil: opfsUtil as any });
+      integrateWithOo1({
+        sqlite3,
+        opfsVfs,
+        opfsUtil: opfsUtil as unknown as OpfsUtilInterface,
+      });
 
       // 2.17 Create sanity check runner
       const boundRunSanityCheck = () =>
         runSanityCheck({
           wasm,
           capi,
-          state: state as any,
+          state,
           vfsSyncWrappers,
           ioSyncWrappers,
           opfsVfs,
@@ -337,48 +309,48 @@ export function createInstallOpfsVfsContext(
         opfsIoMethods,
         ioSyncWrappers,
         vfsSyncWrappers,
-        state: state as any,
-        opfsUtil: opfsUtil as any,
-        options: config,
+        state,
+        opfsUtil: opfsUtil as unknown as OpfsUtilInterface,
+        options: activeConfig,
         warn,
         error,
         runSanityCheck: boundRunSanityCheck,
         thisThreadHasOPFS,
-        W,
+        W: W_,
       });
     });
 
     // 3. Output handling
     return thePromise;
-  };
+  } as InstallOpfsVfs;
 
   installOpfsVfs.defaultProxyUri =
-    "../sqlite3-opfs-async-proxy/sqlite3-opfs-async-proxy.js";
+    "../../sqlite3-opfs-async-proxy/sqlite3-opfs-async-proxy.js";
 
   /**
    * Initializer function for OPFS VFS.
    * @param sqlite3Ref - SQLite3 module reference
    * @returns Resolves when initialization completes
    */
-  const installOpfsVfsInitializer: InstallOpfsVfsInitializer = async (
+  const installOpfsVfsInitializer = async (
     sqlite3Ref: SQLite3Module,
-  ) => {
+  ): Promise<void> => {
     try {
       // 1. Input handling
       const proxyJs = installOpfsVfs.defaultProxyUri;
-      if (sqlite3Ref.scriptInfo.sqlite3Dir) {
+      if (sqlite3Ref.scriptInfo && sqlite3Ref.scriptInfo.sqlite3Dir) {
         installOpfsVfs.defaultProxyUri =
           sqlite3Ref.scriptInfo.sqlite3Dir + proxyJs;
       }
 
       // 2. Core processing
-      return installOpfsVfs().catch((e: Error) => {
+      await installOpfsVfs().catch((e: Error) => {
         sqlite3Ref.config.warn(
           "Ignoring inability to install OPFS sqlite3_vfs:",
           e.message,
         );
       });
-    } catch (e: any) {
+    } catch (e) {
       // 3. Output handling
       sqlite3Ref.config.error("installOpfsVfs() exception:", e);
       return Promise.reject(e);

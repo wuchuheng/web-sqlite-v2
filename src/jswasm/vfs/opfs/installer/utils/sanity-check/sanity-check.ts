@@ -1,6 +1,7 @@
 import type {
   IoSyncWrappers,
   VfsSyncWrappers,
+  OpfsState,
 } from "../../../../../shared/opfs-vfs-installer";
 
 /**
@@ -14,7 +15,7 @@ export interface SanityCheckDeps {
     scopedAllocCString: (str: string) => number;
     scopedAlloc: (size: number) => number;
     peek: (ptr: number, type: string) => number | bigint;
-    poke: (ptr: number, value: number | bigint, type?: string) => void;
+    poke: (ptr: number, value: number | bigint, type: string) => void;
     cstrToJs: (ptr: number) => string;
   };
   /** C API functions and constants */
@@ -28,14 +29,7 @@ export interface SanityCheckDeps {
     SQLITE_OPEN_MAIN_DB: number;
   };
   /** OPFS state object */
-  state: {
-    sabOPView: Int32Array;
-    opIds: Record<string, number>;
-    s11n: {
-      serialize: (value: string) => void;
-      deserialize: () => [string];
-    };
-  };
+  state: OpfsState;
   /** VFS synchronization wrappers */
   vfsSyncWrappers: VfsSyncWrappers & {
     xSleep?: (pVfs: number, microseconds: number) => number;
@@ -98,10 +92,10 @@ export function runSanityCheck(deps: SanityCheckDeps): void {
     let rc: number | bigint;
 
     // 2.1 Test serialization
-    state.s11n.serialize("This is ä string.");
-    const d13n = state.s11n.deserialize();
+    state.s11n!.serialize("This is ä string.");
+    const d13n = state.s11n!.deserialize();
     log("deserialize() says:", d13n);
-    if ("This is ä string." !== d13n[0]) toss("String d13n error.");
+    if ("This is ä string." !== d13n![0]) toss("String d13n error.");
 
     // 2.2 Test xAccess (file doesn't exist)
     vfsSyncWrappers.xAccess(opfsVfs.pointer, zDbFile, 0, pOut);
@@ -114,7 +108,7 @@ export function runSanityCheck(deps: SanityCheckDeps): void {
       "open rc =",
       rc,
       "state.sabOPView[xOpen] =",
-      state.sabOPView[state.opIds.xOpen],
+      state.sabOPView![state.opIds.xOpen],
     );
     if (0 !== rc) {
       error("open failed with code", rc);
@@ -147,7 +141,7 @@ export function runSanityCheck(deps: SanityCheckDeps): void {
     // 2.9 Test xRead
     const readBuf = wasm.scopedAlloc(16);
     rc = ioSyncWrappers.xRead(sq3File.pointer, readBuf, 6, 2);
-    wasm.poke(readBuf + 6, 0);
+    wasm.poke(readBuf + 6, 0, "i8");
     const jRead = wasm.cstrToJs(readBuf);
     log("xRead() got:", jRead);
     if ("sanity" !== jRead) toss("Unexpected xRead() value.");

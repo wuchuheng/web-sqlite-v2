@@ -65,6 +65,7 @@ export function initializeOpfsState(
   state.opIds.retry = i++;
 
   state.sabOP = new SharedArrayBuffer(i * 4);
+  state.sabOPView = new Int32Array(state.sabOP);
 
   // 2.4 Map SQLite constants
   state.sq3Codes = Object.create(null) as SQLiteConstants;

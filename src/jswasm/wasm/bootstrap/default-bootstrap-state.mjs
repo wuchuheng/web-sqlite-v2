@@ -1,8 +1,8 @@
 import { StructBinderFactory } from "../../utils/struct-binder/struct-binder-factory/struct-binder-factory";
 import { createInstallOo1Initializer } from "../../api/install-oo1.mjs";
 import { installOo1DbApi } from "../../api/install-oo1-db-api.mjs";
-import { createInstallOpfsVfsContext } from "../../vfs/opfs/installer/index.mjs";
-import { initializeOpfsSahpool } from "../../vfs/opfs/opfs-sahpool-vfs/opfs-sahpool-vfs.js";
+import { createInstallOpfsVfsContext } from "../../vfs/opfs/installer/installer/index";
+import { initializeOpfsSahpool } from "../../vfs/opfs/opfs-sahpool-vfs/opfs-sahpool-vfs";
 import { initializeWorker1Api } from "./worker1-api-initializer.mjs";
 import {
     initializeVtabUtilities,

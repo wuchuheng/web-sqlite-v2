@@ -1,7 +1,6 @@
 import sqlite3InitModule from "@wuchuheng/web-sqlite";
 import type { SQLite3API } from "@wuchuheng/web-sqlite";
-// @ts-expect-error The installer is JavaScript-only and ships without type declarations.
-import { createInstallOpfsVfsContext } from "../../src/jswasm/vfs/opfs/installer/index.mjs";
+import { createInstallOpfsVfsContext } from "../../src/jswasm/vfs/opfs/installer/installer/index";
 
 type SQLite3WithOpfs = SQLite3API & {
   opfs?: { unlink: (path: string) => Promise<void> };
@@ -22,12 +21,10 @@ self.onmessage = async (e) => {
       // 2. Install OPFS VFS manually if needed
       // (Note: default-bootstrap-state.mjs normally does this, but we want to be sure)
       if (!sqlite3.capi.sqlite3_vfs_find("opfs")) {
-        const { installOpfsVfs } = createInstallOpfsVfsContext(sqlite3);
+        const { installOpfsVfs } = createInstallOpfsVfsContext(sqlite3 as any);
         await installOpfsVfs({
-          proxyUri: new URL(
-            "../../src/jswasm/vfs/opfs/async-proxy/index.js",
-            import.meta.url,
-          ).href,
+          proxyUri:
+            "../../../src/jswasm/vfs/opfs/sqlite3-opfs-async-proxy/sqlite3-opfs-async-proxy.js",
         });
       }
 

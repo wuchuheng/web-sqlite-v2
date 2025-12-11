@@ -9,6 +9,7 @@ import type {
   OpfsUtilInterface,
   SQLite3DBInstance,
   SQLite3DBClass,
+  OpfsOpIds,
 } from "../../../../../shared/opfs-vfs-installer";
 
 /**
@@ -22,11 +23,13 @@ interface WasmModule {
 /**
  * Dependencies for setupOptionalVfsMethods
  */
+
+
 export interface OptionalVfsMethodsDeps {
   opfsVfs: SQLite3VFSInstance;
   dVfs: SQLite3VFSInstance | null;
   wasm: WasmModule;
-  state: { sabOPView: Int32Array; opIds: Record<string, number> };
+  state: { sabOPView?: Int32Array; opIds: OpfsOpIds };
 }
 
 /**
@@ -71,7 +74,7 @@ export function setupOptionalVfsMethods(
   // 2.2 Provide fallback xSleep if needed
   if (!opfsVfs.$xSleep) {
     methods.xSleep = function (_pVfs: number, ms: number) {
-      Atomics.wait(state.sabOPView, state.opIds.xSleep, 0, ms);
+      Atomics.wait(state.sabOPView!, state.opIds.xSleep, 0, ms);
       return 0;
     };
   }

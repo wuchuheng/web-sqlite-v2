@@ -3,12 +3,12 @@
  * @module core/operation-runner
  */
 
-import {
-  type OpfsState,
-  type OpfsMetrics,
-  type OperationRunner,
-  type OperationTimer,
-  type SerializableValue,
+import type {
+  OpfsState,
+  OpfsMetrics,
+  OperationRunner,
+  OperationTimer,
+  SerializableValue,
 } from "../../../../../shared/opfs-vfs-installer";
 
 /**

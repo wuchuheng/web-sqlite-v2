@@ -3,123 +3,159 @@
  * Filesystem utilities for the OPFS VFS installer.
  */
 
+import type {
+
+  OpfsOpIds,
+
+  OpfsMetrics,
+
+  OpfsMetricSet,
+
+  OpfsS11nMetrics,
+
+  OpfsUtilInterface,
+
+  DirectoryTree,
+
+} from "../../../../../shared/opfs-vfs-installer";
+
+
+
 // We need to define types that were previously implicit or in missing .d.ts files
+
 export interface OpfsUtilDeps {
+
   state: {
-    opIds: Record<string, unknown>;
-    [key: string]: unknown;
+
+    opIds: OpfsOpIds;
+
   };
+
   util: {
+
     affirmIsDb: (bytes: Uint8Array) => void;
+
     affirmDbHeader: (bytes: Uint8Array) => void;
+
     [key: string]: unknown;
+
   };
+
   sqlite3: {
+
     config: {
+
       log: (...args: unknown[]) => void;
-      [key: string]: unknown;
+
     };
-    [key: string]: unknown;
+
   };
+
 }
+
+
 
 interface FileSystemSyncAccessHandle {
+
   read(buffer: BufferSource | Uint8Array, options?: { at: number }): number;
+
   write(buffer: BufferSource | Uint8Array, options?: { at: number }): number;
+
   flush(): void;
+
   truncate(newSize: number): void;
+
   getSize(): number | Promise<number>;
+
   close(): void | Promise<void>;
+
 }
 
-interface MetricStats {
-  count: number;
-  time: number;
-  wait: number;
-  avgTime?: number;
-  avgWait?: number;
-}
 
-interface SerializationMetrics {
-  count: number;
-  time: number;
-  serialize?: { count: number; time: number };
-  deserialize?: { count: number; time: number };
-  [key: string]: unknown;
-}
 
-interface OpfsMetrics {
-  s11n: SerializationMetrics;
-  [opId: string]: MetricStats | SerializationMetrics;
-}
+export interface OpfsUtilImplementation
 
-export interface TreeListEntry {
-  name?: string;
-  dirs: TreeListEntry[];
-  files: string[];
-}
+  extends Omit<OpfsUtilInterface, "metrics" | "debug"> {
 
-export interface OpfsUtilInterface {
-  rootDirectory: FileSystemDirectoryHandle;
-  randomFilename: (len?: number) => string;
-  getResolvedPath: (filename: string, splitIt?: boolean) => string | string[];
-  getDirForFilename: (
-    absFilename: string,
-    createDirs?: boolean,
-  ) => Promise<[FileSystemDirectoryHandle, string]>;
-  mkdir: (absDirName: string) => Promise<boolean>;
-  entryExists: (fsEntryName: string) => Promise<boolean>;
-  treeList: () => Promise<TreeListEntry>;
-  rmfr: () => Promise<void>;
-  unlink: (
-    fsEntryName: string,
-    recursive?: boolean,
-    throwOnError?: boolean,
-  ) => Promise<boolean>;
-  traverse: (opt: TraverseOptions | TraverseCallback) => Promise<void>;
-  importDb: (
-    filename: string,
-    bytes: ArrayBuffer | Uint8Array | (() => Promise<Uint8Array | undefined>),
-  ) => Promise<number>;
   metrics: {
+
     dump: (metrics: OpfsMetrics, W: Worker) => void;
+
     reset: (metrics: OpfsMetrics) => void;
+
   };
+
   debug: {
+
     asyncShutdown: (
+
       opRun: (op: string) => void,
+
       warn: (...args: unknown[]) => void,
+
     ) => void;
+
     asyncRestart: (W: Worker, warn: (...args: unknown[]) => void) => void;
+
   };
+
 }
+
+
 
 export type TraverseCallback = (
+
   handle: FileSystemHandle,
+
   dirHandle: FileSystemDirectoryHandle,
+
   depth: number,
+
 ) => boolean | void | Promise<boolean | void>;
 
+
+
 export interface TraverseOptions {
+
   callback: TraverseCallback;
+
   recursive?: boolean;
+
   directory?: FileSystemDirectoryHandle;
+
 }
 
+
+
 /**
+
  * Creates utility functions for OPFS filesystem operations.
+
  * @param deps - Dependencies object
+
  * @returns OPFS utility interface
+
  */
-export function createOpfsUtil(deps: OpfsUtilDeps): OpfsUtilInterface {
+
+export function createOpfsUtil(deps: OpfsUtilDeps): OpfsUtilImplementation {
+
   const { state, util, sqlite3 } = deps;
 
+
+
   // Use a Partial to construct the object, but cast to full interface at return
+
   // Note: rootDirectory is NOT initialized here, but expected to be assigned later by the caller?
+
   // In the original .mjs, it was `const opfsUtil = Object.create(null);` and methods were added.
+
   // However, usages show `opfsUtil.rootDirectory` being accessed.
+
   // The consumer of createOpfsUtil must assign `rootDirectory`.
-  const opfsUtil = Object.create(null) as Partial<OpfsUtilInterface>;
+
+  const opfsUtil = Object.create(null) as Partial<OpfsUtilImplementation>;
+
+
 
   /**
    * Generates a random filename.
@@ -221,10 +257,10 @@ export function createOpfsUtil(deps: OpfsUtilDeps): OpfsUtilInterface {
    * Lists directory tree structure.
    * @returns Tree structure with dirs and files
    */
-  opfsUtil.treeList = async function (): Promise<TreeListEntry> {
+  opfsUtil.treeList = async function (): Promise<DirectoryTree> {
     const doDir = async function callee(
       dirHandle: FileSystemDirectoryHandle,
-      tgt: TreeListEntry,
+      tgt: DirectoryTree,
     ) {
       tgt.name = dirHandle.name;
       tgt.dirs = [];
@@ -236,7 +272,7 @@ export function createOpfsUtil(deps: OpfsUtilDeps): OpfsUtilInterface {
       ).values();
       for await (const handle of iterator) {
         if ("directory" === handle.kind) {
-          const subDir = Object.create(null) as TreeListEntry;
+          const subDir = Object.create(null) as DirectoryTree;
           tgt.dirs.push(subDir);
           await callee(handle as FileSystemDirectoryHandle, subDir);
         } else {
@@ -244,7 +280,7 @@ export function createOpfsUtil(deps: OpfsUtilDeps): OpfsUtilInterface {
         }
       }
     };
-    const root = Object.create(null) as TreeListEntry;
+    const root = Object.create(null) as DirectoryTree;
     await doDir(opfsUtil.rootDirectory!, root);
     return root;
   };
@@ -457,7 +493,7 @@ export function createOpfsUtil(deps: OpfsUtilDeps): OpfsUtilInterface {
       let t = 0;
       let w = 0;
       for (const k in state.opIds) {
-        const m = metrics[k] as MetricStats;
+        const m = metrics[k] as OpfsMetricSet;
         n += m.count;
         t += m.time;
         w += m.wait;
@@ -484,15 +520,17 @@ export function createOpfsUtil(deps: OpfsUtilDeps): OpfsUtilInterface {
      * Resets metrics counters.
      */
     reset: function (metrics: OpfsMetrics) {
-      const r = (m: MetricStats) => (m.count = m.time = m.wait = 0);
+      const r = (m: OpfsMetricSet) => (m.count = m.time = m.wait = 0);
       for (const k in state.opIds) {
         r((metrics[k] = Object.create(null)));
       }
-      let s = (metrics.s11n = Object.create(null));
-      s = s.serialize = Object.create(null);
-      s.count = s.time = 0;
-      s = metrics.s11n.deserialize = Object.create(null);
-      s.count = s.time = 0;
+      const s11n = (metrics.s11n = Object.create(null) as OpfsS11nMetrics);
+      const ser = Object.create(null) as OpfsMetricSet;
+      ser.count = ser.time = ser.wait = 0;
+      s11n.serialize = ser;
+      const des = Object.create(null) as OpfsMetricSet;
+      des.count = des.time = des.wait = 0;
+      s11n.deserialize = des;
     },
   };
 
@@ -517,5 +555,5 @@ export function createOpfsUtil(deps: OpfsUtilDeps): OpfsUtilInterface {
     },
   };
 
-  return opfsUtil as OpfsUtilInterface;
+  return opfsUtil as OpfsUtilImplementation;
 }
