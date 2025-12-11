@@ -25,7 +25,7 @@ The following scripts are available to build, test, and run the project. They ca
 To build the library, run the following command:
 
 ```bash
-pnpm build
+npm build
 ```
 
 This will create a `dist` directory with the compiled JavaScript and TypeScript declaration files.
@@ -35,13 +35,13 @@ This will create a `dist` directory with the compiled JavaScript and TypeScript 
 To run the unit tests, use the following command:
 
 ```bash
-pnpm test:unit
+npm test:unit
 ```
 
 To run the integration tests, use the following command:
 
 ```bash
-pnpm test
+npm test
 ```
 
 ### Running the linter
@@ -49,7 +49,7 @@ pnpm test
 To check the code for linting errors, run:
 
 ```bash
-pnpm lint
+npm lint
 ```
 
 ### Type checking
@@ -57,7 +57,7 @@ pnpm lint
 To perform a type check, run:
 
 ```bash
-pnpm typecheck
+npm typecheck
 ```
 
 ### Development server
@@ -65,7 +65,7 @@ pnpm typecheck
 To start the development server, run:
 
 ```bash
-pnpm dev
+npm dev
 ```
 
 ## Development Conventions
