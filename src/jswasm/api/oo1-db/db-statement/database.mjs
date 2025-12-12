@@ -319,8 +319,7 @@ export function createDatabaseClass(
                             ) {
                                 if (columnNamesCaptured++ === 0) {
                                     statement.getColumnNames(
-                                        (cbCache.columnNames =
-                                            opt.columnNames || []),
+                                        (cbCache.columnNames = opt.columnNames),
                                     );
                                 }
                                 statement._lockedByExec = true;
