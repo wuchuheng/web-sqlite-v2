@@ -64,7 +64,8 @@
         "src/types/global.d.ts",
         "src/jswasm/vfs/opfs/installer/core/environment-validation/environment-validation.ts",
         "src/jswasm/vfs/opfs/opfs-sahpool-vfs/opfs-sahpool-vfs.ts",
-        "src/jswasm/vfs/opfs/installer/installer/index.ts"
+        "src/jswasm/vfs/opfs/installer/installer/index.ts",
+        "src/jswasm/api/oo1-db/db-statement/binding/*.ts"
     ],
     "exclude": ["src/**/*.test.ts"]
 }

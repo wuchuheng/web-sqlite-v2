@@ -3,7 +3,7 @@
  */
 
 import { createValidationHelpers } from "./validation.mjs";
-import { createBindingHelpers } from "./binding.mjs";
+import { createBindingHelpers } from "./binding/binding";
 import { createExecHelpers } from "./execution.mjs";
 import { createStatementClass } from "./statement.mjs";
 import { createDatabaseClass } from "./database.mjs";
