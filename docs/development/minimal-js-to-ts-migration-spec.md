@@ -100,7 +100,10 @@ steps:
 ### 1. Analyze the originals.
 
 - Open `originalPath` and `dtsPath`. Record their exports, signatures, and edge cases.
-- **Deep Analysis:** Analyze the target JS file and relevant source code to understand the full context. Identify existing reference types to strictly avoid `any`.
+- **Deep Analysis & Strict Typing:** Analyze the target JS file and relevant source code to understand the full context.
+    - **Identify all types in detail.** You must find where types are defined in the codebase.
+    - **Missing/Incorrect Types:** If a type is missing or incorrect, you must plan to redefine or correct it.
+    - **No `any`:** Strictly avoid `any`. If you encounter `any` in existing code, you must determine the correct type.
 - **Wiki Analysis:** Specifically check the repository wiki in `.qoder/` for any relevant documentation, architectural notes, or known issues related to the module being migrated.
 - Identify existing behavior that must remain unchanged (e.g., return types, overloads, TextDecoder fallbacks).
 - Note any runtime assumptions (e.g., running in a browser, availability of `TextDecoder`, polyfills, etc.).
@@ -115,6 +118,11 @@ steps:
 **Phase 1: Spec Generation (Gate 1)**
 
 - **Action:** Create a Test Plan/Spec file in `docs/development` (using `docs/development/migration-spec-template.md` as a guide) describing:
+    - **Type Definitions (CRITICAL):** The spec MUST include a detailed list of all types (interfaces, type aliases, enums) that will be used.
+        - **Analyze & Resolve:** The AI must have analyzed relevant source code to find these types.
+        - **Define Missing Types:** If a type is missing from the codebase, the spec must define it.
+        - **Correct Types:** If a type is incorrect, the spec must propose the correction.
+        - **NO `any`:** The spec must explicitly declare that `any` will not be used.
     - **Test Strategy:** Analyze the target file to select the most appropriate approach:
         - **E2E (`*.e2e.test.ts`):** Must be used if the file contains numerous browser interfaces (DOM, Window, etc.).
         - **Unit (`*.unit.test.ts`):** Must be used if the file does not heavily rely on the browser environment.
@@ -128,6 +136,7 @@ steps:
 **Phase 2: Implementation (Autonomous Start)**
 
 - **Action:** Create `*.test.ts` next to `originalPath` (same directory, same stem).
+    - **Strict Typing in Tests:** The test file (`*.unit.test.ts` or `*.e2e.test.ts`) must **NOT** use `any` types or any type ignore rules (e.g., `@ts-ignore`, `eslint-disable`). All test data and variables must be properly typed.
 - Cover the behaviors exposed by the `.mjs` file and `.d.ts` types using Vitest (the repo already has `vitest.config.ts`).
 - Point the tests at the existing `.mjs` implementation and run `npm run test`. Tests must pass to establish the baseline.
 - **Coverage Goal:** Ensure the target file has a test coverage of **≥ 80%**.
@@ -148,6 +157,8 @@ steps:
 - Before writing the new `.ts`, re-open the original `.d.ts` and any related type helpers to lift precise signatures and
   reduce reliance on fallback types such as `any`, `unknown`, or `null`.
 - Inside that folder add the new `utf8.ts` implementing the same exports, with type annotations guided by the original `.d.ts`.
+    - **Strict Typing:** The new TS file must **NOT** use `any`.
+    - **Missing Types:** If a type was identified as missing in Step 2 (Spec), define it now in a suitable location (e.g., a shared types file or within the module if private).
 - Keep functions small and focused; break repeated/complex logic into helpers.
 - Add standard doc comments (for example, JSDoc/TSDoc-style `/** ... */`) on each exported function, class, and class method
   to explain its intention and usage.
