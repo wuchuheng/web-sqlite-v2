@@ -48,7 +48,7 @@ describe("operation-runner", () => {
         xUnlock: 17,
         xWrite: 18,
         mkdir: 19,
-        // @ts-expect-error -- testOp is not in the OpfsOpIds interface
+
         testOp: 2,
       };
 

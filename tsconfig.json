@@ -12,6 +12,13 @@
         "verbatimModuleSyntax": true,
         "moduleDetection": "auto",
         "noEmit": true,
+        "rootDir": ".",
+        "outDir": "dist",
+        "baseUrl": ".",
+        "paths": {
+            "@wuchuheng/web-sqlite/*": ["./src/*"],
+            "jswasm/*": ["./src/jswasm/*"]
+        },
         /* Linting */
         "strict": true,
         "noUnusedLocals": true,
@@ -21,8 +28,8 @@
         "noUncheckedSideEffectImports": true
     },
     "include": [
-        "src",
-        "tests",
+        "src/**/*.ts",
+        "tests/**/*.ts",
         "vitest.unit.config.ts",
         "vitest.debug.config.ts"
     ]

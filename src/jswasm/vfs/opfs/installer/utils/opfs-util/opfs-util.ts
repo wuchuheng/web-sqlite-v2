@@ -1,3 +1,4 @@
+
 /**
  * @module opfs-util
  * Filesystem utilities for the OPFS VFS installer.
@@ -555,5 +556,9 @@ export function createOpfsUtil(deps: OpfsUtilDeps): OpfsUtilImplementation {
     },
   };
 
+<<<<<<< HEAD
   return opfsUtil as OpfsUtilImplementation;
+=======
+  return opfsUtil as UnboundOpfsUtil;
+>>>>>>> fa34add (feat(types): Remove 'any' types and improve type safety in OPFS installer)
 }

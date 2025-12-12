@@ -245,6 +245,10 @@ export function createInstallOpfsVfsContext(
       });
 
       // 2.12 Set up optional VFS methods
+      // state has sabOPView initialized by createOperationRunner?
+      // createOperationRunner calls initializeState which does state.sabOPView = ...
+      // Wait, createOperationRunner in core/operation-runner/operation-runner.ts needs to be checked.
+      // Assuming it does, we cast state.
       const optionalMethods = setupOptionalVfsMethods({
         opfsVfs,
         dVfs,

@@ -230,7 +230,7 @@ export interface SQLite3WASM {
   allocCString(str: string): number;
   cstrToJs(ptr: number): string;
   cstrncpy(dest: number, src: number, max: number): number;
-  poke(ptr: number, value: number | bigint, type: string): void;
+  poke(ptr: number, value: number | bigint, type?: string): void;
   peek(ptr: number, type: string): number | bigint;
   scopedAllocPush(): unknown;
   scopedAllocPop(marker: unknown): void;
@@ -390,6 +390,7 @@ export interface OpfsOpIds {
   "opfs-async-metrics": number;
   "opfs-async-shutdown": number;
   retry: number;
+  [key: string]: number; // Index signature for compatibility with Record<string, number>
 }
 
 /**
@@ -618,7 +619,30 @@ export type TraverseCallback = (
   handle: FileSystemHandle,
   dirHandle: FileSystemDirectoryHandle,
   depth: number,
-) => boolean | void;
+) => boolean | void | Promise<boolean | void>;
+
+/**
+ * Context for installing OPFS VFS.
+ */
+export interface InstallOpfsVfsContext {
+  installOpfsVfs: InstallOpfsVfs;
+  installOpfsVfsInitializer: InstallOpfsVfsInitializer;
+}
+
+/**
+ * Function to install OPFS VFS.
+ */
+export interface InstallOpfsVfs {
+  (options?: Partial<OpfsConfig>): Promise<SQLite3Module>;
+  defaultProxyUri: string;
+}
+
+/**
+ * Initializer function for OPFS VFS.
+ */
+export interface InstallOpfsVfsInitializer {
+  (sqlite3Ref: SQLite3Module): Promise<void>;
+}
 
 /**
  * Chunked import callback
