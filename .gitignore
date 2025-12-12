@@ -8,3 +8,4 @@ src/**/*.d.ts
 
 __screenshots__
 coverage/
+.idea/
