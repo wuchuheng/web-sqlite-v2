@@ -7,46 +7,46 @@
 **TypeScript Migration Progress**
 
 - Currently working on migrating JavaScript (.mjs) modules to TypeScript
-- Recent focus on `struct-binder-helpers` module conversion
+- Recent focus on VFS module conversion, including memfs and OPFS components
 - Maintaining backward compatibility while enhancing type safety
 - Dual compilation strategy for ESM output preservation
 
-**OPFS Enhancement**
-
-- Ongoing work on sector-aligned heap pool optimization
-- Cross-context synchronization improvements
-- Performance tuning for high-frequency operations
-- Enhanced error handling for edge cases
-
-**Testing Infrastructure**
-
-- Browser-based test runner expansion
-- Additional test suites for edge cases
-- Performance benchmarking integration
-- Automated regression testing setup
-
-### Recent Changes
-
 **Module Refactoring**
 
-- Extracted bootstrap logic into focused modules
-- Improved separation of concerns between runtime layers
-- Enhanced error propagation patterns
-- Optimized memory management in critical paths
-
-**API Improvements**
-
-- Enhanced TypeScript definitions for better IDE support
-- Additional utility functions for common operations
-- Improved error messages with better context
-- Performance optimizations in hot paths
+- Restructuring monolithic modules into modular directory structures
+- Improving separation of concerns between different VFS implementations
+- Enhancing error handling and type safety across the codebase
 
 **Documentation Updates**
 
-- Comprehensive API documentation with examples
-- Enhanced development setup guides
-- Performance tuning recommendations
-- Troubleshooting guides for common issues
+- Revised coding standards in `.clinerules/base_rules.md`
+- Updated repository guidelines in `AGENTS.md`
+- AI agent rules in `CLAUDE.md`
+- Added new migration and test specs
+
+### Recent Changes
+
+**Memfs Module Migration**
+
+- Refactored from `src/jswasm/vfs/` to `src/jswasm/vfs/memfs/` directory
+- Converted from JavaScript (.mjs) to TypeScript (.ts)
+- Added comprehensive unit test file
+- Updated TypeScript configuration files
+
+**OPFS Module Improvements**
+
+- Migrated OPFS SAHPOOL VFS from JavaScript to TypeScript
+- Improved type safety in OPFS installer module
+- Refactored OPFS VFS installer module structure
+- Added migration specs and test plans for OPFS modules
+
+**Documentation Updates**
+
+- Revised coding standards in `.clinerules/base_rules.md`
+- Updated repository guidelines in `AGENTS.md`
+- AI agent rules in `CLAUDE.md`
+- Added docs/development/lint-any-cleanup-spec.md
+- Updated GEMINI.md for task progress tracking
 
 ## Active Decisions and Considerations
 
@@ -58,17 +58,17 @@
 - Rationale: Ensures backward compatibility while improving developer experience
 - Impact: Requires dual maintenance but provides smoother transition path
 
-**OPFS-First Storage Strategy**
+**VFS Modularization**
 
-- Decision: Prioritize OPFS over IndexedDB for persistent storage
-- Rationale: Better performance, synchronous access in workers, modern browser support
-- Impact: Limits browser compatibility but provides superior user experience
+- Decision: Split VFS implementations into separate directories (memfs/, opfs/)
+- Rationale: Improves maintainability and allows for easier addition of new VFS implementations
+- Impact: Requires updating import paths but provides cleaner module organization
 
-**Modular Architecture**
+**Documentation Standardization**
 
-- Decision: Extract functionality into focused, single-responsibility modules
-- Rationale: Improves maintainability, testability, and enables selective feature usage
-- Impact: Increases module count but reduces complexity per module
+- Decision: Update and expand coding standards and guidelines
+- Rationale: Ensures consistent code quality across the project
+- Impact: Requires developers to follow new standards but improves long-term maintainability
 
 ### Technical Considerations
 
@@ -78,17 +78,11 @@
 - Consideration: Balancing performance vs. browser compatibility
 - Decision: Maintain SharedArrayBuffer with graceful degradation fallbacks
 
-**Bundle Size Optimization**
+**Type Safety**
 
-- Current: Tree-shaking and code splitting for minimal bundles
-- Consideration: Feature completeness vs. bundle size impact
-- Decision: Provide multiple bundle configurations for different use cases
-
-**Error Handling Philosophy**
-
-- Current: Comprehensive error types with detailed context
-- Consideration: Error verbosity vs. performance impact
-- Decision: Prioritize developer experience with optional error detail levels
+- Current: Strict TypeScript mode for all migrated modules
+- Consideration: Removing 'any' types and improving type safety
+- Decision: Prioritize type safety across all modules
 
 ## Development Patterns and Preferences
 
@@ -131,13 +125,6 @@
 - Performance benchmarking integration
 - Automated visual regression testing
 
-**Quality Assurance**
-
-- ESLint for code style enforcement
-- TypeScript strict mode for type safety
-- Automated testing on multiple browsers
-- Continuous integration with comprehensive checks
-
 ## Important Insights and Learnings
 
 ### Performance Insights
@@ -149,19 +136,12 @@
 - Cross-context synchronization overhead is minimal with SharedArrayBuffer
 - Memory-mapped file operations outgrow traditional I/O for large datasets
 
-**WASM Optimization Techniques**
+**TypeScript Migration Benefits**
 
-- Memory pool management reduces allocation overhead
-- Lazy initialization improves cold-start performance
-- Typed array views provide better performance than DataView
-- Batch operations dramatically improve throughput for bulk operations
-
-**Browser Compatibility Learnings**
-
-- COOP/COEP headers critical for SharedArrayBuffer functionality
-- Feature detection essential for graceful degradation
-- Memory limits vary significantly between browsers
-- Performance characteristics change based on device capabilities
+- Early detection of type-related errors
+- Improved IDE support and developer productivity
+- Better documentation through type annotations
+- Enhanced code maintainability
 
 ### Development Process Learnings
 
@@ -172,19 +152,12 @@
 - Comprehensive test coverage essential for safe refactoring
 - Documentation must evolve with code changes
 
-**Testing Strategy Evolution**
+**Modularization Benefits**
 
-- Browser-based testing catches issues that unit tests miss
-- Performance regression testing prevents slowdowns
-- Automated verification reduces manual testing overhead
-- Cross-browser testing reveals platform-specific issues
-
-**Developer Experience Priorities**
-
-- Type safety significantly reduces bugs in complex modules
-- Comprehensive documentation accelerates onboarding
-- Consistent error handling improves debugging experience
-- Performance monitoring identifies optimization opportunities
+- Improved code discoverability
+- Easier to test individual components
+- Better separation of concerns
+- Enhanced scalability
 
 ## Next Immediate Steps
 
@@ -192,7 +165,7 @@
 
 **Complete TypeScript Migration**
 
-- Finish converting remaining .mjs modules to TypeScript
+- Continue migrating remaining VFS modules
 - Enhance type definitions for better IDE support
 - Improve error messages with type context
 - Update documentation to reflect TypeScript changes
