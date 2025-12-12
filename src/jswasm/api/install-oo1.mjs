@@ -5,7 +5,7 @@
  * to install the SQLite3 Object-Oriented API (OO1).
  *
  * This file has been reduced from 2,200 lines to ~350 lines by extracting:
- * - Binding signatures → bindings/core-bindings.mjs
+ * - Binding signatures → bindings/core-bindings.ts
  * - Database cleanup → utils/db-cleanup.mjs
  * - UDF creation → utils/udf-factory.mjs
  * - SQL preparation → utils/sql-preparation.mjs
@@ -16,7 +16,7 @@ import {
     createCoreBindings,
     createOptionalBindings,
     createWasmInternalBindings,
-} from "./bindings/core-bindings.mjs";
+} from "./bindings/core-bindings";
 import { createDbCleanup } from "./utils/db-cleanup.mjs";
 import { createUdfFactory } from "./utils/udf-factory.mjs";
 import { createSqlPreparation } from "./utils/sql-preparation.mjs";

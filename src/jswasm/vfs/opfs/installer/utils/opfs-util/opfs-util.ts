@@ -1,63 +1,40 @@
-
 /**
  * @module opfs-util
  * Filesystem utilities for the OPFS VFS installer.
  */
 
 import type {
-
   OpfsOpIds,
-
   OpfsMetrics,
-
   OpfsMetricSet,
-
   OpfsS11nMetrics,
-
   OpfsUtilInterface,
-
   DirectoryTree,
-
 } from "../../../../../shared/opfs-vfs-installer";
-
-
 
 // We need to define types that were previously implicit or in missing .d.ts files
 
 export interface OpfsUtilDeps {
-
   state: {
-
     opIds: OpfsOpIds;
-
   };
 
   util: {
-
     affirmIsDb: (bytes: Uint8Array) => void;
 
     affirmDbHeader: (bytes: Uint8Array) => void;
 
     [key: string]: unknown;
-
   };
 
   sqlite3: {
-
     config: {
-
       log: (...args: unknown[]) => void;
-
     };
-
   };
-
 }
 
-
-
 interface FileSystemSyncAccessHandle {
-
   read(buffer: BufferSource | Uint8Array, options?: { at: number }): number;
 
   write(buffer: BufferSource | Uint8Array, options?: { at: number }): number;
@@ -69,64 +46,42 @@ interface FileSystemSyncAccessHandle {
   getSize(): number | Promise<number>;
 
   close(): void | Promise<void>;
-
 }
 
-
-
 export interface OpfsUtilImplementation
-
   extends Omit<OpfsUtilInterface, "metrics" | "debug"> {
-
   metrics: {
-
     dump: (metrics: OpfsMetrics, W: Worker) => void;
 
     reset: (metrics: OpfsMetrics) => void;
-
   };
 
   debug: {
-
     asyncShutdown: (
-
       opRun: (op: string) => void,
 
       warn: (...args: unknown[]) => void,
-
     ) => void;
 
     asyncRestart: (W: Worker, warn: (...args: unknown[]) => void) => void;
-
   };
-
 }
 
-
-
 export type TraverseCallback = (
-
   handle: FileSystemHandle,
 
   dirHandle: FileSystemDirectoryHandle,
 
   depth: number,
-
 ) => boolean | void | Promise<boolean | void>;
 
-
-
 export interface TraverseOptions {
-
   callback: TraverseCallback;
 
   recursive?: boolean;
 
   directory?: FileSystemDirectoryHandle;
-
 }
-
-
 
 /**
 
@@ -139,10 +94,7 @@ export interface TraverseOptions {
  */
 
 export function createOpfsUtil(deps: OpfsUtilDeps): OpfsUtilImplementation {
-
   const { state, util, sqlite3 } = deps;
-
-
 
   // Use a Partial to construct the object, but cast to full interface at return
 
@@ -155,7 +107,6 @@ export function createOpfsUtil(deps: OpfsUtilDeps): OpfsUtilImplementation {
   // The consumer of createOpfsUtil must assign `rootDirectory`.
 
   const opfsUtil = Object.create(null) as Partial<OpfsUtilImplementation>;
-
 
   /**
    * Generates a random filename.

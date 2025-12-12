@@ -24,7 +24,6 @@ interface WasmModule {
  * Dependencies for setupOptionalVfsMethods
  */
 
-
 export interface OptionalVfsMethodsDeps {
   opfsVfs: SQLite3VFSInstance;
   dVfs: SQLite3VFSInstance | null;

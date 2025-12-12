@@ -6,12 +6,14 @@
         "target": "ES2022",
         "moduleResolution": "bundler",
         "allowImportingTsExtensions": false,
+        "skipLibCheck": true,
         "sourceMap": false,
         "declaration": true,
         "declarationMap": false,
         "composite": false
     },
     "include": [
+        "src/jswasm/api/bindings/core-bindings.ts",
         "src/jswasm/utils/async-utils/*.ts",
         "src/jswasm/utils/utf8/*.ts",
         "src/jswasm/utils/memory-utils/*.ts",
