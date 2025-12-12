@@ -157,7 +157,6 @@ export function createOpfsUtil(deps: OpfsUtilDeps): OpfsUtilImplementation {
   const opfsUtil = Object.create(null) as Partial<OpfsUtilImplementation>;
 
 
-
   /**
    * Generates a random filename.
    * @param len - Filename length (default 16)
@@ -556,9 +555,5 @@ export function createOpfsUtil(deps: OpfsUtilDeps): OpfsUtilImplementation {
     },
   };
 
-<<<<<<< HEAD
   return opfsUtil as OpfsUtilImplementation;
-=======
-  return opfsUtil as UnboundOpfsUtil;
->>>>>>> fa34add (feat(types): Remove 'any' types and improve type safety in OPFS installer)
 }

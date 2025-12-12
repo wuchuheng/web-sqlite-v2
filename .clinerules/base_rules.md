@@ -299,6 +299,8 @@ function badExample(input) {
 - Comment obvious code (`i++; // increment i`)
 - Use numbered comments on property declarations
 - Repeat information available in type signatures
+- Add per-line comments unless explicitly requested by a human reviewer; when requested, keep them concise and focused on
+  meaning or constraints to avoid harming readability.
 
 ### 3.3 Language-Specific Documentation
 

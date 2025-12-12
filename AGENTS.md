@@ -37,5 +37,8 @@ The rules in `.clinerules/base_rules.md` apply to the entire repository. Any AI 
 - Use the Three‑Phase Processing Pattern and numeric comments only inside function/method bodies when helpful.
 - Keep functions small, extract complex or repeated logic, and respect the 120‑char line length.
 - After making changes, self‑check compliance and note any deviations in the final message.
+- Commenting rule: keep comments minimal by default, but when a human explicitly requests deeper documentation, add concise
+  per-member doc comments to exported interfaces/types or other public surfaces to improve readability without bloating the
+  code.
 
 If any instruction conflicts arise, follow this precedence: direct system/developer/user instructions > this AGENTS.md > `.clinerules/base_rules.md` > other files. When a conflict occurs, call it out explicitly in your final message.

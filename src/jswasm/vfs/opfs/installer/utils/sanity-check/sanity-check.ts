@@ -29,18 +29,7 @@ export interface SanityCheckDeps {
     SQLITE_OPEN_MAIN_DB: number;
   };
   /** OPFS state object */
-<<<<<<< HEAD
   state: OpfsState;
-=======
-  state: {
-    sabOPView: Int32Array;
-    opIds: Record<string, number>;
-    s11n: {
-      serialize: (value: string) => void;
-      deserialize: () => [string] | null;
-    };
-  };
->>>>>>> fa34add (feat(types): Remove 'any' types and improve type safety in OPFS installer)
   /** VFS synchronization wrappers */
   vfsSyncWrappers: VfsSyncWrappers & {
     xSleep?: (pVfs: number, microseconds: number) => number;
@@ -106,11 +95,7 @@ export function runSanityCheck(deps: SanityCheckDeps): void {
     state.s11n!.serialize("This is ä string.");
     const d13n = state.s11n!.deserialize();
     log("deserialize() says:", d13n);
-<<<<<<< HEAD
-    if ("This is ä string." !== d13n![0]) toss("String d13n error.");
-=======
     if (!d13n || "This is ä string." !== d13n[0]) toss("String d13n error.");
->>>>>>> fa34add (feat(types): Remove 'any' types and improve type safety in OPFS installer)
 
     // 2.2 Test xAccess (file doesn't exist)
     vfsSyncWrappers.xAccess(opfsVfs.pointer, zDbFile, 0, pOut);

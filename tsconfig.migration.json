@@ -41,6 +41,7 @@
         "src/jswasm/vfs/filesystem/path-operations/*.ts",
         "src/jswasm/vfs/filesystem/stream-helpers/*.ts",
         "src/jswasm/vfs/filesystem/stream-operations/*.ts",
+        "src/jswasm/vfs/memfs/*.ts",
         "src/jswasm/vfs/opfs/async-proxy/logging/*.ts",
         "src/jswasm/vfs/opfs/async-proxy/environment/*.ts",
         "src/jswasm/vfs/opfs/async-proxy/serialization-buffer/*.ts",

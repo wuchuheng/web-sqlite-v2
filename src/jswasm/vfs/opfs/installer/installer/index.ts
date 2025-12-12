@@ -111,8 +111,10 @@ export function createInstallOpfsVfsContext(
       ];
 
       const logImpl = (level: number, ...args: unknown[]) => {
-        if (activeConfig.verbose > level)
-          loggers[level]("OPFS syncer:", ...args);
+        const logger = loggers[level];
+        if (activeConfig.verbose > level && logger) {
+          logger("OPFS syncer:", ...args);
+        }
       };
 
       const log = (...args: unknown[]) => logImpl(2, ...args);
@@ -154,13 +156,11 @@ export function createInstallOpfsVfsContext(
         }
       }, 4000);
 
-      // Cast to allow assignment of _originalOnError which is not on standard Worker
-      const W_ = W as Worker & {
-        _originalOnError?: (ev: ErrorEvent) => unknown;
+      const workerWithOriginal = W as Worker & {
+        _originalOnError?: typeof W.onerror;
       };
-
-      W_._originalOnError = W.onerror as (ev: ErrorEvent) => unknown;
-      W.onerror = function (err: ErrorEvent) {
+      workerWithOriginal._originalOnError = workerWithOriginal.onerror;
+      workerWithOriginal.onerror = function (err: ErrorEvent) {
         error("Error initializing OPFS asyncer:", err);
         promiseReject(
           new Error("Loading OPFS async Worker failed for unknown reasons."),
@@ -202,19 +202,25 @@ export function createInstallOpfsVfsContext(
       const __openFiles = Object.create(null) as Record<number, OpfsFileHandle>;
 
       // 2.10 Generate random filename utility
-      const randomFilename = function f(len = 16) {
-        const func = f as unknown as { _chars: string; _n: number };
-        if (!func._chars) {
-          func._chars =
+      type RandomFilenameFn = ((len?: number) => string) & {
+        _chars?: string;
+        _n?: number;
+      };
+
+      const randomFilename: RandomFilenameFn = (len = 16): string => {
+        if (!randomFilename._chars) {
+          randomFilename._chars =
             "abcdefghijklmnopqrstuvwxyz" +
             "ABCDEFGHIJKLMNOPQRSTUVWXYZ" +
             "012346789";
-          func._n = func._chars.length;
+          randomFilename._n = randomFilename._chars.length;
         }
-        const a = [];
+        const characters = randomFilename._chars ?? "";
+        const count = randomFilename._n ?? characters.length;
+        const a: string[] = [];
         for (let i = 0; i < len; ++i) {
-          const ndx = (Math.random() * (func._n * 64)) % func._n | 0;
-          a[i] = func._chars[ndx];
+          const ndx = (Math.random() * (count * 64)) % count | 0;
+          a[i] = characters[ndx] ?? "";
         }
         return a.join("");
       };
@@ -320,7 +326,7 @@ export function createInstallOpfsVfsContext(
         error,
         runSanityCheck: boundRunSanityCheck,
         thisThreadHasOPFS,
-        W: W_,
+        W: workerWithOriginal,
       });
     });
 

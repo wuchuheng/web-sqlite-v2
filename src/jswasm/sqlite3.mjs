@@ -40,7 +40,7 @@ import {
     stringToUTF8Array,
 } from "./utils/utf8/utf8";
 import { createTTY } from "./system/tty-operations.mjs";
-import { createMEMFS } from "./vfs/memfs.mjs";
+import { createMEMFS } from "./vfs/memfs/memfs";
 import { createSYSCALLS } from "./system/syscalls.mjs";
 import { createWASIFunctions } from "./system/wasi-functions.mjs";
 import { createFS as createFileSystem } from "./vfs/filesystem/filesystem.js";

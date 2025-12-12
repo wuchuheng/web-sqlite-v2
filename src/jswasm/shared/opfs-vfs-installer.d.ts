@@ -630,21 +630,6 @@ export interface InstallOpfsVfsContext {
 }
 
 /**
- * Function to install OPFS VFS.
- */
-export interface InstallOpfsVfs {
-  (options?: Partial<OpfsConfig>): Promise<SQLite3Module>;
-  defaultProxyUri: string;
-}
-
-/**
- * Initializer function for OPFS VFS.
- */
-export interface InstallOpfsVfsInitializer {
-  (sqlite3Ref: SQLite3Module): Promise<void>;
-}
-
-/**
  * Chunked import callback
  */
 export type ChunkedImportCallback = () => Promise<
@@ -724,7 +709,7 @@ export interface WorkerMessageHandlerDeps {
  * Install OPFS VFS function
  */
 export type InstallOpfsVfs = {
-  (options?: OpfsInstallerOptions): Promise<SQLite3Module>;
+  (options?: Partial<OpfsConfig>): Promise<SQLite3Module>;
   defaultProxyUri: string;
 };
 
@@ -733,7 +718,7 @@ export type InstallOpfsVfs = {
  */
 export type InstallOpfsVfsInitializer = (
   sqlite3Ref: SQLite3Module,
-) => Promise<void | SQLite3Module>;
+) => Promise<void>;
 
 /**
  * Return type of createInstallOpfsVfsContext

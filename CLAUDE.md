@@ -55,7 +55,7 @@ src/jswasm/
 ├── sqlite3Apibootstrap.mjs      # SQLite3 API initialization and bootstrap
 ├── vfs/opfs/sqlite3-opfs-async-proxy/sqlite3-opfs-async-proxy.js  # Worker entry delegating to async-proxy/
 ├── vfs/opfs/async-proxy/        # OPFS async proxy implementation modules
-├── memfs.mjs                    # In-memory file system implementation
+├── vfs/memfs/memfs.ts           # In-memory file system implementation
 ├── syscalls.mjs                 # System call implementations
 ├── wasi-functions.mjs           # WASI functions (time, env, fd operations)
 ├── tty-operations.mjs           # TTY/terminal operations
@@ -73,7 +73,7 @@ src/jswasm/
 - Memory management (HEAP8, HEAP16, HEAP32, HEAP64, etc.)
 - Module exports and import coordination
 
-**2. File System Layer** (`memfs.mjs`)
+**2. File System Layer** (`vfs/memfs/memfs.ts`)
 
 - Complete in-memory file system (MEMFS) implementation
 - Node operations: create, read, write, lookup, rename, unlink
