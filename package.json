@@ -1,51 +1,52 @@
 {
-  "name": "@wuchuheng/web-sqlite",
-  "version": "1.0.0",
-  "description": "",
-  "private": true,
-  "type": "module",
-  "main": "./src/main.js",
-  "types": "./src/main.d.ts",
-  "exports": {
-    ".": {
-      "types": "./src/main.d.ts",
-      "default": "./src/main.js"
-    }
-  },
-  "scripts": {
-    "test": "pnpm run build && npm run test:e2e",
-    "test:e2e": "vitest run --config vitest.e2e.config.ts",
-    "build": "tsc -p tsconfig.migration.json",
-    "build:watch": "tsc -p tsconfig.migration.json --watch",
-    "lint": "eslint . --ext .ts,.js,.mjs --fix; npm run typecheck && npm run format",
-    "typecheck": "tsc --noEmit --pretty",
-    "format": "prettier --ignore-path .gitignore --write ."
-  },
-  "devDependencies": {
-    "@eslint/css": "^0.14.1",
-    "@eslint/js": "^9.39.2",
-    "@eslint/json": "^0.14.0",
-    "@types/node": "^25.0.1",
-    "@vitest/browser": "^4.0.15",
-    "@vitest/browser-playwright": "^4.0.15",
-    "@vitest/coverage-v8": "4.0.15",
-    "@vitest/ui": "^4.0.15",
-    "eslint": "^9.39.2",
-    "globals": "^16.5.0",
-    "jiti": "^2.6.1",
-    "playwright": "^1.57.0",
-    "typescript": "^5.9.3",
-    "typescript-eslint": "^8.49.0",
-    "vitest": "^4.0.15"
-  },
-  "repository": {
-    "type": "git",
-    "url": "git+https://github.com/wuchuheng/web-sqlite-v2.git"
-  },
-  "author": "",
-  "license": "ISC",
-  "bugs": {
-    "url": "https://github.com/wuchuheng/web-sqlite-v2/issues"
-  },
-  "homepage": "https://github.com/wuchuheng/web-sqlite-v2#readme"
+    "name": "@wuchuheng/web-sqlite",
+    "version": "1.0.0",
+    "description": "",
+    "private": true,
+    "type": "module",
+    "main": "./src/main.js",
+    "types": "./src/main.d.ts",
+    "exports": {
+        ".": {
+            "types": "./src/main.d.ts",
+            "default": "./src/main.js"
+        }
+    },
+    "scripts": {
+        "test": "npm run build && npm run test:e2e",
+        "test:e2e": "vitest run --config vitest.e2e.config.ts",
+        "test:debug": "vitest run --config vitest.e2e.config.ts --no-file-parallelism",
+        "build": "tsc -p tsconfig.migration.json",
+        "build:watch": "tsc -p tsconfig.migration.json --watch",
+        "lint": "eslint . --ext .ts,.js,.mjs --fix; npm run typecheck && npm run format",
+        "typecheck": "tsc --noEmit --pretty",
+        "format": "prettier --ignore-path .gitignore --write ."
+    },
+    "devDependencies": {
+        "@eslint/css": "^0.14.1",
+        "@eslint/js": "^9.39.2",
+        "@eslint/json": "^0.14.0",
+        "@types/node": "^25.0.1",
+        "@vitest/browser": "^4.0.15",
+        "@vitest/browser-playwright": "^4.0.15",
+        "@vitest/coverage-v8": "4.0.15",
+        "@vitest/ui": "^4.0.15",
+        "eslint": "^9.39.2",
+        "globals": "^16.5.0",
+        "jiti": "^2.6.1",
+        "playwright": "^1.57.0",
+        "typescript": "^5.9.3",
+        "typescript-eslint": "^8.49.0",
+        "vitest": "^4.0.15"
+    },
+    "repository": {
+        "type": "git",
+        "url": "git+https://github.com/wuchuheng/web-sqlite-v2.git"
+    },
+    "author": "",
+    "license": "ISC",
+    "bugs": {
+        "url": "https://github.com/wuchuheng/web-sqlite-v2/issues"
+    },
+    "homepage": "https://github.com/wuchuheng/web-sqlite-v2#readme"
 }

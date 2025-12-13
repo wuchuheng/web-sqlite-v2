@@ -3,15 +3,8 @@
         "target": "ES2022",
         "useDefineForClassFields": true,
         "module": "ESNext",
-        "lib": [
-            "ES2022",
-            "DOM",
-            "DOM.Iterable",
-            "WebWorker"
-        ],
-        "types": [
-            "vite/client"
-        ],
+        "lib": ["ES2022", "DOM", "DOM.Iterable", "WebWorker"],
+        "types": ["vite/client"],
         "skipLibCheck": true,
         /* Bundler mode */
         "moduleResolution": "bundler",
@@ -23,12 +16,8 @@
         "outDir": "dist",
         "baseUrl": ".",
         "paths": {
-            "@wuchuheng/web-sqlite/*": [
-                "./src/*"
-            ],
-            "@/*": [
-                "./src/*"
-            ]
+            "@wuchuheng/web-sqlite/*": ["./src/*"],
+            "@/*": ["./src/*"]
         },
         /* Linting */
         "strict": true,
@@ -39,8 +28,5 @@
         "noUncheckedSideEffectImports": true,
         "sourceMap": true
     },
-    "include": [
-        "src/**/*.ts",
-        "tests/**/*.ts"
-    ]
+    "include": ["src/**/*.ts", "tests/**/*.ts"]
 }
