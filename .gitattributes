@@ -1,0 +1,14 @@
+# Typescript project
+*.{js,jsx,ts,tsx} eol=lf
+
+# Markdown
+*.md eol=lf
+
+# HTML
+*.html eol=lf
+
+# CSS
+*.css eol=lf
+
+# PHP
+*.php eol=lf
