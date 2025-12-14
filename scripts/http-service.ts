@@ -60,6 +60,7 @@ const MIME: Record<string, string> = {
   ".jpg": "image/jpeg",
   ".svg": "image/svg+xml",
   ".txt": "text/plain",
+  ".wasm": "application/wasm",
 };
 
 /**
@@ -71,7 +72,7 @@ const server = http.createServer((req, res) => {
   res.setHeader("Cross-Origin-Opener-Policy", "same-origin");
   res.setHeader("Cross-Origin-Embedder-Policy", "require-corp");
 
-  if (!req.url || req.method !== "GET") {
+  if (!req.url || (req.method !== "GET" && req.method !== "HEAD")) {
     res.writeHead(405);
     res.end();
     return;

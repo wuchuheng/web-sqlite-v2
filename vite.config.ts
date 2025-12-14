@@ -4,7 +4,10 @@ import { resolve } from "path";
 export default defineConfig({
   build: {
     lib: {
-      entry: resolve(__dirname, "src"),
+      entry: resolve(
+        __dirname,
+        "src/sqlite3-worker1-promiser-bundler-friendly.mjs"
+      ),
       name: "WebSqlite",
       fileName: "sqlite3-worker1-promiser-bundler-friendly.mjs",
       formats: ["es"],
