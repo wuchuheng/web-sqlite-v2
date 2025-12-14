@@ -3,3 +3,4 @@ node_modules/
 src/**/*.d.ts
 src/**/*.js
 __screenshots__/
+dist/

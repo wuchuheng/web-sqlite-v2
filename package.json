@@ -4,22 +4,24 @@
     "description": "",
     "private": true,
     "type": "module",
-    "main": "./src/main.js",
-    "types": "./src/main.d.ts",
+    "main": "./dist/index.js",
+    "types": "./dist/index.d.ts",
     "exports": {
         ".": {
-            "types": "./src/main.d.ts",
-            "default": "./src/main.js"
+            "types": "./dist/index.d.ts",
+            "default": "./dist/index.js"
         }
     },
     "scripts": {
         "test": "npm run build && npm run test:e2e",
+        "http": "tsx scripts/http-service.ts ./dist --port 8399",
         "test:e2e": "vitest run --config vitest.e2e.config.ts",
         "test:debug": "vitest run --config vitest.e2e.config.ts --no-file-parallelism",
-        "build": "tsc -p tsconfig.migration.json",
-        "build:watch": "tsc -p tsconfig.migration.json --watch",
+        "build": "vite build",
+        "build:watch": "vite build --watch",
         "lint": "eslint . --ext .ts,.js,.mjs --fix; npm run typecheck && npm run format",
-        "typecheck": "tsc --noEmit --pretty",
+        "lint:tmp": "eslint src/tmp --ext .ts,.js,.mjs --fix; npm run typecheck src/tmp && npm run format",
+        "typecheck": "tsc --strict --noImplicitAny ",
         "format": "prettier --ignore-path .gitignore --write ."
     },
     "devDependencies": {
@@ -31,12 +33,16 @@
         "@vitest/browser-playwright": "^4.0.15",
         "@vitest/coverage-v8": "4.0.15",
         "@vitest/ui": "^4.0.15",
+        "commander": "^14.0.2",
         "eslint": "^9.39.2",
         "globals": "^16.5.0",
+        "http-server": "^14.1.1",
         "jiti": "^2.6.1",
         "playwright": "^1.57.0",
+        "tsx": "^4.21.0",
         "typescript": "^5.9.3",
         "typescript-eslint": "^8.49.0",
+        "vite": "^7.2.7",
         "vitest": "^4.0.15"
     },
     "repository": {
