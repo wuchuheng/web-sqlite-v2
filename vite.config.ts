@@ -1,19 +1,23 @@
 import { defineConfig } from "vite";
 import { resolve } from "path";
+import dts from "vite-plugin-dts";
 
 export default defineConfig({
+  plugins: [
+    dts({
+      insertTypesEntry: true,
+      rollupTypes: true,
+      tsconfigPath: "./tsconfig.json",
+    }),
+  ],
   build: {
     lib: {
-      entry: resolve(
-        __dirname,
-        "src/sqlite3-worker1-promiser-bundler-friendly.mjs"
-      ),
+      entry: resolve(__dirname, "src/main.ts"),
       name: "WebSqlite",
-      fileName: "sqlite3-worker1-promiser-bundler-friendly.mjs",
       formats: ["es"],
     },
     outDir: "dist",
-    emptyOutDir: false, // Prevent removing dist directory during build
+    emptyOutDir: true, // Prevent removing dist directory during build
     rollupOptions: {
       // External dependencies that should not be bundled
       external: [],
