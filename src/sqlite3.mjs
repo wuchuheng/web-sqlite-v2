@@ -34,6 +34,9 @@
  **
  */
 
+// TAG(refactor):  Load wasm with by base64.
+import wasmUrl from "./sqlite3.wasm?url";
+
 async function sqlite3InitModule(moduleArg = {}) {
     var moduleRtn;
 
@@ -72,7 +75,9 @@ async function sqlite3InitModule(moduleArg = {}) {
                 "undefined" === typeof scriptDirectory ? "" : scriptDirectory
             );
             sims.debugModule("instantiateWasm() uri =", uri, "sIMS =", this);
-            const wfetch = () => fetch(uri, { credentials: "same-origin" });
+
+            // TAG(refactor):  Load wasm with by base64.
+            const wfetch = () => fetch(wasmUrl, { credentials: "same-origin" });
             const finalThen = (arg) => {
                 arg.imports = imports;
                 sims.instantiateWasm = arg;
