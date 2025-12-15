@@ -1,5 +1,5 @@
 // sqlite3.worker.ts
-import sqlite3InitModule, { type Sqlite3 } from "./sqlite3";
+import sqlite3InitModule, { type Sqlite3, Sqlite3DB } from "./sqlite3";
 
 type RpcReq =
   | { id: number; type: "init" }
@@ -8,19 +8,19 @@ type RpcReq =
   | { id: number; type: "query"; sql: string; bind?: unknown };
 
 let sqlite3: Sqlite3;
-let db: any;
+let db: Sqlite3DB;
 
-self.onmessage = async (ev: MessageEvent<RpcReq>) => {
+self.onmessage = async (_: MessageEvent<RpcReq>) => {
   sqlite3 = await sqlite3InitModule();
   // await sqlite3.asyncPostInit(); // important: finishes async pieces (vfs/opfs/etc.)
 
   const filename = "db.sqlite3";
   // Use OpfsDb if available, otherwise fallback to transient/memory
-  db = await sqlite3.oo1.OpfsDb(filename);
+  db = new sqlite3!.oo1!.OpfsDb!(filename, "c");
 
   // Create test table
   db.exec(
-    "CREATE TABLE IF NOT EXISTS test (id INTEGER PRIMARY KEY, name TEXT)"
+    "CREATE TABLE IF NOT EXISTS test (id INTEGER PRIMARY KEY, name TEXT)",
   );
 
   // if (sqlite3.opfs) {

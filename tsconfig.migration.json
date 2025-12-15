@@ -31,5 +31,11 @@
         "composite": false
     },
     "include": ["src/**/*.ts", "src/**/*.d.ts"],
-    "exclude": ["node_modules", "dist", "**/*.spec.ts", "**/*.test.ts", "**/tests/**/*"]
+    "exclude": [
+        "node_modules",
+        "dist",
+        "**/*.spec.ts",
+        "**/*.test.ts",
+        "**/tests/**/*"
+    ]
 }

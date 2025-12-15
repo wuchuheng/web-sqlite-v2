@@ -335,7 +335,7 @@ describe("Sqlite3 test", () => {
             resultRows: [],
           });
           throw new sqlite3.SQLite3Error(
-            "Demonstrating nested savepoint() rollback"
+            "Demonstrating nested savepoint() rollback",
           );
         });
       });
@@ -383,13 +383,13 @@ describe("Taster 1 tests", () => {
     }
 
     expect(capi.sqlite3_config(capi.SQLITE_CONFIG_URI, 1)).toBe(
-      capi.SQLITE_MISUSE
+      capi.SQLITE_MISUSE,
     );
     expect(capi.sqlite3_config(capi.SQLITE_CONFIG_GETMALLOC)).toBe(
-      capi.SQLITE_MISUSE
+      capi.SQLITE_MISUSE,
     );
     expect(capi.sqlite3_config(capi.SQLITE_CONFIG_GETMALLOC, 1)).toBe(
-      capi.SQLITE_NOTFOUND
+      capi.SQLITE_NOTFOUND,
     );
   });
 
@@ -559,7 +559,7 @@ describe("Taster 1 tests", () => {
         expect(+aVals[1]).toBe(2 * +aVals[0]);
       },
       0,
-      0
+      0,
     );
     expect(rc).toBe(0);
     expect(rowCount).toBe(3);
@@ -573,7 +573,7 @@ describe("Taster 1 tests", () => {
         throw new Error("Testing throwing from exec() callback.");
       },
       0,
-      0
+      0,
     );
     expect(rc2).toBe(capi.SQLITE_ABORT);
 
@@ -587,7 +587,7 @@ describe("Taster 1 tests", () => {
           expect(nCols).toBeGreaterThan(0);
           expect(wasm.isPtr(pVoid)).toBe(true);
           return 0;
-        }
+        },
       );
       try {
         const rc3 = capi.sqlite3_exec(db, "select a from foo.bar", pCb, 0, 0);
@@ -636,7 +636,7 @@ describe("Taster 1 tests", () => {
     db.exec("create table t(a);insert into t(a) values(1);");
 
     const checkOp = (
-      op: "bind" | "finalize" | "clearBindings" | "reset" | "step"
+      op: "bind" | "finalize" | "clearBindings" | "reset" | "step",
     ) => {
       expect(() => {
         db.exec({
@@ -722,8 +722,8 @@ describe("Taster 1 tests", () => {
         capi.SQLITE_UTF8,
         0,
         myCmp,
-        0
-      )
+        0,
+      ),
     );
     expect(db.selectValue("select 'hi' = 'HI' collate mycollation")).toBe(1);
     expect(collationCounter).toBe(1);
