@@ -22,7 +22,7 @@
         "build:watch": "vite build --watch",
         "lint": "eslint . --ext .ts,.js,.mjs --fix; npm run typecheck && npm run format",
         "lint:tmp": "eslint src/tmp --ext .ts,.js,.mjs --fix; npm run typecheck src/tmp && npm run format",
-        "typecheck": "tsc --strict --noImplicitAny ",
+        "typecheck": "tsc --noEmit",
         "format": "prettier --ignore-path .gitignore --write ."
     },
     "devDependencies": {

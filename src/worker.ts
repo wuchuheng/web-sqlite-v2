@@ -1,27 +1,60 @@
 // sqlite3.worker.ts
-import sqlite3InitModule, { type Sqlite3, Sqlite3DB } from "./sqlite3";
+import sqlite3InitModule, { Sqlite3DB } from "./sqlite3";
+import {
+  SqliteEvent,
+  type SqliteReqMsg,
+  type SqliteResMsg,
+} from "./types/message.d";
 
-type RpcReq =
-  | { id: number; type: "init" }
-  | { id: number; type: "open"; filename?: string }
-  | { id: number; type: "exec"; sql: string; bind?: unknown }
-  | { id: number; type: "query"; sql: string; bind?: unknown };
+self.onmessage = async (msg: MessageEvent<SqliteReqMsg<unknown>>) => {
+  let db: Sqlite3DB | null = null;
+  const sqlite3 = await sqlite3InitModule();
+  console.log(`Warder receive: `, msg.data);
 
-let sqlite3: Sqlite3;
-let db: Sqlite3DB;
+  // 2.1 Handle OPEN event.
+  if (msg.data.event === SqliteEvent.OPEN) {
+    if (!msg.data.payload || typeof msg.data.payload !== "string") {
+      throw new Error("Invalid payload for OPEN event");
+    }
+    let filename = msg.data.payload;
+    // if the suffix is not ".sqlite3", append it.
+    if (!filename.endsWith(".sqlite3")) {
+      filename += ".sqlite3";
+    }
 
-self.onmessage = async (_: MessageEvent<RpcReq>) => {
-  sqlite3 = await sqlite3InitModule();
-  // await sqlite3.asyncPostInit(); // important: finishes async pieces (vfs/opfs/etc.)
+    // Use OpfsDb if available, otherwise fallback to transient/memory
+    db = new sqlite3!.oo1!.OpfsDb!(filename, "c");
 
-  const filename = "db.sqlite3";
-  // Use OpfsDb if available, otherwise fallback to transient/memory
-  db = new sqlite3!.oo1!.OpfsDb!(filename, "c");
+    const res: SqliteResMsg<void> = {
+      id: msg.data.id,
+    };
+
+    self.postMessage(res);
+    return;
+  }
+
+  if (db === undefined) {
+    throw new Error("Database is not opened");
+  }
+  console.log("Database state:", db!.state);
+  if (db!.state !== "open") {
+    throw new Error("Database is not opened");
+  }
+
+  // 2.2 Handle Execute event.
+  if (msg.data.event === SqliteEvent.EXECUTE) {
+    if (!msg.data.payload || typeof msg.data.payload !== "string") {
+      throw new Error("Invalid payload for EXECUTE event");
+    }
+    const sql = msg.data.payload;
+
+    db!.exec(sql);
+  }
 
   // Create test table
-  db.exec(
-    "CREATE TABLE IF NOT EXISTS test (id INTEGER PRIMARY KEY, name TEXT)",
-  );
+  // db.exec(
+  //   "CREATE TABLE IF NOT EXISTS test (id INTEGER PRIMARY KEY, name TEXT)",
+  // );
 
   // if (sqlite3.opfs) {
   //   db = new sqlite3.opfs.OpfsDb(filename);
