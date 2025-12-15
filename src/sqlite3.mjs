@@ -36,8 +36,12 @@
 
 // TAG(refactor):  Load wasm with by base64.
 import wasmUrl from "./sqlite3.wasm?url";
+import opfsProxyContent from "./sqlite3-opfs-async-proxy.js?raw";
 
 async function sqlite3InitModule(moduleArg = {}) {
+    const opfsProxyUrl = URL.createObjectURL(
+        new Blob([opfsProxyContent], { type: "application/javascript" })
+    );
     var moduleRtn;
 
     var Module = moduleArg;
@@ -65,15 +69,17 @@ async function sqlite3InitModule(moduleArg = {}) {
         sIMS.debugModule("pre-js.js sqlite3InitModuleState =", sIMS);
 
         Module["locateFile"] = function (path, prefix) {
-            return new URL(path, import.meta.url).href;
+            const result = new URL(path, import.meta.url).href;
+            return result;
         }.bind(sIMS);
 
         Module["instantiateWasm"] = function callee(imports, onSuccess) {
             const sims = this;
-            const uri = Module.locateFile(
-                sims.wasmFilename,
-                "undefined" === typeof scriptDirectory ? "" : scriptDirectory
-            );
+            const uri = wasmUrl;
+            // const uri = Module.locateFile(
+            //     sims.wasmFilename,
+            //     "undefined" === typeof scriptDirectory ? "" : scriptDirectory
+            // );
             sims.debugModule("instantiateWasm() uri =", uri, "sIMS =", this);
 
             // TAG(refactor):  Load wasm with by base64.
@@ -255,11 +261,12 @@ async function sqlite3InitModule(moduleArg = {}) {
     var wasmBinaryFile;
 
     function findWasmBinary() {
-        if (Module["locateFile"]) {
-            return locateFile("sqlite3.wasm");
-        }
-
-        return new URL("sqlite3.wasm", import.meta.url).href;
+        // TAG(refactor): Use bundled WASM URL to avoid duplication
+        return wasmUrl;
+        // if (Module["locateFile"]) {
+        //     return locateFile("sqlite3.wasm");
+        // }
+        // return new URL("sqlite3.wasm", import.meta.url).href;
     }
 
     function getBinarySync(file) {
@@ -12745,9 +12752,16 @@ async function sqlite3InitModule(moduleArg = {}) {
                         promiseWasRejected = false;
                         return promiseResolve_(sqlite3);
                     };
-                    const W = new Worker(
-                        new URL(options.proxyUri, import.meta.url)
-                    );
+                    // Tag(refactor): load opfs files
+                    let W;
+                    try {
+                        W = new Worker(
+                            new URL(options.proxyUri, import.meta.url)
+                        );
+                    } catch (e) {
+                        promiseReject(e);
+                        return;
+                    }
                     setTimeout(() => {
                         if (undefined === promiseWasRejected) {
                             promiseReject(
@@ -13845,15 +13859,16 @@ async function sqlite3InitModule(moduleArg = {}) {
                 });
                 return thePromise;
             };
-            installOpfsVfs.defaultProxyUri = "sqlite3-opfs-async-proxy.js";
+            installOpfsVfs.defaultProxyUri = opfsProxyUrl;
             globalThis.sqlite3ApiBootstrap.initializersAsync.push(
                 async (sqlite3) => {
                     try {
-                        let proxyJs = installOpfsVfs.defaultProxyUri;
-                        if (sqlite3.scriptInfo.sqlite3Dir) {
-                            installOpfsVfs.defaultProxyUri =
-                                sqlite3.scriptInfo.sqlite3Dir + proxyJs;
-                        }
+                        // TAG(refactor): Use bundled proxy URL, skip directory prepending
+                        // let proxyJs = installOpfsVfs.defaultProxyUri;
+                        // if (sqlite3.scriptInfo.sqlite3Dir) {
+                        //     installOpfsVfs.defaultProxyUri =
+                        //         sqlite3.scriptInfo.sqlite3Dir + proxyJs;
+                        // }
                         return installOpfsVfs().catch((e) => {
                             sqlite3.config.warn(
                                 "Ignoring inability to install OPFS sqlite3_vfs:",

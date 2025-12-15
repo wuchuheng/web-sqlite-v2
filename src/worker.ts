@@ -1,5 +1,5 @@
 // sqlite3.worker.ts
-import sqlite3InitModule from "./sqlite3";
+import sqlite3InitModule, { type Sqlite3 } from "./sqlite3";
 
 type RpcReq =
   | { id: number; type: "init" }
@@ -7,78 +7,47 @@ type RpcReq =
   | { id: number; type: "exec"; sql: string; bind?: unknown }
   | { id: number; type: "query"; sql: string; bind?: unknown };
 
-type RpcRes =
-  | { id: number; ok: true; data?: unknown }
-  | {
-      id: number;
-      ok: false;
-      error: { name: string; message: string; stack?: string };
-    };
-
-let sqlite3: Awaited<ReturnType<typeof sqlite3InitModule>> | null = null;
-let db: InstanceType<
-  NonNullable<NonNullable<typeof sqlite3>["oo1"]>["DB"]
-> | null = null;
-
-function serializeError(e: unknown): RpcRes["error"] {
-  if (e instanceof Error)
-    return { name: e.name, message: e.message, stack: e.stack };
-  return { name: "Error", message: String(e) };
-}
+let sqlite3: Sqlite3;
+let db: any;
 
 self.onmessage = async (ev: MessageEvent<RpcReq>) => {
-  const req = ev.data;
+  sqlite3 = await sqlite3InitModule();
+  // await sqlite3.asyncPostInit(); // important: finishes async pieces (vfs/opfs/etc.)
 
-  try {
-    if (req.type === "init") {
-      sqlite3 = await sqlite3InitModule();
-      await sqlite3.asyncPostInit(); // important: finishes async pieces (vfs/opfs/etc.)
-      console.log("init sqlite3");
-      return;
-    }
+  const filename = "db.sqlite3";
+  // Use OpfsDb if available, otherwise fallback to transient/memory
+  db = await sqlite3.oo1.OpfsDb(filename);
 
-    if (!sqlite3)
-      throw new Error("Worker not initialized. Call {type:'init'} first.");
+  // Create test table
+  db.exec(
+    "CREATE TABLE IF NOT EXISTS test (id INTEGER PRIMARY KEY, name TEXT)"
+  );
 
-    if (req.type === "open") {
-      db = new sqlite3.oo1!.DB("file:///test.db?vfs=opfs", "c");
-      debugger;
-    }
-
-    if (!db) throw new Error("DB not opened. Call {type:'open'} first.");
-
-    if (req.type === "exec") {
-      // exec is great for DDL / inserts / updates
-      db.exec({ sql: req.sql, bind: req.bind as unknown });
-      (self as DedicatedWorkerGlobalScope).postMessage({
-        id: req.id,
-        ok: true,
-      } satisfies RpcRes);
-      return;
-    }
-
-    if (req.type === "query") {
-      // collect rows as objects
-      const rows = db.exec<{ [k: string]: unknown }>({
-        sql: req.sql,
-        bind: req.bind as unknown,
-        rowMode: "object",
-        returnValue: "resultRows",
-      });
-      (self as DedicatedWorkerGlobalScope).postMessage({
-        id: req.id,
-        ok: true,
-        data: rows,
-      } satisfies RpcRes);
-      return;
-    }
-
-    throw new Error(`Unknown request type: ${(req as { type?: string }).type}`);
-  } catch (e) {
-    (self as DedicatedWorkerGlobalScope).postMessage({
-      id: req.id,
-      ok: false,
-      error: serializeError(e),
-    } satisfies RpcRes);
-  }
+  // if (sqlite3.opfs) {
+  //   db = new sqlite3.opfs.OpfsDb(filename);
+  //   console.log(`Opened OPFS database: ${filename}`);
+  // } else {
+  //   db = new sqlite3.oo1.DB(filename, "ct");
+  //   console.log(`Opened transient database: ${filename}`);
+  // }
+  // self.postMessage({ id: req.id, type: "success", result: filename });
+  //   } else if (req.type === "exec") {
+  //     if (!db) throw new Error("db not opened");
+  //     db.exec({ sql: req.sql, bind: req.bind });
+  //     self.postMessage({ id: req.id, type: "success" });
+  //   } else if (req.type === "query") {
+  //     if (!db) throw new Error("db not opened");
+  //     const rows: any[] = [];
+  //     db.exec({
+  //       sql: req.sql,
+  //       bind: req.bind,
+  //       rowMode: "object",
+  //       callback: (row: any) => rows.push(row),
+  //     });
+  //     self.postMessage({ id: req.id, type: "success", result: rows });
+  //   }
+  // } catch (err: any) {
+  //   console.error("Worker error:", err);
+  //   self.postMessage({ id: req.id, type: "error", error: err.message });
+  // }
 };
