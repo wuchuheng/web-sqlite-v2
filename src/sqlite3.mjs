@@ -7674,7 +7674,7 @@ globalThis.sqlite3ApiBootstrap.initializers.push(function(sqlite3){
     ]
   } ;
 
-  if( !!wasm.exports.sqlite3_progress_handler ){
+  if( wasm.exports.sqlite3_progress_handler ){
     bindingSignatures.core.push(
       ["sqlite3_progress_handler", undefined, [
         "sqlite3*", "int", new wasm.xWrap.FuncPtrAdapter({
@@ -7687,14 +7687,14 @@ globalThis.sqlite3ApiBootstrap.initializers.push(function(sqlite3){
     );
   }
 
-  if( !!wasm.exports.sqlite3_stmt_explain ){
+  if( wasm.exports.sqlite3_stmt_explain ){
     bindingSignatures.core.push(
       ["sqlite3_stmt_explain", "int", "sqlite3_stmt*", "int"],
       ["sqlite3_stmt_isexplain", "int", "sqlite3_stmt*"]
     );
   }
 
-  if( !!wasm.exports.sqlite3_set_authorizer ){
+  if( wasm.exports.sqlite3_set_authorizer ){
     bindingSignatures.core.push(
       ["sqlite3_set_authorizer", "int", [
         "sqlite3*",
@@ -7720,7 +7720,7 @@ globalThis.sqlite3ApiBootstrap.initializers.push(function(sqlite3){
     );
   }
 
-  if( !!wasm.exports.sqlite3_column_origin_name ){
+  if( wasm.exports.sqlite3_column_origin_name ){
     bindingSignatures.core.push(
       ["sqlite3_column_database_name","string", "sqlite3_stmt*", "int"],
       ["sqlite3_column_origin_name","string", "sqlite3_stmt*", "int"],
@@ -10264,14 +10264,14 @@ sqlite3.initWorker1API = function(){
         }
       }
       try {
-        const changeCount = !!rc.countChanges
+        const changeCount = rc.countChanges
               ? db.changes(true,(64===rc.countChanges))
               : undefined;
         db.exec(rc);
         if(undefined !== changeCount){
           rc.changeCount = db.changes(true,64===rc.countChanges) - changeCount;
         }
-        const lastInsertRowId = !!rc.lastInsertRowId
+        const lastInsertRowId = rc.lastInsertRowId
               ? sqlite3.capi.sqlite3_last_insert_rowid(db)
               : undefined;
         if( undefined!==lastInsertRowId ){
