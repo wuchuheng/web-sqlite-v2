@@ -1,5 +1,5 @@
 // sqlite3.worker.ts
-import sqlite3InitModule, {Sqlite3DB} from "./jswasm/sqlite3";
+import sqlite3InitModule, { Sqlite3DB } from "./jswasm/sqlite3";
 import {
   SqliteEvent,
   type SqliteReqMsg,
