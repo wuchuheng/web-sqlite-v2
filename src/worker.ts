@@ -1,87 +1,128 @@
 // sqlite3.worker.ts
-import sqlite3InitModule, { Sqlite3DB } from "./jswasm/sqlite3";
+import sqlite3InitModule, {
+  type Sqlite3,
+  Sqlite3DB,
+  type BindCollection,
+} from "./jswasm/sqlite3";
 import {
   SqliteEvent,
   type SqliteReqMsg,
   type SqliteResMsg,
-} from "./types/message.d";
+} from "./types/message";
+
+let db: Sqlite3DB | null = null;
+let sqlite3: Sqlite3 | null = null;
+
+// Initialize sqlite3 module once
+const initPromise = sqlite3InitModule().then((mod) => {
+  sqlite3 = mod;
+  console.log("SQLite3 module initialized");
+});
+
+const handleOpen = (payload: unknown) => {
+  if (typeof payload !== "string") {
+    throw new Error("Invalid payload for OPEN event: expected filename string");
+  }
+  let filename = payload;
+  if (!filename.endsWith(".sqlite3")) {
+    filename += ".sqlite3";
+  }
+
+  if (sqlite3!.oo1 && sqlite3!.oo1.OpfsDb) {
+    db = new sqlite3!.oo1.OpfsDb(filename, "c");
+    console.log(`Opened OPFS database: ${filename}`);
+  } else {
+    // Fallback logic
+    db = new sqlite3!.oo1!.DB(filename, "ct");
+    console.log(`Opened transient database: ${filename}`);
+  }
+};
+
+const handleExecute = (payload: unknown) => {
+  if (!db) {
+    throw new Error("Database is not open");
+  }
+  if (typeof payload !== "string") {
+    throw new Error("Invalid payload for EXECUTE event: expected SQL string");
+  }
+  db.exec(payload);
+};
+
+const handleRun = (payload: unknown) => {
+  if (!db) {
+    throw new Error("Database is not open");
+  }
+
+  const { sql, bind } = payload as { sql: string; bind?: BindCollection };
+
+  if (typeof sql !== "string") {
+    throw new Error("Invalid payload for RUN event: expected { sql: string }");
+  }
+
+  db.exec({
+    sql,
+    bind,
+  });
+
+  return {
+    changes: db.changes(),
+    lastInsertRowid: db.selectValue("SELECT last_insert_rowid()"),
+  };
+};
+
+const handleClose = () => {
+  if (db) {
+    db.close();
+    db = null;
+  }
+};
 
 self.onmessage = async (msg: MessageEvent<SqliteReqMsg<unknown>>) => {
-  let db: Sqlite3DB | null = null;
-  const sqlite3 = await sqlite3InitModule();
-  console.log(`Warder receive: `, msg.data);
+  const { id, event, payload } = msg.data;
 
-  // 2.1 Handle OPEN event.
-  if (msg.data.event === SqliteEvent.OPEN) {
-    if (!msg.data.payload || typeof msg.data.payload !== "string") {
-      throw new Error("Invalid payload for OPEN event");
+  try {
+    await initPromise;
+
+    let result: unknown = undefined;
+
+    switch (event) {
+      case SqliteEvent.OPEN:
+        handleOpen(payload);
+        break;
+
+      case SqliteEvent.EXECUTE:
+        handleExecute(payload);
+        break;
+
+      case SqliteEvent.RUN:
+        result = handleRun(payload);
+        break;
+
+      case SqliteEvent.CLOSE:
+        handleClose();
+        break;
+
+      default:
+        throw new Error(`Unknown event: ${event}`);
     }
-    let filename = msg.data.payload;
-    // if the suffix is not ".sqlite3", append it.
-    if (!filename.endsWith(".sqlite3")) {
-      filename += ".sqlite3";
-    }
 
-    // Use OpfsDb if available, otherwise fallback to transient/memory
-    db = new sqlite3!.oo1!.OpfsDb!(filename, "c");
-
-    const res: SqliteResMsg<void> = {
-      id: msg.data.id,
+    const res: SqliteResMsg<unknown> = {
+      id,
       success: true,
+      payload: result,
     };
-
     self.postMessage(res);
-    return;
+  } catch (err) {
+    const errorObj = err instanceof Error ? err : new Error(String(err));
+    const res: SqliteResMsg<void> = {
+      id,
+      success: false,
+      error: {
+        name: errorObj.name,
+        message: errorObj.message,
+        stack: errorObj.stack,
+      } as Error,
+    };
+    self.postMessage(res);
   }
-
-  if (db === undefined) {
-    throw new Error("Database is not opened");
-  }
-  console.log("Database state:", db!.state);
-  if (db!.state !== "open") {
-    throw new Error("Database is not opened");
-  }
-
-  // 2.2 Handle Execute event.
-  if (msg.data.event === SqliteEvent.EXECUTE) {
-    if (!msg.data.payload || typeof msg.data.payload !== "string") {
-      throw new Error("Invalid payload for EXECUTE event");
-    }
-    const sql = msg.data.payload;
-
-    db!.exec(sql);
-  }
-
-  // Create test table
-  // db.exec(
-  //   "CREATE TABLE IF NOT EXISTS test (id INTEGER PRIMARY KEY, name TEXT)",
-  // );
-
-  // if (sqlite3.opfs) {
-  //   db = new sqlite3.opfs.OpfsDb(filename);
-  //   console.log(`Opened OPFS database: ${filename}`);
-  // } else {
-  //   db = new sqlite3.oo1.DB(filename, "ct");
-  //   console.log(`Opened transient database: ${filename}`);
-  // }
-  // self.postMessage({ id: req.id, type: "success", result: filename });
-  //   } else if (req.type === "exec") {
-  //     if (!db) throw new Error("db not opened");
-  //     db.exec({ sql: req.sql, bind: req.bind });
-  //     self.postMessage({ id: req.id, type: "success" });
-  //   } else if (req.type === "query") {
-  //     if (!db) throw new Error("db not opened");
-  //     const rows: any[] = [];
-  //     db.exec({
-  //       sql: req.sql,
-  //       bind: req.bind,
-  //       rowMode: "object",
-  //       callback: (row: any) => rows.push(row),
-  //     });
-  //     self.postMessage({ id: req.id, type: "success", result: rows });
-  //   }
-  // } catch (err: any) {
-  //   console.error("Worker error:", err);
-  //   self.postMessage({ id: req.id, type: "error", error: err.message });
-  // }
 };

@@ -13,12 +13,12 @@
         }
     },
     "scripts": {
-        "test": "npm run build && npm run test:e2e",
+        "test": "npm run lint && npm run build && npm run test:e2e",
         "test:unit": "vitest run --config vitest.unit.config.ts --coverage",
         "http": "tsx scripts/http-service.ts ./ --port 8399",
         "test:e2e": "vitest run --config vitest.e2e.config.ts",
         "test:debug": "vitest run --config vitest.e2e.config.ts --no-file-parallelism",
-        "build": "vite build",
+        "build": "vite build ",
         "build:watch": "vite build --watch",
         "lint": "eslint . --ext .ts --fix; npm run typecheck && npm run format",
         "typecheck": "tsc --noEmit",

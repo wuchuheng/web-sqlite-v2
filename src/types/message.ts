@@ -6,9 +6,11 @@ export enum SqliteEvent {
   /** Open database */
   OPEN = "open",
   /** Close database */
-  CLOSE = "close",
-  /** Execute SQL */
+  CLOSE = "close", // Added CLOSE
+  /** Execute SQL script */
   EXECUTE = "execute",
+  /** Run parameterized DML (returns ExecResult) */
+  RUN = "run",
 }
 
 /**

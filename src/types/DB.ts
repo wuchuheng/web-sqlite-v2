@@ -1,0 +1,118 @@
+/**
+ * A value which can be bound to a SQLite parameter.
+ */
+export type SqlValue =
+  | null
+  | number
+  | string
+  | boolean
+  | bigint
+  | Uint8Array
+  | ArrayBuffer;
+
+/** A bindable parameter collection: positional or named. */
+export type SQLParams = SqlValue[] | Record<string, SqlValue>;
+
+/**
+ * Metadata returned for non-query statements.
+ * @property changes Number of rows changed by last operation (may be bigint on some builds).
+ * @property lastInsertRowid Last inserted row id when applicable.
+ */
+export type ExecResult = {
+  changes?: number | bigint;
+  lastInsertRowid?: number | bigint;
+};
+
+/**
+ * A prepared statement client wrapper.
+ * @remarks The `stmtId` is optional and intended for debugging only; callers should not depend on it.
+ */
+export interface PreparedStatement {
+  /**
+   * Execute the prepared statement for DML/DDL and return execution metadata.
+   * @param params - Positional array or named parameters to bind to the statement.
+   */
+  run(params?: SQLParams): Promise<ExecResult>;
+
+  /**
+   * Execute the prepared statement and return all result rows as an array of objects.
+   * @param params - Bind parameters for the statement execution.
+   */
+  all<T = unknown>(params?: SQLParams): Promise<T[]>;
+
+  /**
+   * Execute the prepared statement and return the first row, or `undefined` if none.
+   * @param params - Bind parameters for the statement execution.
+   */
+  get<T = unknown>(params?: SQLParams): Promise<T | undefined>;
+
+  /** Reset the statement cursor to allow re-execution with different parameters. */
+  reset(): Promise<void>;
+
+  /** Finalize the statement and release worker-side resources. Idempotent. */
+  finalize(): Promise<void>;
+
+  /** Optional debug-only statement id returned by the worker when the statement was prepared. */
+  readonly stmtId?: number;
+}
+
+/** Primary DB interface used by client code. */
+export interface DBInterface {
+  /**
+   * Execute a SQL script (one or more statements) without returning rows.
+   * Intended for migrations, schema setup, or bulk SQL execution.
+   * @param sql - SQL string to execute.
+   */
+  exec(sql: string): Promise<void>;
+
+  /**
+   * Run a single DML/DDL statement and return execution metadata.
+   * @param sql - Single SQL statement to execute (INSERT/UPDATE/DELETE/DDL).
+   * @param params - Optional bind parameters for the statement.
+   */
+  run(sql: string, params?: SQLParams): Promise<ExecResult>;
+
+  /**
+   * Execute a query and return all result rows as an array of objects.
+   * @param sql - SELECT SQL to execute.
+   * @param params - Optional bind parameters for the query.
+   */
+  query<T = unknown>(sql: string, params?: SQLParams): Promise<T[]>;
+
+  /**
+   * Execute a query and return the first row or `undefined`.
+   * @param sql - SELECT SQL to execute.
+   * @param params - Optional bind parameters for the query.
+   */
+  get<T = unknown>(sql: string, params?: SQLParams): Promise<T | undefined>;
+
+  /**
+   * Prepare a statement and provide a prepared-statement object. The implementation may be
+   * handle-based (worker holds the compiled Stmt) or stateless (worker executes SQL each call).
+   * @param sql - SQL to prepare.
+   */
+  prepare(sql: string): Promise<PreparedStatement>;
+
+  /**
+   * Prepare a statement, run the provided callback with a PreparedStatement wrapper,
+   * and guarantee the statement is finalized after the callback completes (success or error).
+   * This `prepare(sql, fn)` overload prevents leaked worker-side statements when developers forget to call
+   * `finalize()` themselves.
+   * @param sql - SQL to prepare.
+   * @param fn - Async callback that receives a PreparedStatement and returns a value or promise.
+   */
+  prepare<T = unknown>(
+    sql: string,
+    fn: (stmt: PreparedStatement) => Promise<T>,
+  ): Promise<T>;
+
+  /**
+   * Run a callback inside a transaction. The implementation should BEGIN before calling `fn`
+   * and COMMIT on success or ROLLBACK on error.
+   * @param fn - Callback that receives a DBInterface and performs transactional work.
+   */
+  transaction<T>(fn: (db: DBInterface) => Promise<T>): Promise<T>;
+
+  /** Close the database and release resources. */
+  close(): Promise<void>;
+}

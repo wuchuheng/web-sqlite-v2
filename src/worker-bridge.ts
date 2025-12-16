@@ -3,7 +3,7 @@ import {
   type SqliteReqMsg,
   type SqliteResMsg,
   SqliteEvent,
-} from "./types/message.d";
+} from "./types/message";
 
 type Task<T> = {
   resolve: (value: T | PromiseLike<T>) => void;
@@ -48,7 +48,7 @@ export const createWorkerBridge = () => {
    */
   const sendMsg = <TRes, TReq = unknown>(
     event: SqliteEvent,
-    payload?: TReq
+    payload?: TReq,
   ): Promise<TRes> => {
     const id = getLatestMsgId();
     const msg: SqliteReqMsg<TReq> = {
