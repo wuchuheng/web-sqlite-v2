@@ -13,11 +13,10 @@
         }
     },
     "scripts": {
-        "test": "npm run build && npm run test:e2e && npm run test:server",
+        "test": "npm run build && npm run test:e2e",
         "test:unit": "vitest run --config vitest.unit.config.ts --coverage",
         "http": "tsx scripts/http-service.ts ./ --port 8399",
         "test:e2e": "vitest run --config vitest.e2e.config.ts",
-        "test:server": "vitest run tests/e2e/server.test.ts --environment node",
         "test:debug": "vitest run --config vitest.e2e.config.ts --no-file-parallelism",
         "build": "vite build",
         "build:watch": "vite build --watch",

@@ -1,5 +1,5 @@
 import { SqliteEvent } from "./types/message.d";
-import { sendMsg } from "./worker-bridge";
+import { createWorkerBridge } from "./worker-bridge";
 
 type DBState = {
   state: "closed" | "opened";
@@ -15,6 +15,7 @@ export const openDB = async (
   args: string | { fileName: string }
 ): Promise<void> => {
   const fileName: string = typeof args === "string" ? args : args.fileName;
+  const { sendMsg } = createWorkerBridge();
 
   await sendMsg<void, string>(SqliteEvent.OPEN, fileName);
 
