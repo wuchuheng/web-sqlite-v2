@@ -1,5 +1,5 @@
-import { describe, test, expect, beforeAll, afterEach } from "vitest";
-import sqlite3InitModule from "../../src/sqlite3.mjs";
+import {describe, test, expect, beforeAll, afterEach} from "vitest";
+import sqlite3InitModule from "../../src/jswasm/sqlite3.js";
 
 describe("Sqlite3 test", () => {
   let sqlite3: any;
@@ -44,7 +44,7 @@ describe("Sqlite3 test", () => {
 
     db.exec("CREATE TABLE IF NOT EXISTS t(a,b)");
     // Equivalent with options object
-    db.exec({ sql: "CREATE TABLE IF NOT EXISTS t2(a,b)" });
+    db.exec({sql: "CREATE TABLE IF NOT EXISTS t2(a,b)"});
 
     // Verify tables exist by querying sqlite_master
     const tables: string[] = [];
@@ -86,7 +86,7 @@ describe("Sqlite3 test", () => {
     for (let i = 1; i <= expectedValue; ++i) {
       db.exec({
         sql: "insert into t(a,b) values ($a,$b)",
-        bind: { $a: i * 10, $b: i * 20 },
+        bind: {$a: i * 10, $b: i * 20},
       });
     }
 
@@ -125,9 +125,9 @@ describe("Sqlite3 test", () => {
     db = new oo.DB("/mydb.sqlite3", "ct");
     db.exec("DROP TABLE IF EXISTS t");
     db.exec("CREATE TABLE IF NOT EXISTS t(a,b)");
-    db.exec({ sql: "insert into t(a,b) values (?,?)", bind: [1, 2] });
-    db.exec({ sql: "insert into t(a,b) values (?,?)", bind: [3, 4] });
-    db.exec({ sql: "insert into t(a,b) values (?,?)", bind: [5, 6] });
+    db.exec({sql: "insert into t(a,b) values (?,?)", bind: [1, 2]});
+    db.exec({sql: "insert into t(a,b) values (?,?)", bind: [3, 4]});
+    db.exec({sql: "insert into t(a,b) values (?,?)", bind: [5, 6]});
 
     const rows: any[] = [];
     db.exec({
@@ -147,8 +147,8 @@ describe("Sqlite3 test", () => {
     db = new oo.DB("/mydb.sqlite3", "ct");
     db.exec("DROP TABLE IF EXISTS t");
     db.exec("CREATE TABLE IF NOT EXISTS t(a,b)");
-    db.exec({ sql: "insert into t(a,b) values (?,?)", bind: [1, 2] });
-    db.exec({ sql: "insert into t(a,b) values (?,?)", bind: [3, 4] });
+    db.exec({sql: "insert into t(a,b) values (?,?)", bind: [1, 2]});
+    db.exec({sql: "insert into t(a,b) values (?,?)", bind: [3, 4]});
 
     const rows: any[] = [];
     db.exec({
@@ -158,8 +158,8 @@ describe("Sqlite3 test", () => {
     });
 
     expect(rows.length).toBe(2);
-    expect(rows[0]).toEqual({ aa: 1, bb: 2 });
-    expect(rows[1]).toEqual({ aa: 3, bb: 4 });
+    expect(rows[0]).toEqual({aa: 1, bb: 2});
+    expect(rows[1]).toEqual({aa: 3, bb: 4});
   });
 
   test("should query data with rowMode 'stmt'", () => {
@@ -167,7 +167,7 @@ describe("Sqlite3 test", () => {
     db = new oo.DB("/mydb.sqlite3", "ct");
     db.exec("DROP TABLE IF EXISTS t");
     db.exec("CREATE TABLE IF NOT EXISTS t(a,b)");
-    db.exec({ sql: "insert into t(a,b) values (?,?)", bind: [10, 20] });
+    db.exec({sql: "insert into t(a,b) values (?,?)", bind: [10, 20]});
 
     const values: any[] = [];
     db.exec({
@@ -184,8 +184,8 @@ describe("Sqlite3 test", () => {
     db = new oo.DB("/mydb.sqlite3", "ct");
     db.exec("DROP TABLE IF EXISTS t");
     db.exec("CREATE TABLE IF NOT EXISTS t(a,b)");
-    db.exec({ sql: "insert into t(a,b) values (?,?)", bind: [1, 100] });
-    db.exec({ sql: "insert into t(a,b) values (?,?)", bind: [2, 200] });
+    db.exec({sql: "insert into t(a,b) values (?,?)", bind: [1, 100]});
+    db.exec({sql: "insert into t(a,b) values (?,?)", bind: [2, 200]});
 
     const bValues: number[] = [];
     db.exec({
@@ -203,7 +203,7 @@ describe("Sqlite3 test", () => {
     // remove the table if exists
     db.exec("DROP TABLE IF EXISTS t");
     db.exec("CREATE TABLE IF NOT EXISTS t(a,b)");
-    db.exec({ sql: "insert into t(a,b) values (?,?)", bind: [42, 84] });
+    db.exec({sql: "insert into t(a,b) values (?,?)", bind: [42, 84]});
 
     const aValues: number[] = [];
     db.exec({
@@ -223,8 +223,8 @@ describe("Sqlite3 test", () => {
     db = new oo.DB("/mydb.sqlite3", "ct");
     db.exec("DROP TABLE IF EXISTS t");
     db.exec("CREATE TABLE IF NOT EXISTS t(a,b)");
-    db.exec({ sql: "insert into t(a,b) values (?,?)", bind: [1, 2] });
-    db.exec({ sql: "insert into t(a,b) values (?,?)", bind: [3, 4] });
+    db.exec({sql: "insert into t(a,b) values (?,?)", bind: [1, 2]});
+    db.exec({sql: "insert into t(a,b) values (?,?)", bind: [3, 4]});
 
     const resultRows: any[] = [];
     db.exec({
@@ -234,7 +234,7 @@ describe("Sqlite3 test", () => {
     });
 
     expect(resultRows.length).toBe(2);
-    expect(resultRows[0]).toEqual({ a: 1, b: 2 });
+    expect(resultRows[0]).toEqual({a: 1, b: 2});
   });
 
   test("should create and use a scalar UDF", () => {
@@ -242,7 +242,7 @@ describe("Sqlite3 test", () => {
     db = new oo.DB("/mydb.sqlite3", "ct");
     db.exec("DROP TABLE IF EXISTS t");
     db.exec("CREATE TABLE IF NOT EXISTS t(a,b)");
-    db.exec({ sql: "insert into t(a,b) values (?,?)", bind: [5, 10] });
+    db.exec({sql: "insert into t(a,b) values (?,?)", bind: [5, 10]});
 
     db.createFunction({
       name: "twice",
@@ -264,14 +264,15 @@ describe("Sqlite3 test", () => {
     db = new oo.DB("/mydb.sqlite3", "ct");
     db.exec("DROP TABLE IF EXISTS t");
     db.exec("CREATE TABLE IF NOT EXISTS t(a,b)");
-    db.exec({ sql: "insert into t(a,b) values (?,?)", bind: [1, 2] });
+    db.exec({sql: "insert into t(a,b) values (?,?)", bind: [1, 2]});
 
     const columnNames: string[] = [];
     db.exec({
       sql: "select a, b from t limit 1",
       columnNames: columnNames,
       rowMode: "array",
-      callback: () => {},
+      callback: () => {
+      },
     });
 
     expect(columnNames).toContain("a");
@@ -298,7 +299,7 @@ describe("Sqlite3 test", () => {
     db = new oo.DB("/mydb.sqlite3", "ct");
     db.exec("DROP TABLE IF EXISTS t");
     db.exec("CREATE TABLE IF NOT EXISTS t(a,b)");
-    db.exec({ sql: "insert into t(a,b) values (?,?)", bind: [1, 2] });
+    db.exec({sql: "insert into t(a,b) values (?,?)", bind: [1, 2]});
 
     const countBefore = db.selectValue("select count(*) from t");
 
@@ -318,7 +319,7 @@ describe("Sqlite3 test", () => {
     db = new oo.DB("/mydb.sqlite3", "ct");
     db.exec("DROP TABLE IF EXISTS t");
     db.exec("CREATE TABLE IF NOT EXISTS t(a,b)");
-    db.exec({ sql: "insert into t(a,b) values (?,?)", bind: [1, 2] });
+    db.exec({sql: "insert into t(a,b) values (?,?)", bind: [1, 2]});
 
     const countBefore = db.selectValue("select count(*) from t");
 
@@ -437,7 +438,7 @@ describe("Taster 1 tests", () => {
       throw new sqlite3.WasmAllocError();
     }).toThrowError(Error);
 
-    const e1 = new sqlite3.WasmAllocError("test", { cause: 3 });
+    const e1 = new sqlite3.WasmAllocError("test", {cause: 3});
     expect(e1.message).toBe("test");
     expect(e1.cause).toBe(3);
 
@@ -514,7 +515,7 @@ describe("Taster 1 tests", () => {
 
     db.exec("CREATE TABLE IF NOT EXISTS t(a,b)");
     // Equivalent with options object
-    db.exec({ sql: "CREATE TABLE IF NOT EXISTS t2(a,b)" });
+    db.exec({sql: "CREATE TABLE IF NOT EXISTS t2(a,b)"});
 
     // Verify tables exist by querying sqlite_master
     const tables: string[] = [];
