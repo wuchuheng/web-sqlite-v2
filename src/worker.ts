@@ -27,6 +27,7 @@ self.onmessage = async (msg: MessageEvent<SqliteReqMsg<unknown>>) => {
 
     const res: SqliteResMsg<void> = {
       id: msg.data.id,
+      success: true,
     };
 
     self.postMessage(res);

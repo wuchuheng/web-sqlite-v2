@@ -25,5 +25,7 @@ export type SqliteReqMsg<T> = {
  */
 export type SqliteResMsg<T> = {
   id: number;
+  success: boolean;
+  error?: Error;
   payload?: T;
 };
