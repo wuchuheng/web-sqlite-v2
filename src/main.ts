@@ -24,39 +24,42 @@ import type {
  */
 export const openDB = async (
   filename: string,
-  options?: WorkerOpenDBOptions
+  options?: WorkerOpenDBOptions,
 ): Promise<DBInterface> => {
   const { sendMsg, terminate: _terminate } = createWorkerBridge();
 
   await sendMsg<void, OpenDBArgs>(SqliteEvent.OPEN, { filename, options });
 
   const exec = async (sql: string, params?: SQLParams): Promise<ExecResult> => {
-    return await sendMsg<ExecResult, ExecParams>(SqliteEvent.RUN, {
+    return await sendMsg<ExecResult, ExecParams>(SqliteEvent.EXECUTE, {
       sql,
       bind: params,
     });
   };
+
   /**
    * Execute a query and return all rows.
    */
   const query = async <T = unknown>(
-    _sql: string,
-    _params?: SQLParams
+    sql: string,
+    params?: SQLParams,
   ): Promise<T[]> => {
-    // TODO: Implement transaction logic
-    throw new Error("Method not implemented.");
-  };
+    // 1. Handle input.
+    if (typeof sql !== "string" || sql.trim() === "") {
+      throw new Error("SQL query must be a non-empty string");
+    }
 
-  /**
-   * Prepare statement API placeholder.
-   */
-  // Placeholder removed until implemented
+    return await sendMsg<T[], ExecParams>(SqliteEvent.QUERY, {
+      sql,
+      bind: params,
+    });
+  };
 
   /**
    * Execute a transaction.
    */
   const transaction = async <T>(
-    _fn: (db: DBInterface) => Promise<T>
+    _fn: (db: DBInterface) => Promise<T>,
   ): Promise<T> => {
     // TODO: Implement transaction logic
     throw new Error("Method not implemented.");
@@ -74,7 +77,7 @@ export const openDB = async (
     transaction,
     prepare: function <T = unknown>(
       _sql: string,
-      _fn: (stmt: PreparedStatement) => Promise<T>
+      _fn: (stmt: PreparedStatement) => Promise<T>,
     ): Promise<T> {
       throw new Error("Function not implemented.");
     },

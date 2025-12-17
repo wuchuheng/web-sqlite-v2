@@ -11,6 +11,8 @@ export enum SqliteEvent {
   EXECUTE = "execute",
   /** Run parameterized DML (returns ExecResult) */
   RUN = "run",
+  /** Execute query and return rows */
+  QUERY = "query",
 }
 
 export type WorkerOpenDBOptions = {

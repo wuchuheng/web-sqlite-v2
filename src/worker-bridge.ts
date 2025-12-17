@@ -20,11 +20,15 @@ export const createWorkerBridge = () => {
 
     if (!task) return;
 
-    if (success) {
-      task.resolve(payload);
-    } else {
-      task.reject(error);
+    if (!success) {
+      const newError = new Error(error!.message);
+      newError.name = error!.name;
+      newError.stack = error!.stack;
+
+      task.reject(newError);
     }
+
+    task.resolve(payload);
 
     idMapPromise.delete(id);
   };

@@ -1,9 +1,5 @@
 // sqlite3.worker.ts
-import sqlite3InitModule, {
-  BindCollection,
-  Sqlite3,
-  Sqlite3DB,
-} from "./jswasm/sqlite3";
+import sqlite3InitModule, { Sqlite3, Sqlite3DB } from "./jswasm/sqlite3";
 import { ExecParams } from "./types/DB";
 import {
   OpenDBArgs,
@@ -56,7 +52,7 @@ const handleExecute = (payload: unknown) => {
   const { sql, bind } = payload as ExecParams;
   if (typeof sql !== "string") {
     throw new Error(
-      "Invalid payload for EXECUTE event: expected SQL string or { sql, bind }"
+      "Invalid payload for EXECUTE event: expected SQL string or { sql, bind }",
     );
   }
   db.exec({ sql, bind });
@@ -69,22 +65,25 @@ const handleExecute = (payload: unknown) => {
   };
 };
 
-const handleRun = (payload: unknown) => {
+const handleQuery = (payload: ExecParams) => {
+  // 1. Handle input.
   if (!db) {
     throw new Error("Database is not open");
   }
 
-  const { sql, bind } = payload as { sql: string; bind?: BindCollection };
+  const { sql, bind } = payload;
 
+  // 2. Handle query.
+  // 2.1 Convert the sql and bind into a proper format. then execute the query.
   if (typeof sql !== "string") {
-    throw new Error("Invalid payload for RUN event: expected { sql: string }");
+    throw new Error(
+      "Invalid payload for QUERY event: expected { sql: string, bind?: any[] }",
+    );
   }
 
   const start = performance.now();
-  db.exec({
-    sql,
-    bind,
-  });
+  const rows = db.selectObjects(sql, bind);
+
   const end = performance.now();
   const duration = end - start;
 
@@ -94,10 +93,7 @@ const handleRun = (payload: unknown) => {
     bind,
   } as SqlLogInfo);
 
-  return {
-    changes: db.changes(),
-    lastInsertRowid: db.selectValue("SELECT last_insert_rowid()"),
-  };
+  return rows;
 };
 
 const handleClose = () => {
@@ -127,8 +123,8 @@ self.onmessage = async (msg: MessageEvent<SqliteReqMsg<unknown>>) => {
         result = handleExecute(payload);
         break;
 
-      case SqliteEvent.RUN:
-        result = handleRun(payload);
+      case SqliteEvent.QUERY:
+        result = handleQuery(payload as ExecParams);
         break;
 
       case SqliteEvent.CLOSE:

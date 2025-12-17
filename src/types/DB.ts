@@ -83,7 +83,7 @@ export interface DBInterface {
    */
   prepare<T = unknown>(
     sql: string,
-    fn: (stmt: PreparedStatement) => Promise<T>
+    fn: (stmt: PreparedStatement) => Promise<T>,
   ): Promise<T>;
 
   /**
