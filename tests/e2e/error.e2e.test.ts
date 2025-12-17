@@ -13,13 +13,13 @@ describe("error handling e2e tests", () => {
     await db.close();
   });
 
-  test("should throw error when running DML on non-existent table", async () => {
+  test("should throw error when executing DML on non-existent table", async () => {
     const filename = "error-run.sqlite3";
     const db = await openDB(filename, { debug: true });
 
     // Table 'missing_table' does not exist
     await expect(
-      db.run("INSERT INTO missing_table (name) VALUES (?)", ["test"]),
+      db.exec("INSERT INTO missing_table (name) VALUES (?)", ["test"]),
     ).rejects.toThrow();
 
     // Cleanup

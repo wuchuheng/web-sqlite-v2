@@ -4,6 +4,7 @@ import sqlite3InitModule, {
   Sqlite3,
   Sqlite3DB,
 } from "./jswasm/sqlite3";
+import { ExecParams } from "./types/DB";
 import {
   OpenDBArgs,
   SqliteEvent,
@@ -51,10 +52,21 @@ const handleExecute = (payload: unknown) => {
   if (!db) {
     throw new Error("Database is not open");
   }
-  if (typeof payload !== "string") {
-    throw new Error("Invalid payload for EXECUTE event: expected SQL string");
+  const start = performance.now();
+  const { sql, bind } = payload as ExecParams;
+  if (typeof sql !== "string") {
+    throw new Error(
+      "Invalid payload for EXECUTE event: expected SQL string or { sql, bind }"
+    );
   }
-  db.exec(payload);
+  db.exec({ sql, bind });
+  const end = performance.now();
+  const duration = end - start;
+  console.debug({ sql, duration, bind } as SqlLogInfo);
+  return {
+    changes: db.changes(),
+    lastInsertRowid: db.selectValue("SELECT last_insert_rowid()"),
+  };
 };
 
 const handleRun = (payload: unknown) => {
@@ -112,7 +124,7 @@ self.onmessage = async (msg: MessageEvent<SqliteReqMsg<unknown>>) => {
         break;
 
       case SqliteEvent.EXECUTE:
-        handleExecute(payload);
+        result = handleExecute(payload);
         break;
 
       case SqliteEvent.RUN:

@@ -13,6 +13,8 @@ export type SqlValue =
 /** A bindable parameter collection: positional or named. */
 export type SQLParams = SqlValue[] | Record<string, SqlValue>;
 
+export type ExecParams = { sql: string; bind?: SQLParams };
+
 /**
  * Metadata returned for non-query statements.
  * @property changes Number of rows changed by last operation (may be bigint on some builds).
@@ -29,22 +31,19 @@ export type ExecResult = {
  */
 export interface PreparedStatement {
   /**
-   * Execute the prepared statement for DML/DDL and return execution metadata.
-   * @param params - Positional array or named parameters to bind to the statement.
+   * Execute a SQL script (one or more statements) without returning rows.
+   * Intended for migrations, schema setup, or bulk SQL execution.
+   * @param sql - SQL string to execute.
+   * @param params - Optional bind parameters for the statement.
    */
-  run(params?: SQLParams): Promise<ExecResult>;
+  exec(sql: string, params?: SQLParams): Promise<ExecResult>;
 
   /**
-   * Execute the prepared statement and return all result rows as an array of objects.
-   * @param params - Bind parameters for the statement execution.
+   * Execute a query and return all result rows as an array of objects.
+   * @param sql - SELECT SQL to execute.
+   * @param params - Optional bind parameters for the query.
    */
-  all<T = unknown>(params?: SQLParams): Promise<T[]>;
-
-  /**
-   * Execute the prepared statement and return the first row, or `undefined` if none.
-   * @param params - Bind parameters for the statement execution.
-   */
-  get<T = unknown>(params?: SQLParams): Promise<T | undefined>;
+  query<T = unknown>(sql: string, params?: SQLParams): Promise<T[]>;
 
   /** Reset the statement cursor to allow re-execution with different parameters. */
   reset(): Promise<void>;
@@ -62,15 +61,9 @@ export interface DBInterface {
    * Execute a SQL script (one or more statements) without returning rows.
    * Intended for migrations, schema setup, or bulk SQL execution.
    * @param sql - SQL string to execute.
-   */
-  exec(sql: string): Promise<void>;
-
-  /**
-   * Run a single DML/DDL statement and return execution metadata.
-   * @param sql - Single SQL statement to execute (INSERT/UPDATE/DELETE/DDL).
    * @param params - Optional bind parameters for the statement.
    */
-  run(sql: string, params?: SQLParams): Promise<ExecResult>;
+  exec(sql: string, params?: SQLParams): Promise<ExecResult>;
 
   /**
    * Execute a query and return all result rows as an array of objects.
@@ -80,20 +73,7 @@ export interface DBInterface {
   query<T = unknown>(sql: string, params?: SQLParams): Promise<T[]>;
 
   /**
-   * Execute a query and return the first row or `undefined`.
-   * @param sql - SELECT SQL to execute.
-   * @param params - Optional bind parameters for the query.
-   */
-  get<T = unknown>(sql: string, params?: SQLParams): Promise<T | undefined>;
-
-  /**
-   * Prepare a statement and provide a prepared-statement object. The implementation may be
-   * handle-based (worker holds the compiled Stmt) or stateless (worker executes SQL each call).
-   * @param sql - SQL to prepare.
-   */
-  prepare(sql: string): Promise<PreparedStatement>;
-
-  /**
+   **
    * Prepare a statement, run the provided callback with a PreparedStatement wrapper,
    * and guarantee the statement is finalized after the callback completes (success or error).
    * This `prepare(sql, fn)` overload prevents leaked worker-side statements when developers forget to call
@@ -103,7 +83,7 @@ export interface DBInterface {
    */
   prepare<T = unknown>(
     sql: string,
-    fn: (stmt: PreparedStatement) => Promise<T>,
+    fn: (stmt: PreparedStatement) => Promise<T>
   ): Promise<T>;
 
   /**
