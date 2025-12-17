@@ -70,7 +70,7 @@ const isSqlLogInfo = (arg: unknown): arg is SqlLogInfo => {
 export const configureLogger = (isDebug: boolean) => {
   if (isDebug) {
     console.debug = (...args: unknown[]) => {
-      const badgeText = "Sqlite";
+      const badgeText = "Debug";
       const badgeStyle =
         "background: #1976d2; color: white; padding: 2px 4px; border-radius: 4px; font-weight: bold;";
       const defaultStyle =
@@ -86,7 +86,7 @@ export const configureLogger = (isDebug: boolean) => {
       if (isSqlLogInfo(firstArg)) {
         const { sql, duration, bind } = firstArg;
 
-        let formatString = `%cSql%c `; // Badge %c and Reset %c for what follows
+        let formatString = `%cDebug:sql%c `; // Badge %c and Reset %c for what follows
         const logArgs: unknown[] = [badgeStyle, sqlNormalTextStyle]; // Start with badge style, then sqlNormalTextStyle for initial SQL content
 
         const parts = sql.split(/(\b\w+\b)/);
