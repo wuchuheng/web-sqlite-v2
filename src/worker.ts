@@ -1,41 +1,50 @@
 // sqlite3.worker.ts
 import sqlite3InitModule, {
-  type Sqlite3,
+  BindCollection,
+  Sqlite3,
   Sqlite3DB,
-  type BindCollection,
 } from "./jswasm/sqlite3";
 import {
+  OpenDBArgs,
   SqliteEvent,
   type SqliteReqMsg,
   type SqliteResMsg,
 } from "./types/message";
 
+import { configureLogger, SqlLogInfo } from "./utils/logger";
+
 let db: Sqlite3DB | null = null;
 let sqlite3: Sqlite3 | null = null;
+let isDebug = false;
 
-// Initialize sqlite3 module once
-const initPromise = sqlite3InitModule().then((mod) => {
-  sqlite3 = mod;
-  console.log("SQLite3 module initialized");
-});
+// Initial call to set up the logger state (starts disabled)
+configureLogger(isDebug);
 
-const handleOpen = (payload: unknown) => {
-  if (typeof payload !== "string") {
+// sqlite3InitModuleState = Object.assign(sqlite3InitModuleState || {}, {
+//   debugModule: (...args: readonly unknown[]) => {
+//     console.log("[sIMS Debug]", ...args);
+//   },
+// } as Partial<Sqlite3InitModuleState>);
+
+const handleOpen = async (payload: OpenDBArgs) => {
+  if (typeof payload.filename !== "string") {
     throw new Error("Invalid payload for OPEN event: expected filename string");
   }
-  let filename = payload;
+
+  sqlite3 = await sqlite3InitModule();
+  console.debug(`Initialized sqlite3 module in worker.`);
+
+  let { filename } = payload;
   if (!filename.endsWith(".sqlite3")) {
     filename += ".sqlite3";
   }
 
-  if (sqlite3!.oo1 && sqlite3!.oo1.OpfsDb) {
-    db = new sqlite3!.oo1.OpfsDb(filename, "c");
-    console.log(`Opened OPFS database: ${filename}`);
-  } else {
-    // Fallback logic
-    db = new sqlite3!.oo1!.DB(filename, "ct");
-    console.log(`Opened transient database: ${filename}`);
-  }
+  isDebug = payload.options?.debug === true;
+  // Re-configure logger based on the new isDebug state from user options
+  configureLogger(isDebug);
+
+  db = new sqlite3!.oo1!.OpfsDb!(filename, "c");
+  console.debug(`Opened database: ${filename}`);
 };
 
 const handleExecute = (payload: unknown) => {
@@ -59,10 +68,19 @@ const handleRun = (payload: unknown) => {
     throw new Error("Invalid payload for RUN event: expected { sql: string }");
   }
 
+  const start = performance.now();
   db.exec({
     sql,
     bind,
   });
+  const end = performance.now();
+  const duration = end - start;
+
+  console.debug({
+    sql,
+    duration,
+    bind,
+  } as SqlLogInfo);
 
   return {
     changes: db.changes(),
@@ -73,6 +91,7 @@ const handleRun = (payload: unknown) => {
 const handleClose = () => {
   if (db) {
     db.close();
+    sqlite3 = null;
     db = null;
   }
 };
@@ -81,13 +100,15 @@ self.onmessage = async (msg: MessageEvent<SqliteReqMsg<unknown>>) => {
   const { id, event, payload } = msg.data;
 
   try {
-    await initPromise;
+    if (sqlite3 === null && event !== SqliteEvent.OPEN) {
+      throw new Error("Database is not open");
+    }
 
     let result: unknown = undefined;
 
     switch (event) {
       case SqliteEvent.OPEN:
-        handleOpen(payload);
+        await handleOpen(payload as OpenDBArgs);
         break;
 
       case SqliteEvent.EXECUTE:

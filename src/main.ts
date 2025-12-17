@@ -1,4 +1,4 @@
-import { SqliteEvent } from "./types/message";
+import { OpenDBArgs, SqliteEvent, WorkerOpenDBOptions } from "./types/message";
 import { createWorkerBridge } from "./worker-bridge";
 import type {
   DBInterface,
@@ -10,16 +10,16 @@ import type {
 /**
  * Open a SQLite database file.
  *
- * @param args - The arguments for opening the database. Can be a string (file path) or an object with a fileName property.
+ * @param filename - The arguments for opening the database. Can be a string (file path) or an object with a fileName property.
  * @returns A promise that resolves to a DBInterface instance.
  */
 export const openDB = async (
-  args: string | { fileName: string },
+  filename: string,
+  options?: WorkerOpenDBOptions,
 ): Promise<DBInterface> => {
-  const fileName: string = typeof args === "string" ? args : args.fileName;
   const { sendMsg, terminate: _terminate } = createWorkerBridge();
 
-  await sendMsg<void, string>(SqliteEvent.OPEN, fileName);
+  await sendMsg<void, OpenDBArgs>(SqliteEvent.OPEN, { filename, options });
 
   const exec = async (sql: string): Promise<void> => {
     await sendMsg<void, string>(SqliteEvent.EXECUTE, sql);

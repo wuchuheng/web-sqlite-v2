@@ -13,7 +13,7 @@
         }
     },
     "scripts": {
-        "test": "npm run lint && npm run build && npm run test:e2e",
+        "test": "npm run build && npm run lint && npm run test:e2e",
         "test:unit": "vitest run --config vitest.unit.config.ts --coverage",
         "http": "tsx scripts/http-service.ts ./ --port 8399",
         "test:e2e": "vitest run --config vitest.e2e.config.ts",

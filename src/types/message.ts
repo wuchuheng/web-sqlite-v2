@@ -13,6 +13,15 @@ export enum SqliteEvent {
   RUN = "run",
 }
 
+export type WorkerOpenDBOptions = {
+  debug?: boolean;
+};
+
+export type OpenDBArgs = {
+  filename: string;
+  options?: WorkerOpenDBOptions;
+};
+
 /**
  * Request message shape sent to the worker.
  */

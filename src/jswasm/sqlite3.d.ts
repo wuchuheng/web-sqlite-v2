@@ -300,13 +300,15 @@ export interface Sqlite3 {
    */
   installOpfsSAHPoolVfs?: (
     options?: Partial<OpfsSAHPoolVfsOptions>,
-  ) => Promise<OpfsSAHPoolVfsPoolUtil>;
+  ) => Promise<OpfsSAHPoolUtil>;
 
   /**
    * Installs Worker1 API helpers (must be called in a Worker global scope).
    * The returned API surface is bundle-specific.
    */
-  initWorker1API?: () => Record<string, unknown>;
+  initWorker1API?: (
+    this: WorkerGlobalScope & { sqlite3: Sqlite3Module },
+  ) => void;
 
   /**
    * Struct binder helper (created via `globalThis.Jaccwabyt(...)` in this bundle).
@@ -343,6 +345,9 @@ export interface Sqlite3ScriptInfo {
  * Logging and configuration hooks.
  */
 export interface Sqlite3Config {
+  /** Debug logger used by the bundle. */
+  debug: (...args: readonly unknown[]) => void;
+
   /** Error logger used by the bundle. */
   error: (...args: readonly unknown[]) => void;
 
@@ -449,6 +454,14 @@ export interface Sqlite3Capi {
     prototype: Sqlite3IndexInfoStruct;
   };
 
+  /**
+   * `sqlite3_module` struct wrapper constructor (used by vtab helpers).
+   */
+  sqlite3_module?: {
+    new (ptr: number | bigint): Sqlite3ModuleStruct;
+    prototype: Sqlite3ModuleStruct;
+  };
+
   /** Registers a VFS. */
   sqlite3_vfs_register?: (vfs: number | bigint, asDefault: number) => number;
 
@@ -504,6 +517,44 @@ export interface Sqlite3IndexInfoStruct {
    */
   nthConstraint?: (n: number, asPtr?: boolean) => unknown;
 
+  /**
+   * Returns the Nth constraint-usage entry or `false` if out of range.
+   *
+   * @param n Constraint index.
+   * @param asPtr When true, returns a pointer-like value.
+   */
+  nthConstraintUsage?: (n: number, asPtr?: boolean) => unknown;
+
+  /**
+   * Returns the Nth ORDER BY entry or `false` if out of range.
+   *
+   * @param n Order-by index.
+   * @param asPtr When true, returns a pointer-like value.
+   */
+  nthOrderBy?: (n: number, asPtr?: boolean) => unknown;
+
+  /** Additional fields. */
+  [key: string]: unknown;
+}
+
+/**
+ * Wrapper for the `sqlite3_module` struct, used to define a virtual table module.
+ *
+ * The bundle populates this via its struct-binder. Most fields are build-specific,
+ * so this interface focuses on the helper method exposed by this bundle.
+ */
+export interface Sqlite3ModuleStruct {
+  /** Pointer to the wrapped struct. */
+  readonly pointer?: number | bigint;
+
+  /**
+   * Configures this module using the vtab helper (`sqlite3.vtab.setupModule()`).
+   *
+   * @param options Module setup options (bundle-specific).
+   * @returns This module instance.
+   */
+  setupModule?: (options: Record<string, unknown>) => this;
+
   /** Additional fields. */
   [key: string]: unknown;
 }
@@ -525,6 +576,79 @@ export interface Sqlite3Util {
 /**
  * OO layer namespace (`sqlite3.oo1`).
  */
+/**
+ * A `DB` subclass backed by `sessionStorage` or `localStorage` via `kvvfs`.
+ */
+export interface Sqlite3JsStorageDb extends Sqlite3DB {
+  /**
+   * Clears the underlying storage for this DB instance.
+   *
+   * @returns Bundle-defined result code.
+   */
+  clearStorage(): number;
+
+  /**
+   * Returns the storage size (in bytes) for this DB instance.
+   */
+  storageSize(): number;
+}
+
+/**
+ * Constructor for `sqlite3.oo1.JsStorageDb`.
+ */
+export interface Sqlite3JsStorageDbConstructor extends Sqlite3DBConstructor {
+  /**
+   * Opens a `kvvfs` database backed by browser storage.
+   *
+   * Only `'session'` and `'local'` are accepted by this bundle.
+   */
+
+  new (storageName?: "session" | "local"): Sqlite3JsStorageDb;
+
+  /**
+   * Clears the named storage.
+   */
+  clearStorage: (storageName: "session" | "local") => number;
+
+  /**
+   * Returns the size (bytes) for the named storage.
+   */
+  storageSize: (storageName: "session" | "local") => number;
+}
+
+/**
+ * A `DB` subclass that forces the OPFS VFS.
+ */
+export interface Sqlite3OpfsDb extends Sqlite3DB {
+  readonly isOpfsDb: true;
+}
+
+/**
+ * Constructor for `sqlite3.oo1.OpfsDb`.
+ */
+export interface Sqlite3OpfsDbConstructor extends Sqlite3DBConstructor {
+  new (
+    filename?: string | Sqlite3DbOpenOptions,
+    flags?: string,
+    vfs?: string | null,
+  ): Sqlite3OpfsDb;
+
+  /**
+   * Imports an SQLite database file into OPFS.
+   *
+   * @param filename Target filename/path in OPFS.
+   * @param bytes Full database bytes, or an ArrayBuffer.
+   * @returns Number of bytes written.
+   */
+  importDb: (
+    filename: string,
+    bytes:
+      | Uint8Array
+      | ArrayBuffer
+      | (() => Promise<Uint8Array | ArrayBuffer | undefined>),
+  ) => Promise<number>;
+}
+
 export interface Sqlite3Oo1 {
   /** Database wrapper class. */
   readonly DB: Sqlite3DBConstructor;
@@ -535,23 +659,12 @@ export interface Sqlite3Oo1 {
   /**
    * A DB backed by browser storage (only on UI thread and when kvvfs is available).
    */
-  readonly JsStorageDb?: Sqlite3DBConstructor;
+  readonly JsStorageDb?: Sqlite3JsStorageDbConstructor;
 
   /**
    * A DB variant that forces the OPFS VFS (available when OPFS VFS is installed).
    */
-  readonly OpfsDb?: Sqlite3DBConstructor & {
-    /**
-     * Imports a database file into OPFS.
-     *
-     * @param filename Target filename within OPFS.
-     * @param bytes SQLite database file bytes.
-     */
-    importDb?: (
-      filename: string,
-      bytes: Uint8Array | ArrayBuffer,
-    ) => Promise<void>;
-  };
+  readonly OpfsDb?: Sqlite3OpfsDbConstructor;
 
   /** Additional classes and helpers. */
   [key: string]: unknown;
@@ -601,21 +714,35 @@ export interface Sqlite3DBConstructor {
  */
 export interface Sqlite3DbCtorHelper {
   /**
-   * Normalizes DB constructor arguments into an options object.
+   * Callable helper used by this bundle to initialize a `DB`-like instance.
+   *
+   * Note: This is intentionally broad because the bundle calls it via
+   * `Function.prototype.call()` with a normalized options object.
    */
-  normalizeArgs: (...args: readonly unknown[]) => Sqlite3DbOpenOptions;
+  (this: object, ...args: readonly unknown[]): void;
 
   /**
-   * Calls the DB constructor logic with a normalized options object.
+   * Normalizes constructor arguments into a standard options object.
+   *
+   * @param filename Filename or `:memory:`, or an options object.
+   * @param flags Open flags (e.g. `'c'`).
+   * @param vfs Optional VFS name.
    */
-  call: (dbThis: unknown, opt: Sqlite3DbOpenOptions) => void;
+  normalizeArgs: (
+    filename?: string | Sqlite3DbOpenOptions,
+    flags?: string,
+    vfs?: string | null,
+  ) => Sqlite3DbOpenOptions;
 
   /**
-   * Installs a callback invoked after opening a DB with a specific VFS pointer.
+   * Installs a callback invoked after opening a DB with a given VFS pointer.
+   *
+   * @param pVfs Pointer to `sqlite3_vfs`.
+   * @param callback Callback invoked after open.
    */
   setVfsPostOpenCallback: (
-    vfsPtr: number | bigint,
-    cb: (oo1DbPtr: number | bigint, sqlite3: Sqlite3) => void,
+    pVfs: number | bigint,
+    callback: (db: Sqlite3DB, sqlite3: Sqlite3Module) => void,
   ) => void;
 
   /** Additional helper fields. */
@@ -1113,30 +1240,104 @@ export interface Sqlite3OpfsUtil {
 /**
  * Options accepted by `sqlite3.installOpfsSAHPoolVfs()` in this bundle.
  */
+/**
+ * Options for `sqlite3.installOpfsSAHPoolVfs()`.
+ *
+ * This bundle merges your options with internal defaults.
+ */
 export interface OpfsSAHPoolVfsOptions {
-  /** VFS name to install (default is bundle-defined). */
-  name: string;
+  /** VFS name to install (default: `'opfs-sahpool'`). */
+  name?: string;
 
-  /** When true, forces reinit if a previous init failed. */
-  forceReinitIfPreviouslyFailed: boolean;
+  /** Optional directory name under OPFS root (bundle-specific). */
+  directory?: string | undefined;
+
+  /** Initial pool capacity (default: 6). */
+  initialCapacity?: number;
+
+  /** When true, clears existing pool files on init (default: false). */
+  clearOnInit?: boolean;
+
+  /** Log verbosity (default: 2). */
+  verbosity?: number;
+
+  /** When true, forces reinit if a previous init failed (default: false). */
+  forceReinitIfPreviouslyFailed?: boolean;
 
   /** Additional options (build-specific). */
   [key: string]: unknown;
 }
 
 /**
- * Pool utility object returned from `sqlite3.installOpfsSAHPoolVfs()`.
+ * Utility object returned from `sqlite3.installOpfsSAHPoolVfs()`.
+ *
+ * It provides convenient pool/VFS management helpers and (when `oo1` is present)
+ * an `OpfsSAHPoolDb` constructor for opening databases on the installed VFS.
  */
-export interface OpfsSAHPoolVfsPoolUtil {
+export declare class OpfsSAHPoolUtil {
   /**
-   * The pool class, exposed for consumers.
+   * Name of the installed VFS.
    */
-  OpfsSAHPool?: typeof OpfsSAHPool;
+  readonly vfsName: string;
 
   /**
-   * A `DB` variant that uses the installed pool VFS (available when `sqlite3.oo1` is present).
+   * DB constructor bound to the installed VFS (present when `sqlite3.oo1` exists).
    */
   OpfsSAHPoolDb?: Sqlite3DBConstructor;
+
+  /** Adds capacity to the pool. */
+  addCapacity(n: number): Promise<number>;
+
+  /** Reduces capacity by removing available handles. */
+  reduceCapacity(n: number): Promise<number>;
+
+  /** Gets current capacity. */
+  getCapacity(): number;
+
+  /** Gets current file count. */
+  getFileCount(): number;
+
+  /** Lists known file names in the pool. */
+  getFileNames(): readonly string[];
+
+  /** Ensures at least `min` capacity. */
+  reserveMinimumCapacity(min: number): Promise<number>;
+
+  /** Exports a pooled database file as bytes. */
+  exportFile(name: string): Uint8Array;
+
+  /**
+   * Imports bytes into a pooled database file.
+   *
+   * @returns Number of bytes written.
+   */
+  importDb(
+    name: string,
+    bytes:
+      | Uint8Array
+      | ArrayBuffer
+      | ((
+          ...args: readonly unknown[]
+        ) => Promise<Uint8Array | ArrayBuffer | undefined>),
+  ): number | Promise<number>;
+
+  /** Wipes all pool files (bundle-specific). */
+  wipeFiles(): Promise<void>;
+
+  /** Removes a pooled file (bundle-specific). */
+  unlink(filename: string): boolean;
+
+  /** Uninstalls the VFS and releases resources. */
+  removeVfs(): Promise<void>;
+
+  /** Pauses VFS operations (bundle-specific). */
+  pauseVfs(): this;
+
+  /** Resumes VFS operations (bundle-specific). */
+  unpauseVfs(): Promise<this>;
+
+  /** Returns whether the VFS is paused. */
+  isPaused(): boolean;
 
   /** Additional fields. */
   [key: string]: unknown;
@@ -1145,8 +1346,8 @@ export interface OpfsSAHPoolVfsPoolUtil {
 /**
  * OPFS SAH pool implementation class (installed by this bundle).
  *
- * The full public surface is large and build-specific; this declaration focuses on the
- * methods observed in this bundle while keeping extra fields safely typed.
+ * Most of its internal state is private; this declaration focuses on the public
+ * methods exposed by the class in this bundle.
  */
 export declare class OpfsSAHPool {
   /**
@@ -1156,29 +1357,47 @@ export declare class OpfsSAHPool {
    */
   constructor(options: Record<string, unknown>);
 
-  /** Returns the installed VFS struct wrapper. */
-  getVfs(): Sqlite3VfsStruct;
+  /** Emits a log line (bundle-specific). */
+  log(...args: readonly unknown[]): void;
 
-  /** Returns the number of files managed by the pool. */
-  getFileCount(): number;
+  /** Emits a warning (bundle-specific). */
+  warn(...args: readonly unknown[]): void;
 
-  /** Returns the list of managed filenames. */
-  getFileNames(): string[];
+  /** Emits an error (bundle-specific). */
+  error(...args: readonly unknown[]): void;
 
-  /** Returns current pool capacity (bundle-specific units). */
+  /** Returns the installed VFS struct wrapper (if installed). */
+  getVfs(): unknown;
+
+  /** Returns current pool capacity. */
   getCapacity(): number;
 
-  /** Adds capacity to the pool. */
+  /** Returns current number of pooled files. */
+  getFileCount(): number;
+
+  /** Returns the list of pooled file names. */
+  getFileNames(): readonly string[];
+
+  /** Returns true if a filename exists in the pool. */
+  hasFilename(name: string): boolean;
+
+  /** Adds `n` access handles to the pool. */
   addCapacity(n: number): Promise<number>;
 
-  /** Reduces capacity from the pool. */
+  /** Removes up to `n` available access handles from the pool. */
   reduceCapacity(n: number): Promise<number>;
 
-  /** Acquire underlying access handles (bundle-specific). */
-  acquireAccessHandles(): Promise<void>;
+  /** Returns the next available access handle (bundle-specific). */
+  nextAvailableSAH(): unknown;
 
-  /** Release underlying access handles (bundle-specific). */
-  releaseAccessHandles(): Promise<void>;
+  /** Acquires access handles, optionally clearing files (bundle-specific). */
+  acquireAccessHandles(clearFiles?: boolean): Promise<void>;
+
+  /** Releases access handles (bundle-specific). */
+  releaseAccessHandles(): void;
+
+  /** Installs the VFS (bundle-specific). */
+  setPoolForVfs(): Promise<this>;
 
   /** Removes/uninstalls the VFS. */
   removeVfs(): Promise<void>;
@@ -1187,19 +1406,73 @@ export declare class OpfsSAHPool {
   pauseVfs(): void;
 
   /** Resumes VFS operations (bundle-specific). */
-  unpauseVfs(): void;
+  unpauseVfs(): Promise<void>;
+
+  /** Returns whether the VFS is paused. */
+  isPaused(): boolean;
 
   /** Resets internal state (bundle-specific). */
-  reset(): void;
+  reset(clearFiles?: boolean): Promise<void>;
 
-  /** Emits a warning (bundle-specific). */
-  warn(...args: readonly unknown[]): void;
+  /**
+   * Returns a normalized path for `arg`.
+   *
+   * @param arg String, URL, or pointer-like value.
+   */
+  getPath(arg: string | URL | number | bigint): string;
 
-  /** Emits an error (bundle-specific). */
-  error(...args: readonly unknown[]): void;
+  /** Deletes a pooled file by path/name (bundle-specific). */
+  deletePath(path: string): boolean;
 
-  /** Throws an error (bundle-specific). */
-  toss(...args: readonly unknown[]): never;
+  /** Gets the associated path for a pooled file (bundle-specific). */
+  getAssociatedPath(sahOrName: unknown, name?: string): string;
+
+  /** Sets the associated path for a pooled file (bundle-specific). */
+  setAssociatedPath(sahOrName: unknown, name: string, flags: number): void;
+
+  /** Maps an S3 filename to an opaque pool filename (bundle-specific). */
+  mapS3FileToOFile(s3Name: string): string;
+
+  /** Gets an opaque file handle for an S3 file (bundle-specific). */
+  getOFileForS3File(s3Name: string): string;
+
+  /** Exports a pooled file as bytes. */
+  exportFile(name: string): Uint8Array;
+
+  /**
+   * Imports a database into the pool.
+   *
+   * If `bytes` is a callback, it will be called repeatedly to stream chunks.
+   *
+   * @returns Bytes written.
+   */
+  importDb(
+    name: string,
+    bytes:
+      | Uint8Array
+      | ArrayBuffer
+      | ((
+          ...args: readonly unknown[]
+        ) => Promise<Uint8Array | ArrayBuffer | undefined>),
+  ): number | Promise<number>;
+
+  /**
+   * Chunked import helper.
+   *
+   * @returns Bytes written.
+   */
+  importDbChunked(
+    name: string,
+    callback: (
+      ...args: readonly unknown[]
+    ) => Promise<Uint8Array | ArrayBuffer | undefined>,
+  ): Promise<number>;
+
+  /** Stores an error (bundle-specific). */
+  storeErr(e: unknown, code?: number): number;
+
+  /** Pops the last stored error (bundle-specific). */
+  popErr(): unknown;
 
   /** Additional fields and methods. */
   [key: string]: unknown;

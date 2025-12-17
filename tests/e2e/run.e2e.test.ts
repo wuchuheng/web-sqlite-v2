@@ -4,11 +4,11 @@ import openDB from "web-sqlite-js";
 describe("run e2e tests", () => {
   test("should execute parameterized DML and return metadata", async () => {
     const filename = "run-test.sqlite3";
-    const db = await openDB(filename);
+    const db = await openDB(filename, { debug: true });
 
     // Setup
     await db.exec(
-      "CREATE TABLE IF NOT EXISTS test (id INTEGER PRIMARY KEY, name TEXT);",
+      "CREATE TABLE IF NOT EXISTS test (id INTEGER PRIMARY KEY, name TEXT);"
     );
 
     // Test Run with positional params
@@ -26,7 +26,7 @@ describe("run e2e tests", () => {
 
     // Validation (Persistence): Close and Reopen to ensure data is written
     await db.close(); // Close the database
-    const db2 = await openDB(filename); // Reopen it
+    const db2 = await openDB(filename, { debug: true }); // Reopen it
 
     // Attempt to select from it (we don't have query yet, but we can try to exec a DDL/DML)
     // For now, simply successfully reopening and not throwing errors implies persistence
