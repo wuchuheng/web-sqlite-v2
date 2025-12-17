@@ -8,12 +8,12 @@ describe("exec e2e tests", () => {
 
     // DDL: Create table
     await db.exec(
-      "CREATE TABLE IF NOT EXISTS test (id INTEGER PRIMARY KEY, name TEXT);"
+      "CREATE TABLE IF NOT EXISTS test (id INTEGER PRIMARY KEY, name TEXT);",
     );
 
     // DML: Insert data via script
     await db.exec(
-      "INSERT INTO test (name) VALUES ('a'); INSERT INTO test (name) VALUES ('b');"
+      "INSERT INTO test (name) VALUES ('a'); INSERT INTO test (name) VALUES ('b');",
     );
 
     // Validation: Check file size in OPFS

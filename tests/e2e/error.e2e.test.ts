@@ -19,7 +19,7 @@ describe("error handling e2e tests", () => {
 
     // Table 'missing_table' does not exist
     await expect(
-      db.run("INSERT INTO missing_table (name) VALUES (?)", ["test"])
+      db.run("INSERT INTO missing_table (name) VALUES (?)", ["test"]),
     ).rejects.toThrow();
 
     // Cleanup
@@ -33,7 +33,7 @@ describe("error handling e2e tests", () => {
 
     // Attempt to execute after close
     await expect(db.exec("CREATE TABLE test (id INT)")).rejects.toThrow(
-      "Database is not open"
+      "Database is not open",
     );
   });
 });

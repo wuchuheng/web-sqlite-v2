@@ -8,13 +8,14 @@ describe("run e2e tests", () => {
 
     // Setup
     await db.exec(
-      "CREATE TABLE IF NOT EXISTS test (id INTEGER PRIMARY KEY, name TEXT);"
+      "CREATE TABLE IF NOT EXISTS test (id INTEGER PRIMARY KEY, name TEXT);",
     );
 
     // Test Run with positional params
     const result1 = await db.run("INSERT INTO test (name) VALUES (?)", ["foo"]);
     expect(result1.changes).toBe(1);
     expect(result1.lastInsertRowid).toBeDefined();
+    expect(result1.lastInsertRowid).toBeTypeOf("number");
 
     // Test Run with named params
     const result2 = await db.run("INSERT INTO test (name) VALUES ($n)", {
@@ -23,6 +24,7 @@ describe("run e2e tests", () => {
     expect(result2.changes).toBe(1);
     expect(result2.lastInsertRowid).toBeDefined();
     expect(result2.lastInsertRowid).not.toBe(result1.lastInsertRowid);
+    expect(result2.lastInsertRowid).toBeTypeOf("number");
 
     // Validation (Persistence): Close and Reopen to ensure data is written
     await db.close(); // Close the database

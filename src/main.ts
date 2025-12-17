@@ -8,10 +8,18 @@ import type {
 } from "./types/DB";
 
 /**
- * Open a SQLite database file.
+ * Opens a SQLite database connection.
  *
- * @param filename - The arguments for opening the database. Can be a string (file path) or an object with a fileName property.
- * @returns A promise that resolves to a DBInterface instance.
+ * @param filename - The path to the SQLite database file to open.
+ * @param options - Optional configuration options for opening the database.
+ * @returns A promise that resolves to a DBInterface object providing methods to interact with the database.
+ *
+ * @example
+ * ```typescript
+ * const db = await openDB('./mydata.db');
+ * const results = await db.query('SELECT * FROM users');
+ * await db.close();
+ * ```
  */
 export const openDB = async (
   filename: string,
@@ -24,6 +32,13 @@ export const openDB = async (
   const exec = async (sql: string): Promise<void> => {
     await sendMsg<void, string>(SqliteEvent.EXECUTE, sql);
   };
+
+  /**
+   * Run a SQL statement (INSERT, UPDATE, DELETE, etc.).
+   * @param _sql
+   * @param _params
+   * @returns
+   */
   const run = async (
     _sql: string,
     _params?: SQLParams,
@@ -33,29 +48,48 @@ export const openDB = async (
       { sql: _sql, bind: _params },
     );
   };
+  /**
+   * Execute a query and return all rows.
+   */
   const query = async <T = unknown>(
     _sql: string,
     _params?: SQLParams,
   ): Promise<T[]> => {
+    // TODO: Implement transaction logic
     throw new Error("Method not implemented.");
   };
+
+  /**
+   * Execute a query and return the first row.
+   */
   const get = <T = unknown>(
     _sql: string,
     _params?: SQLParams,
   ): Promise<T | undefined> => {
+    // TODO: Implement transaction logic
     throw new Error("Method not implemented.");
   };
   const prepare = <T = unknown>(
     _sql: string,
     _fn?: (stmt: PreparedStatement) => Promise<T>,
   ): Promise<PreparedStatement | T> => {
+    // TODO: Implement transaction logic
     throw new Error("Method not implemented.");
   };
+
+  /**
+   * Execute a transaction.
+   */
   const transaction = async <T>(
     _fn: (db: DBInterface) => Promise<T>,
   ): Promise<T> => {
+    // TODO: Implement transaction logic
     throw new Error("Method not implemented.");
   };
+
+  /**
+   * Close the database connection.
+   */
   const close = async (): Promise<void> => {
     await sendMsg(SqliteEvent.CLOSE);
   };
