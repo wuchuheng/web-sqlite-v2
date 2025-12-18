@@ -1,10 +1,21 @@
 {
     "name": "web-sqlite-js",
     "version": "0.0.1",
-    "description": "",
+    "description": "Enables direct use of SQLite in the web browser with reliable local data persistence via OPFS.",
     "type": "module",
     "main": "./dist/index.js",
     "types": "./dist/index.d.ts",
+    "author": "wuchuheng <root@wuchuheng.com>",
+    "keywords": [
+        "sqlite",
+        "wasm",
+        "opfs",
+        "web-worker",
+        "database",
+        "typescript",
+        "web-sqlite"
+    ],
+    "sideEffects": false,
     "exports": {
         ".": {
             "types": "./dist/index.d.ts",
@@ -27,7 +38,9 @@
         "package:publish": "npm run test && npm run build && npm publish --access public"
     },
     "files": [
-        "dist"
+        "dist",
+        "LICENSE",
+        "README.md"
     ],
     "devDependencies": {
         "@eslint/css": "^0.14.1",
@@ -53,12 +66,11 @@
     },
     "repository": {
         "type": "git",
-        "url": "git+https://github.com/wuchuheng/web-sqlite-v2.git"
+        "url": "git+https://github.com/wuchuheng/web-sqlite-js.git"
     },
-    "author": "",
-    "license": "ISC",
+    "license": "MIT",
     "bugs": {
-        "url": "https://github.com/wuchuheng/web-sqlite-v2/issues"
+        "url": "https://github.com/wuchuheng/web-sqlite-js/issues"
     },
-    "homepage": "https://github.com/wuchuheng/web-sqlite-v2#readme"
+    "homepage": "https://github.com/wuchuheng/web-sqlite-js#readme"
 }
