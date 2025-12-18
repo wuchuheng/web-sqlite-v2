@@ -1,6 +1,6 @@
 # web-sqlite-js
 
-Enables direct use of SQLite in the web browser with reliable local data persistence via OPFS (Origin Private File System).
+Client-side SQLite for the browser: a relational database with persistent storage on the user's device via OPFS (Origin Private File System).
 
 It runs SQLite in a Web Worker to avoid blocking the main thread and handles all synchronization automatically, providing a simple, Promise-based API.
 
