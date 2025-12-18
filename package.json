@@ -1,8 +1,7 @@
 {
     "name": "web-sqlite-js",
-    "version": "1.0.0",
+    "version": "0.0.1",
     "description": "",
-    "private": true,
     "type": "module",
     "main": "./dist/index.js",
     "types": "./dist/index.d.ts",
@@ -13,17 +12,23 @@
         }
     },
     "scripts": {
-        "test": "npm run build && npm run lint && npm run test:e2e",
+        "test": "npm run build && npm run lint && npm run test:unit && npm run test:e2e ",
         "test:unit": "vitest run --config vitest.unit.config.ts --coverage",
         "http": "tsx scripts/http-service.ts ./ --port 8399",
         "test:e2e": "vitest run --config vitest.e2e.config.ts",
         "test:debug": "vitest run --config vitest.e2e.config.ts --no-file-parallelism",
-        "build": "vite build ",
+        "build": "vite build",
+        "build:dev": "SOURCE_MAP=true vite build",
         "build:watch": "vite build --watch",
         "lint": "eslint . --ext .ts --fix; npm run typecheck && npm run format",
         "typecheck": "tsc --noEmit",
-        "format": "prettier --ignore-path .gitignore --write ."
+        "format": "prettier --ignore-path .gitignore --write .",
+        "package:compress": "npm pack",
+        "package:publish": "npm run test && npm run build && npm publish --access public"
     },
+    "files": [
+        "dist"
+    ],
     "devDependencies": {
         "@eslint/css": "^0.14.1",
         "@eslint/js": "^9.39.2",

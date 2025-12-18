@@ -2,6 +2,8 @@ import { defineConfig } from "vite";
 import { resolve } from "path";
 import dts from "vite-plugin-dts";
 
+const sourceMap = process.env.SOURCE_MAP === "true";
+
 export default defineConfig({
   plugins: [
     dts({
@@ -26,7 +28,7 @@ export default defineConfig({
         entryFileNames: "index.js",
       },
     },
-    sourcemap: true,
+    sourcemap: sourceMap,
     minify: false, // Set to true if you want minification
   },
   resolve: {

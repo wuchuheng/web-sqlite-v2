@@ -4,3 +4,4 @@ src/**/*.js
 __screenshots__/
 dist/
 coverage/
+*.tgz

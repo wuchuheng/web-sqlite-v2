@@ -84,5 +84,5 @@ export interface DBInterface {
 }
 
 export type transactionCallback<T> = (
-  db: Pick<DBInterface, "exec" | "query">
+  db: Pick<DBInterface, "exec" | "query">,
 ) => Promise<T>;

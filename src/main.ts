@@ -25,7 +25,7 @@ import type {
  */
 export const openDB = async (
   filename: string,
-  options?: WorkerOpenDBOptions
+  options?: WorkerOpenDBOptions,
 ): Promise<DBInterface> => {
   const { sendMsg, terminate: _terminate } = createWorkerBridge();
   const runMutex = createMutex();
@@ -35,7 +35,7 @@ export const openDB = async (
   // Internal helper to send EXECUTE messages without locking (for use inside transaction/lock)
   const _exec = async (
     sql: string,
-    params?: SQLParams
+    params?: SQLParams,
   ): Promise<ExecResult> => {
     return await sendMsg<ExecResult, ExecParams>(SqliteEvent.EXECUTE, {
       sql,
@@ -46,7 +46,7 @@ export const openDB = async (
   // Internal helper to send QUERY messages without locking
   const _query = async <T = unknown>(
     sql: string,
-    params?: SQLParams
+    params?: SQLParams,
   ): Promise<T[]> => {
     if (typeof sql !== "string" || sql.trim() === "") {
       throw new Error("SQL query must be a non-empty string");
@@ -66,7 +66,7 @@ export const openDB = async (
    */
   const query = async <T = unknown>(
     sql: string,
-    params?: SQLParams
+    params?: SQLParams,
   ): Promise<T[]> => {
     return runMutex(() => _query<T>(sql, params));
   };
