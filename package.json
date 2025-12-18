@@ -1,6 +1,6 @@
 {
     "name": "web-sqlite-js",
-    "version": "0.0.1",
+    "version": "0.0.2-beta",
     "description": "Enables direct use of SQLite in the web browser with reliable local data persistence via OPFS.",
     "type": "module",
     "main": "./dist/index.js",
