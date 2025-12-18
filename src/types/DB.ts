@@ -73,20 +73,6 @@ export interface DBInterface {
   query<T = unknown>(sql: string, params?: SQLParams): Promise<T[]>;
 
   /**
-   **
-   * Prepare a statement, run the provided callback with a PreparedStatement wrapper,
-   * and guarantee the statement is finalized after the callback completes (success or error).
-   * This `prepare(sql, fn)` overload prevents leaked worker-side statements when developers forget to call
-   * `finalize()` themselves.
-   * @param sql - SQL to prepare.
-   * @param fn - Async callback that receives a PreparedStatement and returns a value or promise.
-   */
-  prepare<T = unknown>(
-    sql: string,
-    fn: (stmt: PreparedStatement) => Promise<T>,
-  ): Promise<T>;
-
-  /**
    * Run a callback inside a transaction. The implementation should BEGIN before calling `fn`
    * and COMMIT on success or ROLLBACK on error.
    * @param fn - Callback that receives a DBInterface and performs transactional work.
@@ -98,5 +84,5 @@ export interface DBInterface {
 }
 
 export type transactionCallback<T> = (
-  db: Pick<DBInterface, "exec" | "query">,
+  db: Pick<DBInterface, "exec" | "query">
 ) => Promise<T>;
