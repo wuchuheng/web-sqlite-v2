@@ -43,4 +43,32 @@ describe("query e2e tests", () => {
 
     await db.close();
   });
+
+  // Multiple db instances to test the same database file.
+  test("should handle multiple db instances querying the same database file", async () => {
+    const filename = "multi-instance-query-test.sqlite3";
+
+    // 1. First instance: create table and insert data.
+    const db1 = await openDB(filename);
+    const db2 = await openDB(filename);
+    await db1.exec("DROP TABLE IF EXISTS test_multi;");
+    await db1.exec(
+      "CREATE TABLE IF NOT EXISTS test_multi (id INTEGER PRIMARY KEY, value TEXT);",
+    );
+    await db1.exec(
+      "INSERT INTO test_multi (id, value) VALUES (1, 'First'), (2, 'Second');",
+    );
+
+    // 2. Use the db2 to query the data that inserted by db1.
+    const rows = await db2.query<{ id: number; value: string }>(
+      "SELECT * FROM test_multi;",
+    );
+
+    expect(rows).toHaveLength(2);
+    expect(rows[0]).toEqual({ id: 1, value: "First" });
+    expect(rows[1]).toEqual({ id: 2, value: "Second" });
+
+    await db1.close();
+    await db2.close();
+  });
 });
