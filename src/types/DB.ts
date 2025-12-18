@@ -91,8 +91,12 @@ export interface DBInterface {
    * and COMMIT on success or ROLLBACK on error.
    * @param fn - Callback that receives a DBInterface and performs transactional work.
    */
-  transaction<T>(fn: (db: DBInterface) => Promise<T>): Promise<T>;
+  transaction<T>(fn: transactionCallback<T>): Promise<T>;
 
   /** Close the database and release resources. */
   close(): Promise<void>;
 }
+
+export type transactionCallback<T> = (
+  db: Pick<DBInterface, "exec" | "query">,
+) => Promise<T>;

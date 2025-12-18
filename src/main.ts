@@ -1,11 +1,13 @@
 import { OpenDBArgs, SqliteEvent, WorkerOpenDBOptions } from "./types/message";
 import { createWorkerBridge } from "./worker-bridge";
+import { createMutex } from "./utils/mutex/mutex";
 import type {
   DBInterface,
   SQLParams,
   PreparedStatement,
   ExecResult,
   ExecParams,
+  transactionCallback,
 } from "./types/DB";
 
 /**
@@ -27,14 +29,37 @@ export const openDB = async (
   options?: WorkerOpenDBOptions,
 ): Promise<DBInterface> => {
   const { sendMsg, terminate: _terminate } = createWorkerBridge();
+  const runMutex = createMutex();
 
   await sendMsg<void, OpenDBArgs>(SqliteEvent.OPEN, { filename, options });
 
-  const exec = async (sql: string, params?: SQLParams): Promise<ExecResult> => {
+  // Internal helper to send EXECUTE messages without locking (for use inside transaction/lock)
+  const _exec = async (
+    sql: string,
+    params?: SQLParams,
+  ): Promise<ExecResult> => {
     return await sendMsg<ExecResult, ExecParams>(SqliteEvent.EXECUTE, {
       sql,
       bind: params,
     });
+  };
+
+  // Internal helper to send QUERY messages without locking
+  const _query = async <T = unknown>(
+    sql: string,
+    params?: SQLParams,
+  ): Promise<T[]> => {
+    if (typeof sql !== "string" || sql.trim() === "") {
+      throw new Error("SQL query must be a non-empty string");
+    }
+    return await sendMsg<T[], ExecParams>(SqliteEvent.QUERY, {
+      sql,
+      bind: params,
+    });
+  };
+
+  const exec = async (sql: string, params?: SQLParams): Promise<ExecResult> => {
+    return runMutex(() => _exec(sql, params));
   };
 
   /**
@@ -44,33 +69,40 @@ export const openDB = async (
     sql: string,
     params?: SQLParams,
   ): Promise<T[]> => {
-    // 1. Handle input.
-    if (typeof sql !== "string" || sql.trim() === "") {
-      throw new Error("SQL query must be a non-empty string");
-    }
-
-    return await sendMsg<T[], ExecParams>(SqliteEvent.QUERY, {
-      sql,
-      bind: params,
-    });
+    return runMutex(() => _query<T>(sql, params));
   };
 
   /**
    * Execute a transaction.
    */
-  const transaction = async <T>(
-    _fn: (db: DBInterface) => Promise<T>,
-  ): Promise<T> => {
-    // TODO: Implement transaction logic
-    throw new Error("Method not implemented.");
+  const transaction = async <T>(fn: transactionCallback<T>): Promise<T> => {
+    return runMutex(async () => {
+      await _exec("BEGIN");
+      try {
+        const result = await fn({
+          exec: _exec,
+          query: _query,
+        });
+        await _exec("COMMIT");
+        return result;
+      } catch (error) {
+        await _exec("ROLLBACK");
+        throw error;
+      }
+    });
   };
 
   /**
    * Close the database connection.
    */
   const close = async (): Promise<void> => {
-    await sendMsg(SqliteEvent.CLOSE);
+    return runMutex(async () => {
+      await sendMsg(SqliteEvent.CLOSE);
+      // We don't terminate the worker bridge immediately here as sendMsg might be finishing?
+      // Actually sendMsg awaits response.
+    });
   };
+
   const db: DBInterface = {
     exec,
     query,

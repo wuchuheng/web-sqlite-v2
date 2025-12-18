@@ -62,13 +62,13 @@ export default defineConfig({
   resolve: {
     alias: {
       "@": srcDir,
-      "@wuchuheng/web-sqlite": resolve(srcDir, "main.ts"),
+      "web-sqlite-js": resolve(srcDir, "main.ts"),
     },
   },
 
   /* Optimize dependencies */
   optimizeDeps: {
-    exclude: ["@wuchuheng/web-sqlite"],
+    exclude: ["web-sqlite-js"],
   },
 
   // Worker configuration for OPFS proxy tests
