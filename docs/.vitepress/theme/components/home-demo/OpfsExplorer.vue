@@ -55,13 +55,14 @@ defineExpose({
   z-index: 10;
   background: #f7f4ec; /* Match page background to mask the curve behind */
   /* Use padding to create space but let SVG handle the shape */
-  padding: 10px;
+  /* padding: 10px; */
 }
 
 .folder-svg-container {
   position: relative;
   width: 100%;
-  min-height: 140px;
+  /* min-height: 140px; */
+  /* round border */
 }
 
 .folder-bg {
@@ -77,10 +78,12 @@ defineExpose({
 .folder-content {
   position: relative;
   z-index: 1;
-  padding: 30px 20px 20px; /* Top padding to clear the tab area */
+  padding: 20px 15px 15px; /* Top padding to clear the tab area */
   display: flex;
   flex-direction: column;
-  gap: 12px;
+  /* gap: 12px; */
+  /* round border */
+  /* border-radius: 8px; */
 }
 
 .folder-header {

@@ -111,7 +111,7 @@
           />
         </svg>
       </div>
-      <span>Database</span>
+      <span>Sqlite</span>
     </div>
 
     <div class="plus">+</div>
@@ -152,7 +152,7 @@
           />
         </svg>
       </div>
-      <span>Folder</span>
+      <span>OPFS</span>
     </div>
   </footer>
 </template>

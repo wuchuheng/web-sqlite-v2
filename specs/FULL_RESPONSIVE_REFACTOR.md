@@ -18,14 +18,14 @@ _Note: While `sm` starts at 640px in standard rules, for our layout logic, we tr
 
 ### 1. Large Device (`lg`)
 
-- **Structure:** Single horizontal row.
-- **Allocation:**
-    - `SqlConsole`: 35%
-    - `WorkerConnector`: 20%
-    - `ResultTable`: 25%
-    - `IO Spacer`: 10%
-    - `OpfsExplorer`: 10%
-- **Data Flow:** Horizontal (Left-to-Right).
+- **Structure:** Single horizontal row with 3 columns.
+- **Column 1:** `SqlConsole` (50% width).
+- **Column 2:** `WorkerConnector` (20% width).
+- **Column 3:** Vertical Persistence Column (30% width).
+    - **Row 1:** `ResultTable` (100% width of Column 3).
+    - **Row 2:** `IO Connector` (Vertical orientation).
+    - **Row 3:** `OpfsExplorer` (Centrally aligned, 50% width of Column 3).
+- **Data Flow:** Mixed (Horizontal from Console to Table, Vertical between Table and OPFS).
 
 ### 2. Medium Device (`md`)
 
@@ -58,21 +58,28 @@ _Note: While `sm` starts at 640px in standard rules, for our layout logic, we tr
 
 ## Layout Configuration (JS Standard)
 
-| Component         | LG (Flex) | MD (Flex) | SM (Flex) |
-| :---------------- | :-------- | :-------- | :-------- |
-| `SqlConsole`      | 35%       | 100%      | 100%      |
-| `WorkerConnector` | 20%       | 100%      | 100%      |
-| `ResultTable`     | 25%       | 50%       | 100%      |
-| `IO Connector`    | 10%       | 20%       | 100%      |
-| `OpfsExplorer`    | 10%       | 30%       | 100%      |
+| Component               | LG (Flex)    | MD (Flex)  | SM (Flex) |
+| :---------------------- | :----------- | :--------- | :-------- |
+| `SqlConsole`            | 50%          | 100%       | 100%      |
+| `WorkerConnector`       | 20%          | 100%       | 100%      |
+| `Persistence Column`    | 30%          | 100%       | 100%      |
+| `ResultTable` (in Col)  | 100%         | 50%        | 100%      |
+| `IO Connector` (in Col) | Vertical     | Horizontal | Vertical  |
+| `OpfsExplorer` (in Col) | 50% (Center) | 30%        | 100%      |
 
 ## Implementation Plan
 
-... 2. **Step 2: Refactor HomePage.vue for Dynamic Layout** - Replace static CSS layouts with dynamic bindings driven by `deviceType`. - Ensure all sub-components receive the necessary state to adjust their internal presentation if needed.
+1. **Step 1: Implement Breakpoint Detection**
+    - Add a resize listener to `HomePage.vue`.
+    - Create a helper to map width to `deviceType`.
+
+2. **Step 2: Refactor HomePage.vue for Dynamic Layout**
+    - Replace static CSS layouts with dynamic bindings driven by `deviceType`.
+    - Ensure all sub-components receive the necessary state to adjust their internal presentation if needed.
 
 3. **Step 3: Update Connector Logic**
     - Refactor `updatePoints` to use `deviceType` for determining connection sides.
-    - Ensure IO arrows handle the transition from horizontal (`md`, `lg`) to vertical (`sm`) correctly.
+    - Ensure IO arrows handle the transition from horizontal (`md`) to vertical (`sm`, `lg`) correctly.
 
 4. **Step 4: Verification**
     - Test across specific widths: 500px (`sm`), 850px (`md`), 1200px (`lg`).

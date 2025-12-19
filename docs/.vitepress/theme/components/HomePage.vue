@@ -109,19 +109,26 @@ const updatePoints = () => {
   }
   p2.value = getRelativePos(workerRect, "center");
 
-  // IO Arrows points
-  if (deviceType.value === "sm") {
+  // LG and SM use Vertical IO, MD uses Horizontal IO
+  if (deviceType.value === "sm" || deviceType.value === "lg") {
+    // Vertical IO
     const tX = tableRect.left + tableRect.width / 2 - containerRect.left;
     const oX = opfsRect.left + opfsRect.width / 2 - containerRect.left;
+
+    // Adjust for the folder tab height (20 units in a 180 unit height SVG)
+    const visualTopOffset = (20 / 180) * opfsRect.height;
+    const opfsVisualTop = opfsRect.top + visualTopOffset - containerRect.top;
+
     ioLine1.value = {
       p1: { x: tX - 15, y: tableRect.bottom - containerRect.top },
-      p2: { x: oX - 15, y: opfsRect.top - containerRect.top },
+      p2: { x: oX - 15, y: opfsVisualTop },
     };
     ioLine2.value = {
-      p1: { x: oX + 15, y: opfsRect.top - containerRect.top },
+      p1: { x: oX + 15, y: opfsVisualTop },
       p2: { x: tX + 15, y: tableRect.bottom - containerRect.top },
     };
   } else {
+    // Horizontal IO for md
     const tY = tableRect.top + tableRect.height / 2 - containerRect.top;
     const oY = opfsRect.top + opfsRect.height / 2 - containerRect.top;
     ioLine1.value = {
@@ -140,13 +147,18 @@ const layoutConfig = computed(() => {
   const type = deviceType.value;
   if (type === "lg") {
     return {
-      mainFlow: { flexDirection: "row", gap: "0", alignItems: "center" },
-      console: { flex: "0 0 35%" },
-      worker: { flex: "0 0 20%" },
-      persistence: { flex: "0 0 45%", flexDirection: "row", gap: "0" },
-      table: { flex: "0 0 55.5%" },
-      ioSpacer: { display: "block", flex: "0 0 22.2%" },
-      opfs: { flex: "0 0 22.2%" },
+      mainFlow: { flexDirection: "row", gap: "40px", alignItems: "center" },
+      console: { flex: "0 0 50%" },
+      worker: { flex: "0 0 15%" },
+      persistence: {
+        flex: "0 0 30%",
+        flexDirection: "column",
+        gap: "40px",
+        alignItems: "center",
+      },
+      table: { flex: "0 0 100%", width: "100%" },
+      ioSpacer: { display: "none" },
+      opfs: { flex: "0 0 auto", width: "75%" },
     };
   } else if (type === "md") {
     return {
@@ -242,11 +254,11 @@ onMounted(async () => {
             `);
 
       const countRes = await db.value.query(
-        "SELECT COUNT(*) as count FROM users",
+        "SELECT COUNT(*) as count FROM users"
       );
       if (countRes[0].count === 0) {
         await db.value.exec(
-          "INSERT INTO users (username, email) VALUES ('foo', 'foo@domain.com'), ('bar', 'bar@domain.com')",
+          "INSERT INTO users (username, email) VALUES ('foo', 'foo@domain.com'), ('bar', 'bar@domain.com')"
         );
       }
 
@@ -322,8 +334,8 @@ onUnmounted(() => {
   align-items: center;
   gap: 40px;
   color: #222;
-  font-family:
-    "Kalam", "Patrick Hand", "Comic Neue", "Comic Sans MS", cursive, sans-serif;
+  font-family: "Kalam", "Patrick Hand", "Comic Neue", "Comic Sans MS", cursive,
+    sans-serif;
 }
 
 .main-flow {
