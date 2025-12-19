@@ -5,3 +5,4 @@ __screenshots__/
 dist/
 coverage/
 *.tgz
+docs/.vitepress/cache/
