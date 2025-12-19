@@ -1,14 +1,27 @@
 <script setup>
 defineProps({
   isActive: Boolean,
+  deviceType: { type: String, default: "sm" },
 });
 </script>
 
 <template>
-  <section class="connector-section">
+  <section
+    class="connector-section"
+    :style="{
+      height: deviceType === 'lg' ? 'auto' : '80px',
+      minHeight: deviceType === 'lg' ? '40px' : 'auto',
+    }"
+  >
     <div class="connector-container">
       <!-- Worker Label with Lightning Icon -->
-      <div class="worker-label" :class="{ active: isActive }">
+      <div
+        class="worker-label"
+        :class="{ active: isActive }"
+        :style="{
+          padding: deviceType === 'lg' ? '4px 12px' : '6px 14px',
+        }"
+      >
         <svg
           class="lightning-icon"
           width="24"
@@ -35,7 +48,6 @@ defineProps({
 <style scoped>
 .connector-section {
   position: relative;
-  height: 80px; /* Reduced height as per cleaner look */
   width: 100%;
   display: flex;
   justify-content: center;
@@ -57,13 +69,16 @@ defineProps({
   z-index: 10;
   display: flex;
   align-items: center;
+  justify-content: center;
   gap: 8px;
-  background: #f7f4ec; /* Match background to hide line behind text if needed */
-  padding: 4px 10px;
+  background: #f7f4ec; /* Match page background color */
+  padding: 6px 14px;
   font-size: 14px;
   font-weight: 700;
   color: #2d2d2d;
   font-family: "Kalam", cursive;
+  white-space: nowrap;
+  border-radius: 4px;
 }
 
 .lightning-icon {

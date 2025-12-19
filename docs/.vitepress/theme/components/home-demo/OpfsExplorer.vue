@@ -2,13 +2,17 @@
 import { ref } from "vue";
 const folderRef = ref(null);
 
+defineProps({
+  deviceType: { type: String, default: "sm" },
+});
+
 defineExpose({
   folderRef,
 });
 </script>
 
 <template>
-  <div class="opfs-view">
+  <div class="opfs-view" :style="{ width: deviceType === 'sm' ? '100%' : '' }">
     <div class="folder-svg-container" ref="folderRef">
       <!-- Hand-drawn Folder Shape SVG -->
       <svg viewBox="0 0 300 180" preserveAspectRatio="none" class="folder-bg">
@@ -123,11 +127,5 @@ defineExpose({
 }
 .download-btn:hover {
   transform: scale(1.05);
-}
-
-@media (max-width: 768px) {
-  .opfs-view {
-    width: 100%;
-  }
 }
 </style>

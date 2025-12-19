@@ -51,40 +51,32 @@ const arrowRotation = computed(() => {
 
 const arrowPosition = computed(() => {
   const dx = props.p3.x - controlPoint.value.x;
-
   const dy = props.p3.y - controlPoint.value.y;
-
   const length = Math.sqrt(dx * dx + dy * dy);
-
   const gap = 12; // Gap size in pixels
+
+  if (length === 0) return props.p3;
 
   return {
     x: props.p3.x - (dx / length) * gap,
-
     y: props.p3.y - (dy / length) * gap,
   };
 });
 
 /**
-
  * The end of the dotted line should be at the back of the arrow.
-
  * Arrow length is 12px.
-
  */
-
 const pathEnd = computed(() => {
   const dx = props.p3.x - controlPoint.value.x;
-
   const dy = props.p3.y - controlPoint.value.y;
-
   const length = Math.sqrt(dx * dx + dy * dy);
-
   const totalOffset = 24; // 12 (gap) + 12 (arrow length)
+
+  if (length === 0) return props.p3;
 
   return {
     x: props.p3.x - (dx / length) * totalOffset,
-
     y: props.p3.y - (dy / length) * totalOffset,
   };
 });
@@ -170,9 +162,5 @@ const pathEnd = computed(() => {
 
 .dots-layer {
   z-index: 20; /* In front of components */
-}
-
-.curve-path {
-  transition: d 0.1s ease-out;
 }
 </style>
