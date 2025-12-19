@@ -342,7 +342,7 @@ onUnmounted(() => {
   display: flex;
   width: 100%;
   position: relative;
-  z-index: 10;
+  /* z-index: 10; */
 }
 
 .persistence-layer {
