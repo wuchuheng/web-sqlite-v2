@@ -102,7 +102,6 @@ onMounted(async () => {
 @import url("https://fonts.googleapis.com/css2?family=Kalam:wght@400;700&family=Patrick+Hand&display=swap");
 .demo-container {
   width: 100%;
-  max-width: 900px;
   margin: 0 auto;
   display: flex;
   flex-direction: column;
@@ -111,26 +110,12 @@ onMounted(async () => {
   color: #222;
   font-family: "Kalam", "Patrick Hand", "Comic Neue", "Comic Sans MS", cursive,
     sans-serif;
-  background: #f7f4ec;
-  background-image: radial-gradient(
-      circle at 10% 20%,
-      rgba(0, 0, 0, 0.04) 1px,
-      transparent 0
-    ),
-    radial-gradient(
-      circle at 80% 70%,
-      rgba(0, 0, 0, 0.035) 1.2px,
-      transparent 0
-    );
-  background-size: 160px 160px, 200px 200px;
-  border-radius: 18px;
-  box-shadow: 0 8px 22px rgba(0, 0, 0, 0.08);
 }
 
 .persistence-layer {
   display: flex;
   width: 100%;
-  max-width: 850px;
+  max-width: 1150px;
   gap: 22px;
   align-items: center;
   justify-content: center;

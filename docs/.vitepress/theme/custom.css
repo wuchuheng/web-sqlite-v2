@@ -1,4 +1,39 @@
 :root {
   --vp-home-hero-name-color: transparent;
-  --vp-home-hero-name-background: -webkit-linear-gradient(120deg, #bd34fe 30%, #41d1ff);
+  --vp-home-hero-name-background: -webkit-linear-gradient(
+    120deg,
+    #bd34fe 30%,
+    #41d1ff
+  );
+}
+
+/* Light theme overrides */
+:root:not(.dark) {
+  --vp-c-bg: #f7f4ec;
+  background-color: #f7f4ec;
+  background-image: radial-gradient(
+      circle at 10% 20%,
+      rgba(0, 0, 0, 0.04) 1px,
+      transparent 0
+    ),
+    radial-gradient(
+      circle at 80% 70%,
+      rgba(0, 0, 0, 0.035) 1.2px,
+      transparent 0
+    );
+  background-size: 160px 160px, 200px 200px;
+}
+
+/* Ensure the home page container can be wider than default */
+.VPHome {
+  max-width: 1400px !important;
+  margin: 0 auto;
+}
+
+/* Ensure navbar and other components in light mode use the same background or are transparent */
+:root:not(.dark) .VPNavBar,
+:root:not(.dark) .VPLocalNav,
+:root:not(.dark) .VPCNav,
+:root:not(.dark) .VPHomeHero {
+  background-color: transparent !important;
 }
