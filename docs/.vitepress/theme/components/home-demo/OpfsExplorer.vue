@@ -1,6 +1,15 @@
+<script setup>
+import { ref } from "vue";
+const folderRef = ref(null);
+
+defineExpose({
+  folderRef,
+});
+</script>
+
 <template>
   <div class="opfs-view">
-    <div class="folder-svg-container">
+    <div class="folder-svg-container" ref="folderRef">
       <!-- Hand-drawn Folder Shape SVG -->
       <svg viewBox="0 0 300 180" preserveAspectRatio="none" class="folder-bg">
         <path
@@ -39,6 +48,8 @@
 .opfs-view {
   flex: 1.5;
   position: relative;
+  z-index: 10;
+  background: #f7f4ec; /* Match page background to mask the curve behind */
   /* Use padding to create space but let SVG handle the shape */
   padding: 10px;
 }

@@ -89,7 +89,9 @@ Use `query<T>()` for `SELECT` statements.
 ```ts
 type User = { id: number; name: string };
 
-const users = await db.query<User>("SELECT id, name FROM users ORDER BY id DESC");
+const users = await db.query<User>(
+    "SELECT id, name FROM users ORDER BY id DESC",
+);
 ```
 
 ## Transactions

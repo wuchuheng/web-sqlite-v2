@@ -1,16 +1,16 @@
 {
-  "name": "@web-sqlite-js/docs",
-  "version": "0.0.1",
-  "type": "module",
-  "private": true,
-  "scripts": {
-    "dev": "vitepress dev .",
-    "build": "vitepress build .",
-    "preview": "vitepress preview ."
-  },
-  "devDependencies": {
-    "vitepress": "^1.6.4",
-    "typescript": "^5.9.3",
-    "@types/node": "^25.0.1"
-  }
+    "name": "@web-sqlite-js/docs",
+    "version": "0.0.1",
+    "type": "module",
+    "private": true,
+    "scripts": {
+        "dev": "vitepress dev .",
+        "build": "vitepress build .",
+        "preview": "vitepress preview ."
+    },
+    "devDependencies": {
+        "vitepress": "^1.6.4",
+        "typescript": "^5.9.3",
+        "@types/node": "^25.0.1"
+    }
 }

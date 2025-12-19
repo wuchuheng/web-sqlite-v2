@@ -135,9 +135,15 @@ const handleKeydown = (e) => {
   border-radius: 50%;
   border: 1.5px solid #2d2d2d;
 }
-.light.red { background-color: #f7c3c3; }
-.light.yellow { background-color: #f8e3a1; }
-.light.green { background-color: #c6f0b3; }
+.light.red {
+  background-color: #f7c3c3;
+}
+.light.yellow {
+  background-color: #f8e3a1;
+}
+.light.green {
+  background-color: #c6f0b3;
+}
 
 .window-title {
   font-weight: 700;
@@ -166,7 +172,9 @@ const handleKeydown = (e) => {
   align-items: center;
   gap: 6px;
   box-shadow: 2px 2px 0 rgba(0, 0, 0, 0.12);
-  transition: transform 0.08s ease, box-shadow 0.08s ease;
+  transition:
+    transform 0.08s ease,
+    box-shadow 0.08s ease;
   font-weight: 600;
   font-family: "Kalam", cursive;
 }

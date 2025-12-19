@@ -1,37 +1,49 @@
 <script setup>
+import { ref } from "vue";
+const tableRef = ref(null);
+
 defineProps({
   data: Array,
+});
+
+defineExpose({
+  tableRef,
 });
 </script>
 
 <template>
   <div class="table-container">
-      <table class="data-view">
-        <thead>
-          <tr>
-            <th>ID</th>
-            <th>username</th>
-            <th>email</th>
-          </tr>
-        </thead>
-        <tbody>
-          <tr v-if="data.length === 0">
-            <td colspan="3" style="text-align: center; color: #999">No results</td>
-          </tr>
-          <tr v-for="row in data" :key="row.id">
-            <td>{{ row.id }}</td>
-            <td>{{ row.username }}</td>
-            <td>{{ row.email }}</td>
-          </tr>
-        </tbody>
-      </table>
+    <table class="data-view" ref="tableRef">
+      <thead>
+        <tr>
+          <th>ID</th>
+          <th>username</th>
+          <th>email</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr v-if="data.length === 0">
+          <td colspan="3" style="text-align: center; color: #999">
+            No results
+          </td>
+        </tr>
+        <tr v-for="row in data" :key="row.id">
+          <td>{{ row.id }}</td>
+          <td>{{ row.username }}</td>
+          <td>{{ row.email }}</td>
+        </tr>
+      </tbody>
+    </table>
   </div>
 </template>
 
 <style scoped>
 .table-container {
-    flex: 2;
-    width: 100%;
+  flex: 2;
+  width: 100%;
+  position: relative;
+  z-index: 10;
+  background: #f7f4ec; /* Match page background to mask the curve behind */
 }
 
 .data-view {
@@ -41,8 +53,8 @@ defineProps({
   border: 2px solid #2d2d2d;
   border-radius: 8px; /* Slightly rounded corners for hand-drawn feel */
   overflow: hidden;
-  box-shadow: 2px 2px 0 rgba(0,0,0,0.1);
-  font-family: 'Kalam', cursive;
+  box-shadow: 2px 2px 0 rgba(0, 0, 0, 0.1);
+  font-family: "Kalam", cursive;
 }
 
 th,
