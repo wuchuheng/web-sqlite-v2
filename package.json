@@ -2,6 +2,9 @@
     "name": "web-sqlite-js",
     "version": "0.0.2-beta",
     "description": "Client-side SQLite for the browser: a relational database with persistent storage on the user's device via OPFS.",
+    "workspaces": [
+        "docs"
+    ],
     "type": "module",
     "main": "./dist/index.js",
     "types": "./dist/index.d.ts",
@@ -36,9 +39,9 @@
         "format": "prettier --ignore-path .gitignore --write .",
         "package:compress": "npm pack",
         "package:publish": "npm run test && npm run build && npm publish --access public",
-        "docs:dev": "vitepress dev docs",
-        "docs:build": "vitepress build docs",
-        "docs:preview": "vitepress preview docs"
+        "docs:dev": "npm run dev --workspace=@web-sqlite-js/docs",
+        "docs:build": "npm run build --workspace=@web-sqlite-js/docs",
+        "docs:preview": "npm run preview --workspace=@web-sqlite-js/docs"
     },
     "files": [
         "dist",
@@ -64,7 +67,6 @@
         "typescript-eslint": "^8.49.0",
         "vite": "^7.2.7",
         "vite-plugin-dts": "^4.5.4",
-        "vitepress": "^1.6.4",
         "vitest": "^4.0.15"
     },
     "repository": {
