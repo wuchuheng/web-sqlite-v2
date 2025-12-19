@@ -1,10 +1,13 @@
-import DefaultTheme from 'vitepress/theme'
-import HomeDemo from './components/HomeDemo.vue'
-import './custom.css'
+import DefaultTheme from "vitepress/theme";
+import { h } from "vue";
+import HomePage from "./components/HomePage.vue";
+import "./custom.css";
 
 export default {
   extends: DefaultTheme,
-  enhanceApp({ app }) {
-    app.component('HomeDemo', HomeDemo)
-  }
-}
+  Layout: () => {
+    return h(DefaultTheme.Layout, null, {
+      "home-hero-before": () => h(HomePage),
+    });
+  },
+};
