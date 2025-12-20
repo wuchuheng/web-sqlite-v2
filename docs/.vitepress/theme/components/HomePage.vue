@@ -323,7 +323,7 @@ onUnmounted(() => {
 </template>
 
 <style scoped>
-@import url("https://fonts.googleapis.com/css2?family=Kalam:wght@400;700&family=Patrick+Hand&display=swap");
+@import url("/fonts/google-fonts.css");
 
 .demo-container {
   position: relative;
