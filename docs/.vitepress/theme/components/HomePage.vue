@@ -304,7 +304,7 @@ const layoutConfig = computed(() => {
       },
       table: { flex: "0 0 100%" },
       ioSpacer: { display: "none" },
-      opfs: { flex: "0 0 50%", width: "50%", alignSelf: "center" },
+      opfs: { flex: "0 0 65%", width: "65%", alignSelf: "center" },
     };
   }
 });
@@ -415,7 +415,7 @@ onMounted(async () => {
       // Import dynamically to avoid SSR issues
       const { openDB } = await import("web-sqlite-js");
 
-      db.value = await openDB("docs_demo_vue");
+      db.value = await openDB("hello");
 
       await db.value.exec(`
                 CREATE TABLE IF NOT EXISTS users (
