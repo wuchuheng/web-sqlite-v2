@@ -213,6 +213,7 @@ const handleComponentClick = () => {
     cancelAutoTyping();
     emit("user-input");
   }
+  focusEditor();
 };
 
 const typeText = async (text, delayMs = 40) => {
