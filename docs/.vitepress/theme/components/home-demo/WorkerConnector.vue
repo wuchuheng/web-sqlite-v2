@@ -21,6 +21,7 @@ defineProps({
         :style="{
           padding: deviceType === 'lg' ? '4px 12px' : '6px 14px',
         }"
+        title="UI stays fluid, even during heavy I/O."
       >
         <svg
           class="lightning-icon"
@@ -39,7 +40,7 @@ defineProps({
             :fill="isActive ? '#FFD700' : 'none'"
           />
         </svg>
-        <span>Non-blocking web worker</span>
+        <span>Asynchronous Processing Engine</span>
       </div>
     </div>
   </section>

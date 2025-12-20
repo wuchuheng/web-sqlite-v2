@@ -30,7 +30,7 @@ defineExpose({
       <div class="folder-content">
         <div class="folder-header">
           <i class="fa-regular fa-folder-open"></i>
-          <span>Persistent Database locally (OPFS)</span>
+          <span>Persistent Local File System (OPFS)</span>
         </div>
         <div class="file-list">
           <div class="file-item">

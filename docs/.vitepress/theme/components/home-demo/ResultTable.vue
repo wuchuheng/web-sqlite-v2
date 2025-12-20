@@ -13,6 +13,10 @@ defineExpose({
 
 <template>
   <div class="table-container">
+    <div class="table-header">
+      <i class="fa-solid fa-table"></i>
+      <span>Live Data View</span>
+    </div>
     <table class="data-view" ref="tableRef">
       <thead>
         <tr>
@@ -38,12 +42,28 @@ defineExpose({
 </template>
 
 <style scoped>
+@import url("/font-awesome/all.min.css");
+
 .table-container {
   flex: 2;
   width: 100%;
   position: relative;
-  z-index: 10;
+  /* z-index: 10; */
   background: #f7f4ec; /* Match page background to mask the curve behind */
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.table-header {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 14px;
+  font-weight: 700;
+  color: #2d2d2d;
+  font-family: "Kalam", cursive;
+  padding-left: 4px;
 }
 
 .data-view {

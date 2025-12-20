@@ -1,5 +1,5 @@
 <script setup>
-import { ref, onMounted, nextTick, watch } from "vue";
+import { ref, onMounted, onUnmounted, nextTick, watch } from "vue";
 
 const props = defineProps({
   modelValue: String,
@@ -17,6 +17,7 @@ const presets = {
 };
 
 const activePreset = ref("insert");
+const toolbarRef = ref(null);
 const tabRefs = ref({});
 const tabWidths = ref({});
 const maskStyle = ref({
@@ -46,7 +47,9 @@ const getTabPath = (width) => {
   const strokeWidth = 2;
   const topY = strokeWidth;
   const bottomY = height;
-  return `M 0,${bottomY} L ${slant},${topY} L ${width - slant},${topY} L ${width},${bottomY}`;
+  return `M 0,${bottomY} L ${slant},${topY} L ${
+    width - slant
+  },${topY} L ${width},${bottomY}`;
 };
 
 const setPreset = (action) => {
@@ -64,9 +67,27 @@ const handleKeydown = (e) => {
   }
 };
 
+let resizeObserver = null;
+
 onMounted(() => {
-  updateMask();
-  window.addEventListener("resize", updateMask);
+  // Use ResizeObserver for more robust layout tracking (e.g. font loading, parent flex shifts)
+  if (typeof window !== "undefined" && toolbarRef.value) {
+    resizeObserver = new ResizeObserver(() => {
+      updateMask();
+    });
+    resizeObserver.observe(toolbarRef.value);
+  }
+
+  // Initial update after a short delay to ensure layout has settled
+  nextTick(() => {
+    setTimeout(updateMask, 100);
+  });
+});
+
+onUnmounted(() => {
+  if (resizeObserver) {
+    resizeObserver.disconnect();
+  }
 });
 
 watch(
@@ -89,7 +110,7 @@ watch(
         }
       }
     }
-  },
+  }
 );
 </script>
 
@@ -101,10 +122,10 @@ watch(
         <span class="light yellow"></span>
         <span class="light green"></span>
       </div>
-      <div class="window-title">Run SQL locally.</div>
+      <div class="window-title">Execute SQL locally.</div>
     </div>
 
-    <div class="window-toolbar">
+    <div class="window-toolbar" ref="toolbarRef">
       <button
         v-for="(label, key) in {
           insert: 'Insert',
@@ -164,7 +185,7 @@ watch(
             stroke-linejoin="round"
           />
         </svg>
-        <span class="hint">type "enter" to run the SQL</span>
+        <span class="hint">Press ↵ Enter to execute.</span>
       </div>
 
       <div class="status-indicator">
@@ -248,7 +269,7 @@ watch(
   cursor: pointer;
   font-size: 14px;
   color: #2d2d2d;
-  padding: 8px 24px;
+  padding: 4px 24px;
   display: flex;
   align-items: center;
   gap: 6px;
@@ -292,8 +313,7 @@ watch(
   bottom: -2px;
   height: 2px;
   background: #fdfbf6;
-  transition:
-    left 0.3s cubic-bezier(0.4, 0, 0.2, 1),
+  transition: left 0.3s cubic-bezier(0.4, 0, 0.2, 1),
     width 0.3s cubic-bezier(0.4, 0, 0.2, 1);
   z-index: 2;
 }
