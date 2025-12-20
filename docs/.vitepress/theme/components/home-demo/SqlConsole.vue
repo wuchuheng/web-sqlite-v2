@@ -22,7 +22,12 @@ const props = defineProps({
   },
 });
 
-const emit = defineEmits(["update:modelValue", "execute", "user-input"]);
+const emit = defineEmits([
+  "update:modelValue",
+  "execute",
+  "user-input",
+  "execution-complete",
+]);
 
 const presets = {
   insert:
@@ -309,6 +314,17 @@ onUnmounted(() => {
     view.destroy();
   }
 });
+
+let lastProcessing = props.isProcessing;
+watch(
+  () => props.isProcessing,
+  (newVal) => {
+    if (lastProcessing && !newVal) {
+      emit("execution-complete");
+    }
+    lastProcessing = newVal;
+  },
+);
 
 watch(
   () => props.modelValue,

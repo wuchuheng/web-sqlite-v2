@@ -38,6 +38,8 @@ const displayFilename = computed(() => {
   return `${fileMeta.value.name}${sizeLabel}`;
 });
 
+let refreshChain = Promise.resolve();
+
 const pickFirstSqliteFile = async () => {
   const root = await navigator.storage.getDirectory();
   let entry = null;
@@ -110,12 +112,18 @@ const downloadDb = async () => {
   }
 };
 
+const refresh = () => {
+  refreshChain = refreshChain.catch(() => {}).then(() => loadMeta());
+  return refreshChain;
+};
+
 onMounted(() => {
-  loadMeta();
+  refresh();
 });
 
 defineExpose({
   folderRef,
+  refresh,
 });
 </script>
 

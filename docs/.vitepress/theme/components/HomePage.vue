@@ -16,6 +16,7 @@ const isProcessing = ref(false);
 const db = ref(null);
 const errorMsg = ref("");
 const schema = ref({});
+const lastRunMutated = ref(false);
 
 // Constants
 const QUERY_ANIMATION_DELAY = 500; // ms, matches BezierCurve duration
@@ -329,6 +330,7 @@ const runQuery = async () => {
 
     const sql = sqlInput.value.trim();
     const isQuery = sql.toUpperCase().startsWith("SELECT");
+    lastRunMutated.value = !isQuery;
 
     if (isQuery) {
       const rows = await db.value.query(sql);
@@ -345,6 +347,18 @@ const runQuery = async () => {
     errorMsg.value = e.message;
   } finally {
     isProcessing.value = false;
+  }
+};
+
+const refreshAfterReads = true;
+const handleExecutionComplete = async () => {
+  if (!refreshAfterReads && !lastRunMutated.value) return;
+  if (!opfsRef.value?.refresh) return;
+
+  try {
+    await opfsRef.value.refresh();
+  } catch (e) {
+    console.error("Failed to refresh OPFS metadata:", e);
   }
 };
 
@@ -497,6 +511,7 @@ onUnmounted(() => {
         :schema="schema"
         @execute="runQuery"
         @user-input="handleUserInput"
+        @execution-complete="handleExecutionComplete"
         :style="layoutConfig.console"
       />
 
