@@ -6,12 +6,15 @@
     "scripts": {
         "dev": "vitepress dev .",
         "build": "vitepress build .",
-        "preview": "vitepress preview ."
+        "preview": "vitepress preview .",
+        "icons": "tsx ./scripts/generate-doc-icons.ts"
     },
     "devDependencies": {
         "@types/node": "^25.0.1",
         "typescript": "^5.9.3",
-        "vitepress": "^1.6.4"
+        "vitepress": "^1.6.4",
+        "@vite-pwa/vitepress": "^0.5.3",
+        "tsx": "^4.21.0"
     },
     "dependencies": {
         "@codemirror/autocomplete": "^6.20.0",

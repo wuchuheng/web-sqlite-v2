@@ -1,11 +1,25 @@
 import { defineConfig } from "vitepress";
 import { resolve } from "path";
+import { withPwa } from "@vite-pwa/vitepress";
+import { pwaOptions } from "./pwa";
 
 // https://vitepress.dev/reference/site-config
-export default defineConfig({
+export default withPwa(
+  defineConfig({
   title: "Web Sqlite JS",
   description:
     "Client-side SQLite for the browser: a relational database with persistent storage on the user's device via OPFS.",
+  head: [
+    ["link", { rel: "icon", type: "image/svg+xml", href: "/logo.svg" }],
+    ["link", { rel: "icon", type: "image/png", sizes: "32x32", href: "/favicon-32x32.png" }],
+    ["link", { rel: "icon", type: "image/png", sizes: "16x16", href: "/favicon-16x16.png" }],
+    [
+      "link",
+      { rel: "apple-touch-icon", sizes: "180x180", href: "/apple-touch-icon.png" },
+    ],
+    ["meta", { name: "theme-color", content: "#f7f4ec" }],
+  ],
+  pwa: pwaOptions,
   vite: {
     resolve: {
       alias: {
@@ -37,6 +51,7 @@ export default defineConfig({
     },
   },
   themeConfig: {
+    logo: "/logo.svg",
     // https://vitepress.dev/reference/default-theme-config
     nav: [
       { text: "Home", link: "/" },
@@ -59,4 +74,5 @@ export default defineConfig({
       { icon: "github", link: "https://github.com/wuchuheng/web-sqlite-js" },
     ],
   },
-});
+})
+);

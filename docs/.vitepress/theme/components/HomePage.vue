@@ -415,7 +415,7 @@ onMounted(async () => {
       // Import dynamically to avoid SSR issues
       const { openDB } = await import("web-sqlite-js");
 
-      db.value = await openDB("hello");
+      db.value = await openDB("local");
 
       await db.value.exec(`
                 CREATE TABLE IF NOT EXISTS users (

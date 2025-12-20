@@ -6,3 +6,5 @@ dist/
 coverage/
 *.tgz
 docs/.vitepress/cache/
+.env
+*.tar.gz
