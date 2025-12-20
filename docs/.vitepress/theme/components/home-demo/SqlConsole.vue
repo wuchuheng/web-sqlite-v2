@@ -1,5 +1,7 @@
 <script setup>
-defineProps({
+import { ref, onMounted, nextTick, watch } from "vue";
+
+const props = defineProps({
   modelValue: String,
   isProcessing: Boolean,
   errorMsg: String,
@@ -14,9 +16,44 @@ const presets = {
   update: "UPDATE users SET email = 'new@domain.com' WHERE id = 2;",
 };
 
+const activePreset = ref("insert");
+const tabRefs = ref({});
+const tabWidths = ref({});
+const maskStyle = ref({
+  left: "0px",
+  width: "0px",
+});
+
+const updateMask = () => {
+  const el = tabRefs.value[activePreset.value];
+  if (el) {
+    maskStyle.value = {
+      left: `${el.offsetLeft}px`,
+      width: `${el.offsetWidth}px`,
+    };
+  }
+  // Update all widths for SVG paths
+  Object.keys(tabRefs.value).forEach((key) => {
+    if (tabRefs.value[key]) {
+      tabWidths.value[key] = tabRefs.value[key].offsetWidth;
+    }
+  });
+};
+
+const getTabPath = (width) => {
+  const slant = 12;
+  const height = 40; // Approximate button height
+  const strokeWidth = 2;
+  const topY = strokeWidth;
+  const bottomY = height;
+  return `M 0,${bottomY} L ${slant},${topY} L ${width - slant},${topY} L ${width},${bottomY}`;
+};
+
 const setPreset = (action) => {
   if (presets[action]) {
+    activePreset.value = action;
     emit("update:modelValue", presets[action]);
+    nextTick(updateMask);
   }
 };
 
@@ -26,6 +63,34 @@ const handleKeydown = (e) => {
     emit("run");
   }
 };
+
+onMounted(() => {
+  updateMask();
+  window.addEventListener("resize", updateMask);
+});
+
+watch(
+  () => props.modelValue,
+  (newVal) => {
+    // If the value doesn't match the active preset, clear the active state
+    if (newVal !== presets[activePreset.value]) {
+      // Find if it matches another preset
+      const found = Object.keys(presets).find((key) => presets[key] === newVal);
+      if (found) {
+        activePreset.value = found;
+        nextTick(updateMask);
+      } else {
+        // We keep the last active preset visually if it's just a slight edit,
+        // or clear it if it's completely different.
+        // For this demo, let's just keep the mask for better UX unless it's empty.
+        if (!newVal) {
+          activePreset.value = null;
+          maskStyle.value.width = "0px";
+        }
+      }
+    }
+  },
+);
 </script>
 
 <template>
@@ -40,15 +105,31 @@ const handleKeydown = (e) => {
     </div>
 
     <div class="window-toolbar">
-      <button class="tool-btn" @click="setPreset('insert')">
-        <span class="icon">+</span> Insert
+      <button
+        v-for="(label, key) in {
+          insert: 'Insert',
+          delete: 'Delete',
+          update: 'Update',
+        }"
+        :key="key"
+        class="tool-btn"
+        :class="{ active: activePreset === key }"
+        :ref="(el) => (tabRefs[key] = el)"
+        @click="setPreset(key)"
+      >
+        <svg
+          class="tab-svg"
+          :viewBox="`0 0 ${tabWidths[key] || 100} 40`"
+          preserveAspectRatio="none"
+        >
+          <path :d="getTabPath(tabWidths[key] || 100)" class="tab-path" />
+        </svg>
+        <span class="icon">{{
+          key === "insert" ? "+" : key === "delete" ? "🗑" : "✎"
+        }}</span>
+        {{ label }}
       </button>
-      <button class="tool-btn" @click="setPreset('delete')">
-        <span class="icon">🗑</span> Delete
-      </button>
-      <button class="tool-btn" @click="setPreset('update')">
-        <span class="icon">✎</span> Update
-      </button>
+      <div class="active-tab-mask" :style="maskStyle"></div>
     </div>
 
     <div class="window-content">
@@ -153,39 +234,68 @@ const handleKeydown = (e) => {
 }
 
 .window-toolbar {
-  padding: 8px 14px;
+  padding: 8px 14px 0 14px;
   border-bottom: 2px solid #2d2d2d;
   display: flex;
-  gap: 12px;
   background: #fdfbf6;
+  position: relative;
+  z-index: 1;
 }
 
 .tool-btn {
-  background: #fdfbf6;
-  border: 2px solid #2d2d2d;
+  background: transparent;
+  border: none;
   cursor: pointer;
   font-size: 14px;
   color: #2d2d2d;
-  padding: 4px 12px;
-  border-radius: 20px;
+  padding: 8px 24px;
   display: flex;
   align-items: center;
   gap: 6px;
-  box-shadow: 2px 2px 0 rgba(0, 0, 0, 0.12);
-  transition:
-    transform 0.08s ease,
-    box-shadow 0.08s ease;
   font-weight: 600;
   font-family: "Kalam", cursive;
+  position: relative;
+  z-index: 4;
+  margin-bottom: 0;
+  transition: transform 0.1s ease;
 }
 
-.tool-btn:hover {
-  transform: translate(-1px, -1px);
-  box-shadow: 3px 3px 0 rgba(0, 0, 0, 0.16);
+.tab-svg {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  z-index: -1;
+  overflow: visible;
 }
-.tool-btn:active {
-  transform: translate(0, 0);
-  box-shadow: 1px 1px 0 rgba(0, 0, 0, 0.16) inset;
+
+.tab-path {
+  fill: #fdfbf6;
+  stroke: #2d2d2d;
+  stroke-width: 2;
+  stroke-linejoin: round;
+  stroke-linecap: round;
+  transition: fill 0.2s ease;
+}
+
+.tool-btn:hover .tab-path {
+  fill: #f5f2e9;
+}
+
+.tool-btn.active .tab-path {
+  fill: #fdfbf6;
+}
+
+.active-tab-mask {
+  position: absolute;
+  bottom: -2px;
+  height: 2px;
+  background: #fdfbf6;
+  transition:
+    left 0.3s cubic-bezier(0.4, 0, 0.2, 1),
+    width 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  z-index: 2;
 }
 .tool-btn .icon {
   font-size: 14px;
