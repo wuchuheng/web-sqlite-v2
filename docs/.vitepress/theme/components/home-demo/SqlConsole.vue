@@ -2,11 +2,14 @@
 import { ref, onMounted, onUnmounted, nextTick, watch } from "vue";
 import { EditorView, basicSetup } from "codemirror";
 import { sql, SQLite } from "@codemirror/lang-sql";
-import { EditorState, Compartment, Prec } from "@codemirror/state";
 import {
-  snippetCompletion,
-  completeFromList,
-} from "@codemirror/autocomplete";
+  EditorState,
+  Compartment,
+  Prec,
+  Transaction,
+  EditorSelection,
+} from "@codemirror/state";
+import { snippetCompletion, completeFromList } from "@codemirror/autocomplete";
 import { keymap } from "@codemirror/view";
 
 const props = defineProps({
@@ -19,13 +22,13 @@ const props = defineProps({
   },
 });
 
-const emit = defineEmits(["update:modelValue", "run"]);
+const emit = defineEmits(["update:modelValue", "execute", "user-input"]);
 
 const presets = {
   insert:
     "INSERT INTO users (username, email) VALUES ('baz', 'baz@domain.com');",
-  delete: "DELETE FROM users WHERE id = 1;",
   update: "UPDATE users SET email = 'new@domain.com' WHERE id = 2;",
+  delete: "DELETE FROM users WHERE id = 1;",
 };
 
 const activePreset = ref("insert");
@@ -40,6 +43,8 @@ const maskStyle = ref({
 const editorContainer = ref(null);
 let view = null;
 const sqlConfig = new Compartment();
+const isAutoTyping = ref(false);
+let autoTypingController = { cancelled: false };
 
 const sqlSnippets = [
   snippetCompletion("INSERT INTO ${table} (${columns}) VALUES (${values});", {
@@ -60,14 +65,15 @@ const sqlSnippets = [
     detail: "Delete template",
     type: "keyword",
   }),
-    snippetCompletion(
-      "CREATE TABLE ${name} (\n  id INTEGER PRIMARY KEY AUTOINCREMENT,\n  ${column} TEXT\n);",
-      {
-        label: "CREATE TABLE",
-        detail: "Create table template",
-        type: "keyword",
-      }
-    ),  snippetCompletion("SELECT * FROM ${table} WHERE ${condition};", {
+  snippetCompletion(
+    "CREATE TABLE ${name} (\n  id INTEGER PRIMARY KEY AUTOINCREMENT,\n  ${column} TEXT\n);",
+    {
+      label: "CREATE TABLE",
+      detail: "Create table template",
+      type: "keyword",
+    }
+  ),
+  snippetCompletion("SELECT * FROM ${table} WHERE ${condition};", {
     label: "SELECT",
     detail: "Select template",
     type: "keyword",
@@ -141,27 +147,92 @@ const getTabPath = (width) => {
   const strokeWidth = 2;
   const topY = strokeWidth;
   const bottomY = height;
-  return `M 0,${bottomY} L ${slant},${topY} L ${ width - slant },${topY} L ${width},${bottomY}`;
+  return `M 0,${bottomY} L ${slant},${topY} L ${
+    width - slant
+  },${topY} L ${width},${bottomY}`;
 };
 
-const setPreset = (action) => {
-  if (presets[action]) {
-    activePreset.value = action;
+const setPreset = (action, options = {}) => {
+  const { applyValue = true } = options;
+  if (!presets[action]) return;
+  activePreset.value = action;
+
+  if (applyValue) {
     emit("update:modelValue", presets[action]);
     if (view) {
       view.dispatch({
-        changes: { from: 0, to: view.state.doc.length, insert: presets[action] },
+        changes: {
+          from: 0,
+          to: view.state.doc.length,
+          insert: presets[action],
+        },
+        annotations: Transaction.userEvent.of("codex-auto"),
+        selection: EditorSelection.cursor(presets[action].length),
       });
     }
-    nextTick(updateMask);
   }
+
+  nextTick(updateMask);
 };
 
-const handleRun = () => {
-  emit("run");
+const handleExecute = () => {
+  emit("execute");
 };
 
 let resizeObserver = null;
+const delay = (ms) => new Promise((resolve) => setTimeout(resolve, ms));
+
+const focusEditor = () => {
+  if (view) {
+    view.focus();
+  }
+};
+
+const clearEditor = () => {
+  if (view) {
+    view.dispatch({
+      changes: { from: 0, to: view.state.doc.length, insert: "" },
+      annotations: Transaction.userEvent.of("codex-auto"),
+      selection: EditorSelection.cursor(0),
+    });
+  }
+};
+
+const cancelAutoTyping = () => {
+  autoTypingController.cancelled = true;
+  isAutoTyping.value = false;
+};
+
+const typeText = async (text, delayMs = 40) => {
+  if (!view) return false;
+
+  autoTypingController = { cancelled: false };
+  isAutoTyping.value = true;
+  focusEditor();
+
+  for (let i = 0; i < text.length; i++) {
+    if (autoTypingController.cancelled) break;
+    view.dispatch({
+      changes: {
+        from: view.state.doc.length,
+        to: view.state.doc.length,
+        insert: text[i],
+      },
+      annotations: Transaction.userEvent.of("codex-auto"),
+      selection: EditorSelection.cursor(view.state.doc.length + 1),
+    });
+    await delay(delayMs);
+  }
+
+  const completed = !autoTypingController.cancelled;
+  isAutoTyping.value = false;
+
+  if (completed) {
+    emit("execute");
+  }
+
+  return completed;
+};
 
 onMounted(() => {
   // Init CodeMirror
@@ -173,7 +244,7 @@ onMounted(() => {
           {
             key: "Mod-Enter",
             run: () => {
-              handleRun();
+              handleExecute();
               return true;
             },
           },
@@ -188,11 +259,24 @@ onMounted(() => {
         })
       ),
       // Add snippets as a custom completion source
-      SQLite.language.data.of({ // This line was missing in the original code
+      SQLite.language.data.of({
+        // This line was missing in the original code
         autocomplete: completeFromList(sqlSnippets),
       }),
+      EditorView.lineWrapping,
       myTheme,
       EditorView.updateListener.of((update) => {
+        const hasUserEvent = update.transactions.some((tr) => {
+          const userEvent = tr.annotation(Transaction.userEvent);
+          if (userEvent === "codex-auto") return false;
+          return Boolean(userEvent);
+        });
+
+        if (update.docChanged && hasUserEvent) {
+          cancelAutoTyping();
+          emit("user-input");
+        }
+
         if (update.docChanged) {
           emit("update:modelValue", update.state.doc.toString());
         }
@@ -232,6 +316,8 @@ watch(
     if (view && newVal !== view.state.doc.toString()) {
       view.dispatch({
         changes: { from: 0, to: view.state.doc.length, insert: newVal || "" },
+        selection: EditorSelection.cursor((newVal || "").length),
+        annotations: Transaction.userEvent.of("codex-auto"),
       });
     }
 
@@ -240,10 +326,8 @@ watch(
       if (found) {
         activePreset.value = found;
         nextTick(updateMask);
-      } else if (!newVal) {
-        activePreset.value = null;
-        maskStyle.value.width = "0px";
       }
+      nextTick(updateMask);
     }
   }
 );
@@ -265,6 +349,14 @@ watch(
   },
   { deep: true }
 );
+
+defineExpose({
+  setPreset,
+  focusEditor,
+  clearEditor,
+  typeText,
+  cancelAutoTyping,
+});
 </script>
 
 <template>
@@ -282,8 +374,8 @@ watch(
       <button
         v-for="(label, key) in {
           insert: 'Insert',
-          delete: 'Delete',
           update: 'Update',
+          delete: 'Delete',
         }"
         :key="key"
         class="tool-btn"
@@ -298,7 +390,7 @@ watch(
         >
           <path :d="getTabPath(tabWidths[key] || 100)" class="tab-path" />
         </svg>
-        <span class="icon">{{ 
+        <span class="icon">{{
           key === "insert" ? "+" : key === "delete" ? "🗑" : "✎"
         }}</span>
         {{ label }}
@@ -313,7 +405,7 @@ watch(
     <div class="window-footer">
       <div
         class="enter-hint-container"
-        @click="handleRun"
+        @click="handleExecute"
         style="cursor: pointer"
         title="Click to run or press Ctrl + Enter"
       >
@@ -330,7 +422,12 @@ watch(
               stroke="#2d2d2d"
               stroke-width="2"
             />
-            <path d="M1 21 L1 23 A 2 2 0 0 0 3 25 L35 25 A 2 2 0 0 0 37 23 L37 21" fill="none" stroke="#2d2d2d" stroke-width="2" />
+            <path
+              d="M1 21 L1 23 A 2 2 0 0 0 3 25 L35 25 A 2 2 0 0 0 37 23 L37 21"
+              fill="none"
+              stroke="#2d2d2d"
+              stroke-width="2"
+            />
             <text
               x="19"
               y="16"
@@ -355,7 +452,12 @@ watch(
               stroke="#2d2d2d"
               stroke-width="2"
             />
-            <path d="M1 21 L1 23 A 2 2 0 0 0 3 25 L43 25 A 2 2 0 0 0 45 23 L45 21" fill="none" stroke="#2d2d2d" stroke-width="2" />
+            <path
+              d="M1 21 L1 23 A 2 2 0 0 0 3 25 L43 25 A 2 2 0 0 0 45 23 L45 21"
+              fill="none"
+              stroke="#2d2d2d"
+              stroke-width="2"
+            />
             <text
               x="23"
               y="16"

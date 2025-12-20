@@ -9,7 +9,7 @@ import BezierCurve from "./home-demo/BezierCurve.vue";
 import StraightConnector from "./home-demo/StraightConnector.vue";
 
 // State
-const sqlInput = ref("Select * from users;");
+const sqlInput = ref("");
 const resultTable = ref([]);
 const isProcessing = ref(false);
 const db = ref(null);
@@ -18,6 +18,22 @@ const schema = ref({});
 
 // Constants
 const QUERY_ANIMATION_DELAY = 500; // ms, matches BezierCurve duration
+const AUTO_TAB_DELAY = 2000;
+const AUTO_STEPS = [
+  {
+    tab: "insert",
+    sql: "INSERT INTO users (id, username, email) VALUES (3, 'baz', 'baz@domain.com');",
+  },
+  {
+    tab: "update",
+    sql: "UPDATE users SET email = 'root@wuchuheng.com', username='Andy' WHERE id = 3;",
+  },
+  {
+    tab: "delete",
+    sql: "DELETE FROM users WHERE id = 3;",
+  },
+];
+const delay = (ms) => new Promise((resolve) => setTimeout(resolve, ms));
 
 const updateSchema = async () => {
   if (!db.value) return;
@@ -66,6 +82,9 @@ const consoleRef = ref(null);
 const workerRef = ref(null);
 const tableRef = ref(null);
 const opfsRef = ref(null);
+let autoDemoStarted = false;
+let autoDemoHalted = false;
+let autoLoopStop = false;
 
 let rafId = null;
 const throttledUpdate = () => {
@@ -98,8 +117,7 @@ const ensureVisibleCurve = (start, mid, end, rects) => {
     return { start, mid, end };
   }
 
-  const spaceRight =
-    rects.container.width - Math.max(start.x, mid.x, end.x);
+  const spaceRight = rects.container.width - Math.max(start.x, mid.x, end.x);
   const spaceLeft = Math.min(start.x, mid.x, end.x);
   const direction = spaceRight >= spaceLeft ? 1 : -1;
 
@@ -195,16 +213,11 @@ const updatePoints = () => {
   }
 
   if (deviceType.value === "sm") {
-    const curvedPoints = ensureVisibleCurve(
-      p1.value,
-      p2.value,
-      p3.value,
-      {
-        container: containerRect,
-        console: consoleRect,
-        table: tableRect,
-      }
-    );
+    const curvedPoints = ensureVisibleCurve(p1.value, p2.value, p3.value, {
+      container: containerRect,
+      console: consoleRect,
+      table: tableRect,
+    });
 
     p1.value = curvedPoints.start;
     p2.value = curvedPoints.mid;
@@ -334,6 +347,59 @@ const runQuery = async () => {
   }
 };
 
+const waitForProcessingIdle = async () => {
+  while (isProcessing.value && !autoLoopStop) {
+    await delay(50);
+  }
+};
+
+const stopAutoDemo = () => {
+  autoLoopStop = true;
+  autoDemoHalted = true;
+  consoleRef.value?.cancelAutoTyping?.();
+};
+
+const handleUserInput = () => {
+  stopAutoDemo();
+};
+
+const startAutoDemo = async () => {
+  if (autoDemoStarted || autoDemoHalted) return;
+  if (!consoleRef.value) return;
+  autoDemoStarted = true;
+  autoLoopStop = false;
+
+  consoleRef.value?.setPreset?.("insert", { applyValue: false });
+  consoleRef.value?.clearEditor?.();
+  sqlInput.value = "";
+  consoleRef.value?.focusEditor?.();
+
+  while (!autoLoopStop) {
+    for (const step of AUTO_STEPS) {
+      if (autoLoopStop) break;
+
+      consoleRef.value?.setPreset?.(step.tab, { applyValue: false });
+      await delay(AUTO_TAB_DELAY);
+      if (autoLoopStop) break;
+
+      consoleRef.value?.clearEditor?.();
+      sqlInput.value = "";
+      consoleRef.value?.focusEditor?.();
+
+      const completed = await consoleRef.value?.typeText?.(step.sql);
+      if (!completed || autoLoopStop) {
+        autoLoopStop = true;
+        break;
+      }
+
+      await nextTick();
+      await waitForProcessingIdle();
+      if (autoLoopStop) break;
+      await delay(AUTO_TAB_DELAY);
+    }
+  }
+};
+
 // Initialize on client side only
 onMounted(async () => {
   if (typeof window !== "undefined") {
@@ -371,6 +437,9 @@ onMounted(async () => {
       const rows = await db.value.query("SELECT * FROM users");
       resultTable.value = rows;
       await updateSchema();
+
+      await nextTick();
+      startAutoDemo();
     } catch (e) {
       console.error("Failed to init DB:", e);
       errorMsg.value = "Failed to initialize Web-SQLite: " + e.message;
@@ -383,6 +452,7 @@ onUnmounted(() => {
     window.removeEventListener("resize", throttledUpdate);
     if (rafId) cancelAnimationFrame(rafId);
   }
+  stopAutoDemo();
 });
 </script>
 
@@ -422,7 +492,8 @@ onUnmounted(() => {
         :is-processing="isProcessing"
         :error-msg="errorMsg"
         :schema="schema"
-        @run="runQuery"
+        @execute="runQuery"
+        @user-input="handleUserInput"
         :style="layoutConfig.console"
       />
 
