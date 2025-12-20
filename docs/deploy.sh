@@ -41,7 +41,7 @@ if [ ${#missedVars[@]} -ne 0 ]; then
 fi
 
 
-# npm run build
+npm run build
 
 if [ $? -ne 0 ]; then
   RED='\033[0;31m'
