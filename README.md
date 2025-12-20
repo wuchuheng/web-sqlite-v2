@@ -1,5 +1,5 @@
  <h1 align="center">web-sqlite-js</h1>
-<p align="center"> <img src="docs/public/web-sqlite-js.gif" width="400px" />
+<p align="center"> <img src="docs/public/web-sqlite-js.gif" width="80%" style="border-radius: 10px;"  />
 </p>
 
 `web-sqlite-js` is a friendly, out-of-the-box SQLite database for the web that makes persistent client-side storage simple for every developer.
@@ -8,11 +8,11 @@ Designed to be truly effortless, it allows you to get a high-performance relatio
 
 ## Features
 
-- **Persistent Storage**: Uses OPFS for high-performance, persistent file storage.
-- **Non-Blocking**: Runs in a Web Worker, keeping your UI responsive.
-- **Concurrency Safe**: Built-in mutex ensures safe, sequential execution of commands.
-- **Type-Safe**: Written in TypeScript with full type definitions.
-- **Transactions**: Supports atomic transactions with automatic rollback on error.
+-   **Persistent Storage**: Uses OPFS for high-performance, persistent file storage.
+-   **Non-Blocking**: Runs in a Web Worker, keeping your UI responsive.
+-   **Concurrency Safe**: Built-in mutex ensures safe, sequential execution of commands.
+-   **Type-Safe**: Written in TypeScript with full type definitions.
+-   **Transactions**: Supports atomic transactions with automatic rollback on error.
 
 ## Installation
 

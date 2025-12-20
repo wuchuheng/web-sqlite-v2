@@ -23,8 +23,9 @@ const layoutConfig = computed(() => {
   <!-- make the style config here -->
   <div class="hero-header" :style="layoutConfig">
     <h1 class="title">web-sqlite-js</h1>
-        <p class="description">
-      A friendly, out-of-the-box SQLite database for the web. <br v-if="deviceType !== 'sm'" />
+    <p class="description">
+      A friendly, out-of-the-box SQLite database for the web.
+      <br v-if="deviceType !== 'sm'" />
       Making persistent client-side storage simple for every developer.
     </p>
 

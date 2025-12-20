@@ -129,7 +129,7 @@ watch(
       if (toEl) resizeObserver.observe(toEl);
     }
     updatePoints();
-  }
+  },
 );
 
 const angle = computed(() => {
