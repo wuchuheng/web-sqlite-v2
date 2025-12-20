@@ -142,7 +142,7 @@ const onLeave = (el, done) => {
   overflow: hidden;
   box-shadow: 2px 2px 0 rgba(0, 0, 0, 0.1);
   font-family: "Kalam", cursive;
-  display: table;
+  display: block; /* Changed from table to block for better predictability */
 }
 
 .data-view :deep(thead),
@@ -173,6 +173,7 @@ const onLeave = (el, done) => {
   flex: 1;
   display: flex;
   align-items: center;
+  justify-content: center; /* Center content for better visual balance */
 }
 
 .data-view :deep(th:last-child),

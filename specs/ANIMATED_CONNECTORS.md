@@ -31,8 +31,14 @@ Based on technical research, the most robust and performant way to reveal a **da
     - The dashed line is "painted" behind the arrow.
     - The text/icons at the destination (e.g., Worker pulse) trigger once the arrow arrives ($progress = 1$).
 
-### 3. Layout Stability
-- Ensure the animation recalculates its path lengths if the window is resized mid-animation.
+### 3. Real-Time Position Tracking (Debounced)
+- **Requirement:** Connectors must remain attached to elements even when they move or change size (e.g., when the `ResultTable` expands during a transition).
+- **Mechanism:**
+    - Use `ResizeObserver` to monitor the source and destination elements.
+    - Implement a **Debounced Recalculation** strategy:
+        - **Real-Time:** Update positions immediately using `requestAnimationFrame` during high-frequency changes (like animations).
+        - **Debounce:** Ensure a final, precise calculation runs 50ms after the last change to correct any sub-pixel drifts.
+- **Independence:** The `StraightConnector.vue` will become "Smart": instead of receiving static `p1/p2` coordinates, it will receive the target elements and calculate its own anchor points dynamically.
 
 ## Technical Implementation Plan
 
@@ -50,9 +56,10 @@ Based on technical research, the most robust and performant way to reveal a **da
 <path :d="pathData" class="dashed-line" :mask="`url(#${maskId})`" />
 ```
 
-### Step 3: Dynamic Arrow Binding
-- Compute `arrowX`, `arrowY`, and `arrowRotation` as `computed` properties based on `progress`.
-- Use the `getTotalLength()` of the path ref to set the `stroke-dasharray` accurately.
+### Step 4: Autonomous Positioning (StraightConnector)
+- Refactor `StraightConnector.vue` to accept element identifiers or refs.
+- Implement a `ResizeObserver` to watch these targets.
+- Implement a debounced tracking logic to keep the points `p1` and `p2` updated relative to the parent container.
 
 ## Verification
 - Run a SQL query.

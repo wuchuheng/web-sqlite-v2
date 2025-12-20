@@ -1,5 +1,6 @@
 <script setup>
-import { computed, ref, watch, onMounted, onUnmounted, nextTick } from "vue";
+import { computed, watch, onMounted, toRef } from "vue";
+import { usePathAnimation } from "../../composables/usePathAnimation";
 
 const props = defineProps({
   p1: { type: Object, required: true }, // { x, y }
@@ -8,71 +9,16 @@ const props = defineProps({
   isProcessing: { type: Boolean, default: false },
 });
 
-// Configuration
-const ANIMATION_DURATION = 500; // ms
-
-// Animation state
-const progress = ref(1); // 0 to 1
-const pathRef = ref(null);
-const pathLength = ref(0);
-const maskId = `path-mask-${Math.random().toString(36).slice(2, 9)}`;
-
-let animationFrame = null;
-
-/**
- * Easing function: easeInOutQuad
- */
-const easeInOutQuad = (t) => (t < 0.5 ? 2 * t * t : 1 - Math.pow(-2 * t + 2, 2) / 2);
-
-const animate = (targetValue, duration) => {
-  const startValue = progress.value;
-  const startTime = performance.now();
-
-  const step = (currentTime) => {
-    const elapsed = currentTime - startTime;
-    const t = Math.min(elapsed / duration, 1);
-    
-    progress.value = startValue + (targetValue - startValue) * easeInOutQuad(t);
-
-    if (t < 1) {
-      animationFrame = requestAnimationFrame(step);
-    } else {
-      animationFrame = null;
-    }
-  };
-
-  if (animationFrame) cancelAnimationFrame(animationFrame);
-  animationFrame = requestAnimationFrame(step);
-};
-
-watch(() => props.isProcessing, (newVal) => {
-  if (newVal) {
-    // Reset and Start drawing
-    progress.value = 0;
-    // Small delay to ensure the reset is rendered before animation starts
-    setTimeout(() => {
-      animate(1, ANIMATION_DURATION);
-    }, 20);
-  }
-});
+// Use shared animation logic
+const { progress, pathRef, pathLength, maskId, updatePathLength } = usePathAnimation(toRef(props, "isProcessing"));
 
 onMounted(() => {
-  if (pathRef.value) {
-    pathLength.value = pathRef.value.getTotalLength();
-  }
-});
-
-onUnmounted(() => {
-  if (animationFrame) cancelAnimationFrame(animationFrame);
+  updatePathLength();
 });
 
 // Update path length if points change
 watch([() => props.p1, () => props.p2, () => props.p3], () => {
-  nextTick(() => {
-    if (pathRef.value) {
-      pathLength.value = pathRef.value.getTotalLength();
-    }
-  });
+  updatePathLength();
 }, { deep: true });
 
 /**

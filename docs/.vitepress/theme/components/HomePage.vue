@@ -315,8 +315,24 @@ onUnmounted(() => {
       :p3="p3"
       :is-processing="isProcessing"
     />
-    <StraightConnector v-if="ioLine1" :p1="ioLine1.p1" :p2="ioLine1.p2" />
-    <StraightConnector v-if="ioLine2" :p1="ioLine2.p1" :p2="ioLine2.p2" />
+    <StraightConnector
+      v-if="tableRef && opfsRef && containerRef"
+      :from="tableRef"
+      :to="opfsRef"
+      :container="containerRef"
+      :direction="deviceType === 'md' ? 'horizontal' : 'vertical'"
+      :offset="-15"
+      :is-processing="isProcessing"
+    />
+    <StraightConnector
+      v-if="tableRef && opfsRef && containerRef"
+      :from="opfsRef"
+      :to="tableRef"
+      :container="containerRef"
+      :direction="deviceType === 'md' ? 'horizontal' : 'vertical'"
+      :offset="15"
+      :is-processing="isProcessing"
+    />
 
     <div class="main-flow" :style="layoutConfig.mainFlow">
       <SqlConsole
