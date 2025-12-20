@@ -1,10 +1,22 @@
 <script setup>
 import { ref, onMounted, onUnmounted, nextTick, watch } from "vue";
+import { EditorView, basicSetup } from "codemirror";
+import { sql, SQLite } from "@codemirror/lang-sql";
+import { EditorState, Compartment, Prec } from "@codemirror/state";
+import {
+  snippetCompletion,
+  completeFromList,
+} from "@codemirror/autocomplete";
+import { keymap } from "@codemirror/view";
 
 const props = defineProps({
   modelValue: String,
   isProcessing: Boolean,
   errorMsg: String,
+  schema: {
+    type: Object,
+    default: () => ({}),
+  },
 });
 
 const emit = defineEmits(["update:modelValue", "run"]);
@@ -25,6 +37,89 @@ const maskStyle = ref({
   width: "0px",
 });
 
+const editorContainer = ref(null);
+let view = null;
+const sqlConfig = new Compartment();
+
+const sqlSnippets = [
+  snippetCompletion("INSERT INTO ${table} (${columns}) VALUES (${values});", {
+    label: "INSERT",
+    detail: "Insert template",
+    type: "keyword",
+  }),
+  snippetCompletion(
+    "UPDATE ${table} SET ${column} = ${value} WHERE ${condition};",
+    {
+      label: "UPDATE",
+      detail: "Update template",
+      type: "keyword",
+    }
+  ),
+  snippetCompletion("DELETE FROM ${table} WHERE ${condition};", {
+    label: "DELETE",
+    detail: "Delete template",
+    type: "keyword",
+  }),
+    snippetCompletion(
+      "CREATE TABLE ${name} (\n  id INTEGER PRIMARY KEY AUTOINCREMENT,\n  ${column} TEXT\n);",
+      {
+        label: "CREATE TABLE",
+        detail: "Create table template",
+        type: "keyword",
+      }
+    ),  snippetCompletion("SELECT * FROM ${table} WHERE ${condition};", {
+    label: "SELECT",
+    detail: "Select template",
+    type: "keyword",
+  }),
+];
+
+const myTheme = EditorView.theme(
+  {
+    "&": {
+      height: "140px",
+      backgroundColor: "#fdfbf6",
+    },
+    ".cm-content": {
+      fontFamily: "'Kalam', cursive",
+      fontSize: "18px",
+      padding: "16px",
+      caretColor: "#2d2d2d",
+    },
+    "&.cm-focused .cm-cursor": {
+      borderLeftColor: "#2d2d2d",
+    },
+    "&.cm-focused .cm-selectionBackground, .cm-selectionBackground, .cm-content ::selection":
+      {
+        backgroundColor: "#c6f0b3 !important",
+      },
+    ".cm-gutters": {
+      backgroundColor: "#fdfbf6",
+      color: "#2d2d2d",
+      border: "none",
+      display: "none",
+    },
+    ".cm-activeLine": {
+      backgroundColor: "transparent",
+    },
+    ".cm-tooltip": {
+      backgroundColor: "#fdfbf6",
+      border: "2px solid #2d2d2d",
+      borderRadius: "8px",
+      boxShadow: "4px 4px 0 rgba(0,0,0,0.1)",
+      fontFamily: "'Kalam', cursive",
+    },
+    ".cm-tooltip-autocomplete > ul > li": {
+      padding: "4px 8px",
+    },
+    ".cm-tooltip-autocomplete > ul > li[aria-selected]": {
+      backgroundColor: "#c6f0b3",
+      color: "#2d2d2d",
+    },
+  },
+  { dark: false }
+);
+
 const updateMask = () => {
   const el = tabRefs.value[activePreset.value];
   if (el) {
@@ -33,7 +128,6 @@ const updateMask = () => {
       width: `${el.offsetWidth}px`,
     };
   }
-  // Update all widths for SVG paths
   Object.keys(tabRefs.value).forEach((key) => {
     if (tabRefs.value[key]) {
       tabWidths.value[key] = tabRefs.value[key].offsetWidth;
@@ -43,34 +137,74 @@ const updateMask = () => {
 
 const getTabPath = (width) => {
   const slant = 12;
-  const height = 40; // Approximate button height
+  const height = 40;
   const strokeWidth = 2;
   const topY = strokeWidth;
   const bottomY = height;
-  return `M 0,${bottomY} L ${slant},${topY} L ${
-    width - slant
-  },${topY} L ${width},${bottomY}`;
+  return `M 0,${bottomY} L ${slant},${topY} L ${ width - slant },${topY} L ${width},${bottomY}`;
 };
 
 const setPreset = (action) => {
   if (presets[action]) {
     activePreset.value = action;
     emit("update:modelValue", presets[action]);
+    if (view) {
+      view.dispatch({
+        changes: { from: 0, to: view.state.doc.length, insert: presets[action] },
+      });
+    }
     nextTick(updateMask);
   }
 };
 
-const handleKeydown = (e) => {
-  if (e.key === "Enter" && (e.ctrlKey || e.metaKey)) {
-    e.preventDefault();
-    emit("run");
-  }
+const handleRun = () => {
+  emit("run");
 };
 
 let resizeObserver = null;
 
 onMounted(() => {
-  // Use ResizeObserver for more robust layout tracking (e.g. font loading, parent flex shifts)
+  // Init CodeMirror
+  const startState = EditorState.create({
+    doc: props.modelValue,
+    extensions: [
+      Prec.highest(
+        keymap.of([
+          {
+            key: "Mod-Enter",
+            run: () => {
+              handleRun();
+              return true;
+            },
+          },
+        ])
+      ),
+      basicSetup,
+      sqlConfig.of(
+        sql({
+          dialect: SQLite,
+          schema: props.schema,
+          upperCaseKeywords: true,
+        })
+      ),
+      // Add snippets as a custom completion source
+      SQLite.language.data.of({ // This line was missing in the original code
+        autocomplete: completeFromList(sqlSnippets),
+      }),
+      myTheme,
+      EditorView.updateListener.of((update) => {
+        if (update.docChanged) {
+          emit("update:modelValue", update.state.doc.toString());
+        }
+      }),
+    ],
+  });
+
+  view = new EditorView({
+    state: startState,
+    parent: editorContainer.value,
+  });
+
   if (typeof window !== "undefined" && toolbarRef.value) {
     resizeObserver = new ResizeObserver(() => {
       updateMask();
@@ -78,7 +212,6 @@ onMounted(() => {
     resizeObserver.observe(toolbarRef.value);
   }
 
-  // Initial update after a short delay to ensure layout has settled
   nextTick(() => {
     setTimeout(updateMask, 100);
   });
@@ -88,29 +221,49 @@ onUnmounted(() => {
   if (resizeObserver) {
     resizeObserver.disconnect();
   }
+  if (view) {
+    view.destroy();
+  }
 });
 
 watch(
   () => props.modelValue,
   (newVal) => {
-    // If the value doesn't match the active preset, clear the active state
+    if (view && newVal !== view.state.doc.toString()) {
+      view.dispatch({
+        changes: { from: 0, to: view.state.doc.length, insert: newVal || "" },
+      });
+    }
+
     if (newVal !== presets[activePreset.value]) {
-      // Find if it matches another preset
       const found = Object.keys(presets).find((key) => presets[key] === newVal);
       if (found) {
         activePreset.value = found;
         nextTick(updateMask);
-      } else {
-        // We keep the last active preset visually if it's just a slight edit,
-        // or clear it if it's completely different.
-        // For this demo, let's just keep the mask for better UX unless it's empty.
-        if (!newVal) {
-          activePreset.value = null;
-          maskStyle.value.width = "0px";
-        }
+      } else if (!newVal) {
+        activePreset.value = null;
+        maskStyle.value.width = "0px";
       }
     }
   }
+);
+
+watch(
+  () => props.schema,
+  (newSchema) => {
+    if (view) {
+      view.dispatch({
+        effects: sqlConfig.reconfigure(
+          sql({
+            dialect: SQLite,
+            schema: newSchema,
+            upperCaseKeywords: true,
+          })
+        ),
+      });
+    }
+  },
+  { deep: true }
 );
 </script>
 
@@ -145,7 +298,7 @@ watch(
         >
           <path :d="getTabPath(tabWidths[key] || 100)" class="tab-path" />
         </svg>
-        <span class="icon">{{
+        <span class="icon">{{ 
           key === "insert" ? "+" : key === "delete" ? "🗑" : "✎"
         }}</span>
         {{ label }}
@@ -154,38 +307,69 @@ watch(
     </div>
 
     <div class="window-content">
-      <textarea
-        :value="modelValue"
-        @input="$emit('update:modelValue', $event.target.value)"
-        id="sql-input"
-        spellcheck="false"
-        @keydown="handleKeydown"
-      ></textarea>
+      <div ref="editorContainer" class="sql-editor-mount"></div>
     </div>
 
     <div class="window-footer">
       <div
         class="enter-hint-container"
-        @click="$emit('run')"
+        @click="handleRun"
         style="cursor: pointer"
-        title="Click to run or press Enter"
+        title="Click to run or press Ctrl + Enter"
       >
-        <svg
-          class="enter-key-icon"
-          viewBox="0 0 44 24"
-          fill="none"
-          xmlns="http://www.w3.org/2000/svg"
-        >
-          <!-- Return arrow -->
-          <path
-            d="M28 8V16H10M10 16L14 12M10 16L14 20"
-            stroke="#2d2d2d"
-            stroke-width="2"
-            stroke-linecap="round"
-            stroke-linejoin="round"
-          />
-        </svg>
-        <span class="hint">Press ↵ Enter to execute.</span>
+        <span class="hint">Press</span>
+        <div class="keys-row">
+          <svg class="key-cap" width="38" height="26" viewBox="0 0 38 26">
+            <rect
+              x="1"
+              y="1"
+              width="36"
+              height="22"
+              rx="4"
+              fill="#fff"
+              stroke="#2d2d2d"
+              stroke-width="2"
+            />
+            <path d="M1 21 L1 23 A 2 2 0 0 0 3 25 L35 25 A 2 2 0 0 0 37 23 L37 21" fill="none" stroke="#2d2d2d" stroke-width="2" />
+            <text
+              x="19"
+              y="16"
+              text-anchor="middle"
+              font-family="sans-serif"
+              font-size="11"
+              font-weight="bold"
+              fill="#2d2d2d"
+            >
+              Ctrl
+            </text>
+          </svg>
+          <span class="hint-plus">+</span>
+          <svg class="key-cap" width="46" height="26" viewBox="0 0 46 26">
+            <rect
+              x="1"
+              y="1"
+              width="44"
+              height="22"
+              rx="4"
+              fill="#fff"
+              stroke="#2d2d2d"
+              stroke-width="2"
+            />
+            <path d="M1 21 L1 23 A 2 2 0 0 0 3 25 L43 25 A 2 2 0 0 0 45 23 L45 21" fill="none" stroke="#2d2d2d" stroke-width="2" />
+            <text
+              x="23"
+              y="16"
+              text-anchor="middle"
+              font-family="sans-serif"
+              font-size="11"
+              font-weight="bold"
+              fill="#2d2d2d"
+            >
+              Enter
+            </text>
+          </svg>
+        </div>
+        <span class="hint">to execute.</span>
       </div>
 
       <div class="status-indicator">
@@ -321,22 +505,13 @@ watch(
   font-size: 14px;
 }
 
-#sql-input {
-  width: 100%;
-  height: 140px;
-  border: none;
-  padding: 16px;
-  font-family: "Kalam", "Patrick Hand", "Courier New", monospace;
-  font-size: 18px;
-  resize: none;
-  outline: none;
-  color: #1f1f1f;
-  background: #fdfbf6;
-}
-
 .window-content {
   border-bottom: 2px solid #2d2d2d;
   background: #fdfbf6;
+}
+
+.sql-editor-mount :deep(.cm-editor) {
+  outline: none;
 }
 
 .window-footer {
@@ -352,13 +527,25 @@ watch(
 .enter-hint-container {
   display: flex;
   align-items: center;
-  gap: 10px;
+  gap: 8px;
+  user-select: none;
 }
 
-.enter-key-icon {
-  width: 44px;
-  height: 24px;
+.keys-row {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.key-cap {
   display: block;
+}
+
+.hint-plus {
+  font-family: "Kalam", cursive;
+  font-size: 16px;
+  font-weight: 700;
+  color: #2d2d2d;
 }
 
 .hint {

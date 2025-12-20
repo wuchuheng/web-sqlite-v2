@@ -1,19 +1,98 @@
 <script setup>
-import { computed } from "vue";
+import { computed, ref, watch, onMounted, onUnmounted, nextTick } from "vue";
 
 const props = defineProps({
   p1: { type: Object, required: true }, // { x, y }
   p2: { type: Object, required: true },
   p3: { type: Object, required: true },
+  isProcessing: { type: Boolean, default: false },
 });
 
+// Configuration
+const ANIMATION_DURATION = 500; // ms
+
+// Animation state
+const progress = ref(1); // 0 to 1
+const pathRef = ref(null);
+const pathLength = ref(0);
+const maskId = `path-mask-${Math.random().toString(36).slice(2, 9)}`;
+
+let animationFrame = null;
+
 /**
- * To make a quadratic Bezier curve B(t) pass through P2 at t=0.5:
- * B(0.5) = (1-0.5)^2 * P1 + 2(1-0.5)(0.5) * Pc + 0.5^2 * P3 = P2
- * 0.25 * P1 + 0.5 * Pc + 0.25 * P3 = P2
- * 0.5 * Pc = P2 - 0.25 * P1 - 0.25 * P3
- * Pc = 2 * P2 - 0.5 * P1 - 0.5 * P3
+ * Easing function: easeInOutQuad
  */
+const easeInOutQuad = (t) => (t < 0.5 ? 2 * t * t : 1 - Math.pow(-2 * t + 2, 2) / 2);
+
+const animate = (targetValue, duration) => {
+  const startValue = progress.value;
+  const startTime = performance.now();
+
+  const step = (currentTime) => {
+    const elapsed = currentTime - startTime;
+    const t = Math.min(elapsed / duration, 1);
+    
+    progress.value = startValue + (targetValue - startValue) * easeInOutQuad(t);
+
+    if (t < 1) {
+      animationFrame = requestAnimationFrame(step);
+    } else {
+      animationFrame = null;
+    }
+  };
+
+  if (animationFrame) cancelAnimationFrame(animationFrame);
+  animationFrame = requestAnimationFrame(step);
+};
+
+watch(() => props.isProcessing, (newVal) => {
+  if (newVal) {
+    // Reset and Start drawing
+    progress.value = 0;
+    // Small delay to ensure the reset is rendered before animation starts
+    setTimeout(() => {
+      animate(1, ANIMATION_DURATION);
+    }, 20);
+  }
+});
+
+onMounted(() => {
+  if (pathRef.value) {
+    pathLength.value = pathRef.value.getTotalLength();
+  }
+});
+
+onUnmounted(() => {
+  if (animationFrame) cancelAnimationFrame(animationFrame);
+});
+
+// Update path length if points change
+watch([() => props.p1, () => props.p2, () => props.p3], () => {
+  nextTick(() => {
+    if (pathRef.value) {
+      pathLength.value = pathRef.value.getTotalLength();
+    }
+  });
+}, { deep: true });
+
+/**
+ * Quadratic Bezier point at t
+ */
+const getPointAtT = (t) => {
+  const x = Math.pow(1 - t, 2) * props.p1.x + 2 * (1 - t) * t * controlPoint.value.x + Math.pow(t, 2) * props.p3.x;
+  const y = Math.pow(1 - t, 2) * props.p1.y + 2 * (1 - t) * t * controlPoint.value.y + Math.pow(t, 2) * props.p3.y;
+  return { x, y };
+};
+
+/**
+ * Tangent angle at t
+ */
+const getAngleAtT = (t) => {
+  const dx = 2 * (1 - t) * (controlPoint.value.x - props.p1.x) + 2 * t * (props.p3.x - controlPoint.value.x);
+  const dy = 2 * (1 - t) * (controlPoint.value.y - props.p1.y) + 2 * t * (props.p3.y - controlPoint.value.y);
+  return Math.atan2(dy, dx) * (180 / Math.PI);
+};
+
 const controlPoint = computed(() => {
   return {
     x: 2 * props.p2.x - 0.5 * props.p1.x - 0.5 * props.p3.x,
@@ -21,87 +100,48 @@ const controlPoint = computed(() => {
   };
 });
 
-const pathData = computed(() => {
-  return `M ${props.p1.x} ${props.p1.y} Q ${controlPoint.value.x} ${controlPoint.value.y} ${pathEnd.value.x} ${pathEnd.value.y}`;
+const fullPathData = computed(() => {
+  return `M ${props.p1.x} ${props.p1.y} Q ${controlPoint.value.x} ${controlPoint.value.y} ${props.p3.x} ${props.p3.y}`;
 });
 
-/**
+// Arrow state follows progress
+const currentArrowPos = computed(() => getPointAtT(progress.value));
+const currentArrowRotation = computed(() => getAngleAtT(progress.value));
 
- * Calculate the angle of the curve at the end point (t=1)
-
- * The tangent at t=1 is 2 * (P3 - Pc)
-
- */
-
-const arrowRotation = computed(() => {
-  const dx = props.p3.x - controlPoint.value.x;
-
-  const dy = props.p3.y - controlPoint.value.y;
-
-  const angle = Math.atan2(dy, dx) * (180 / Math.PI);
-
-  return angle;
-});
-
-/**
-
- * Calculate the arrow position with a small offset (gap) from the dot.
-
- */
-
-const arrowPosition = computed(() => {
-  const dx = props.p3.x - controlPoint.value.x;
-  const dy = props.p3.y - controlPoint.value.y;
-  const length = Math.sqrt(dx * dx + dy * dy);
-  const gap = 12; // Gap size in pixels
-
-  if (length === 0) return props.p3;
-
-  return {
-    x: props.p3.x - (dx / length) * gap,
-    y: props.p3.y - (dy / length) * gap,
-  };
-});
-
-/**
- * The end of the dotted line should be at the back of the arrow.
- * Arrow length is 12px.
- */
-const pathEnd = computed(() => {
-  const dx = props.p3.x - controlPoint.value.x;
-  const dy = props.p3.y - controlPoint.value.y;
-  const length = Math.sqrt(dx * dx + dy * dy);
-  const totalOffset = 24; // 12 (gap) + 12 (arrow length)
-
-  if (length === 0) return props.p3;
-
-  return {
-    x: props.p3.x - (dx / length) * totalOffset,
-    y: props.p3.y - (dy / length) * totalOffset,
-  };
-});
+// Mask offset to reveal the path
+const maskOffset = computed(() => pathLength.value * (1 - progress.value));
 </script>
 
 <template>
   <div class="bezier-container">
-    <!-- Layer 1: The Curve (behind components) -->
-
     <svg class="bezier-svg curve-layer" xmlns="http://www.w3.org/2000/svg">
+      <defs>
+        <mask :id="maskId">
+          <!-- A solid path that reveals the dashed path -->
+          <path
+            :d="fullPathData"
+            fill="none"
+            stroke="white"
+            stroke-width="10"
+            :stroke-dasharray="pathLength"
+            :stroke-dashoffset="maskOffset"
+            ref="pathRef"
+          />
+        </mask>
+      </defs>
+
       <path
-        :d="pathData"
+        :d="fullPathData"
         fill="none"
         stroke="#2d2d2d"
         stroke-width="2"
         stroke-dasharray="6 6"
         class="curve-path"
+        :mask="`url(#${maskId})`"
       />
     </svg>
 
-    <!-- Layer 2: The Dots (in front of components) -->
-
     <svg class="bezier-svg dots-layer" xmlns="http://www.w3.org/2000/svg">
-      <!-- Start Point Dot -->
-
       <circle
         :cx="p1.x"
         :cy="p1.y"
@@ -111,8 +151,6 @@ const pathEnd = computed(() => {
         stroke-width="2"
       />
 
-      <!-- End Point Dot -->
-
       <circle
         :cx="p3.x"
         :cy="p3.y"
@@ -120,10 +158,10 @@ const pathEnd = computed(() => {
         fill="#c6f0b3"
         stroke="#2d2d2d"
         stroke-width="2"
+        v-if="progress === 1"
       />
 
-      <!-- Arrow head pointing in the direction of the curve with a gap -->
-
+      <!-- Animated Arrow head -->
       <path
         d="M -12 -6 L 0 0 L -12 6"
         fill="none"
@@ -131,7 +169,8 @@ const pathEnd = computed(() => {
         stroke-width="2"
         stroke-linecap="round"
         stroke-linejoin="round"
-        :transform="`translate(${arrowPosition.x}, ${arrowPosition.y}) rotate(${arrowRotation})`"
+        :transform="`translate(${currentArrowPos.x}, ${currentArrowPos.y}) rotate(${currentArrowRotation})`"
+        v-if="progress > 0"
       />
     </svg>
   </div>

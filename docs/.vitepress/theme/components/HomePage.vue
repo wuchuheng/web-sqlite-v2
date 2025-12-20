@@ -14,6 +14,27 @@ const resultTable = ref([]);
 const isProcessing = ref(false);
 const db = ref(null);
 const errorMsg = ref("");
+const schema = ref({});
+
+// Constants
+const QUERY_ANIMATION_DELAY = 500; // ms, matches BezierCurve duration
+
+const updateSchema = async () => {
+  if (!db.value) return;
+  try {
+    const tables = await db.value.query(
+      "SELECT name FROM sqlite_master WHERE type='table' AND name NOT LIKE 'sqlite_%'"
+    );
+    const newSchema = {};
+    for (const table of tables) {
+      const columns = await db.value.query(`PRAGMA table_info(${table.name})`);
+      newSchema[table.name] = columns.map((c) => c.name);
+    }
+    schema.value = newSchema;
+  } catch (e) {
+    console.error("Failed to update schema:", e);
+  }
+};
 
 // Device detection (JS as the sole standard)
 const deviceType = ref("lg"); // 'sm' | 'md' | 'lg'
@@ -208,6 +229,9 @@ const runQuery = async () => {
   errorMsg.value = "";
 
   try {
+    // Wait for the Bezier animation to finish before running the query
+    await new Promise((resolve) => setTimeout(resolve, QUERY_ANIMATION_DELAY));
+
     const sql = sqlInput.value.trim();
     const isQuery = sql.toUpperCase().startsWith("SELECT");
 
@@ -219,6 +243,7 @@ const runQuery = async () => {
       // Refresh table
       const rows = await db.value.query("SELECT * FROM users");
       resultTable.value = rows;
+      await updateSchema();
     }
   } catch (e) {
     console.error(e);
@@ -264,6 +289,7 @@ onMounted(async () => {
 
       const rows = await db.value.query("SELECT * FROM users");
       resultTable.value = rows;
+      await updateSchema();
     } catch (e) {
       console.error("Failed to init DB:", e);
       errorMsg.value = "Failed to initialize Web-SQLite: " + e.message;
@@ -282,7 +308,13 @@ onUnmounted(() => {
 <template>
   <div class="demo-container" ref="containerRef">
     <!-- The dynamic connector curves -->
-    <BezierCurve v-if="p1 && p2 && p3" :p1="p1" :p2="p2" :p3="p3" />
+    <BezierCurve
+      v-if="p1 && p2 && p3"
+      :p1="p1"
+      :p2="p2"
+      :p3="p3"
+      :is-processing="isProcessing"
+    />
     <StraightConnector v-if="ioLine1" :p1="ioLine1.p1" :p2="ioLine1.p2" />
     <StraightConnector v-if="ioLine2" :p1="ioLine2.p1" :p2="ioLine2.p2" />
 
@@ -292,6 +324,7 @@ onUnmounted(() => {
         v-model="sqlInput"
         :is-processing="isProcessing"
         :error-msg="errorMsg"
+        :schema="schema"
         @run="runQuery"
         :style="layoutConfig.console"
       />
