@@ -214,7 +214,7 @@ const layoutConfig = computed(() => {
   const type = deviceType.value;
   if (type === "lg") {
     return {
-      mainFlow: { flexDirection: "row", gap: "40px", alignItems: "center" },
+      mainFlow: { flexDirection: "row", gap: "40px", alignItems: "flex-start" },
       console: { flex: "0 0 50%" },
       worker: { flex: "0 0 15%" },
       persistence: {
@@ -256,7 +256,7 @@ const layoutConfig = computed(() => {
       },
       table: { flex: "0 0 100%" },
       ioSpacer: { display: "none" },
-      opfs: { flex: "0 0 100%" },
+      opfs: { flex: "0 0 50%", width: "50%", alignSelf: "center" },
     };
   }
 });
