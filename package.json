@@ -1,6 +1,6 @@
 {
     "name": "web-sqlite-js",
-    "version": "0.0.2-beta",
+    "version": "0.0.3",
     "description": "web-sqlite-js gives web developers an out-of-the-box way to run SQLite directly in the browser and keep data persisted on the client via OPFS (Origin Private File System).",
     "workspaces": [
         "docs"
