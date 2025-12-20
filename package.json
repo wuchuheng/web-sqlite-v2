@@ -1,7 +1,7 @@
 {
     "name": "web-sqlite-js",
     "version": "0.0.3",
-    "description": "web-sqlite-js gives web developers an out-of-the-box way to run SQLite directly in the browser and keep data persisted on the client via OPFS (Origin Private File System).",
+    "description": "web-sqlite-js is a friendly, out-of-the-box SQLite database for the web that makes persistent client-side storage simple for every developer.",
     "workspaces": [
         "docs"
     ],
@@ -78,5 +78,5 @@
     "bugs": {
         "url": "https://github.com/wuchuheng/web-sqlite-js/issues"
     },
-    "homepage": "https://github.com/wuchuheng/web-sqlite-js#readme"
+    "homepage": "https://web-sqlite-js.wuchuheng.com/"
 }

@@ -18,13 +18,22 @@ let debounceTimer = null;
 
 const getTargetEl = (target) => {
   if (!target) return null;
-  return target.tableRef || target.folderRef || target.tableEl || target.folderEl || target.$el || target;
+  return (
+    target.tableRef ||
+    target.folderRef ||
+    target.tableEl ||
+    target.folderEl ||
+    target.$el ||
+    target
+  );
 };
 
 const isOpfsEl = (el) => {
-  return el?.classList?.contains('opfs-view') || 
-         el?.querySelector?.('.folder-header') ||
-         el?.textContent?.includes('OPFS');
+  return (
+    el?.classList?.contains("opfs-view") ||
+    el?.querySelector?.(".folder-header") ||
+    el?.textContent?.includes("OPFS")
+  );
 };
 
 const updatePoints = () => {
@@ -71,8 +80,12 @@ const updatePoints = () => {
     const centerY = (fromCenterY + toCenterY) / 2;
 
     const fromIsLeft = fromRect.left < toRect.left;
-    const x1 = fromIsLeft ? fromRect.right - containerRect.left : fromRect.left - containerRect.left;
-    const x2 = fromIsLeft ? toRect.left - containerRect.left : toRect.right - containerRect.left;
+    const x1 = fromIsLeft
+      ? fromRect.right - containerRect.left
+      : fromRect.left - containerRect.left;
+    const x2 = fromIsLeft
+      ? toRect.left - containerRect.left
+      : toRect.right - containerRect.left;
 
     p1.value = { x: x1, y: centerY + props.offset };
     p2.value = { x: x2, y: centerY + props.offset };
@@ -105,16 +118,19 @@ onUnmounted(() => {
   if (debounceTimer) clearTimeout(debounceTimer);
 });
 
-watch([() => props.from, () => props.to, () => props.direction, () => props.offset], () => {
-  if (resizeObserver) {
-    resizeObserver.disconnect();
-    const fromEl = getTargetEl(props.from);
-    const toEl = getTargetEl(props.to);
-    if (fromEl) resizeObserver.observe(fromEl);
-    if (toEl) resizeObserver.observe(toEl);
+watch(
+  [() => props.from, () => props.to, () => props.direction, () => props.offset],
+  () => {
+    if (resizeObserver) {
+      resizeObserver.disconnect();
+      const fromEl = getTargetEl(props.from);
+      const toEl = getTargetEl(props.to);
+      if (fromEl) resizeObserver.observe(fromEl);
+      if (toEl) resizeObserver.observe(toEl);
+    }
+    updatePoints();
   }
-  updatePoints();
-});
+);
 
 const angle = computed(() => {
   const dx = p2.value.x - p1.value.x;
@@ -163,8 +179,22 @@ const lineEnd = computed(() => {
 
     <!-- Layer 2: Dots and Arrow (in front) -->
     <svg class="connector-svg overlay-layer" xmlns="http://www.w3.org/2000/svg">
-      <circle :cx="p1.x" :cy="p1.y" r="5" fill="#c6f0b3" stroke="#2d2d2d" stroke-width="2" />
-      <circle :cx="p2.x" :cy="p2.y" r="5" fill="#c6f0b3" stroke="#2d2d2d" stroke-width="2" />
+      <circle
+        :cx="p1.x"
+        :cy="p1.y"
+        r="5"
+        fill="#c6f0b3"
+        stroke="#2d2d2d"
+        stroke-width="2"
+      />
+      <circle
+        :cx="p2.x"
+        :cy="p2.y"
+        r="5"
+        fill="#c6f0b3"
+        stroke="#2d2d2d"
+        stroke-width="2"
+      />
       <path
         v-if="showArrow"
         d="M -12 -6 L 0 0 L -12 6"

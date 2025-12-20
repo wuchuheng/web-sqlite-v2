@@ -25,7 +25,7 @@ const formatBytes = (bytes) => {
   const units = ["KB", "MB", "GB"];
   const exponent = Math.min(
     units.length - 1,
-    Math.floor(Math.log(bytes) / Math.log(1024)) - 1
+    Math.floor(Math.log(bytes) / Math.log(1024)) - 1,
   );
   const value = bytes / 1024 ** (exponent + 1);
   return `${value.toFixed(value >= 10 ? 0 : 1)} ${units[exponent]}`;
@@ -33,7 +33,8 @@ const formatBytes = (bytes) => {
 
 const formattedSize = computed(() => formatBytes(fileMeta.value.size));
 const displayFilename = computed(() => {
-  const sizeLabel = formattedSize.value === "—" ? "" : ` (${formattedSize.value})`;
+  const sizeLabel =
+    formattedSize.value === "—" ? "" : ` (${formattedSize.value})`;
   return `${fileMeta.value.name}${sizeLabel}`;
 });
 

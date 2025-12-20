@@ -58,7 +58,7 @@ const sqlSnippets = [
       label: "UPDATE",
       detail: "Update template",
       type: "keyword",
-    }
+    },
   ),
   snippetCompletion("DELETE FROM ${table} WHERE ${condition};", {
     label: "DELETE",
@@ -71,7 +71,7 @@ const sqlSnippets = [
       label: "CREATE TABLE",
       detail: "Create table template",
       type: "keyword",
-    }
+    },
   ),
   snippetCompletion("SELECT * FROM ${table} WHERE ${condition};", {
     label: "SELECT",
@@ -123,7 +123,7 @@ const myTheme = EditorView.theme(
       color: "#2d2d2d",
     },
   },
-  { dark: false }
+  { dark: false },
 );
 
 const updateMask = () => {
@@ -248,7 +248,7 @@ onMounted(() => {
               return true;
             },
           },
-        ])
+        ]),
       ),
       basicSetup,
       sqlConfig.of(
@@ -256,7 +256,7 @@ onMounted(() => {
           dialect: SQLite,
           schema: props.schema,
           upperCaseKeywords: true,
-        })
+        }),
       ),
       // Add snippets as a custom completion source
       SQLite.language.data.of({
@@ -329,7 +329,7 @@ watch(
       }
       nextTick(updateMask);
     }
-  }
+  },
 );
 
 watch(
@@ -342,12 +342,12 @@ watch(
             dialect: SQLite,
             schema: newSchema,
             upperCaseKeywords: true,
-          })
+          }),
         ),
       });
     }
   },
-  { deep: true }
+  { deep: true },
 );
 
 defineExpose({
@@ -599,7 +599,8 @@ defineExpose({
   bottom: -2px;
   height: 2px;
   background: #fdfbf6;
-  transition: left 0.3s cubic-bezier(0.4, 0, 0.2, 1),
+  transition:
+    left 0.3s cubic-bezier(0.4, 0, 0.2, 1),
     width 0.3s cubic-bezier(0.4, 0, 0.2, 1);
   z-index: 2;
 }

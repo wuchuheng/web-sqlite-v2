@@ -10,7 +10,8 @@ export function usePathAnimation(isProcessing: { value: boolean }) {
 
   let animationFrame: number | null = null;
 
-  const easeInOutQuad = (t: number) => (t < 0.5 ? 2 * t * t : 1 - Math.pow(-2 * t + 2, 2) / 2);
+  const easeInOutQuad = (t: number) =>
+    t < 0.5 ? 2 * t * t : 1 - Math.pow(-2 * t + 2, 2) / 2;
 
   const animate = (targetValue: number, duration: number) => {
     const startValue = progress.value;
@@ -19,8 +20,9 @@ export function usePathAnimation(isProcessing: { value: boolean }) {
     const step = (currentTime: number) => {
       const elapsed = currentTime - startTime;
       const t = Math.min(elapsed / duration, 1);
-      
-      progress.value = startValue + (targetValue - startValue) * easeInOutQuad(t);
+
+      progress.value =
+        startValue + (targetValue - startValue) * easeInOutQuad(t);
 
       if (t < 1) {
         animationFrame = requestAnimationFrame(step);
@@ -33,14 +35,17 @@ export function usePathAnimation(isProcessing: { value: boolean }) {
     animationFrame = requestAnimationFrame(step);
   };
 
-  watch(() => isProcessing.value, (newVal) => {
-    if (newVal) {
-      progress.value = 0;
-      setTimeout(() => {
-        animate(1, ANIMATION_DURATION);
-      }, 20);
-    }
-  });
+  watch(
+    () => isProcessing.value,
+    (newVal) => {
+      if (newVal) {
+        progress.value = 0;
+        setTimeout(() => {
+          animate(1, ANIMATION_DURATION);
+        }, 20);
+      }
+    },
+  );
 
   const updatePathLength = () => {
     nextTick(() => {
@@ -64,6 +69,6 @@ export function usePathAnimation(isProcessing: { value: boolean }) {
     pathRef,
     pathLength,
     maskId,
-    updatePathLength
+    updatePathLength,
   };
 }

@@ -7,6 +7,7 @@ import OpfsExplorer from "./home-demo/OpfsExplorer.vue";
 import TechStackFooter from "./home-demo/TechStackFooter.vue";
 import BezierCurve from "./home-demo/BezierCurve.vue";
 import StraightConnector from "./home-demo/StraightConnector.vue";
+import HeroHeader from "./home-demo/HeroHeader.vue";
 
 // State
 const sqlInput = ref("");
@@ -39,7 +40,7 @@ const updateSchema = async () => {
   if (!db.value) return;
   try {
     const tables = await db.value.query(
-      "SELECT name FROM sqlite_master WHERE type='table' AND name NOT LIKE 'sqlite_%'"
+      "SELECT name FROM sqlite_master WHERE type='table' AND name NOT LIKE 'sqlite_%'",
     );
     const newSchema = {};
     for (const table of tables) {
@@ -187,7 +188,7 @@ const updatePoints = () => {
     };
     const baseDistance = Math.hypot(
       p3.value.x - p1.value.x,
-      p3.value.y - p1.value.y
+      p3.value.y - p1.value.y,
     );
     const maxVerticalOffset = Math.min(80, baseDistance * 0.2);
     const maxHorizontalOffset = Math.min(120, baseDistance * 0.1);
@@ -198,14 +199,14 @@ const updatePoints = () => {
         clamp(
           workerCenter.x - midLine.x,
           -maxHorizontalOffset,
-          maxHorizontalOffset
+          maxHorizontalOffset,
         ),
       y:
         midLine.y +
         clamp(
           workerCenter.y - midLine.y,
           -maxVerticalOffset,
-          maxVerticalOffset
+          maxVerticalOffset,
         ),
     };
   } else {
@@ -426,11 +427,11 @@ onMounted(async () => {
             `);
 
       const countRes = await db.value.query(
-        "SELECT COUNT(*) as count FROM users"
+        "SELECT COUNT(*) as count FROM users",
       );
       if (countRes[0].count === 0) {
         await db.value.exec(
-          "INSERT INTO users (username, email) VALUES ('foo', 'foo@domain.com'), ('bar', 'bar@domain.com')"
+          "INSERT INTO users (username, email) VALUES ('foo', 'foo@domain.com'), ('bar', 'bar@domain.com')",
         );
       }
 
@@ -458,6 +459,8 @@ onUnmounted(() => {
 
 <template>
   <div class="demo-container" ref="containerRef">
+    <HeroHeader :device-type="deviceType" />
+
     <!-- The dynamic connector curves -->
     <BezierCurve
       v-if="p1 && p2 && p3"
@@ -535,8 +538,8 @@ onUnmounted(() => {
   align-items: center;
   gap: 40px;
   color: #222;
-  font-family: "Kalam", "Patrick Hand", "Comic Neue", "Comic Sans MS", cursive,
-    sans-serif;
+  font-family:
+    "Kalam", "Patrick Hand", "Comic Neue", "Comic Sans MS", cursive, sans-serif;
 }
 
 .main-flow {

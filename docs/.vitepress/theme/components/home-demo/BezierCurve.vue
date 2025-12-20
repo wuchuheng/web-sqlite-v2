@@ -10,23 +10,34 @@ const props = defineProps({
 });
 
 // Use shared animation logic
-const { progress, pathRef, pathLength, maskId, updatePathLength } = usePathAnimation(toRef(props, "isProcessing"));
+const { progress, pathRef, pathLength, maskId, updatePathLength } =
+  usePathAnimation(toRef(props, "isProcessing"));
 
 onMounted(() => {
   updatePathLength();
 });
 
 // Update path length if points change
-watch([() => props.p1, () => props.p2, () => props.p3], () => {
-  updatePathLength();
-}, { deep: true });
+watch(
+  [() => props.p1, () => props.p2, () => props.p3],
+  () => {
+    updatePathLength();
+  },
+  { deep: true },
+);
 
 /**
  * Quadratic Bezier point at t
  */
 const getPointAtT = (t) => {
-  const x = Math.pow(1 - t, 2) * props.p1.x + 2 * (1 - t) * t * controlPoint.value.x + Math.pow(t, 2) * props.p3.x;
-  const y = Math.pow(1 - t, 2) * props.p1.y + 2 * (1 - t) * t * controlPoint.value.y + Math.pow(t, 2) * props.p3.y;
+  const x =
+    Math.pow(1 - t, 2) * props.p1.x +
+    2 * (1 - t) * t * controlPoint.value.x +
+    Math.pow(t, 2) * props.p3.x;
+  const y =
+    Math.pow(1 - t, 2) * props.p1.y +
+    2 * (1 - t) * t * controlPoint.value.y +
+    Math.pow(t, 2) * props.p3.y;
   return { x, y };
 };
 
@@ -34,8 +45,12 @@ const getPointAtT = (t) => {
  * Tangent angle at t
  */
 const getAngleAtT = (t) => {
-  const dx = 2 * (1 - t) * (controlPoint.value.x - props.p1.x) + 2 * t * (props.p3.x - controlPoint.value.x);
-  const dy = 2 * (1 - t) * (controlPoint.value.y - props.p1.y) + 2 * t * (props.p3.y - controlPoint.value.y);
+  const dx =
+    2 * (1 - t) * (controlPoint.value.x - props.p1.x) +
+    2 * t * (props.p3.x - controlPoint.value.x);
+  const dy =
+    2 * (1 - t) * (controlPoint.value.y - props.p1.y) +
+    2 * t * (props.p3.y - controlPoint.value.y);
   return Math.atan2(dy, dx) * (180 / Math.PI);
 };
 

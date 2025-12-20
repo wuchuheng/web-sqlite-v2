@@ -2,17 +2,17 @@
 <p align="center"> <img src="docs/public/web-sqlite-js.gif" width="400px" />
 </p>
 
-`web-sqlite-js` gives web developers an out-of-the-box way to run SQLite directly in the browser and keep data persisted on the client via OPFS (Origin Private File System).
+`web-sqlite-js` is a friendly, out-of-the-box SQLite database for the web that makes persistent client-side storage simple for every developer.
 
-Developers only need to install and configure the http request header to use it directly, which is quite friendly.
+Designed to be truly effortless, it allows you to get a high-performance relational database running in the browser in seconds. Just install, set your HTTP headers, and start querying—no complex infrastructure required.
 
 ## Features
 
--   **Persistent Storage**: Uses OPFS for high-performance, persistent file storage.
--   **Non-Blocking**: Runs in a Web Worker, keeping your UI responsive.
--   **Concurrency Safe**: Built-in mutex ensures safe, sequential execution of commands.
--   **Type-Safe**: Written in TypeScript with full type definitions.
--   **Transactions**: Supports atomic transactions with automatic rollback on error.
+- **Persistent Storage**: Uses OPFS for high-performance, persistent file storage.
+- **Non-Blocking**: Runs in a Web Worker, keeping your UI responsive.
+- **Concurrency Safe**: Built-in mutex ensures safe, sequential execution of commands.
+- **Type-Safe**: Written in TypeScript with full type definitions.
+- **Transactions**: Supports atomic transactions with automatic rollback on error.
 
 ## Installation
 

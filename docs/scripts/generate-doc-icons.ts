@@ -85,7 +85,10 @@ async function renderIcon(
   `,
   );
 
-  const buffer = await page.screenshot({ omitBackground: true, fullPage: true });
+  const buffer = await page.screenshot({
+    omitBackground: true,
+    fullPage: true,
+  });
   await page.close();
   return buffer;
 }
