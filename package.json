@@ -1,7 +1,7 @@
 {
     "name": "web-sqlite-js",
     "version": "0.0.2-beta",
-    "description": "Client-side SQLite for the browser: a relational database with persistent storage on the user's device via OPFS.",
+    "description": "web-sqlite-js gives web developers an out-of-the-box way to run SQLite directly in the browser and keep data persisted on the client via OPFS (Origin Private File System).",
     "workspaces": [
         "docs"
     ],
@@ -41,11 +41,11 @@
         "package:publish": "npm run test && npm run build && npm publish --access public",
         "docs:dev": "npm run dev --workspace=@web-sqlite-js/docs",
         "docs:build": "npm run build --workspace=@web-sqlite-js/docs",
-        "docs:preview": "npm run preview --workspace=@web-sqlite-js/docs"
+        "docs:preview": "npm run preview --workspace=@web-sqlite-js/docs",
+        "docs:icons": "npm run icons --workspace=@web-sqlite-js/docs"
     },
     "files": [
-        "dist",
-        "README.md"
+        "dist"
     ],
     "devDependencies": {
         "@eslint/css": "^0.14.1",

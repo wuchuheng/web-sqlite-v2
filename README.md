@@ -1,16 +1,18 @@
-# web-sqlite-js
+ <h1 align="center">web-sqlite-js</h1>
+<p align="center"> <img src="docs/public/web-sqlite-js.gif" width="400px" />
+</p>
 
-Client-side SQLite for the browser: a relational database with persistent storage on the user's device via OPFS (Origin Private File System).
+`web-sqlite-js` gives web developers an out-of-the-box way to run SQLite directly in the browser and keep data persisted on the client via OPFS (Origin Private File System).
 
-It runs SQLite in a Web Worker to avoid blocking the main thread and handles all synchronization automatically, providing a simple, Promise-based API.
+Developers only need to install and configure the http request header to use it directly, which is quite friendly.
 
 ## Features
 
-- **Persistent Storage**: Uses OPFS for high-performance, persistent file storage.
-- **Non-Blocking**: Runs in a Web Worker, keeping your UI responsive.
-- **Concurrency Safe**: Built-in mutex ensures safe, sequential execution of commands.
-- **Type-Safe**: Written in TypeScript with full type definitions.
-- **Transactions**: Supports atomic transactions with automatic rollback on error.
+-   **Persistent Storage**: Uses OPFS for high-performance, persistent file storage.
+-   **Non-Blocking**: Runs in a Web Worker, keeping your UI responsive.
+-   **Concurrency Safe**: Built-in mutex ensures safe, sequential execution of commands.
+-   **Type-Safe**: Written in TypeScript with full type definitions.
+-   **Transactions**: Supports atomic transactions with automatic rollback on error.
 
 ## Installation
 
@@ -18,18 +20,14 @@ It runs SQLite in a Web Worker to avoid blocking the main thread and handles all
 npm install web-sqlite-js
 ```
 
-## ⚠️ Critical Configuration: COOP & COEP
+## Setup http headers
 
-To use `SharedArrayBuffer` (required by the SQLite WASM build), your server **must** serve the application with the following HTTP headers:
+This library high-performance dependencies `SharedArrayBuffer`, which requires your server to send the following HTTP headers:
 
 ```http
 Cross-Origin-Opener-Policy: same-origin
 Cross-Origin-Embedder-Policy: require-corp
 ```
-
-If these headers are missing, the database **will not start**.
-
-### Configuration Guides
 
 <details>
 <summary><strong>Vite</strong></summary>
@@ -155,7 +153,7 @@ If you are using an older webpack-based setup (like CRA `react-scripts`), you te
 
 ## Usage
 
-### Basic Query
+#### Basic Usage
 
 ```typescript
 import openDB from "web-sqlite-js";
@@ -197,7 +195,7 @@ console.log(users);
 await db.close();
 ```
 
-### Transactions
+#### Transactions
 
 Transactions are atomic. If any command inside the callback fails, the entire transaction is rolled back.
 
@@ -212,39 +210,3 @@ await db.transaction(async (tx) => {
     // throw new Error('Something went wrong');
 });
 ```
-
-### Multiple Connections
-
-You can open multiple connections to the same file. They will automatically synchronize access.
-
-```typescript
-const db1 = await openDB("shared-db");
-const db2 = await openDB("shared-db");
-
-await db1.exec("INSERT INTO items (name) VALUES (?)", ["Item 1"]);
-
-// db2 sees the change immediately after db1 finishes
-const items = await db2.query("SELECT * FROM items");
-```
-
-## API
-
-### `openDB(filename: string, options?: { debug?: boolean })`
-
-Opens a database connection. Returns a `DBInterface`.
-
-### `db.exec(sql: string, params?: any[] | Record<string, any>)`
-
-Executes a SQL statement (INSERT, UPDATE, DELETE, CREATE). Returns `{ changes, lastInsertRowid }`.
-
-### `db.query<T>(sql: string, params?: any[] | Record<string, any>)`
-
-Executes a SELECT statement. Returns an array of rows `T[]`.
-
-### `db.transaction<T>(callback: (tx: DBInterface) => Promise<T>)`
-
-Runs the callback inside a transaction (`BEGIN` ... `COMMIT`/`ROLLBACK`). The `tx` object provided to the callback has the same `exec` and `query` methods.
-
-### `db.close()`
-
-Closes the connection and terminates the worker.
