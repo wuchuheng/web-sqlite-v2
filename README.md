@@ -8,11 +8,11 @@ Designed to be truly effortless, it allows you to get a high-performance relatio
 
 ## Features
 
--   **Persistent Storage**: Uses OPFS for high-performance, persistent file storage.
--   **Non-Blocking**: Runs in a Web Worker, keeping your UI responsive.
--   **Concurrency Safe**: Built-in mutex ensures safe, sequential execution of commands.
--   **Type-Safe**: Written in TypeScript with full type definitions.
--   **Transactions**: Supports atomic transactions with automatic rollback on error.
+- **Persistent Storage**: Uses OPFS for high-performance, persistent file storage.
+- **Non-Blocking**: Runs in a Web Worker, keeping your UI responsive.
+- **Concurrency Safe**: Built-in mutex ensures safe, sequential execution of commands.
+- **Type-Safe**: Written in TypeScript with full type definitions.
+- **Transactions**: Supports atomic transactions with automatic rollback on error.
 
 ## Installation
 
