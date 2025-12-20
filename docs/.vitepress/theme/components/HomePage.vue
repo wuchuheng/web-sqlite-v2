@@ -83,6 +83,37 @@ const throttledUpdate = () => {
   });
 };
 
+const ensureVisibleCurve = (start, mid, end, rects) => {
+  const dx = end.x - start.x;
+  const dy = end.y - start.y;
+  const base = Math.hypot(dx, dy);
+  if (!base) return { start, mid, end };
+
+  const distanceToLine =
+    Math.abs((mid.x - start.x) * dy - (mid.y - start.y) * dx) / base;
+
+  // Keep the curve noticeable when points sit on the same vertical line (mobile layout).
+  const MIN_CURVE_DISTANCE = 24;
+  if (distanceToLine >= MIN_CURVE_DISTANCE) {
+    return { start, mid, end };
+  }
+
+  const spaceRight =
+    rects.container.width - Math.max(start.x, mid.x, end.x);
+  const spaceLeft = Math.min(start.x, mid.x, end.x);
+  const direction = spaceRight >= spaceLeft ? 1 : -1;
+
+  const bendAmount = Math.min(rects.container.width * 0.25, 120);
+  const startOffset = Math.min(bendAmount * 0.35, rects.console.width * 0.25);
+  const endOffset = Math.min(bendAmount * 0.35, rects.table.width * 0.25);
+
+  return {
+    start: { x: start.x + direction * startOffset, y: start.y },
+    mid: { x: mid.x + direction * bendAmount, y: mid.y },
+    end: { x: end.x + direction * endOffset, y: end.y },
+  };
+};
+
 const updatePoints = () => {
   if (
     !containerRef.value ||
@@ -129,6 +160,21 @@ const updatePoints = () => {
     p3.value = getRelativePos(tableRect, "top");
   }
   p2.value = getRelativePos(workerRect, "center");
+
+  const curvedPoints = ensureVisibleCurve(
+    p1.value,
+    p2.value,
+    p3.value,
+    {
+      container: containerRect,
+      console: consoleRect,
+      table: tableRect,
+    }
+  );
+
+  p1.value = curvedPoints.start;
+  p2.value = curvedPoints.mid;
+  p3.value = curvedPoints.end;
 
   // LG and SM use Vertical IO, MD uses Horizontal IO
   if (deviceType.value === "sm" || deviceType.value === "lg") {
