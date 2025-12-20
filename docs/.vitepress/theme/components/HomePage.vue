@@ -151,6 +151,9 @@ const updatePoints = () => {
     return { x: centerX, y: centerY };
   };
 
+  const clamp = (val, min, max) => Math.min(max, Math.max(min, val));
+  const workerCenter = getRelativePos(workerRect, "center");
+
   // Curve points
   if (deviceType.value === "lg") {
     p1.value = getRelativePos(consoleRect, "right");
@@ -159,22 +162,54 @@ const updatePoints = () => {
     p1.value = getRelativePos(consoleRect, "bottom");
     p3.value = getRelativePos(tableRect, "top");
   }
-  p2.value = getRelativePos(workerRect, "center");
+  if (deviceType.value === "lg") {
+    const midLine = {
+      x: (p1.value.x + p3.value.x) / 2,
+      y: (p1.value.y + p3.value.y) / 2,
+    };
+    const baseDistance = Math.hypot(
+      p3.value.x - p1.value.x,
+      p3.value.y - p1.value.y
+    );
+    const maxVerticalOffset = Math.min(80, baseDistance * 0.2);
+    const maxHorizontalOffset = Math.min(120, baseDistance * 0.1);
 
-  const curvedPoints = ensureVisibleCurve(
-    p1.value,
-    p2.value,
-    p3.value,
-    {
-      container: containerRect,
-      console: consoleRect,
-      table: tableRect,
-    }
-  );
+    p2.value = {
+      x:
+        midLine.x +
+        clamp(
+          workerCenter.x - midLine.x,
+          -maxHorizontalOffset,
+          maxHorizontalOffset
+        ),
+      y:
+        midLine.y +
+        clamp(
+          workerCenter.y - midLine.y,
+          -maxVerticalOffset,
+          maxVerticalOffset
+        ),
+    };
+  } else {
+    p2.value = workerCenter;
+  }
 
-  p1.value = curvedPoints.start;
-  p2.value = curvedPoints.mid;
-  p3.value = curvedPoints.end;
+  if (deviceType.value === "sm") {
+    const curvedPoints = ensureVisibleCurve(
+      p1.value,
+      p2.value,
+      p3.value,
+      {
+        container: containerRect,
+        console: consoleRect,
+        table: tableRect,
+      }
+    );
+
+    p1.value = curvedPoints.start;
+    p2.value = curvedPoints.mid;
+    p3.value = curvedPoints.end;
+  }
 
   // LG and SM use Vertical IO, MD uses Horizontal IO
   if (deviceType.value === "sm" || deviceType.value === "lg") {
