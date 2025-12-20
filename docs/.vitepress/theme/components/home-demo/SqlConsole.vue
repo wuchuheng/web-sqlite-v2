@@ -208,6 +208,13 @@ const cancelAutoTyping = () => {
   isAutoTyping.value = false;
 };
 
+const handleComponentClick = () => {
+  if (isAutoTyping.value) {
+    cancelAutoTyping();
+    emit("user-input");
+  }
+};
+
 const typeText = async (text, delayMs = 40) => {
   if (!view) return false;
 
@@ -376,7 +383,7 @@ defineExpose({
 </script>
 
 <template>
-  <section class="sql-window">
+  <section class="sql-window" @click="handleComponentClick">
     <div class="window-header">
       <div class="traffic-lights">
         <span class="light red"></span>
