@@ -3,3 +3,4 @@
 [x] Docs: Add "Quickstart" and "Dev Tools (Coming soon)" buttons on the home page.
 [x] Docs (bug): OPFS component on the home page does not refresh after database updates.
 [x] Docs: add copyright and MIT license in the home page.
+[ ] Add github test badge.

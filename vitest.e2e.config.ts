@@ -5,7 +5,7 @@ import { defineConfig } from "vitest/config";
 
 const rootDir = fileURLToPath(new URL(".", import.meta.url));
 const srcDir = resolve(rootDir, "src");
-const headless = process.env.IS_HEADERS === "true";
+const headless = process.env.HEADERS === "true";
 
 /**
  * Unified E2E Test Configuration for SQLite3 WASM
