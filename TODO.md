@@ -4,5 +4,5 @@
 [x] Docs (bug): OPFS component on the home page does not refresh after database updates.
 [x] Docs: add copyright and MIT license in the home page.
 [x] Add github test badge.
-[ ] creating some post about how to use sqlite, sql or Relational database.
+[x] creating some post about how to use sqlite, sql or Relational database. hackernews, devto
 [ ] Browser: List the browser versions that support this library in docs.
