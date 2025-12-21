@@ -43,7 +43,7 @@ export default withPwa(
     vite: {
       resolve: {
         alias: {
-          "web-sqlite-js": resolve(__dirname, "../../src/main.ts"),
+          "web-sqlite-js": resolve(__dirname, "../../"),
           "@": resolve(__dirname, "../../src"),
         },
       },
