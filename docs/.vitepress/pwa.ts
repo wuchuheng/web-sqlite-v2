@@ -47,5 +47,6 @@ export const pwaOptions: PwaOptions = {
   workbox: {
     globPatterns: ["**/*.{js,css,html,ico,png,svg,webp,woff2,ttf,otf,json}"],
     navigateFallback: "index.html",
+    navigateFallbackDenylist: [/^\/examples/],
   },
 };
