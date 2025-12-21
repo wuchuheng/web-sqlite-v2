@@ -54,14 +54,18 @@ const updateSchema = async () => {
   }
 };
 
-// Device detection (JS as the sole standard)
+// Device detection (matchMedia as the reliable standard)
 const deviceType = ref("lg"); // 'sm' | 'md' | 'lg'
 const updateDeviceType = () => {
-  const width = window.innerWidth;
+  const isSm = window.matchMedia("(max-width: 767px)").matches;
+  const isMd = window.matchMedia(
+    "(min-width: 768px) and (max-width: 1548px)",
+  ).matches;
+
   let newType = "lg";
-  if (width < 768) {
+  if (isSm) {
     newType = "sm";
-  } else if (width < 1024) {
+  } else if (isMd) {
     newType = "md";
   }
 
