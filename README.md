@@ -6,23 +6,57 @@
 
 Designed to be truly effortless, it allows you to get a high-performance relational database running in the browser in seconds. Just install, set your HTTP headers, and start querying—no complex infrastructure required.
 
+## Table of contents
+
+-   [Quick start](#quick-start)
+-   [Setup HTTP headers](#setup-http-headers)
+-   [Usage](#usage)
+-   [Transactions](#transactions)
+
 ## Features
 
-- **Persistent Storage**: Uses OPFS for high-performance, persistent file storage.
-- **Non-Blocking**: Runs in a Web Worker, keeping your UI responsive.
-- **Concurrency Safe**: Built-in mutex ensures safe, sequential execution of commands.
-- **Type-Safe**: Written in TypeScript with full type definitions.
-- **Transactions**: Supports atomic transactions with automatic rollback on error.
+-   **Persistent Storage**: Uses OPFS for high-performance, persistent file storage.
+-   **Non-Blocking**: Runs in a Web Worker, keeping your UI responsive.
+-   **Concurrency Safe**: Built-in mutex ensures safe, sequential execution of commands.
+-   **Type-Safe**: Written in TypeScript with full type definitions.
+-   **Transactions**: Supports atomic transactions with automatic rollback on error.
 
-## Installation
+## Quick start
+
+Pick the path that fits your setup:
+
+#### Option A: npm / bundler
 
 ```bash
+# npm
 npm install web-sqlite-js
 ```
 
+```typescript
+import openDB from "web-sqlite-js";
+// ...
+```
+
+#### Option B: CDN / script tag (no build step)
+
+For quick demos or plain HTML pages you can load the prebuilt module directly:
+
+```html
+<script type="module">
+    import openDB from "https://wuchuheng.github.io/web-sqlite-js/dist/index.js";
+    // ...
+</script>
+```
+
+See [samples/cdn.html](https://web-sqlite-js.wuchuheng.com/examples/cdn.html) for a copy/paste page you can serve .
+
+> Heads up: `SharedArrayBuffer` requires COOP/COEP headers; see the section below.
+
 ## Setup http headers
 
-This library high-performance dependencies `SharedArrayBuffer`, which requires your server to send the following HTTP headers:
+Pick your stack below to set the headers:
+
+This library depends on `SharedArrayBuffer` for high performance, which requires your server to send the following HTTP headers:
 
 ```http
 Cross-Origin-Opener-Policy: same-origin
@@ -156,10 +190,8 @@ If you are using an older webpack-based setup (like CRA `react-scripts`), you te
 #### Basic Usage
 
 ```typescript
-import openDB from "web-sqlite-js";
-
 // 1. Open the database (creates 'my-database.sqlite3' in OPFS)
-const db = await openDB("my-database");
+const db = await openDB("local.sqlite3");
 
 // 2. Initialize schema
 await db.exec(`
@@ -181,13 +213,8 @@ await db.exec("INSERT INTO users (name, email) VALUES ($name, $email)", {
 });
 
 // 4. Query data
-interface User {
-    id: number;
-    name: string;
-    email: string;
-}
 
-const users = await db.query<User>("SELECT * FROM users");
+const users = await db.query("SELECT * FROM users");
 console.log(users);
 // Output: [{ id: 1, name: 'Alice', ... }, { id: 2, name: 'Bob', ... }]
 

@@ -92,5 +92,21 @@ rm build.tar.gz
 
 log "Cleaned up local build.tar.gz"
 
+sftp ${REMOTE_USER}@${REMOTE_HOST}:${REMOTE_PATH} <<EOF
+  cd $remoteDir
+  pwd
+  mkdir examples
+  bye
+EOF
+log "Ensured examples directory exists."
+
+sftp ${REMOTE_USER}@${REMOTE_HOST}:${REMOTE_PATH} <<EOF
+  cd $remoteDir
+  pwd
+  put $localDir/../../../samples/cdn.html examples
+  bye
+EOF
+log "Copied CDN example files to remote server."
+
 log "✅ ✅ ✅ Deployment completed successfully."
 

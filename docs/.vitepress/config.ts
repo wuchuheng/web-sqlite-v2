@@ -43,7 +43,7 @@ export default withPwa(
     vite: {
       resolve: {
         alias: {
-          "web-sqlite-js": resolve(__dirname, "../../"),
+          "web-sqlite-js": resolve(__dirname, "../../src/main.ts"),
           "@": resolve(__dirname, "../../src"),
         },
       },
@@ -94,5 +94,5 @@ export default withPwa(
         { icon: "github", link: "https://github.com/wuchuheng/web-sqlite-js" },
       ],
     },
-  }),
+  })
 );

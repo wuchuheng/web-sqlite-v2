@@ -4,29 +4,76 @@ outline: deep
 
 # Getting Started
 
-`web-sqlite-js` runs SQLite (WASM) inside a Web Worker and stores the database file in OPFS (Origin Private File System).
+`web-sqlite-js` is a friendly, out-of-the-box SQLite database for the web that makes persistent client-side storage simple for every developer.
 
-## Install
+Designed to be truly effortless, it allows you to get a high-performance relational database running in the browser in seconds. Just install, set your HTTP headers, and start querying—no complex infrastructure required.
 
-```bash
+## Quick start
+
+### Option A: npm / bundler
+
+::: code-group
+
+```bash [npm]
 npm i web-sqlite-js
 ```
 
-## Critical requirement: COOP & COEP
+```bash [pnpm]
+pnpm add web-sqlite-js
+```
 
-This library uses the SQLite WASM build backed by `SharedArrayBuffer`. Your app must be cross-origin isolated and serve these headers:
+```bash [yarn]
+yarn add web-sqlite-js
+```
+
+```bash [bun]
+bun add web-sqlite-js
+```
+
+```bash [deno]
+deno add npm:web-sqlite-js
+```
+
+:::
+
+```ts
+import openDB from "web-sqlite-js";
+
+// ...
+```
+
+### Option B: CDN / script tag (no build step)
+
+For quick demos or plain HTML pages you can load the prebuilt module directly:
+
+```html
+<script type="module">
+    import openDB from "https://wuchuheng.github.io/web-sqlite-js/dist/index.js";
+    // ...
+</script>
+```
+
+See [samples/cdn.html](https://web-sqlite-js.wuchuheng.com/examples/cdn.html) for a copy/paste page you can serve .
+
+> Heads up: `SharedArrayBuffer` requires COOP/COEP headers; see the section below.
+
+## Setup http headers
+
+Pick your stack below to set the headers:
+
+This library depends on `SharedArrayBuffer` for high performance, which requires your server to send the following HTTP headers:
 
 ```http
 Cross-Origin-Opener-Policy: same-origin
 Cross-Origin-Embedder-Policy: require-corp
 ```
 
-If these headers are missing, the database will not start.
+<details>
+<summary><strong>Vite</strong></summary>
 
-### Vite example
+Update your `vite.config.ts`:
 
-```ts
-// vite.config.ts
+```typescript
 import { defineConfig } from "vite";
 
 export default defineConfig({
@@ -45,81 +92,153 @@ export default defineConfig({
 });
 ```
 
-## Open a database
+</details>
 
-`openDB("my-database")` creates/opens `my-database.sqlite3` in OPFS.
+<details>
+<summary><strong>Next.js</strong></summary>
 
-```ts
-import openDB from "web-sqlite-js";
+Update your `next.config.js`:
 
-const db = await openDB("my-database");
+```javascript
+/** @type {import('next').NextConfig} */
+const nextConfig = {
+    async headers() {
+        return [
+            {
+                source: "/(.*)",
+                headers: [
+                    {
+                        key: "Cross-Origin-Opener-Policy",
+                        value: "same-origin",
+                    },
+                    {
+                        key: "Cross-Origin-Embedder-Policy",
+                        value: "require-corp",
+                    },
+                ],
+            },
+        ];
+    },
+};
+
+module.exports = nextConfig;
 ```
 
-## Execute statements
+</details>
 
-Use `exec()` for statements like `CREATE`, `INSERT`, `UPDATE`, `DELETE`.
+<details>
+<summary><strong>Webpack (Dev Server)</strong></summary>
 
-```ts
+Update your `webpack.config.js`:
+
+```javascript
+module.exports = {
+    // ...
+    devServer: {
+        headers: {
+            "Cross-Origin-Opener-Policy": "same-origin",
+            "Cross-Origin-Embedder-Policy": "require-corp",
+        },
+    },
+};
+```
+
+</details>
+
+<details>
+<summary><strong>Nginx</strong></summary>
+
+Add the headers to your server block:
+
+```nginx
+server {
+    # ...
+    add_header Cross-Origin-Opener-Policy "same-origin";
+    add_header Cross-Origin-Embedder-Policy "require-corp";
+    # ...
+}
+```
+
+</details>
+
+<details>
+<summary><strong>Express.js</strong></summary>
+
+Use a middleware:
+
+```javascript
+const express = require("express");
+const app = express();
+
+app.use((req, res, next) => {
+    res.setHeader("Cross-Origin-Opener-Policy", "same-origin");
+    res.setHeader("Cross-Origin-Embedder-Policy", "require-corp");
+    next();
+});
+
+// ...
+```
+
+</details>
+
+<details>
+<summary><strong>React / Vue (Create React App / Vue CLI)</strong></summary>
+
+Most modern React/Vue setups use **Vite**. Please refer to the **Vite** section above.
+
+If you are using an older webpack-based setup (like CRA `react-scripts`), you technically need to configure the underlying `webpack-dev-server`, but CRA doesn't expose this easily without ejecting or using tools like `craco` or `react-app-rewired` to modify the dev server configuration as shown in the **Webpack** section.
+
+</details>
+
+## Usage
+
+#### Basic Usage
+
+```typescript
+// 1. Open the database (creates 'my-database.sqlite3' in OPFS)
+const db = await openDB("local.sqlite3");
+
+// 2. Initialize schema
 await db.exec(`
   CREATE TABLE IF NOT EXISTS users (
     id INTEGER PRIMARY KEY AUTOINCREMENT,
-    name TEXT NOT NULL
+    name TEXT,
+    email TEXT
   );
 `);
-```
 
-### Bind parameters
-
-Positional parameters:
-
-```ts
-await db.exec("INSERT INTO users (name) VALUES (?)", ["Alice"]);
-```
-
-Named parameters:
-
-```ts
-await db.exec("INSERT INTO users (name) VALUES ($name)", { $name: "Bob" });
-```
-
-## Query rows
-
-Use `query<T>()` for `SELECT` statements.
-
-```ts
-type User = { id: number; name: string };
-
-const users = await db.query<User>(
-    "SELECT id, name FROM users ORDER BY id DESC",
-);
-```
-
-## Transactions
-
-Use `transaction()` for atomic sequences. If the callback throws, the transaction rolls back.
-
-```ts
-await db.transaction(async (tx) => {
-    await tx.exec("INSERT INTO users (name) VALUES (?)", ["Charlie"]);
-    await tx.exec("INSERT INTO users (name) VALUES (?)", ["Diana"]);
+// 3. Insert data (Parameterized)
+await db.exec("INSERT INTO users (name, email) VALUES (?, ?)", [
+    "Alice",
+    "alice@example.com",
+]);
+await db.exec("INSERT INTO users (name, email) VALUES ($name, $email)", {
+    $name: "Bob",
+    $email: "bob@example.com",
 });
-```
 
-## Debug logging
+// 4. Query data
 
-Enable SQL timing logs by passing `{ debug: true }`:
+const users = await db.query("SELECT * FROM users");
+console.log(users);
+// Output: [{ id: 1, name: 'Alice', ... }, { id: 2, name: 'Bob', ... }]
 
-```ts
-const db = await openDB("my-database", { debug: true });
-```
-
-## Close
-
-```ts
+// 5. Close when done
 await db.close();
 ```
 
-## Limitations
+#### Transactions
 
-- Requires a secure context (HTTPS or `localhost`) and a browser with OPFS + cross-origin isolated `SharedArrayBuffer`.
-- Runs in a Web Worker, so it must be used in browser runtime code (not during SSR/build time).
+Transactions are atomic. If any command inside the callback fails, the entire transaction is rolled back.
+
+```typescript
+await db.transaction(async (tx) => {
+    await tx.exec("INSERT INTO users (name) VALUES (?)", ["Charlie"]);
+
+    // You can perform multiple operations safely
+    await tx.exec("INSERT INTO logs (action) VALUES (?)", ["User Created"]);
+
+    // If you throw an error here, both INSERTs will be rolled back!
+    // throw new Error('Something went wrong');
+});
+```
