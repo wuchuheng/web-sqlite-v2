@@ -3,6 +3,7 @@ import { resolve } from "path";
 import dts from "vite-plugin-dts";
 
 const sourceMap = process.env.SOURCE_MAP === "true";
+const minify = process.env.MINIFY === "true"; // Disable minify as default value;
 
 export default defineConfig({
   plugins: [
@@ -29,7 +30,7 @@ export default defineConfig({
       },
     },
     sourcemap: sourceMap,
-    minify: false, // Set to true if you want minification
+    minify: minify, // Set to true if you want minification
   },
   resolve: {
     alias: {

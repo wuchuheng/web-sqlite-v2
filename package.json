@@ -32,7 +32,7 @@
         "http:docs": "tsx scripts/http-service.ts ./docs/.vitepress/dist --port 8399",
         "test:e2e": "vitest run --config vitest.e2e.config.ts",
         "test:debug": "vitest run --config vitest.e2e.config.ts --no-file-parallelism",
-        "build": "vite build",
+        "build": "MINIFY=true vite build",
         "build:dev": "SOURCE_MAP=true vite build",
         "build:watch": "vite build --watch",
         "lint": "eslint . --ext .ts --fix; npm run typecheck && npm run format",
