@@ -48,7 +48,7 @@ For quick demos or plain HTML pages you can load the prebuilt module directly:
 
 ```html
 <script type="module">
-    import openDB from "https://wuchuheng.github.io/web-sqlite-js/dist/index.js";
+    import openDB from "https://cdn.jsdelivr.net/npm/web-sqlite-js@0.0.5/dist/index.js";
     // ...
 </script>
 ```
