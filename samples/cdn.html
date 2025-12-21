@@ -1,90 +1,90 @@
 <!doctype html>
 <html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>web-sqlite-js CDN demo</title>
+    <style>
+      body {
+        font-family: Arial, sans-serif;
+        max-width: 720px;
+        margin: 40px auto;
+        padding: 0 16px;
+        line-height: 1.6;
+      }
 
-<head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>web-sqlite-js CDN demo</title>
-  <style>
-    body {
-      font-family: Arial, sans-serif;
-      max-width: 720px;
-      margin: 40px auto;
-      padding: 0 16px;
-      line-height: 1.6;
-    }
+      code {
+        background: #f5f5f5;
+        padding: 2px 4px;
+        border-radius: 4px;
+      }
 
-    code {
-      background: #f5f5f5;
-      padding: 2px 4px;
-      border-radius: 4px;
-    }
+      pre {
+        background: #0b1021;
+        color: #e2e8f0;
+        padding: 12px;
+        border-radius: 8px;
+        overflow: auto;
+      }
+    </style>
+  </head>
 
-    pre {
-      background: #0b1021;
-      color: #e2e8f0;
-      padding: 12px;
-      border-radius: 8px;
-      overflow: auto;
-    }
-  </style>
-</head>
+  <body>
+    <h1>web-sqlite-js (CDN)</h1>
+    <p>
+      Minimal example showing how to load <code>web-sqlite-js</code> from a CDN
+      in a plain HTML page.
+    </p>
 
-<body>
-  <h1>web-sqlite-js (CDN)</h1>
-  <p>
-    Minimal example showing how to load <code>web-sqlite-js</code> from a CDN
-    in a plain HTML page.
-  </p>
+    <h2>Goal</h2>
+    <p>
+      Use the CDN build with no bundler and confirm basic CRUD works in the
+      browser.
+    </p>
 
-  <h2>Goal</h2>
-  <p>
-    Use the CDN build with no bundler and confirm basic CRUD works in the
-    browser.
-  </p>
+    <h2>What this page does</h2>
+    <ol>
+      <li>
+        Loads the prebuilt module from
+        <code
+          >https://cdn.jsdelivr.net/npm/web-sqlite-js@1.0.0/dist/index.js</code
+        >.
+      </li>
+      <li>Opens a local database file named <code>local.sqlite3</code>.</li>
+      <li>
+        Creates a <code>notes</code> table, inserts a sample row, and queries
+        all rows.
+      </li>
+      <li>Shows the query result below.</li>
+    </ol>
 
-  <h2>What this page does</h2>
-  <ol>
-    <li>
-      Loads the prebuilt module from
-      <code>https://cdn.jsdelivr.net/npm/web-sqlite-js@1.0.0/dist/index.js</code>.
-    </li>
-    <li>Opens a local database file named <code>local.sqlite3</code>.</li>
-    <li>
-      Creates a <code>notes</code> table, inserts a sample row, and queries
-      all rows.
-    </li>
-    <li>Shows the query result below.</li>
-  </ol>
+    <p>
+      <strong>Note:</strong> Serve this page with COOP/COEP headers so
+      <code>SharedArrayBuffer</code> works.
+    </p>
 
-  <p>
-    <strong>Note:</strong> Serve this page with COOP/COEP headers so
-    <code>SharedArrayBuffer</code> works.
-  </p>
+    <h2>Result</h2>
+    <pre id="output">Loading...</pre>
 
-  <h2>Result</h2>
-  <pre id="output">Loading...</pre>
+    <script type="module">
+      import openDB from "https://cdn.jsdelivr.net/npm/web-sqlite-js@1.0.0/dist/index.js";
 
-  <script type="module">
-    import openDB from "https://cdn.jsdelivr.net/npm/web-sqlite-js@1.0.0/dist/index.js";
+      const output = document.getElementById("output");
 
-    const output = document.getElementById("output");
-
-    try {
-      const db = await openDB("local.sqlite3");
-      await db.exec(
-        "CREATE TABLE IF NOT EXISTS notes (id INTEGER PRIMARY KEY, body TEXT)",
-      );
-      await db.exec("INSERT INTO notes (body) VALUES ($body)", {
-        $body: "Hello from CDN",
-      });
-      const rows = await db.query("SELECT * FROM notes");
-      output.textContent = JSON.stringify(rows, null, 2);
-    } catch (err) {
-      output.textContent = `Error: ${err?.message || err}`;
-      console.error(err);
-    }
-  </script>
-</body>
-
+      try {
+        const db = await openDB("local.sqlite3");
+        await db.exec(
+          "CREATE TABLE IF NOT EXISTS notes (id INTEGER PRIMARY KEY, body TEXT)",
+        );
+        await db.exec("INSERT INTO notes (body) VALUES ($body)", {
+          $body: "Hello from CDN",
+        });
+        const rows = await db.query("SELECT * FROM notes");
+        output.textContent = JSON.stringify(rows, null, 2);
+      } catch (err) {
+        output.textContent = `Error: ${err?.message || err}`;
+        console.error(err);
+      }
+    </script>
+  </body>
 </html>
