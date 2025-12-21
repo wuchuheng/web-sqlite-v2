@@ -93,6 +93,11 @@ export default withPwa(
       socialLinks: [
         { icon: "github", link: "https://github.com/wuchuheng/web-sqlite-js" },
       ],
+
+      footer: {
+        message: "Released under the MIT License.",
+        copyright: "Copyright © 2025-present wuchuheng",
+      },
     },
   }),
 );
