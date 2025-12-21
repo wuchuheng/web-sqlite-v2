@@ -94,5 +94,5 @@ export default withPwa(
         { icon: "github", link: "https://github.com/wuchuheng/web-sqlite-js" },
       ],
     },
-  })
+  }),
 );
