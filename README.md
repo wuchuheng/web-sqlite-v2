@@ -1,5 +1,27 @@
- <h1 align="center">web-sqlite-js</h1>
-<p align="center"> <img src="docs/public/web-sqlite-js.gif" width="80%" style="border-radius: 10px;"  />
+<h1 align="center">web-sqlite-js</h1>
+
+<p align="center">
+  <a href="https://web-sqlite-js.wuchuheng.com" target="_blank">
+    <img src="docs/public/web-sqlite-js.gif" width="80%" style="border-radius: 10px;"  />
+  </a>
+</p>
+
+<p align="center">
+  <a href="https://github.com/wuchuheng/web-sqlite-js/actions/workflows/test.yml" target="_blank">
+    <img src="https://github.com/wuchuheng/web-sqlite-js/actions/workflows/test.yml/badge.svg" alt="Test" />
+  </a>
+  <a href="https://www.npmjs.com/package/web-sqlite-js" target="_blank">
+    <img src="https://img.shields.io/npm/v/web-sqlite-js.svg" alt="NPM Version" />
+  </a>
+  <a href="https://github.com/wuchuheng/web-sqlite-js/blob/main/LICENSE" target="_blank">
+    <img src="https://img.shields.io/github/license/wuchuheng/web-sqlite-js.svg" alt="License" />
+  </a>
+  <a href="https://bundlephobia.com/package/web-sqlite-js" target="_blank">
+    <img src="https://img.shields.io/bundlephobia/minzip/web-sqlite-js.svg" alt="Bundle Size" />
+  </a>
+  <a href="https://github.com/wuchuheng/web-sqlite-js/pulls" target="_blank">
+    <img src="https://img.shields.io/badge/PRs-welcome-brightgreen.svg" alt="PRs Welcome" />
+  </a>
 </p>
 
 `web-sqlite-js` is a friendly, out-of-the-box SQLite database for the web that makes persistent client-side storage simple for every developer.
@@ -8,18 +30,18 @@ Designed to be truly effortless, it allows you to get a high-performance relatio
 
 ## Table of contents
 
-- [Quick start](#quick-start)
-- [Setup HTTP headers](#setup-http-headers)
-- [Usage](#usage)
-- [Transactions](#transactions)
+-   [Quick start](#quick-start)
+-   [Setup HTTP headers](#setup-http-headers)
+-   [Usage](#usage)
+-   [Transactions](#transactions)
 
 ## Features
 
-- **Persistent Storage**: Uses OPFS for high-performance, persistent file storage.
-- **Non-Blocking**: Runs in a Web Worker, keeping your UI responsive.
-- **Concurrency Safe**: Built-in mutex ensures safe, sequential execution of commands.
-- **Type-Safe**: Written in TypeScript with full type definitions.
-- **Transactions**: Supports atomic transactions with automatic rollback on error.
+-   **Persistent Storage**: Uses OPFS for high-performance, persistent file storage.
+-   **Non-Blocking**: Runs in a Web Worker, keeping your UI responsive.
+-   **Concurrency Safe**: Built-in mutex ensures safe, sequential execution of commands.
+-   **Type-Safe**: Written in TypeScript with full type definitions.
+-   **Transactions**: Supports atomic transactions with automatic rollback on error.
 
 ## Quick start
 
