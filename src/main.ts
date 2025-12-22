@@ -8,6 +8,7 @@ import type {
   ExecParams,
   transactionCallback,
 } from "./types/DB";
+import { abilityCheck } from "./validations/shareBufferAbiliCheck";
 
 /**
  * Opens a SQLite database connection.
@@ -27,6 +28,10 @@ export const openDB = async (
   filename: string,
   options?: WorkerOpenDBOptions,
 ): Promise<DBInterface> => {
+  // 1. Handle input.
+  // 1.1 Validate ShareArrayBuffer ability.
+  abilityCheck();
+
   const { sendMsg, terminate: _terminate } = createWorkerBridge();
   const runMutex = createMutex();
 
