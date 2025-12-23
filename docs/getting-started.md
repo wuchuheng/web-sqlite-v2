@@ -48,7 +48,7 @@ For quick demos or plain HTML pages you can load the prebuilt module directly:
 
 ```html
 <script type="module">
-    import openDB from "https://cdn.jsdelivr.net/npm/web-sqlite-js@1.0.2/dist/index.js";
+    import openDB from "https://cdn.jsdelivr.net/npm/web-sqlite-js@1.0.3/dist/index.js";
     // ...
 </script>
 ```
@@ -226,6 +226,21 @@ console.log(users);
 // 5. Close when done
 await db.close();
 ```
+
+## Debug mode
+
+Enable `{ debug: true }` when opening the database to stream worker-side SQL logs (including bind values and timings) to the browser console. It is ideal for profiling and verifying queries during development.
+
+```ts
+const db = await openDB("local.sqlite3", { debug: true });
+
+await db.exec("CREATE TABLE IF NOT EXISTS notes (body TEXT)");
+await db.query("SELECT * FROM notes WHERE id = ?", [1]);
+```
+
+The console output highlights SQL keywords and shows the duration of each statement (click to preview):
+
+[![Debug console output](./assets/debug.png)](./assets/debug.png)
 
 #### Transactions
 

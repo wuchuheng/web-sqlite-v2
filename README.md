@@ -33,6 +33,7 @@ Designed to be truly effortless, it allows you to get a high-performance relatio
 -   [Quick start](#quick-start)
 -   [Setup HTTP headers](#setup-http-headers)
 -   [Usage](#usage)
+-   [Debug mode](#debug-mode)
 -   [Transactions](#transactions)
 
 ## Features
@@ -65,7 +66,7 @@ For quick demos or plain HTML pages you can load the prebuilt module directly:
 
 ```html
 <script type="module">
-    import openDB from "https://cdn.jsdelivr.net/npm/web-sqlite-js@1.0.2/dist/index.js";
+    import openDB from "https://cdn.jsdelivr.net/npm/web-sqlite-js@1.0.3/dist/index.js";
     // ...
 </script>
 ```
@@ -243,6 +244,21 @@ console.log(users);
 // 5. Close when done
 await db.close();
 ```
+
+## Debug mode
+
+Add `{ debug: true }` when opening the database to stream worker-side SQL logs (including bind values and timings) to your browser's `console.debug`. This is useful for profiling and verifying queries during development.
+
+```typescript
+const db = await openDB("local.sqlite3", { debug: true });
+
+await db.exec("CREATE TABLE IF NOT EXISTS notes (body TEXT)");
+await db.query("SELECT * FROM notes WHERE id = ?", [1]);
+```
+
+The console output highlights SQL keywords and shows how long each statement took (click to preview):
+
+[![Debug console output](docs/assets/debug.png)](docs/assets/debug.png)
 
 #### Transactions
 

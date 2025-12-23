@@ -47,7 +47,7 @@
   <ol>
     <li>
       Loads the prebuilt module from
-      <code>https://cdn.jsdelivr.net/npm/web-sqlite-js@1.0.2/dist/index.js</code>.
+      <code>https://cdn.jsdelivr.net/npm/web-sqlite-js@1.0.3/dist/index.js</code>.
     </li>
     <li>Opens a local database file named <code>local.sqlite3</code>.</li>
     <li>
@@ -66,12 +66,12 @@
   <pre id="output">Loading...</pre>
 
   <script type="module">
-    import openDB from "https://cdn.jsdelivr.net/npm/web-sqlite-js@1.0.2/dist/index.js";
+    import openDB from "https://cdn.jsdelivr.net/npm/web-sqlite-js@1.0.3/dist/index.js";
 
     const output = document.getElementById("output");
 
     try {
-      const db = await openDB("local.sqlite3");
+      const db = await openDB("local.sqlite3", { debug: true });
       await db.exec(
         "CREATE TABLE IF NOT EXISTS notes (id INTEGER PRIMARY KEY, body TEXT)",
       );
