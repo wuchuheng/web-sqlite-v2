@@ -278,4 +278,6 @@ await db.transaction(async (tx) => {
 
 ## Star History
 
-[![Star History Chart](https://api.star-history.com/svg?repos=wuchuheng/web-sqlite-js&type=date&legend=top-left)](https://www.star-history.com/#wuchuheng/web-sqlite-js&type=date&legend=top-left)
+<p align="left">
+    <img src="https://api.star-history.com/svg?repos=wuchuheng/web-sqlite-js&type=date&legend=top-left" alt="Star History" width='50%'/>
+</p>
