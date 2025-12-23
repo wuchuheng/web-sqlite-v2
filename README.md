@@ -66,7 +66,7 @@ For quick demos or plain HTML pages you can load the prebuilt module directly:
 
 ```html
 <script type="module">
-    import openDB from "https://cdn.jsdelivr.net/npm/web-sqlite-js@1.0.3/dist/index.js";
+    import openDB from "https://cdn.jsdelivr.net/npm/web-sqlite-js@1.0.4/dist/index.js";
     // ...
 </script>
 ```
@@ -275,3 +275,7 @@ await db.transaction(async (tx) => {
     // throw new Error('Something went wrong');
 });
 ```
+
+## Star History
+
+[![Star History Chart](https://api.star-history.com/svg?repos=wuchuheng/web-sqlite-js&type=date&legend=top-left)](https://www.star-history.com/#wuchuheng/web-sqlite-js&type=date&legend=top-left)
