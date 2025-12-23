@@ -74,7 +74,9 @@
   align-items: center;
   justify-content: center;
   cursor: pointer;
-  transition: transform 0.1s ease, background 0.15s ease;
+  transition:
+    transform 0.1s ease,
+    background 0.15s ease;
 }
 
 .image-preview-close:hover {

@@ -30,19 +30,19 @@ Designed to be truly effortless, it allows you to get a high-performance relatio
 
 ## Table of contents
 
--   [Quick start](#quick-start)
--   [Setup HTTP headers](#setup-http-headers)
--   [Usage](#usage)
--   [Debug mode](#debug-mode)
--   [Transactions](#transactions)
+- [Quick start](#quick-start)
+- [Setup HTTP headers](#setup-http-headers)
+- [Usage](#usage)
+- [Debug mode](#debug-mode)
+- [Transactions](#transactions)
 
 ## Features
 
--   **Persistent Storage**: Uses OPFS for high-performance, persistent file storage.
--   **Non-Blocking**: Runs in a Web Worker, keeping your UI responsive.
--   **Concurrency Safe**: Built-in mutex ensures safe, sequential execution of commands.
--   **Type-Safe**: Written in TypeScript with full type definitions.
--   **Transactions**: Supports atomic transactions with automatic rollback on error.
+- **Persistent Storage**: Uses OPFS for high-performance, persistent file storage.
+- **Non-Blocking**: Runs in a Web Worker, keeping your UI responsive.
+- **Concurrency Safe**: Built-in mutex ensures safe, sequential execution of commands.
+- **Type-Safe**: Written in TypeScript with full type definitions.
+- **Transactions**: Supports atomic transactions with automatic rollback on error.
 
 ## Quick start
 
