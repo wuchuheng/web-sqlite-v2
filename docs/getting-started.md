@@ -50,12 +50,12 @@ For quick demos or plain HTML pages you can load the prebuilt module directly:
 
 ```html
 <script type="module">
-<<<<<<< HEAD
-    import openDB from "https://cdn.jsdelivr.net/npm/web-sqlite-js@1.0.8/dist/index.js";
-=======
-    import openDB from "https://cdn.jsdelivr.net/npm/web-sqlite-js@1.0.6/dist/index.js";
->>>>>>> main
-    // ...
+    <<<<<<< HEAD
+        import openDB from "https://cdn.jsdelivr.net/npm/web-sqlite-js@1.0.9/dist/index.js";
+    =======
+        import openDB from "https://cdn.jsdelivr.net/npm/web-sqlite-js@1.0.6/dist/index.js";
+    >>>>>>> main
+        // ...
 </script>
 ```
 
