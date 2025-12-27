@@ -1,12 +1,31 @@
-import { defineConfig } from "vite";
+import { defineConfig, Plugin } from "vite";
 import { resolve } from "path";
 import dts from "vite-plugin-dts";
 
 const sourceMap = process.env.SOURCE_MAP === "true";
 const minify = process.env.MINIFY === "true"; // Disable minify as default value;
 
+const sqliteOptimizePlugin: Plugin = {
+  name: "sqlite-optimize",
+  transform(code, id) {
+    if (id.includes("sqlite3.mjs")) {
+      return code;
+      // .replace(
+      //   /var ENVIRONMENT_IS_NODE =[\s\S]*?;/,
+      //   "var ENVIRONMENT_IS_NODE = false;",
+      // )
+      // .replace(
+      //   /var ENVIRONMENT_IS_SHELL =[\s\S]*?;/,
+      //   "var ENVIRONMENT_IS_SHELL = false;",
+      // );
+    }
+    return null;
+  },
+};
+
 export default defineConfig({
   plugins: [
+    sqliteOptimizePlugin,
     dts({
       insertTypesEntry: true,
       rollupTypes: true,
@@ -30,7 +49,13 @@ export default defineConfig({
       },
     },
     sourcemap: sourceMap,
-    minify: minify, // Set to true if you want minification
+    minify: minify ? "terser" : false,
+    terserOptions: {
+      compress: {
+        dead_code: true,
+        passes: 3,
+      },
+    },
   },
   resolve: {
     alias: {

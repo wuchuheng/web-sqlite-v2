@@ -1,6 +1,6 @@
 {
     "name": "web-sqlite-js",
-    "version": "1.0.5",
+    "version": "1.0.8",
     "description": "web-sqlite-js is a friendly, out-of-the-box SQLite database for the web that makes persistent client-side storage simple for every developer.",
     "workspaces": [
         "docs"
@@ -32,7 +32,8 @@
         "http:docs": "tsx scripts/http-service.ts ./docs/.vitepress/dist --port 8399",
         "test:e2e": "vitest run --config vitest.e2e.config.ts",
         "test:debug": "vitest run --config vitest.e2e.config.ts --no-file-parallelism",
-        "build": "MINIFY=true vite build",
+        "prebuild": "npx wasm-opt -Oz --all-features src/jswasm/sqlite3.wasm -o src/jswasm/sqlite3.wasm.tmp && gzip -9 -c src/jswasm/sqlite3.wasm.tmp | base64 -w 0 > src/jswasm/sqlite3.wasm.base64 && echo \"export const wasmBase64 = '$(cat src/jswasm/sqlite3.wasm.base64)';\" > src/jswasm/wasm-asset.js && rm src/jswasm/sqlite3.wasm.tmp src/jswasm/sqlite3.wasm.base64",
+        "build": "npm run prebuild && MINIFY=true vite build",
         "build:dev": "SOURCE_MAP=true vite build",
         "build:watch": "vite build --watch",
         "lint": "eslint . --ext .ts --fix; npm run typecheck && npm run format",
@@ -58,6 +59,7 @@
         "@vitest/browser-playwright": "^4.0.15",
         "@vitest/coverage-v8": "4.0.15",
         "@vitest/ui": "^4.0.15",
+        "binaryen": "^125.0.0",
         "commander": "^14.0.2",
         "eslint": "^9.39.2",
         "globals": "^16.5.0",

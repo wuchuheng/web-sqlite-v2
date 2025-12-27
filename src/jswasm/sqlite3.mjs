@@ -35,7 +35,7 @@
  */
 
 // TAG(refactor):  Load wasm with by base64.
-import wasmUrl from "./sqlite3.wasm?url";
+import { wasmBase64 } from "./wasm-asset.js";
 import opfsProxyContent from "./sqlite3-opfs-async-proxy.js?raw";
 
 async function sqlite3InitModule(moduleArg = {}) {
@@ -75,7 +75,7 @@ async function sqlite3InitModule(moduleArg = {}) {
 
         Module["instantiateWasm"] = function callee(imports, onSuccess) {
             const sims = this;
-            const uri = wasmUrl;
+            const uri = "inlined:sqlite3.wasm.gz";
             // const uri = Module.locateFile(
             //     sims.wasmFilename,
             //     "undefined" === typeof scriptDirectory ? "" : scriptDirectory
@@ -83,24 +83,25 @@ async function sqlite3InitModule(moduleArg = {}) {
             sims.debugModule("instantiateWasm() uri =", uri, "sIMS =", this);
 
             // TAG(refactor):  Load wasm with by base64.
-            const wfetch = () => fetch(wasmUrl, { credentials: "same-origin" });
-            const finalThen = (arg) => {
-                arg.imports = imports;
-                sims.instantiateWasm = arg;
-                onSuccess(arg.instance, arg.module);
+            const loadWasm = async () => {
+                const binaryString = atob(wasmBase64);
+                const len = binaryString.length;
+                const bytes = new Uint8Array(len);
+                for (let i = 0; i < len; i++) {
+                    bytes[i] = binaryString.charCodeAt(i);
+                }
+                const stream = new Blob([bytes])
+                    .stream()
+                    .pipeThrough(new DecompressionStream("gzip"));
+                const decompressed = await new Response(stream).arrayBuffer();
+                return WebAssembly.instantiate(decompressed, imports).then(
+                    (arg) => {
+                        arg.imports = imports;
+                        sims.instantiateWasm = arg;
+                        onSuccess(arg.instance, arg.module);
+                    },
+                );
             };
-            const loadWasm = WebAssembly.instantiateStreaming
-                ? async () =>
-                      WebAssembly.instantiateStreaming(wfetch(), imports).then(
-                          finalThen,
-                      )
-                : async () =>
-                      wfetch()
-                          .then((response) => response.arrayBuffer())
-                          .then((bytes) =>
-                              WebAssembly.instantiate(bytes, imports),
-                          )
-                          .then(finalThen);
             return loadWasm();
         }.bind(sIMS);
     })(Module);
@@ -263,7 +264,7 @@ async function sqlite3InitModule(moduleArg = {}) {
 
     function findWasmBinary() {
         // TAG(refactor): Use bundled WASM URL to avoid duplication
-        return wasmUrl;
+        return "inlined:sqlite3.wasm.gz";
         // if (Module["locateFile"]) {
         //     return locateFile("sqlite3.wasm");
         // }
