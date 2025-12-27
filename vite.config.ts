@@ -46,6 +46,7 @@ export default defineConfig({
       output: {
         // Ensure the output file is named index.js
         entryFileNames: "index.js",
+        inlineDynamicImports: true,
       },
     },
     sourcemap: sourceMap,
