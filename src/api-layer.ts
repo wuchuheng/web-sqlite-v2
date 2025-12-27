@@ -13,14 +13,12 @@ import { createMutex } from "./utils/mutex/mutex";
 /**
  * Internal interface for the messaging implementation.
  */
-export interface Connection {
-  /**
-   * Forwards a message to the service and returns the response.
-   */
+interface Connection {
   sendMsg<TRes, TReq = unknown>(
     event: SqliteEvent,
     payload?: TReq,
   ): Promise<TRes>;
+  terminate(): void;
 }
 
 /**
@@ -30,16 +28,38 @@ const createLocalConnection = (service: SqliteService): Connection => ({
   sendMsg: async <TRes>(event: SqliteEvent, payload: unknown) => {
     return (await service(event, payload)) as TRes;
   },
+  terminate: () => {},
 });
 
 /**
  * Creates a connection to a Worker-based SQLite service.
+ * Handles cross-origin URLs (CDNs) by using a Blob wrapper.
  */
 const createWorkerConnection = (workerUrl: string): Connection => {
-  const worker = new Worker(workerUrl, {
+  let finalWorkerUrl = workerUrl;
+  let isBlobUrl = false;
+  let isTerminated = false;
+
+  // Handle Cross-Origin (CDN) worker loading
+  try {
+    const targetOrigin = new URL(workerUrl, globalThis.location.href).origin;
+    if (targetOrigin !== globalThis.location.origin) {
+      // Use a Blob wrapper to bypass same-origin restriction for Workers
+      const blobCode = `import "${workerUrl}";`;
+      finalWorkerUrl = URL.createObjectURL(
+        new Blob([blobCode], { type: "application/javascript" }),
+      );
+      isBlobUrl = true;
+    }
+  } catch (_e) {
+    // Fallback to original URL if parsing fails
+  }
+
+  const worker = new Worker(finalWorkerUrl, {
     type: "module",
     name: WORKER_NAME,
   });
+
   const tasks = new Map<
     number,
     { resolve: (v: any) => void; reject: (e: Error) => void } // eslint-disable-line @typescript-eslint/no-explicit-any
@@ -62,13 +82,35 @@ const createWorkerConnection = (workerUrl: string): Connection => {
     tasks.delete(id);
   };
 
+  worker.onerror = (e) => {
+    console.error("Worker error:", e);
+  };
+
   return {
     sendMsg: <TRes, TReq>(event: SqliteEvent, payload?: TReq) => {
+      if (isTerminated) {
+        return Promise.reject(new Error("Database is not open"));
+      }
       const id = ++msgId;
       return new Promise<TRes>((resolve, reject) => {
         tasks.set(id, { resolve, reject });
-        worker.postMessage({ id, event, payload } as SqliteReqMsg<TReq>);
+        try {
+          worker.postMessage({ id, event, payload } as SqliteReqMsg<TReq>);
+        } catch (e) {
+          tasks.delete(id);
+          reject(e as Error);
+        }
       });
+    },
+    terminate: () => {
+      isTerminated = true;
+      worker.terminate();
+      if (isBlobUrl) URL.revokeObjectURL(finalWorkerUrl);
+      // Reject all pending tasks
+      tasks.forEach((task) => {
+        task.reject(new Error("Database is not open"));
+      });
+      tasks.clear();
     },
   };
 };
@@ -113,6 +155,13 @@ export const openDB = async (
           throw e;
         }
       }),
-    close: () => runMutex(() => send(SqliteEvent.CLOSE)),
+    close: () =>
+      runMutex(async () => {
+        try {
+          await send(SqliteEvent.CLOSE);
+        } finally {
+          connection.terminate();
+        }
+      }),
   };
 };
