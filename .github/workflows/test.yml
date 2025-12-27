@@ -26,6 +26,9 @@ jobs:
             - name: Install Playwright Browsers
               run: npx playwright install --with-deps chromium
 
+            - name: Build project
+              run: npm run build
+
             - name: Run e2e tests
               env:
                   HEADERS: "true"
