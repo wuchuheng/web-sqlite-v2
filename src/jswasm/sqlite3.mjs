@@ -36,7 +36,7 @@
 
 // TAG(refactor):  Load wasm with by base64.
 import { wasmBase64 } from "./wasm-asset.js";
-import opfsProxyContent from "./sqlite3-opfs-async-proxy.js?raw";
+import { opfsProxyContent } from "./opfs-proxy-asset.js";
 
 async function sqlite3InitModule(moduleArg = {}) {
     const opfsProxyUrl = URL.createObjectURL(

@@ -1,65 +1,71 @@
-# Package Size Optimization Plan (Vite-Native)
+# Specification: Bundle Size Optimization
 
 ## Overview
+This document outlines the strategy for reducing the final bundle size of the `web-sqlite-js` library. The primary focus is on optimizing the vendored SQLite module (`sqlite3.mjs`), minimizing internal assets, and ensuring dead-code elimination.
 
-Reduce bundle size from ~1.3MB to ~700KB while maintaining a single-file distribution and using explicit Vite configurations.
+## Problem Statement
+The current bundle includes a significant amount of unnecessary code from the vendored `sqlite3.mjs` file, which contains logic for environments other than the browser (Node.js, Shell). Additionally, some internal assets like the OPFS proxy script are imported as raw strings without minification, and the WASM inlining process could be more efficient.
 
-## 1. WASM Binary Optimization
+## Optimization Targets
 
-We use a `prebuild` step to handle binary compression. This is necessary because binary manipulation is more efficient in the shell.
-
-**Commands:**
-
-- `wasm-opt -Oz`: Shrinks the WASM instructions.
-- `gzip -9`: Compresses the binary (WASM is highly compressible).
-- `base64`: Inlines the compressed binary as a string asset.
-
-## 2. Explicit Code Stripping (Vite Plugin)
-
-Instead of modifying source files, we use a **Vite Transform Plugin** in `vite.config.ts`.
+### 1. Environment-Specific Dead Code Elimination
+`sqlite3.mjs` (Emscripten glue code) includes checks for various environments:
+- `ENVIRONMENT_IS_NODE`
+- `ENVIRONMENT_IS_SHELL`
+- `ENVIRONMENT_IS_WEB`
+- `ENVIRONMENT_IS_WORKER`
 
 **Action:**
-During build, the plugin explicitly replaces:
+- Use Vite's `define` or a custom transform plugin to hardcode `ENVIRONMENT_IS_NODE` and `ENVIRONMENT_IS_SHELL` to `false`.
+- Hardcode `ENVIRONMENT_IS_WEB` and `ENVIRONMENT_IS_WORKER` based on the target environment (browser worker).
+- This allows Terser to remove entire blocks of code related to Node.js and Shell during the minification phase.
 
-- `ENVIRONMENT_IS_NODE` -> `false`
-- `ENVIRONMENT_IS_SHELL` -> `false`
+### 2. Minification of Internal Assets
+The `sqlite3-opfs-async-proxy.js` (~20KB) is currently imported as a raw string. Vite does not minify strings imported via `?raw`.
 
-**Result:**
-Because these are now constants, Vite's minifier (Terser/Esbuild) will perform **Tree-Shaking**, automatically deleting all the unreachable Node.js-specific logic from the final `dist/index.js`.
+**Action:**
+Use the project's existing `prebuild` infrastructure to create a minified asset:
+1.  **Create a Minification Script**: Add a small utility (e.g., `scripts/bundle-proxy-asset.ts`) that uses `esbuild` (already a dependency) to minify `sqlite3-opfs-async-proxy.js` and write it as an exported string to a new file: `src/jswasm/opfs-proxy-asset.ts`.
+2.  **Update `package.json`**: Add the execution of this script to the `prebuild` command.
+3.  **Modify `src/jswasm/sqlite3.mjs`**:
+    - Remove: `import opfsProxyContent from "./sqlite3-opfs-async-proxy.js?raw";`
+    - Add: `import { opfsProxyContent } from "./opfs-proxy-asset.js";`
 
-## 3. Runtime Decompression Loader
+**Benefits:**
+- **Significant Size Reduction**: The proxy script will be minified (comments removed, variables mangled) before being embedded.
+- **Reliability**: No dependency on Vite's internal string handling or complex plugin logic.
+- **Consistency**: Matches the `wasm-asset.js` pattern exactly.
+- **Type Safety**: By generating a `.ts` or `.js` file with an export, we avoid TypeScript warnings about missing `?raw` modules.
 
-In `src/jswasm/sqlite3.mjs`, we use the browser's native `DecompressionStream` to inflate the Gzipped WASM.
+### 3. SQLite Module Optimization
+The `sqlite3.mjs` file contains many optional features and internal Emscripten utilities that might not be used.
 
-```javascript
-import { wasmBase64 } from "./wasm-asset.js";
+**Action:**
+- Implement a `sqliteOptimizePlugin` in `vite.config.ts` to perform regex-based stripping of known unnecessary sections in `sqlite3.mjs`.
+- Example: Strip out large error message strings or optional FS implementations (like `FS_createPreloadedFile` if not used).
 
-async function getDecompressedWasm(base64) {
-    const bytes = Uint8Array.from(atob(base64), (c) => c.charCodeAt(0));
-    const stream = new Blob([bytes])
-        .stream()
-        .pipeThrough(new DecompressionStream("gzip"));
-    return new Response(stream).arrayBuffer();
-}
-```
+### 4. Build Configuration Refinement
+**Action:**
+- Enable aggressive Terser optimizations in `vite.config.ts`.
+- Set `compress.passes` to 3 or more.
+- Ensure `mangle` is fully enabled for the worker code.
 
-## CDN & CORS Compatibility
+### 5. Single Bundle Integrity
+**Action:**
+- Ensure all parts (WASM, Proxy, Glue code) are correctly bundled into a single `index.js`.
+- Verify that no external files are required at runtime, keeping the library truly portable.
 
-Inlining the WASM binary as a Base64 string provides a major compatibility benefit for CDN users:
+## Implementation Steps
 
-- **Zero Secondary Requests**: Since the WASM is part of the JS bundle, the browser does not need to perform a separate `fetch()` for the `.wasm` file. This eliminates potential CORS errors and "Missing MIME type" issues that frequently occur when loading WASM from a different origin.
-- **Easier Integration**: Users only need to manage a single file path, making it much harder to break the library's internal resource resolution logic.
+1.  **Modify `vite.config.ts`**:
+    - Enhance `sqliteOptimizePlugin` to handle environment stripping.
+    - Add a transformation for `sqlite3-opfs-async-proxy.js` to minify it.
+2.  **Verify Results**:
+    - Compare `dist/index.js` size before and after changes.
+    - Run E2E tests to ensure SQLite functionality remains intact.
+3.  **Documentation**:
+    - Update the build instructions if any new pre-build steps are added.
 
-_Note: The requirement for COOP/COEP headers on the hosting server remains mandatory due to the use of SharedArrayBuffer._
-
-## Implementation Checklist
-
-1. [x] Install `binaryen` (`npm install --save-dev binaryen`).
-
-2. [x] Add `prebuild` script to `package.json` (WASM compression only).
-
-3. [x] Configure `sqliteOptimizePlugin` in `vite.config.ts` for explicit tree-shaking.
-
-4. [x] Update `sqlite3.mjs` loader to handle decompression.
-
-5. [x] Build and verify size.
+## Success Metrics
+- Reduction in `dist/index.js` file size (target: >20% reduction).
+- No regression in database performance or OPFS persistence.
