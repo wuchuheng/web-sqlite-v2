@@ -1,6 +1,6 @@
 {
     "name": "web-sqlite-js",
-    "version": "1.0.5",
+    "version": "1.0.6",
     "description": "web-sqlite-js is a friendly, out-of-the-box SQLite database for the web that makes persistent client-side storage simple for every developer.",
     "workspaces": [
         "docs"
@@ -32,6 +32,7 @@
         "http:docs": "tsx scripts/http-service.ts ./docs/.vitepress/dist --port 8399",
         "test:e2e": "vitest run --config vitest.e2e.config.ts",
         "test:debug": "vitest run --config vitest.e2e.config.ts --no-file-parallelism",
+        "prebuild": "gzip -c src/jswasm/sqlite3.wasm > src/jswasm/sqlite3.wasm.gz",
         "build": "MINIFY=true vite build",
         "build:dev": "SOURCE_MAP=true vite build",
         "build:watch": "vite build --watch",
@@ -64,6 +65,7 @@
         "http-server": "^14.1.1",
         "jiti": "^2.6.1",
         "playwright": "^1.57.0",
+        "terser": "^5.44.1",
         "tsx": "^4.21.0",
         "typescript": "^5.9.3",
         "typescript-eslint": "^8.49.0",

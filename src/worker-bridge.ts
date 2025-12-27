@@ -1,4 +1,3 @@
-import Sqlite3Worker from "./worker?worker&inline";
 import {
   type SqliteReqMsg,
   type SqliteResMsg,
@@ -10,8 +9,22 @@ type Task<T> = {
   reject: (reason?: unknown) => void;
 };
 
-export const createWorkerBridge = () => {
-  const worker = new Sqlite3Worker();
+export const createWorkerBridge = (mainUrl: string) => {
+  // Use the main entry point URL with a query param to spawn the worker.
+  // This avoids duplicating the code (sqlite3.wasm/mjs) in the bundle.
+  const workerUrl = new URL(mainUrl);
+  workerUrl.searchParams.set("worker-thread", "true");
+
+  const worker = new Worker(workerUrl.toString(), { type: "module" });
+
+  worker.onerror = (e) => {
+    console.error("[web-sqlite-js] Worker Error:", e);
+  };
+
+  worker.onmessageerror = (e) => {
+    console.error("[web-sqlite-js] Worker Message Error:", e);
+  };
+
   const idMapPromise: Map<number, Task<unknown>> = new Map();
 
   worker.onmessage = (event: MessageEvent<SqliteResMsg<unknown>>) => {

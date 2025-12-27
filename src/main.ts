@@ -9,6 +9,17 @@ import type {
   transactionCallback,
 } from "./types/DB";
 import { abilityCheck } from "./validations/shareBufferAbiliCheck";
+import { createLocalBridge } from "./local-bridge";
+import { runWorker } from "./core/worker-runner";
+
+// Auto-run worker if we are in a sub-worker thread
+if (
+  typeof self !== "undefined" &&
+  typeof self.location !== "undefined" &&
+  self.location.search.includes("worker-thread")
+) {
+  runWorker();
+}
 
 /**
  * Opens a SQLite database connection.
@@ -32,7 +43,32 @@ export const openDB = async (
   // 1.1 Validate ShareArrayBuffer ability.
   abilityCheck();
 
-  const { sendMsg, terminate: _terminate } = createWorkerBridge();
+  const isWorkerAvailable = typeof Worker !== "undefined";
+  const isWindow = typeof window !== "undefined";
+  const isAlreadyWorker =
+    !isWindow &&
+    (typeof globalThis.WorkerGlobalScope !== "undefined" ||
+      (typeof self !== "undefined" &&
+        typeof (self as unknown as { ServiceWorkerGlobalScope: unknown })
+          .ServiceWorkerGlobalScope !== "undefined"));
+  // Use worker mode if workers are available and we are not already in a worker context.
+  // We prefer worker mode in standard browser windows.
+  const useWorkerMode = isWorkerAvailable && !isAlreadyWorker;
+
+  if (!useWorkerMode && options?.debug) {
+    console.warn(
+      `[web-sqlite-js] ${
+        isAlreadyWorker
+          ? "Running inside a worker/service-worker."
+          : "Worker is not supported."
+      } Using same-thread execution.`,
+    );
+  }
+
+  const { sendMsg, terminate: _terminate } = useWorkerMode
+    ? createWorkerBridge(import.meta.url)
+    : createLocalBridge();
+
   const runMutex = createMutex();
 
   await sendMsg<void, OpenDBArgs>(SqliteEvent.OPEN, { filename, options });

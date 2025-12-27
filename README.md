@@ -30,19 +30,19 @@ Designed to be truly effortless, it allows you to get a high-performance relatio
 
 ## Table of contents
 
-- [Quick start](#quick-start)
-- [Setup HTTP headers](#setup-http-headers)
-- [Usage](#usage)
-- [Debug mode](#debug-mode)
-- [Transactions](#transactions)
+-   [Quick start](#quick-start)
+-   [Setup HTTP headers](#setup-http-headers)
+-   [Usage](#usage)
+-   [Debug mode](#debug-mode)
+-   [Transactions](#transactions)
 
 ## Features
 
-- **Persistent Storage**: Uses OPFS for high-performance, persistent file storage.
-- **Non-Blocking**: Runs in a Web Worker, keeping your UI responsive.
-- **Concurrency Safe**: Built-in mutex ensures safe, sequential execution of commands.
-- **Type-Safe**: Written in TypeScript with full type definitions.
-- **Transactions**: Supports atomic transactions with automatic rollback on error.
+-   **Persistent Storage**: Uses OPFS for high-performance, persistent file storage.
+-   **Non-Blocking**: Runs in a Web Worker, keeping your UI responsive.
+-   **Concurrency Safe**: Built-in mutex ensures safe, sequential execution of commands.
+-   **Type-Safe**: Written in TypeScript with full type definitions.
+-   **Transactions**: Supports atomic transactions with automatic rollback on error.
 
 ## Quick start
 
@@ -66,7 +66,7 @@ For quick demos or plain HTML pages you can load the prebuilt module directly:
 
 ```html
 <script type="module">
-    import openDB from "https://cdn.jsdelivr.net/npm/web-sqlite-js@1.0.5/dist/index.js";
+    import openDB from "https://cdn.jsdelivr.net/npm/web-sqlite-js@1.0.6/dist/index.js";
     // ...
 </script>
 ```

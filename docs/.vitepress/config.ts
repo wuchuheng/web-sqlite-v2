@@ -37,6 +37,13 @@ export default withPwa(
           href: "/apple-touch-icon.png",
         },
       ],
+      [
+        "link",
+        {
+          rel: "stylesheet",
+          href: "/font-awesome/all.min.css",
+        },
+      ],
       ["meta", { name: "theme-color", content: "#f7f4ec" }],
     ],
     pwa: pwaOptions,
@@ -82,11 +89,11 @@ export default withPwa(
       sidebar: [
         {
           text: "Guide",
-          items: [{ text: "Getting Started", link: "/getting-started" }],
-        },
-        {
-          text: "Reference",
-          items: [{ text: "API", link: "/api" }],
+          items: [
+            { text: "Getting Started", link: "/getting-started" },
+            { text: "Browser Compatibility", link: "/browser-compatibility" },
+            { text: "API", link: "/api" },
+          ],
         },
       ],
 

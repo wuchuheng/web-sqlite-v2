@@ -10,6 +10,8 @@ Designed to be truly effortless, it allows you to get a high-performance relatio
 
 ## Quick start
 
+> Before you begin, ensure your environment meets the [Browser Compatibility](/browser-compatibility) requirements.
+
 ### Option A: npm / bundler
 
 ::: code-group
@@ -48,7 +50,7 @@ For quick demos or plain HTML pages you can load the prebuilt module directly:
 
 ```html
 <script type="module">
-    import openDB from "https://cdn.jsdelivr.net/npm/web-sqlite-js@1.0.5/dist/index.js";
+    import openDB from "https://cdn.jsdelivr.net/npm/web-sqlite-js@1.0.6/dist/index.js";
     // ...
 </script>
 ```
@@ -57,7 +59,7 @@ See [samples/cdn.html](https://web-sqlite-js.wuchuheng.com/examples/cdn.html) fo
 
 > Heads up: `SharedArrayBuffer` requires COOP/COEP headers; see the section below.
 
-## Setup http headers
+## <i class="fa-solid fa-gears"></i> Setup http headers
 
 Pick your stack below to set the headers:
 
@@ -69,7 +71,7 @@ Cross-Origin-Embedder-Policy: require-corp
 ```
 
 <details>
-<summary><strong>Vite</strong></summary>
+<summary><strong><i class="fa-solid fa-bolt"></i> Vite</strong></summary>
 
 Update your `vite.config.ts`:
 
@@ -95,7 +97,7 @@ export default defineConfig({
 </details>
 
 <details>
-<summary><strong>Next.js</strong></summary>
+<summary><strong><i class="fa-solid fa-play"></i> Next.js</strong></summary>
 
 Update your `next.config.js`:
 
@@ -127,7 +129,7 @@ module.exports = nextConfig;
 </details>
 
 <details>
-<summary><strong>Webpack (Dev Server)</strong></summary>
+<summary><strong><i class="fa-solid fa-box"></i> Webpack (Dev Server)</strong></summary>
 
 Update your `webpack.config.js`:
 
@@ -146,7 +148,7 @@ module.exports = {
 </details>
 
 <details>
-<summary><strong>Nginx</strong></summary>
+<summary><strong><i class="fa-solid fa-server"></i> Nginx</strong></summary>
 
 Add the headers to your server block:
 
@@ -162,7 +164,7 @@ server {
 </details>
 
 <details>
-<summary><strong>Express.js</strong></summary>
+<summary><strong><i class="fa-solid fa-code"></i> Express.js</strong></summary>
 
 Use a middleware:
 
@@ -182,7 +184,7 @@ app.use((req, res, next) => {
 </details>
 
 <details>
-<summary><strong>React / Vue (Create React App / Vue CLI)</strong></summary>
+<summary><strong><i class="fa-brands fa-react"></i> React / <i class="fa-brands fa-vuejs"></i> Vue (Create React App / Vue CLI)</strong></summary>
 
 Most modern React/Vue setups use **Vite**. Please refer to the **Vite** section above.
 
