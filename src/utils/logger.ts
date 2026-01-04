@@ -5,6 +5,7 @@ export interface SqlLogInfo {
 }
 
 const originalInfo = console.info;
+const originalDebug = console.debug;
 
 const sqlKeywords = new Set([
   "SELECT",
@@ -126,6 +127,6 @@ export const configureLogger = (isDebug: boolean) => {
       originalInfo.apply(console, [finalFormatString, ...finalArgs]);
     };
   } else {
-    console.debug = () => {};
+    console.debug = originalDebug;
   }
 };

@@ -1,120 +1,34 @@
-import { OpenDBArgs, SqliteEvent, WorkerOpenDBOptions } from "./types/message";
 import { createWorkerBridge } from "./worker-bridge";
 import { createMutex } from "./utils/mutex/mutex";
-import type {
-  DBInterface,
-  SQLParams,
-  ExecResult,
-  ExecParams,
-  transactionCallback,
-} from "./types/DB";
+import type { DBInterface, OpenDBOptions } from "./types/DB";
 import { abilityCheck } from "./validations/shareBufferAbiliCheck";
+import { openReleaseDB } from "./release/release-manager";
 
 /**
- * Opens a SQLite database connection.
+ * Opens a SQLite database connection with release-versioning support.
  *
- * @param filename - The path to the SQLite database file to open.
- * @param options - Optional configuration options for opening the database.
- * @returns A promise that resolves to a DBInterface object providing methods to interact with the database.
+ * @param filename - The base database name (directory is created in OPFS).
+ * @param options - Optional release configuration and debug flag.
+ * @returns A DBInterface for the latest active version.
  *
- * @example
- * ```typescript
- * const db = await openDB('./mydata.db');
- * const results = await db.query('SELECT * FROM users');
- * await db.close();
- * ```
+ * @throws Error if the filename is invalid, release config is invalid,
+ * or an archived release hash does not match.
  */
 export const openDB = async (
   filename: string,
-  options?: WorkerOpenDBOptions,
+  options?: OpenDBOptions,
 ): Promise<DBInterface> => {
-  // 1. Handle input.
-  // 1.1 Validate ShareArrayBuffer ability.
   abilityCheck();
 
-  const { sendMsg, terminate: _terminate } = createWorkerBridge();
+  const { sendMsg } = createWorkerBridge();
   const runMutex = createMutex();
 
-  await sendMsg<void, OpenDBArgs>(SqliteEvent.OPEN, { filename, options });
-
-  // Internal helper to send EXECUTE messages without locking (for use inside transaction/lock)
-  const _exec = async (
-    sql: string,
-    params?: SQLParams,
-  ): Promise<ExecResult> => {
-    return await sendMsg<ExecResult, ExecParams>(SqliteEvent.EXECUTE, {
-      sql,
-      bind: params,
-    });
-  };
-
-  // Internal helper to send QUERY messages without locking
-  const _query = async <T = unknown>(
-    sql: string,
-    params?: SQLParams,
-  ): Promise<T[]> => {
-    if (typeof sql !== "string" || sql.trim() === "") {
-      throw new Error("SQL query must be a non-empty string");
-    }
-    return await sendMsg<T[], ExecParams>(SqliteEvent.QUERY, {
-      sql,
-      bind: params,
-    });
-  };
-
-  const exec = async (sql: string, params?: SQLParams): Promise<ExecResult> => {
-    return runMutex(() => _exec(sql, params));
-  };
-
-  /**
-   * Execute a query and return all rows.
-   */
-  const query = async <T = unknown>(
-    sql: string,
-    params?: SQLParams,
-  ): Promise<T[]> => {
-    return runMutex(() => _query<T>(sql, params));
-  };
-
-  /**
-   * Execute a transaction.
-   */
-  const transaction = async <T>(fn: transactionCallback<T>): Promise<T> => {
-    return runMutex(async () => {
-      await _exec("BEGIN");
-      try {
-        const result = await fn({
-          exec: _exec,
-          query: _query,
-        });
-        await _exec("COMMIT");
-        return result;
-      } catch (error) {
-        await _exec("ROLLBACK");
-        throw error;
-      }
-    });
-  };
-
-  /**
-   * Close the database connection.
-   */
-  const close = async (): Promise<void> => {
-    return runMutex(async () => {
-      await sendMsg(SqliteEvent.CLOSE);
-      // We don't terminate the worker bridge immediately here as sendMsg might be finishing?
-      // Actually sendMsg awaits response.
-    });
-  };
-
-  const db: DBInterface = {
-    exec,
-    query,
-    transaction,
-    close,
-  };
-
-  return db;
+  return await openReleaseDB({
+    filename,
+    options,
+    sendMsg,
+    runMutex,
+  });
 };
 
 export default openDB;

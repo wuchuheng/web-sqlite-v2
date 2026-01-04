@@ -15,6 +15,8 @@ export enum SqliteEvent {
   QUERY = "query",
 }
 
+export type DbTarget = "active" | "meta";
+
 export type WorkerOpenDBOptions = {
   debug?: boolean;
 };
@@ -22,6 +24,8 @@ export type WorkerOpenDBOptions = {
 export type OpenDBArgs = {
   filename: string;
   options?: WorkerOpenDBOptions;
+  target?: DbTarget;
+  replace?: boolean;
 };
 
 /**

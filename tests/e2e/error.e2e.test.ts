@@ -36,4 +36,36 @@ describe("error handling e2e tests", () => {
       "Database is not open",
     );
   });
+
+  test("should throw on invalid release version format", async () => {
+    const filename = "error-release-format.sqlite3";
+    await expect(
+      openDB(filename, {
+        releases: [
+          {
+            version: "01.0.0",
+            migrationSQL: "CREATE TABLE t (id INTEGER PRIMARY KEY);",
+          },
+        ],
+      }),
+    ).rejects.toThrow();
+  });
+
+  test("should throw on non-increasing release versions", async () => {
+    const filename = "error-release-order.sqlite3";
+    await expect(
+      openDB(filename, {
+        releases: [
+          {
+            version: "0.0.1",
+            migrationSQL: "CREATE TABLE t (id INTEGER PRIMARY KEY);",
+          },
+          {
+            version: "0.0.0",
+            migrationSQL: "CREATE TABLE t2 (id INTEGER PRIMARY KEY);",
+          },
+        ],
+      }),
+    ).rejects.toThrow();
+  });
 });

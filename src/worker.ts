@@ -10,7 +10,8 @@ import {
 
 import { configureLogger, SqlLogInfo } from "./utils/logger";
 
-let db: Sqlite3DB | null = null;
+let activeDb: Sqlite3DB | null = null;
+let metaDb: Sqlite3DB | null = null;
 let sqlite3: Sqlite3 | null = null;
 let isDebug = false;
 
@@ -28,37 +29,72 @@ const handleOpen = async (payload: OpenDBArgs) => {
     throw new Error("Invalid payload for OPEN event: expected filename string");
   }
 
-  sqlite3 = await sqlite3InitModule();
-  console.debug(`Initialized sqlite3 module in worker.`);
+  if (!sqlite3) {
+    sqlite3 = await sqlite3InitModule();
+    console.debug(`Initialized sqlite3 module in worker.`);
+  }
 
   let { filename } = payload;
   if (!filename.endsWith(".sqlite3")) {
     filename += ".sqlite3";
   }
 
-  isDebug = payload.options?.debug === true;
-  // Re-configure logger based on the new isDebug state from user options
-  configureLogger(isDebug);
+  if (payload.options) {
+    isDebug = payload.options.debug === true;
+    // Re-configure logger based on the new isDebug state from user options
+    configureLogger(isDebug);
+  }
 
-  db = new sqlite3!.oo1!.OpfsDb!(filename, "c");
-  console.debug(`Opened database: ${filename}`);
+  const target = payload.target ?? "active";
+  const replace = payload.replace === true;
+
+  if (target === "meta") {
+    if (metaDb && replace) {
+      metaDb.close();
+      metaDb = null;
+    }
+    if (!metaDb) {
+      metaDb = new sqlite3!.oo1!.OpfsDb!(filename, "c");
+      console.debug(`Opened metadata database: ${filename}`);
+    }
+    return;
+  }
+
+  const hadActiveDb = Boolean(activeDb);
+  if (activeDb && replace) {
+    activeDb.close();
+    activeDb = null;
+  }
+  if (!activeDb) {
+    activeDb = new sqlite3!.oo1!.OpfsDb!(filename, "c");
+    if (replace && hadActiveDb) {
+      console.debug(`Switched active database to: ${filename}`);
+    } else {
+      console.debug(`Opened active database: ${filename}`);
+    }
+  }
 };
 
 const handleExecute = (payload: unknown) => {
-  if (!db) {
-    throw new Error("Database is not open");
-  }
   const start = performance.now();
-  const { sql, bind } = payload as ExecParams;
+  const { sql, bind, target } = payload as ExecParams;
   if (typeof sql !== "string") {
     throw new Error(
       "Invalid payload for EXECUTE event: expected SQL string or { sql, bind }",
     );
   }
+
+  const db = target === "meta" ? metaDb : activeDb;
+  if (!db) {
+    throw new Error("Database is not open");
+  }
+
   db.exec({ sql, bind });
   const end = performance.now();
   const duration = end - start;
-  console.debug({ sql, duration, bind } as SqlLogInfo);
+  if (isDebug) {
+    console.debug({ sql, duration, bind } as SqlLogInfo);
+  }
   return {
     changes: db.changes(),
     lastInsertRowid: db.selectValue("SELECT last_insert_rowid()"),
@@ -67,11 +103,7 @@ const handleExecute = (payload: unknown) => {
 
 const handleQuery = (payload: ExecParams) => {
   // 1. Handle input.
-  if (!db) {
-    throw new Error("Database is not open");
-  }
-
-  const { sql, bind } = payload;
+  const { sql, bind, target } = payload;
 
   // 2. Handle query.
   // 2.1 Convert the sql and bind into a proper format. then execute the query.
@@ -81,27 +113,37 @@ const handleQuery = (payload: ExecParams) => {
     );
   }
 
+  const db = target === "meta" ? metaDb : activeDb;
+  if (!db) {
+    throw new Error("Database is not open");
+  }
+
   const start = performance.now();
   const rows = db.selectObjects(sql, bind);
-
   const end = performance.now();
   const duration = end - start;
 
-  console.debug({
-    sql,
-    duration,
-    bind,
-  } as SqlLogInfo);
+  if (isDebug) {
+    console.debug({
+      sql,
+      duration,
+      bind,
+    } as SqlLogInfo);
+  }
 
   return rows;
 };
 
 const handleClose = () => {
-  if (db) {
-    db.close();
-    sqlite3 = null;
-    db = null;
+  if (activeDb) {
+    activeDb.close();
+    activeDb = null;
   }
+  if (metaDb) {
+    metaDb.close();
+    metaDb = null;
+  }
+  sqlite3 = null;
 };
 
 self.onmessage = async (msg: MessageEvent<SqliteReqMsg<unknown>>) => {

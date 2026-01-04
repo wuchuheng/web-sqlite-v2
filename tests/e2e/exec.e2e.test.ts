@@ -18,11 +18,13 @@ describe("exec e2e tests", () => {
 
     // Validation: Check file size in OPFS
     const root = await navigator.storage.getDirectory();
-    const handle = await root.getFileHandle(filename);
+    const dir = await root.getDirectoryHandle(filename);
+    const handle = await dir.getFileHandle("default.sqlite3");
     const file = await handle.getFile();
 
     // SQLite header is 100 bytes, plus pages. It should be significant.
     expect(file.size).toBeGreaterThan(100);
+    await db.close();
   });
 
   test("should execute parameterized DML and return metadata", async () => {

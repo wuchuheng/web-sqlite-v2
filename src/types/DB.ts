@@ -13,7 +13,31 @@ export type SqlValue =
 /** A bindable parameter collection: positional or named. */
 export type SQLParams = SqlValue[] | Record<string, SqlValue>;
 
-export type ExecParams = { sql: string; bind?: SQLParams };
+export type DbTarget = "active" | "meta";
+
+export type ExecParams = { sql: string; bind?: SQLParams; target?: DbTarget };
+
+/**
+ * Release configuration entry for versioned migrations.
+ */
+export type ReleaseConfig = {
+  /** Semantic version string "x.x.x" (no leading zeros). */
+  version: string;
+  /** Migration SQL to apply for this version. */
+  migrationSQL: string;
+  /** Optional seed SQL to apply after migration. */
+  seedSQL?: string | null;
+};
+
+/**
+ * Options for opening a database.
+ */
+export type OpenDBOptions = {
+  /** Immutable release history configuration. */
+  releases?: ReleaseConfig[];
+  /** Enable SQL timing logs in the worker. */
+  debug?: boolean;
+};
 
 /**
  * Metadata returned for non-query statements.
@@ -81,8 +105,23 @@ export interface DBInterface {
 
   /** Close the database and release resources. */
   close(): Promise<void>;
+
+  /** Dev tooling APIs for release testing. */
+  devTool: DevTool;
 }
 
 export type transactionCallback<T> = (
   db: Pick<DBInterface, "exec" | "query">,
 ) => Promise<T>;
+
+export type DevTool = {
+  /**
+   * Create a new dev version using migration and seed SQL.
+   */
+  release(input: ReleaseConfig): Promise<void>;
+
+  /**
+   * Roll back to a target version and remove dev versions above it.
+   */
+  rollback(version: string): Promise<void>;
+};
