@@ -44,11 +44,14 @@ const formatBytes = (bytes) => {
 
 const displayFilename = computed(() => {
   const sizeLabel =
-    fileMeta.value.size === null ? "" : ` (${formatBytes(fileMeta.value.size)})`;
+    fileMeta.value.size === null
+      ? ""
+      : ` (${formatBytes(fileMeta.value.size)})`;
   return `${fileMeta.value.name}${sizeLabel}`;
 });
 
-const parseVersion = (version) => version.split(".").map((part) => Number(part));
+const parseVersion = (version) =>
+  version.split(".").map((part) => Number(part));
 
 const compareVersions = (a, b) => {
   const aParts = parseVersion(a);

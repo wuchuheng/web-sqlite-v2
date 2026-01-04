@@ -138,18 +138,19 @@ sequenceDiagram
 import openDB from "web-sqlite-js";
 
 const db = await openDB("demo.sqlite3", {
-  releases: [
-    {
-      version: "0.0.0",
-      migrationSQL: "CREATE TABLE users (id INTEGER PRIMARY KEY, name TEXT);",
-      seedSQL: "INSERT INTO users (name) VALUES ('Ada');",
-    },
-    {
-      version: "0.0.1",
-      migrationSQL: "ALTER TABLE users ADD COLUMN created_at TEXT;",
-    },
-  ],
-  debug: false,
+    releases: [
+        {
+            version: "0.0.0",
+            migrationSQL:
+                "CREATE TABLE users (id INTEGER PRIMARY KEY, name TEXT);",
+            seedSQL: "INSERT INTO users (name) VALUES ('Ada');",
+        },
+        {
+            version: "0.0.1",
+            migrationSQL: "ALTER TABLE users ADD COLUMN created_at TEXT;",
+        },
+    ],
+    debug: false,
 });
 ```
 
@@ -157,9 +158,9 @@ const db = await openDB("demo.sqlite3", {
 
 ```ts
 await db.devTool.release({
-  version: "0.0.2",
-  migrationSQL: "ALTER TABLE users ADD COLUMN role TEXT;",
-  seedSQL: null,
+    version: "0.0.2",
+    migrationSQL: "ALTER TABLE users ADD COLUMN role TEXT;",
+    seedSQL: null,
 });
 ```
 
