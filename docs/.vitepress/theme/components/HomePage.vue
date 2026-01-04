@@ -21,6 +21,7 @@ const lastRunMutated = ref(false);
 // Constants
 const QUERY_ANIMATION_DELAY = 500; // ms, matches BezierCurve duration
 const AUTO_TAB_DELAY = 2000;
+const DEMO_DB_NAME = "local-demo";
 const AUTO_STEPS = [
   {
     tab: "insert",
@@ -434,7 +435,7 @@ onMounted(async () => {
       // Import dynamically to avoid SSR issues
       const { openDB } = await import("web-sqlite-js");
 
-      db.value = await openDB("local");
+      db.value = await openDB(DEMO_DB_NAME);
 
       await db.value.exec(`
                 CREATE TABLE IF NOT EXISTS users (
@@ -537,6 +538,7 @@ onUnmounted(() => {
           ref="opfsRef"
           :style="layoutConfig.opfs"
           :device-type="deviceType"
+          :db-name="DEMO_DB_NAME"
         />
       </div>
     </div>

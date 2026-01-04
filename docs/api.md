@@ -18,9 +18,23 @@ const db = await openDB("my-database", { debug: false });
 
 If the filename does not end with `.sqlite3`, the extension is appended automatically.
 
-### `options?: { debug?: boolean }`
+### `options?: { releases?: ReleaseConfig[]; debug?: boolean }`
 
+- `releases`: Immutable release history used for versioned migrations.
 - `debug`: Enables worker-side SQL timing logs via `console.debug`.
+
+### `ReleaseConfig`
+
+```ts
+type ReleaseConfig = {
+    version: string;
+    migrationSQL: string;
+    seedSQL?: string | null;
+};
+```
+
+- `version` must match `x.x.x` with no leading zeros.
+- `default` is reserved and cannot be used.
 
 ## `DBInterface`
 
@@ -64,6 +78,29 @@ Closes the database connection.
 
 ```ts
 await db.close();
+```
+
+### `db.devTool`
+
+Dev-only helpers for testing releases locally.
+
+#### `db.devTool.release(config)`
+
+Creates a new dev version and switches the active DB to it.
+
+```ts
+await db.devTool.release({
+    version: "0.0.2",
+    migrationSQL: "ALTER TABLE users ADD COLUMN role TEXT;",
+});
+```
+
+#### `db.devTool.rollback(version)`
+
+Rolls back to a target version by removing dev versions above it.
+
+```ts
+await db.devTool.rollback("0.0.1");
 ```
 
 ## SQL parameters

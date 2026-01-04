@@ -1,26 +1,37 @@
 <script setup>
 import { computed, onMounted, ref } from "vue";
 
+const props = defineProps({
+  deviceType: { type: String, default: "sm" },
+  dbName: { type: String, default: "local-demo" },
+});
+
 const folderRef = ref(null);
 const isDownloading = ref(false);
 const sqliteHandle = ref(null);
 const fileMeta = ref({
-  name: "No .sqlite3 file",
+  name: "No database file",
   size: null,
 });
 const statusText = ref("");
-
-defineProps({
-  deviceType: { type: String, default: "sm" },
-});
 
 const isOpfsAvailable =
   typeof navigator !== "undefined" &&
   !!navigator.storage &&
   typeof navigator.storage.getDirectory === "function";
 
+const VERSION_RE = /^(0|[1-9]\d*)\.(0|[1-9]\d*)\.(0|[1-9]\d*)$/;
+
+const dbDirName = computed(() => {
+  const rawName = typeof props.dbName === "string" ? props.dbName.trim() : "";
+  const baseName = rawName === "" ? "local-demo" : rawName;
+  return baseName.endsWith(".sqlite3") ? baseName : `${baseName}.sqlite3`;
+});
+
+const folderLabel = computed(() => `${dbDirName.value}/`);
+
 const formatBytes = (bytes) => {
-  if (typeof bytes !== "number" || Number.isNaN(bytes)) return "—";
+  if (typeof bytes !== "number" || Number.isNaN(bytes)) return "n/a";
   if (bytes < 1024) return `${bytes} B`;
   const units = ["KB", "MB", "GB"];
   const exponent = Math.min(
@@ -31,28 +42,45 @@ const formatBytes = (bytes) => {
   return `${value.toFixed(value >= 10 ? 0 : 1)} ${units[exponent]}`;
 };
 
-const formattedSize = computed(() => formatBytes(fileMeta.value.size));
 const displayFilename = computed(() => {
   const sizeLabel =
-    formattedSize.value === "—" ? "" : ` (${formattedSize.value})`;
+    fileMeta.value.size === null ? "" : ` (${formatBytes(fileMeta.value.size)})`;
   return `${fileMeta.value.name}${sizeLabel}`;
 });
 
-let refreshChain = Promise.resolve();
+const parseVersion = (version) => version.split(".").map((part) => Number(part));
 
-const pickFirstSqliteFile = async () => {
-  const root = await navigator.storage.getDirectory();
-  let entry = null;
-  // Choose the first .sqlite3 file we see (alphabetical order depends on the iterator)
-  // If multiple exist, the first one becomes the active target.
-  // eslint-disable-next-line no-restricted-syntax
-  for await (const [name, handle] of root.entries()) {
-    if (handle.kind === "file" && name.endsWith(".sqlite3")) {
-      entry = { name, handle };
-      break;
+const compareVersions = (a, b) => {
+  const aParts = parseVersion(a);
+  const bParts = parseVersion(b);
+  for (let i = 0; i < aParts.length; i += 1) {
+    if (aParts[i] !== bParts[i]) {
+      return aParts[i] > bParts[i] ? 1 : -1;
     }
   }
-  return entry;
+  return 0;
+};
+
+let refreshChain = Promise.resolve();
+
+const resolveActiveDbHandle = async (dbDir) => {
+  const versionDirs = [];
+  // eslint-disable-next-line no-restricted-syntax
+  for await (const [name, handle] of dbDir.entries()) {
+    if (handle.kind === "directory" && VERSION_RE.test(name)) {
+      versionDirs.push({ name, handle });
+    }
+  }
+
+  if (versionDirs.length > 0) {
+    versionDirs.sort((a, b) => compareVersions(a.name, b.name));
+    const latest = versionDirs[versionDirs.length - 1];
+    const dbHandle = await latest.handle.getFileHandle("db.sqlite3");
+    return { name: `${latest.name}/db.sqlite3`, handle: dbHandle };
+  }
+
+  const dbHandle = await dbDir.getFileHandle("default.sqlite3");
+  return { name: "default.sqlite3", handle: dbHandle };
 };
 
 const loadMeta = async () => {
@@ -62,20 +90,36 @@ const loadMeta = async () => {
   }
 
   try {
-    const entry = await pickFirstSqliteFile();
-    if (!entry) {
-      sqliteHandle.value = null;
-      fileMeta.value = { name: "No .sqlite3 file", size: null };
-      statusText.value = "No .sqlite3 file in OPFS. Run a query to create one.";
-      return;
+    const root = await navigator.storage.getDirectory();
+    let dbDir;
+    try {
+      dbDir = await root.getDirectoryHandle(dbDirName.value);
+    } catch (error) {
+      const name = error?.name;
+      if (name === "NotFoundError") {
+        sqliteHandle.value = null;
+        fileMeta.value = { name: "No database file", size: null };
+        statusText.value = `No ${dbDirName.value}/ folder in OPFS. Run a query to create one.`;
+        return;
+      }
+      if (name === "TypeMismatchError") {
+        sqliteHandle.value = null;
+        fileMeta.value = { name: "No database file", size: null };
+        statusText.value = `A file named ${dbDirName.value} already exists. Remove it to create the folder.`;
+        return;
+      }
+      throw error;
     }
 
-    const file = await entry.handle.getFile();
-    sqliteHandle.value = entry.handle;
-    fileMeta.value = { name: entry.name, size: file.size };
+    const activeEntry = await resolveActiveDbHandle(dbDir);
+    const file = await activeEntry.handle.getFile();
+
+    sqliteHandle.value = activeEntry.handle;
+    fileMeta.value = { name: activeEntry.name, size: file.size };
     statusText.value = "";
   } catch (err) {
     sqliteHandle.value = null;
+    fileMeta.value = { name: "No database file", size: null };
     statusText.value = "Unable to read OPFS. Try running a query first.";
   }
 };
@@ -101,10 +145,10 @@ const downloadDb = async () => {
     const url = URL.createObjectURL(blob);
     const anchor = document.createElement("a");
     anchor.href = url;
-    anchor.download = file.name;
+    anchor.download = fileMeta.value.name.replace(/\//g, "__");
     anchor.click();
     URL.revokeObjectURL(url);
-    fileMeta.value = { name: file.name, size: file.size };
+    fileMeta.value = { name: fileMeta.value.name, size: file.size };
   } catch (err) {
     statusText.value = err?.message || "Download failed.";
   } finally {
@@ -148,6 +192,7 @@ defineExpose({
           <i class="fa-regular fa-folder-open"></i>
           <span>Persistent Local File System (OPFS)</span>
         </div>
+        <div class="folder-subtitle">{{ folderLabel }}</div>
         <div class="file-list">
           <div class="file-item">
             <i class="fa-solid fa-file-code"></i>
@@ -177,15 +222,11 @@ defineExpose({
   position: relative;
   z-index: 10;
   background: #f7f4ec; /* Match page background to mask the curve behind */
-  /* Use padding to create space but let SVG handle the shape */
-  /* padding: 10px; */
 }
 
 .folder-svg-container {
   position: relative;
   width: 100%;
-  /* min-height: 140px; */
-  /* round border */
 }
 
 .folder-bg {
@@ -204,9 +245,6 @@ defineExpose({
   padding: 20px 15px 15px; /* Top padding to clear the tab area */
   display: flex;
   flex-direction: column;
-  /* gap: 12px; */
-  /* round border */
-  /* border-radius: 8px; */
 }
 
 .folder-header {
@@ -219,10 +257,17 @@ defineExpose({
   font-family: "Kalam", cursive;
 }
 
+.folder-subtitle {
+  margin-top: 4px;
+  font-size: 12px;
+  color: #6a665e;
+  font-family: "Kalam", cursive;
+}
+
 .file-list {
+  margin-top: 8px;
   background: #fff;
   border-radius: 8px;
-  /* padding: 8px; */
 }
 
 .file-item {
@@ -251,10 +296,12 @@ defineExpose({
   border-radius: 6px;
   transition: transform 0.08s ease;
 }
+
 .download-btn:disabled {
   opacity: 0.6;
   cursor: not-allowed;
 }
+
 .download-btn:hover {
   transform: scale(1.05);
 }
