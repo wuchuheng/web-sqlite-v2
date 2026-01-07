@@ -3,7 +3,7 @@
     "version": "1.1.0",
     "description": "web-sqlite-js is a friendly, out-of-the-box SQLite database for the web that makes persistent client-side storage simple for every developer.",
     "workspaces": [
-        "docs"
+        "vitepress-docs"
     ],
     "type": "module",
     "main": "./dist/index.js",
@@ -29,7 +29,7 @@
         "test": "npm run build && npm run lint && npm run test:unit && npm run test:e2e ",
         "test:unit": "vitest run --config vitest.unit.config.ts --coverage",
         "http": "tsx scripts/http-service.ts ./ --port 8399",
-        "http:docs": "tsx scripts/http-service.ts ./docs/.vitepress/dist --port 8399",
+        "http:docs": "tsx scripts/http-service.ts ./vitepress-docs/.vitepress/dist --port 8399",
         "test:e2e": "vitest run --config vitest.e2e.config.ts",
         "test:debug": "vitest run --config vitest.e2e.config.ts --no-file-parallelism",
         "prebuild": "npx wasm-opt -Oz --all-features src/jswasm/sqlite3.wasm -o src/jswasm/sqlite3.wasm.tmp && gzip -9 -c src/jswasm/sqlite3.wasm.tmp | base64 -w 0 > src/jswasm/sqlite3.wasm.base64 && echo \"export const wasmBase64 = '$(cat src/jswasm/sqlite3.wasm.base64)';\" > src/jswasm/wasm-asset.js && rm src/jswasm/sqlite3.wasm.tmp src/jswasm/sqlite3.wasm.base64 && npx tsx scripts/bundle-proxy-asset.ts",
@@ -41,11 +41,11 @@
         "format": "prettier --ignore-path .gitignore --write .",
         "package:compress": "npm pack",
         "package:publish": "npm run test && npm run build && npm publish --access public",
-        "docs:dev": "npm run dev --workspace=@web-sqlite-js/docs",
-        "docs:build": "npm run build --workspace=@web-sqlite-js/docs",
-        "docs:preview": "npm run preview --workspace=@web-sqlite-js/docs",
-        "docs:icons": "npm run icons --workspace=@web-sqlite-js/docs",
-        "docs:deploy": "cd docs && ./deploy.sh"
+        "docs:dev": "npm run dev --workspace=@web-sqlite-js/vitepress-docs",
+        "docs:build": "npm run build --workspace=@web-sqlite-js/vitepress-docs",
+        "docs:preview": "npm run preview --workspace=@web-sqlite-js/vitepress-docs",
+        "docs:icons": "npm run icons --workspace=@web-sqlite-js/vitepress-docs",
+        "docs:deploy": "cd vitepress-docs && ./deploy.sh"
     },
     "files": [
         "dist"

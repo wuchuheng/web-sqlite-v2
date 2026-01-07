@@ -1,5 +1,5 @@
 {
-    "name": "@web-sqlite-js/docs",
+    "name": "@web-sqlite-js/vitepress-docs",
     "version": "0.0.1",
     "type": "module",
     "private": true,
