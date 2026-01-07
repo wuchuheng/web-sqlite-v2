@@ -1,0 +1,267 @@
+2026-01-07T15:58:22.508Z [DEBUG] Watching for changes in setting files /home/wuchuheng/.claude...
+2026-01-07T15:58:22.522Z [DEBUG] [LSP MANAGER] initializeLspServerManager() called
+2026-01-07T15:58:22.522Z [DEBUG] [LSP MANAGER] Created manager instance, state=pending
+2026-01-07T15:58:22.522Z [DEBUG] [LSP MANAGER] Starting async initialization (generation 1)
+2026-01-07T15:58:22.525Z [DEBUG] LSP server manager initialized successfully
+2026-01-07T15:58:22.525Z [DEBUG] LSP notification handlers registered successfully for all 0 server(s)
+2026-01-07T15:58:22.525Z [DEBUG] Found 0 plugins (0 enabled, 0 disabled)
+2026-01-07T15:58:22.539Z [DEBUG] [SLOW OPERATION DETECTED] execSyncWithDefaults_DEPRECATED (11.5ms): ldd /bin/ls 2>/dev/null
+2026-01-07T15:58:22.539Z [DEBUG] Plugin autoupdate: skipped (auto-updater disabled)
+2026-01-07T15:58:22.543Z [DEBUG] Loading skills from: managed=/etc/claude-code/.claude/skills, user=/home/wuchuheng/.claude/skills, project=[]
+2026-01-07T15:58:22.550Z [DEBUG] installed_plugins.json doesn't exist, returning empty V2 object
+2026-01-07T15:58:22.575Z [DEBUG] Creating shell snapshot for bash (/bin/bash)
+2026-01-07T15:58:22.576Z [DEBUG] Looking for shell config file: /home/wuchuheng/.bashrc
+2026-01-07T15:58:22.576Z [DEBUG] Snapshots directory: /home/wuchuheng/.claude/shell-snapshots
+2026-01-07T15:58:22.577Z [DEBUG] Creating snapshot at: /home/wuchuheng/.claude/shell-snapshots/snapshot-bash-1767801502576-t6oplo.sh
+2026-01-07T15:58:22.577Z [DEBUG] Shell binary exists: true
+2026-01-07T15:58:22.577Z [DEBUG] Execution timeout: 10000ms
+2026-01-07T15:58:22.581Z [DEBUG] Writing to temp file: /home/wuchuheng/.claude/todos/1fd470ba-a534-4103-9e7a-74da59d4dea7-agent-1fd470ba-a534-4103-9e7a-74da59d4dea7.json.tmp.88029.1767801502581
+2026-01-07T15:58:22.585Z [DEBUG] Temp file written successfully, size: 2 bytes
+2026-01-07T15:58:22.585Z [DEBUG] Renaming /home/wuchuheng/.claude/todos/1fd470ba-a534-4103-9e7a-74da59d4dea7-agent-1fd470ba-a534-4103-9e7a-74da59d4dea7.json.tmp.88029.1767801502581 to /home/wuchuheng/.claude/todos/1fd470ba-a534-4103-9e7a-74da59d4dea7-agent-1fd470ba-a534-4103-9e7a-74da59d4dea7.json
+2026-01-07T15:58:22.585Z [DEBUG] File /home/wuchuheng/.claude/todos/1fd470ba-a534-4103-9e7a-74da59d4dea7-agent-1fd470ba-a534-4103-9e7a-74da59d4dea7.json written atomically
+2026-01-07T15:58:22.588Z [DEBUG] getPluginSkills: Processing 0 enabled plugins
+2026-01-07T15:58:22.588Z [DEBUG] Total plugin skills loaded: 0
+2026-01-07T15:58:22.588Z [DEBUG] Total plugin commands loaded: 0
+2026-01-07T15:58:22.588Z [DEBUG] Registered 0 hooks from 0 plugins
+2026-01-07T15:58:22.622Z [DEBUG] Git remote URL: git@github.com:wuchuheng/claude_template.git
+2026-01-07T15:58:22.622Z [DEBUG] Parsed repository: wuchuheng/claude_template from git@github.com:wuchuheng/claude_template.git
+2026-01-07T15:58:22.622Z [DEBUG] Parsed repository: wuchuheng/claude_template from URL: git@github.com:wuchuheng/claude_template.git
+2026-01-07T15:58:22.625Z [DEBUG] Writing to temp file: /home/wuchuheng/.claude.json.tmp.88029.1767801502625
+2026-01-07T15:58:22.625Z [DEBUG] Preserving file permissions: 100600
+2026-01-07T15:58:22.630Z [DEBUG] Temp file written successfully, size: 68703 bytes
+2026-01-07T15:58:22.630Z [DEBUG] Applied original permissions to temp file
+2026-01-07T15:58:22.630Z [DEBUG] Renaming /home/wuchuheng/.claude.json.tmp.88029.1767801502625 to /home/wuchuheng/.claude.json
+2026-01-07T15:58:22.630Z [DEBUG] File /home/wuchuheng/.claude.json written atomically
+2026-01-07T15:58:22.631Z [DEBUG] Added /home/wuchuheng/claude_template/.claude to tracked paths for repo wuchuheng/claude_template
+2026-01-07T15:58:22.638Z [DEBUG] [SLOW OPERATION DETECTED] fs.statSync (5.3ms)
+2026-01-07T15:58:22.639Z [DEBUG] Ripgrep first use test: PASSED (mode=builtin, path=/home/wuchuheng/.dotfiles/src/XDG_CACHE_HOME/pnpm/global/5/.pnpm/@anthropic-ai+claude-code@2.0.76/node_modules/@anthropic-ai/claude-code/vendor/ripgrep/x64-linux/rg)
+2026-01-07T15:58:22.643Z [DEBUG] Shell snapshot created successfully (5413 bytes)
+2026-01-07T15:58:22.651Z [DEBUG] Skipping duplicate file '/home/wuchuheng/claude_template/.claude/agents/S5-contractDesigner.md' from projectSettings (same inode already loaded from userSettings)
+2026-01-07T15:58:22.651Z [DEBUG] Skipping duplicate file '/home/wuchuheng/claude_template/.claude/agents/S7-taskManager.md' from projectSettings (same inode already loaded from userSettings)
+2026-01-07T15:58:22.651Z [DEBUG] Skipping duplicate file '/home/wuchuheng/claude_template/.claude/agents/S3-systemArchitect.md' from projectSettings (same inode already loaded from userSettings)
+2026-01-07T15:58:22.651Z [DEBUG] Skipping duplicate file '/home/wuchuheng/claude_template/.claude/agents/S4-adrSteward.md' from projectSettings (same inode already loaded from userSettings)
+2026-01-07T15:58:22.651Z [DEBUG] Skipping duplicate file '/home/wuchuheng/claude_template/.claude/agents/S6-techLead.md' from projectSettings (same inode already loaded from userSettings)
+2026-01-07T15:58:22.651Z [DEBUG] Skipping duplicate file '/home/wuchuheng/claude_template/.claude/agents/S1-projectManager.md' from projectSettings (same inode already loaded from userSettings)
+2026-01-07T15:58:22.651Z [DEBUG] Skipping duplicate file '/home/wuchuheng/claude_template/.claude/agents/S8-worker.md' from projectSettings (same inode already loaded from userSettings)
+2026-01-07T15:58:22.651Z [DEBUG] Skipping duplicate file '/home/wuchuheng/claude_template/.claude/agents/S2-feasibilityAnalyst.md' from projectSettings (same inode already loaded from userSettings)
+2026-01-07T15:58:22.651Z [DEBUG] Deduplicated 8 files in agents (same inode via symlinks or hard links)
+2026-01-07T15:58:22.652Z [DEBUG] Total plugin agents loaded: 0
+2026-01-07T15:58:22.652Z [DEBUG] Skipping duplicate file '/home/wuchuheng/claude_template/.claude/commands/s2-feasibility.md' from projectSettings (same inode already loaded from userSettings)
+2026-01-07T15:58:22.652Z [DEBUG] Skipping duplicate file '/home/wuchuheng/claude_template/.claude/commands/s3-architecture.md' from projectSettings (same inode already loaded from userSettings)
+2026-01-07T15:58:22.652Z [DEBUG] Skipping duplicate file '/home/wuchuheng/claude_template/.claude/commands/s5-design.md' from projectSettings (same inode already loaded from userSettings)
+2026-01-07T15:58:22.652Z [DEBUG] Skipping duplicate file '/home/wuchuheng/claude_template/.claude/commands/s4-adr.md' from projectSettings (same inode already loaded from userSettings)
+2026-01-07T15:58:22.652Z [DEBUG] Skipping duplicate file '/home/wuchuheng/claude_template/.claude/commands/s1-discovery.md' from projectSettings (same inode already loaded from userSettings)
+2026-01-07T15:58:22.652Z [DEBUG] Deduplicated 5 files in commands (same inode via symlinks or hard links)
+2026-01-07T15:58:22.653Z [DEBUG] Loaded 5 unique skills (managed: 0, user: 0, project: 0, legacy commands: 5)
+2026-01-07T15:58:22.653Z [DEBUG] getSkills returning: 5 skill dir commands, 0 plugin skills
+2026-01-07T15:58:24.228Z [DEBUG] Writing to temp file: /home/wuchuheng/.claude.json.tmp.88029.1767801504228
+2026-01-07T15:58:24.228Z [DEBUG] Preserving file permissions: 100600
+2026-01-07T15:58:24.231Z [DEBUG] Temp file written successfully, size: 69084 bytes
+2026-01-07T15:58:24.231Z [DEBUG] Applied original permissions to temp file
+2026-01-07T15:58:24.231Z [DEBUG] Renaming /home/wuchuheng/.claude.json.tmp.88029.1767801504228 to /home/wuchuheng/.claude.json
+2026-01-07T15:58:24.231Z [DEBUG] File /home/wuchuheng/.claude.json written atomically
+2026-01-07T15:58:24.264Z [DEBUG] Initialized versioned plugins system with 0 plugins
+2026-01-07T15:58:24.266Z [DEBUG] Writing to temp file: /home/wuchuheng/.claude.json.tmp.88029.1767801504266
+2026-01-07T15:58:24.266Z [DEBUG] Preserving file permissions: 100600
+2026-01-07T15:58:24.270Z [DEBUG] Temp file written successfully, size: 69084 bytes
+2026-01-07T15:58:24.270Z [DEBUG] Applied original permissions to temp file
+2026-01-07T15:58:24.270Z [DEBUG] Renaming /home/wuchuheng/.claude.json.tmp.88029.1767801504266 to /home/wuchuheng/.claude.json
+2026-01-07T15:58:24.270Z [DEBUG] File /home/wuchuheng/.claude.json written atomically
+2026-01-07T15:58:24.278Z [DEBUG] Getting matching hook commands for SessionStart with query: startup
+2026-01-07T15:58:24.278Z [DEBUG] Found 0 hook matchers in settings
+2026-01-07T15:58:24.278Z [DEBUG] Matched 0 unique hooks for query "startup" (0 before deduplication)
+2026-01-07T15:58:24.478Z [DEBUG] Writing to temp file: /home/wuchuheng/.claude.json.tmp.88029.1767801504478
+2026-01-07T15:58:24.478Z [DEBUG] Preserving file permissions: 100600
+2026-01-07T15:58:24.482Z [DEBUG] Temp file written successfully, size: 69008 bytes
+2026-01-07T15:58:24.482Z [DEBUG] Applied original permissions to temp file
+2026-01-07T15:58:24.482Z [DEBUG] Renaming /home/wuchuheng/.claude.json.tmp.88029.1767801504478 to /home/wuchuheng/.claude.json
+2026-01-07T15:58:24.482Z [DEBUG] File /home/wuchuheng/.claude.json written atomically
+2026-01-07T15:58:24.500Z [DEBUG] Official marketplace auto-install skipped: already_attempted
+2026-01-07T15:58:24.500Z [DEBUG] performStartupChecks called
+2026-01-07T15:58:24.501Z [DEBUG] Starting background plugin installations
+2026-01-07T15:58:24.501Z [DEBUG] performBackgroundPluginInstallations called
+2026-01-07T15:58:24.805Z [DEBUG] [SLOW OPERATION DETECTED] execSyncWithDefaults_DEPRECATED (303.2ms): powershell.exe -Command '$env:USERPROFILE'
+2026-01-07T15:58:24.878Z [DEBUG] Writing to temp file: /home/wuchuheng/.claude.json.tmp.88029.1767801504878
+2026-01-07T15:58:24.878Z [DEBUG] Preserving file permissions: 100600
+2026-01-07T15:58:24.881Z [DEBUG] Temp file written successfully, size: 69084 bytes
+2026-01-07T15:58:24.881Z [DEBUG] Applied original permissions to temp file
+2026-01-07T15:58:24.881Z [DEBUG] Renaming /home/wuchuheng/.claude.json.tmp.88029.1767801504878 to /home/wuchuheng/.claude.json
+2026-01-07T15:58:24.881Z [DEBUG] File /home/wuchuheng/.claude.json written atomically
+2026-01-07T15:58:25.156Z [DEBUG] [SLOW OPERATION DETECTED] execSyncWithDefaults_DEPRECATED (273.7ms): powershell.exe -Command '$env:USERPROFILE'
+2026-01-07T15:58:25.171Z [DEBUG] Setting installation status: 0 marketplaces, 0 installable plugins, 0 uninstallable plugins
+2026-01-07T15:58:25.171Z [DEBUG] Loaded plugins - Enabled: 0, Disabled: 0, Commands: 0, Agents: 0, Errors: 0
+2026-01-07T15:58:25.176Z [DEBUG] Getting matching hook commands for SubagentStart with query: Explore
+2026-01-07T15:58:25.176Z [DEBUG] Found 0 hook matchers in settings
+2026-01-07T15:58:25.176Z [DEBUG] Matched 0 unique hooks for query "Explore" (0 before deduplication)
+2026-01-07T15:58:25.176Z [DEBUG] Getting matching hook commands for SubagentStart with query: Plan
+2026-01-07T15:58:25.176Z [DEBUG] Found 0 hook matchers in settings
+2026-01-07T15:58:25.176Z [DEBUG] Matched 0 unique hooks for query "Plan" (0 before deduplication)
+2026-01-07T15:58:25.194Z [DEBUG] AutoUpdaterWrapper: Installation type: unknown
+2026-01-07T15:58:25.244Z [DEBUG] Writing to temp file: /home/wuchuheng/.claude.json.tmp.88029.1767801505244
+2026-01-07T15:58:25.244Z [DEBUG] Preserving file permissions: 100600
+2026-01-07T15:58:25.247Z [DEBUG] Temp file written successfully, size: 69265 bytes
+2026-01-07T15:58:25.247Z [DEBUG] Applied original permissions to temp file
+2026-01-07T15:58:25.247Z [DEBUG] Renaming /home/wuchuheng/.claude.json.tmp.88029.1767801505244 to /home/wuchuheng/.claude.json
+2026-01-07T15:58:25.247Z [DEBUG] File /home/wuchuheng/.claude.json written atomically
+2026-01-07T15:58:25.696Z [DEBUG] Stream started - received first chunk
+2026-01-07T15:58:25.704Z [DEBUG] Stream started - received first chunk
+2026-01-07T15:58:25.828Z [DEBUG] Stream started - received first chunk
+2026-01-07T15:58:26.464Z [DEBUG] [SLOW OPERATION DETECTED] execSyncWithDefaults_DEPRECATED (291.1ms): powershell.exe -Command '$env:USERPROFILE'
+2026-01-07T15:58:26.928Z [DEBUG] Getting matching hook commands for SubagentStop with query: undefined
+2026-01-07T15:58:26.928Z [DEBUG] Found 0 hook matchers in settings
+2026-01-07T15:58:26.928Z [DEBUG] Matched 0 unique hooks for query "no match query" (0 before deduplication)
+2026-01-07T15:58:27.770Z [DEBUG] [SLOW OPERATION DETECTED] execSyncWithDefaults_DEPRECATED (290.3ms): powershell.exe -Command '$env:USERPROFILE'
+2026-01-07T15:58:29.059Z [DEBUG] [SLOW OPERATION DETECTED] execSyncWithDefaults_DEPRECATED (273.8ms): powershell.exe -Command '$env:USERPROFILE'
+2026-01-07T15:58:29.333Z [DEBUG] Getting matching hook commands for SubagentStop with query: undefined
+2026-01-07T15:58:29.333Z [DEBUG] Found 0 hook matchers in settings
+2026-01-07T15:58:29.333Z [DEBUG] Matched 0 unique hooks for query "no match query" (0 before deduplication)
+2026-01-07T15:58:29.637Z [DEBUG] [SLOW OPERATION DETECTED] execSyncWithDefaults_DEPRECATED (284.2ms): powershell.exe -Command '$env:USERPROFILE'
+2026-01-07T15:58:29.921Z [DEBUG] [SLOW OPERATION DETECTED] execSyncWithDefaults_DEPRECATED (270.2ms): powershell.exe -Command '$env:USERPROFILE'
+2026-01-07T15:58:29.141Z [DEBUG] [SLOW OPERATION DETECTED] execSyncWithDefaults_DEPRECATED (283.4ms): powershell.exe -Command '$env:USERPROFILE'
+2026-01-07T15:58:30.434Z [DEBUG] [SLOW OPERATION DETECTED] execSyncWithDefaults_DEPRECATED (280.7ms): powershell.exe -Command '$env:USERPROFILE'
+2026-01-07T15:58:31.800Z [DEBUG] [SLOW OPERATION DETECTED] execSyncWithDefaults_DEPRECATED (350.6ms): powershell.exe -Command '$env:USERPROFILE'
+2026-01-07T15:58:33.072Z [DEBUG] [SLOW OPERATION DETECTED] execSyncWithDefaults_DEPRECATED (255.7ms): powershell.exe -Command '$env:USERPROFILE'
+2026-01-07T15:58:33.093Z [DEBUG] Metadata string for s1-discovery:
+2026-01-07T15:58:33.093Z [DEBUG] <command-message>s1-discovery</command-message>
+<command-name>/s1-discovery</command-name>
+2026-01-07T15:58:33.093Z [DEBUG] command-message tags in metadata: 1
+2026-01-07T15:58:33.107Z [DEBUG] LSP Diagnostics: getLSPDiagnosticAttachments called
+2026-01-07T15:58:33.107Z [DEBUG] LSP Diagnostics: Checking registry - 0 pending
+2026-01-07T15:58:33.107Z [DEBUG] Hooks: Found 0 total hooks in registry
+2026-01-07T15:58:33.107Z [DEBUG] Hooks: checkForNewResponses returning 0 responses
+2026-01-07T15:58:33.128Z [DEBUG] processPromptSlashCommand creating 4 messages for s1-discovery
+2026-01-07T15:58:33.128Z [DEBUG] Message 1: <command-message>s1-discovery</command-message>
+<command-name>/s1-discovery</command-name>
+2026-01-07T15:58:33.128Z [DEBUG] Message 2 [META]: [{"type":"text","text":"# File Tree Map\n\n## Reference (templates)\n.claude/templates/docs/\n└─ 01-discovery/\n   ├─ 01-brief.md          # reference template\n   ├─ 02-requirements.md    # reference
+2026-01-07T15:58:33.128Z [DEBUG] Message 3: [ATTACHMENT]
+2026-01-07T15:58:33.128Z [DEBUG] Message 4: [ATTACHMENT]
+2026-01-07T15:58:33.133Z [DEBUG] Getting matching hook commands for UserPromptSubmit with query: undefined
+2026-01-07T15:58:33.133Z [DEBUG] Found 0 hook matchers in settings
+2026-01-07T15:58:33.133Z [DEBUG] Matched 0 unique hooks for query "no match query" (0 before deduplication)
+2026-01-07T15:58:33.135Z [DEBUG] FileHistory: Added snapshot for 974b0392-5f6c-45b7-b421-142bb672b6d4, tracking 0 files
+2026-01-07T15:58:33.139Z [DEBUG] UserCommandMessage rendering: "s1-discovery" (args: "none")
+2026-01-07T15:58:33.139Z [DEBUG] isSkillFormat: false
+2026-01-07T15:58:33.162Z [DEBUG] Total plugin output styles loaded: 0
+2026-01-07T15:58:33.170Z [DEBUG] Skills and commands included in Skill tool: s5-design, s4-adr, s1-discovery, s3-architecture, s2-feasibility
+2026-01-07T15:58:33.224Z [DEBUG] AutoUpdaterWrapper: Installation type: unknown
+2026-01-07T15:58:33.515Z [DEBUG] Stream started - received first chunk
+2026-01-07T15:58:34.369Z [DEBUG] [SLOW OPERATION DETECTED] execSyncWithDefaults_DEPRECATED (283.1ms): powershell.exe -Command '$env:USERPROFILE'
+2026-01-07T15:58:35.671Z [DEBUG] [SLOW OPERATION DETECTED] execSyncWithDefaults_DEPRECATED (286.2ms): powershell.exe -Command '$env:USERPROFILE'
+2026-01-07T15:58:35.707Z [DEBUG] executePreToolHooks called for tool: Glob
+2026-01-07T15:58:35.707Z [DEBUG] executePreToolHooks called for tool: Glob
+2026-01-07T15:58:35.708Z [DEBUG] Getting matching hook commands for PreToolUse with query: Glob
+2026-01-07T15:58:35.708Z [DEBUG] Found 0 hook matchers in settings
+2026-01-07T15:58:35.708Z [DEBUG] Matched 0 unique hooks for query "Glob" (0 before deduplication)
+2026-01-07T15:58:35.717Z [DEBUG] Getting matching hook commands for PreToolUse with query: Glob
+2026-01-07T15:58:35.717Z [DEBUG] Found 0 hook matchers in settings
+2026-01-07T15:58:35.717Z [DEBUG] Matched 0 unique hooks for query "Glob" (0 before deduplication)
+2026-01-07T15:58:35.759Z [DEBUG] Getting matching hook commands for PostToolUse with query: Glob
+2026-01-07T15:58:35.759Z [DEBUG] Found 1 hook matchers in settings
+2026-01-07T15:58:35.759Z [DEBUG] Matched 0 unique hooks for query "Glob" (0 before deduplication)
+2026-01-07T15:58:35.777Z [DEBUG] Getting matching hook commands for PostToolUse with query: Glob
+2026-01-07T15:58:35.777Z [DEBUG] Found 1 hook matchers in settings
+2026-01-07T15:58:35.777Z [DEBUG] Matched 0 unique hooks for query "Glob" (0 before deduplication)
+2026-01-07T15:58:35.790Z [DEBUG] LSP Diagnostics: getLSPDiagnosticAttachments called
+2026-01-07T15:58:35.790Z [DEBUG] LSP Diagnostics: Checking registry - 0 pending
+2026-01-07T15:58:35.790Z [DEBUG] Hooks: Found 0 total hooks in registry
+2026-01-07T15:58:35.790Z [DEBUG] Hooks: checkForNewResponses returning 0 responses
+2026-01-07T15:58:35.980Z [DEBUG] Stream started - received first chunk
+2026-01-07T15:58:36.952Z [DEBUG] [SLOW OPERATION DETECTED] execSyncWithDefaults_DEPRECATED (267.5ms): powershell.exe -Command '$env:USERPROFILE'
+2026-01-07T15:58:36.979Z [DEBUG] executePreToolHooks called for tool: Bash
+2026-01-07T15:58:36.992Z [DEBUG] Getting matching hook commands for PreToolUse with query: Bash
+2026-01-07T15:58:36.992Z [DEBUG] Found 0 hook matchers in settings
+2026-01-07T15:58:36.992Z [DEBUG] Matched 0 unique hooks for query "Bash" (0 before deduplication)
+2026-01-07T15:58:37.026Z [DEBUG] [SLOW OPERATION DETECTED] fs.readFileBytesSync (5.6ms)
+2026-01-07T15:58:37.032Z [DEBUG] tree-sitter: loaded from disk
+2026-01-07T15:58:37.045Z [DEBUG] Permission suggestions for Bash: [
+  {
+    "type": "addRules",
+    "rules": [
+      {
+        "toolName": "Read",
+        "ruleContent": "//home/wuchuheng/claude_template/**"
+      }
+    ],
+    "behavior": "allow",
+    "destination": "session"
+  }
+]
+2026-01-07T15:58:37.060Z [DEBUG] executePermissionRequestHooks called for tool: Bash
+2026-01-07T15:58:37.066Z [DEBUG] Getting matching hook commands for PermissionRequest with query: Bash
+2026-01-07T15:58:37.066Z [DEBUG] Found 0 hook matchers in settings
+2026-01-07T15:58:37.066Z [DEBUG] Matched 0 unique hooks for query "Bash" (0 before deduplication)
+2026-01-07T15:58:38.297Z [DEBUG] [SLOW OPERATION DETECTED] execSyncWithDefaults_DEPRECATED (330.0ms): powershell.exe -Command '$env:USERPROFILE'
+2026-01-07T15:58:39.592Z [DEBUG] [SLOW OPERATION DETECTED] execSyncWithDefaults_DEPRECATED (278.7ms): powershell.exe -Command '$env:USERPROFILE'
+2026-01-07T15:58:40.941Z [DEBUG] [SLOW OPERATION DETECTED] execSyncWithDefaults_DEPRECATED (332.7ms): powershell.exe -Command '$env:USERPROFILE'
+2026-01-07T15:58:42.254Z [DEBUG] [SLOW OPERATION DETECTED] execSyncWithDefaults_DEPRECATED (298.5ms): powershell.exe -Command '$env:USERPROFILE'
+2026-01-07T15:58:43.064Z [DEBUG] Getting matching hook commands for Notification with query: permission_prompt
+2026-01-07T15:58:43.064Z [DEBUG] Found 0 hook matchers in settings
+2026-01-07T15:58:43.064Z [DEBUG] Matched 0 unique hooks for query "permission_prompt" (0 before deduplication)
+2026-01-07T15:58:43.500Z [DEBUG] [SLOW OPERATION DETECTED] execSyncWithDefaults_DEPRECATED (232.6ms): powershell.exe -Command '$env:USERPROFILE'
+2026-01-07T15:58:44.785Z [DEBUG] [SLOW OPERATION DETECTED] execSyncWithDefaults_DEPRECATED (269.8ms): powershell.exe -Command '$env:USERPROFILE'
+2026-01-07T15:58:46.052Z [DEBUG] [SLOW OPERATION DETECTED] execSyncWithDefaults_DEPRECATED (253.4ms): powershell.exe -Command '$env:USERPROFILE'
+2026-01-07T15:58:47.331Z [DEBUG] [SLOW OPERATION DETECTED] execSyncWithDefaults_DEPRECATED (265.7ms): powershell.exe -Command '$env:USERPROFILE'
+2026-01-07T15:58:48.219Z [DEBUG] Applying permission update: Adding 1 allow rule(s) to destination 'session': ["Read(//home/wuchuheng/claude_template/**)"]
+2026-01-07T15:58:48.221Z [DEBUG] No session environment scripts found
+2026-01-07T15:58:48.317Z [DEBUG] Getting matching hook commands for PostToolUse with query: Bash
+2026-01-07T15:58:48.317Z [DEBUG] Found 1 hook matchers in settings
+2026-01-07T15:58:48.317Z [DEBUG] Matched 0 unique hooks for query "Bash" (0 before deduplication)
+2026-01-07T15:58:48.332Z [DEBUG] LSP Diagnostics: getLSPDiagnosticAttachments called
+2026-01-07T15:58:48.332Z [DEBUG] LSP Diagnostics: Checking registry - 0 pending
+2026-01-07T15:58:48.332Z [DEBUG] Hooks: Found 0 total hooks in registry
+2026-01-07T15:58:48.332Z [DEBUG] Hooks: checkForNewResponses returning 0 responses
+2026-01-07T15:58:48.333Z [DEBUG] AutoUpdaterWrapper: Installation type: unknown
+2026-01-07T15:58:48.654Z [DEBUG] [SLOW OPERATION DETECTED] execSyncWithDefaults_DEPRECATED (299.9ms): powershell.exe -Command '$env:USERPROFILE'
+2026-01-07T15:58:48.912Z [DEBUG] Stream started - received first chunk
+2026-01-07T15:58:49.432Z [DEBUG] Stream started - received first chunk
+2026-01-07T15:58:49.964Z [DEBUG] [SLOW OPERATION DETECTED] execSyncWithDefaults_DEPRECATED (293.2ms): powershell.exe -Command '$env:USERPROFILE'
+2026-01-07T15:58:50.676Z [DEBUG] executePreToolHooks called for tool: Bash
+2026-01-07T15:58:50.689Z [DEBUG] Getting matching hook commands for PreToolUse with query: Bash
+2026-01-07T15:58:50.689Z [DEBUG] Found 0 hook matchers in settings
+2026-01-07T15:58:50.689Z [DEBUG] Matched 0 unique hooks for query "Bash" (0 before deduplication)
+2026-01-07T15:58:50.706Z [DEBUG] Permission suggestions for Bash: [
+  {
+    "type": "addDirectories",
+    "directories": [
+      "/home/wuchuheng/claude_template/docs"
+    ],
+    "destination": "session"
+  },
+  {
+    "type": "setMode",
+    "mode": "acceptEdits",
+    "destination": "session"
+  }
+]
+2026-01-07T15:58:50.718Z [DEBUG] executePermissionRequestHooks called for tool: Bash
+2026-01-07T15:58:50.721Z [DEBUG] Getting matching hook commands for PermissionRequest with query: Bash
+2026-01-07T15:58:50.721Z [DEBUG] Found 0 hook matchers in settings
+2026-01-07T15:58:50.721Z [DEBUG] Matched 0 unique hooks for query "Bash" (0 before deduplication)
+2026-01-07T15:58:51.221Z [DEBUG] [SLOW OPERATION DETECTED] execSyncWithDefaults_DEPRECATED (239.6ms): powershell.exe -Command '$env:USERPROFILE'
+2026-01-07T15:58:52.492Z [DEBUG] [SLOW OPERATION DETECTED] execSyncWithDefaults_DEPRECATED (256.2ms): powershell.exe -Command '$env:USERPROFILE'
+2026-01-07T15:58:53.751Z [DEBUG] [SLOW OPERATION DETECTED] execSyncWithDefaults_DEPRECATED (246.4ms): powershell.exe -Command '$env:USERPROFILE'
+2026-01-07T15:58:55.027Z [DEBUG] [SLOW OPERATION DETECTED] execSyncWithDefaults_DEPRECATED (263.3ms): powershell.exe -Command '$env:USERPROFILE'
+2026-01-07T15:58:56.304Z [DEBUG] [SLOW OPERATION DETECTED] execSyncWithDefaults_DEPRECATED (264.3ms): powershell.exe -Command '$env:USERPROFILE'
+2026-01-07T15:58:56.719Z [DEBUG] Getting matching hook commands for Notification with query: permission_prompt
+2026-01-07T15:58:56.719Z [DEBUG] Found 0 hook matchers in settings
+2026-01-07T15:58:56.719Z [DEBUG] Matched 0 unique hooks for query "permission_prompt" (0 before deduplication)
+2026-01-07T15:58:57.594Z [DEBUG] [SLOW OPERATION DETECTED] execSyncWithDefaults_DEPRECATED (274.5ms): powershell.exe -Command '$env:USERPROFILE'
+2026-01-07T15:58:56.828Z [DEBUG] [SLOW OPERATION DETECTED] execSyncWithDefaults_DEPRECATED (243.4ms): powershell.exe -Command '$env:USERPROFILE'
+2026-01-07T15:58:58.107Z [DEBUG] [SLOW OPERATION DETECTED] execSyncWithDefaults_DEPRECATED (265.8ms): powershell.exe -Command '$env:USERPROFILE'
+2026-01-07T15:58:59.363Z [DEBUG] [SLOW OPERATION DETECTED] execSyncWithDefaults_DEPRECATED (243.7ms): powershell.exe -Command '$env:USERPROFILE'
+2026-01-07T15:59:11.593Z [DEBUG] Writing to temp file: /home/wuchuheng/.claude.json.tmp.88029.1767801551593
+2026-01-07T15:59:11.594Z [DEBUG] Preserving file permissions: 100600
+2026-01-07T15:59:11.597Z [DEBUG] Temp file written successfully, size: 69265 bytes
+2026-01-07T15:59:11.597Z [DEBUG] Applied original permissions to temp file
+2026-01-07T15:59:11.597Z [DEBUG] Renaming /home/wuchuheng/.claude.json.tmp.88029.1767801551593 to /home/wuchuheng/.claude.json
+2026-01-07T15:59:11.597Z [DEBUG] File /home/wuchuheng/.claude.json written atomically
+2026-01-07T15:59:11.601Z [DEBUG] Writing to temp file: /home/wuchuheng/.claude.json.tmp.88029.1767801551601
+2026-01-07T15:59:11.601Z [DEBUG] Preserving file permissions: 100600
+2026-01-07T15:59:11.604Z [DEBUG] Temp file written successfully, size: 69265 bytes
+2026-01-07T15:59:11.604Z [DEBUG] Applied original permissions to temp file
+2026-01-07T15:59:11.604Z [DEBUG] Renaming /home/wuchuheng/.claude.json.tmp.88029.1767801551601 to /home/wuchuheng/.claude.json
+2026-01-07T15:59:11.604Z [DEBUG] File /home/wuchuheng/.claude.json written atomically
+2026-01-07T15:59:11.667Z [DEBUG] AutoUpdaterWrapper: Installation type: unknown
+2026-01-07T16:03:03.570Z [DEBUG] Metrics opt-out check failed: No API key available
+2026-01-07T16:03:03.570Z [DEBUG] Metrics check failed, defaulting to disabled
+2026-01-07T16:03:03.570Z [DEBUG] Metrics export disabled by organization setting

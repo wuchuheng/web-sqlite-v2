@@ -1,0 +1,15 @@
+{
+  "hooks": {
+    "PostToolUse": [
+      {
+        "matcher": "Edit|Write|MultiEdit",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "bash \".claude/hooks/post_edit_quality_gate.sh\""
+          }
+        ]
+      }
+    ]
+  }
+}
