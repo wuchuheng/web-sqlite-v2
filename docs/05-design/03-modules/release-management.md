@@ -113,7 +113,7 @@ type ReleaseConfig = {
 
 **Validation Rules**:
 
-1. Version must match semver pattern: `^(\d+)\.(\d+)\.(\d+)(-dev)?$`
+1. Version must match semver pattern: `^(\d+)\.(\d+)\.(\d+)$`
 2. Migration SQL must be non-empty string
 3. Seed SQL must be string or null/undefined
 4. Versions must be in ascending order
@@ -357,14 +357,14 @@ const withReleaseLock = async <T>(fn: () => Promise<T>): Promise<T> => {
 ```sql
 CREATE TABLE release (
   id INTEGER PRIMARY KEY AUTOINCREMENT,
-  version TEXT NOT NULL UNIQUE,
+  version TEXT NOT NULL,
   migrationSQLHash TEXT,
   seedSQLHash TEXT,
   mode TEXT NOT NULL CHECK (mode IN ('release', 'dev')),
   createdAt TEXT NOT NULL
 );
 
-CREATE INDEX release_version_idx ON release(version);
+CREATE UNIQUE INDEX idx_release_version ON release(version);
 
 CREATE TABLE release_lock (
   id PRIMARY KEY CHECK (id = 1),
@@ -376,8 +376,10 @@ CREATE TABLE release_lock (
 
 ```sql
 INSERT INTO release (version, migrationSQLHash, seedSQLHash, mode, createdAt)
-VALUES ('0.0.0', NULL, NULL, 'release', '<timestamp>');
+VALUES ('default', NULL, NULL, 'release', '<timestamp>');
 ```
+
+**Note**: The 'default' version is an internal version representing the initial empty database file (`default.sqlite3`). User-provided releases start from version "0.0.0" or higher.
 
 **Code**:
 
@@ -541,16 +543,12 @@ export const removeDir = async (
 **Code**:
 
 ```typescript
-export function isLockError(error: unknown): boolean {
-    if (error instanceof Error) {
-        return (
-            error.message.includes("database is locked") ||
-            error.message.includes("database schema is locked") ||
-            error.message.includes("no such table")
-        );
-    }
-    return false;
-}
+export const isLockError = (error: unknown): boolean => {
+  const message = error instanceof Error ? error.message : String(error);
+  return (
+    message.includes("database is locked") || message.includes("SQLITE_BUSY")
+  );
+};
 ```
 
 **Usage**:
@@ -798,7 +796,7 @@ src/release/release-manager.ts
 
 - **Version Comparison**: `tests/unit/version-utils.test.ts`
     - Semantic version comparison
-    - Dev version ordering
+    - Version ordering (release and dev modes)
     - Edge cases (equal versions, etc.)
 
 ### E2E Tests

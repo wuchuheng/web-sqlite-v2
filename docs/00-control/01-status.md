@@ -166,8 +166,8 @@ gantt
 - **Started**: 2025-01-09
 - **Completed**: 2025-01-09
 - **Evidence**:
-  - ✅ Regenerated `docs/taskManager/01-roadmap.md` (Practical release strategy & timeline)
-  - ✅ Regenerated `docs/taskManager/02-task-catalog.md` (Practical task breakdown & Kanban board)
+  - ✅ Regenerated `docs/07-taskManager/01-roadmap.md` (Practical release strategy & timeline)
+  - ✅ Regenerated `docs/07-taskManager/02-task-catalog.md` (Practical task breakdown & Kanban board)
   - ✅ Updated `docs/00-control/00-spec.md` (Stage 7 summary updated)
   - ✅ Updated `docs/00-control/01-status.md` (This file)
 - **Notes**: Regenerated roadmap and task catalog with practical, grounded approach. Focus on v1.1.2 production state and agile development for v1.2.0. Removed speculative multi-year planning. Added retrospective tasks for v1.1.2 (32 completed tasks).
@@ -302,8 +302,8 @@ gantt
 
 ### Stage 7: Roadmap & Task Catalog (2 documents)
 
-- ✅ `docs/taskManager/01-roadmap.md` - Release strategy, timeline visualization, strategic priorities
-- ✅ `docs/taskManager/02-task-catalog.md` - Task breakdown, Kanban board, dependencies, DoD
+- ✅ `docs/07-taskManager/01-roadmap.md` - Release strategy, timeline visualization, strategic priorities
+- ✅ `docs/07-taskManager/02-task-catalog.md` - Task breakdown, Kanban board, dependencies, DoD
 
 ### Control Documents (2 documents)
 
@@ -369,8 +369,8 @@ A task is **DONE** only if:
 
 **Task: Stage 7 Roadmap & Task Catalog (Regenerated)**
 
-- ✅ Roadmap document regenerated (`docs/taskManager/01-roadmap.md`)
-- ✅ Task catalog regenerated (`docs/taskManager/02-task-catalog.md`)
+- ✅ Roadmap document regenerated (`docs/07-taskManager/01-roadmap.md`)
+- ✅ Task catalog regenerated (`docs/07-taskManager/02-task-catalog.md`)
 - ✅ Spec index updated (`docs/00-control/00-spec.md`)
 - ✅ Status board updated (this file)
 - ✅ Mermaid diagrams included for timelines and dependencies
@@ -437,8 +437,8 @@ A task is **DONE** only if:
 **Related Documents**:
 
 - [Spec Index](./00-spec.md) - Complete documentation index
-- [Roadmap & Strategy](../taskManager/01-roadmap.md) - Release planning and timeline
-- [Task Catalog](../taskManager/02-task-catalog.md) - Detailed task breakdown
+- [Roadmap & Strategy](../07-taskManager/01-roadmap.md) - Release planning and timeline
+- [Task Catalog](../07-taskManager/02-task-catalog.md) - Detailed task breakdown
 - [Stage 1: Discovery](../01-discovery/01-brief.md) - Problem and solution
 - [Stage 2: Feasibility](../02-feasibility/01-options.md) - Technical options
 - [Stage 3: Architecture](../03-architecture/01-hld.md) - System design

@@ -66,11 +66,9 @@ C4Deployment
 
 ```text
 /dist
-  /assets
-    index-[hash].js           # Main library bundle
-    sqlite3.wasm              # SQLite WASM module
-  index.d.ts                  # TypeScript declarations
-  package.json                # NPM package metadata
+  index.js              # Main library bundle (includes all code)
+  index.d.ts            # TypeScript declarations
+  package.json          # NPM package metadata
 ```
 
 ## 3) Capacity & Scaling
@@ -115,69 +113,30 @@ Library Limits:
 
 - **RPO (Data Loss)**: 0 minutes (OPFS writes are synchronous)
 - **RTO (Downtime)**: Immediate recovery (no server downtime)
-- **Backup Policy**: User application responsible for backup/restore
+- **Recovery Mechanism**: Release versioning system with rollback support
 
-**Backup Strategies**:
+**Recovery Strategy**:
 
-```mermaid
-flowchart TD
-    A[OPFS Database] --> B{Backup Method}
-    B -->|Manual Export| C[Export to File]
-    B -->|Periodic Backup| D[Download .sqlite3]
-    B -->|Cloud Sync| E[Upload to Storage]
-
-    C --> F[User Downloads]
-    D --> F
-    E --> G[External Storage]
-
-    style A fill:#9f9,stroke:#333,stroke-width:2px
-    style F fill:#9f9,stroke:#333,stroke-width:2px
-    style G fill:#9f9,stroke:#333,stroke-width:2px
-```
-
-**Backup Implementation** (User Responsibility):
+The library provides built-in recovery through the release versioning system:
 
 ```typescript
-// Example backup code (not in library)
-const backupDatabase = async () => {
-    const root = await navigator.storage.getDirectory();
-    const dbDir = await root.getDirectoryHandle("my-database");
-    const dbFile = await dbDir.getFileHandle("db.sqlite3");
-    const file = await dbFile.getFile();
-    const blob = await file.blob();
-
-    // Download as file
-    const url = URL.createObjectURL(blob);
-    const a = document.createElement("a");
-    a.href = url;
-    a.download = "database-backup.sqlite3";
-    a.click();
-};
+// Rollback to previous version if issues occur
+await db.devTool.rollback("1.0.0");
 ```
-
-**Restore Strategies**:
-
-- **Manual Restore**: User uploads backup file via file input
-- **OPFS Restore**: Write backup file back to OPFS directory
-- **Version Rollback**: Use `devTool.rollback()` to revert to previous version
 
 **Disaster Scenarios**:
 
-1. **OPFS Corruption**: Browser clears origin data (user action)
-    - **Recovery**: Restore from backup file
-    - **Prevention**: Regular backups, user education
+1. **Schema Migration Failure**: New release schema breaks compatibility
+    - **Recovery**: Use `devTool.rollback()` to revert to previous working version
+    - **Prevention**: Immutable release configs, SHA-256 hash validation
 
 2. **Browser Update Breaking Changes**: Future browser updates restrict OPFS/SharedArrayBuffer
-    - **Recovery**: Fallback to IndexedDB (not implemented, future enhancement)
-    - **Prevention**: Monitor browser changelogs, participate in standards discussions
+    - **Recovery**: No built-in recovery (browser limitation)
+    - **Prevention**: Monitor browser changelogs, test in beta browsers
 
-3. **Library Version Incompatibility**: Upgrading library breaks database format
-    - **Recovery**: Release versioning ensures automatic migrations
-    - **Prevention**: Immutable release configs, hash validation
-
-4. **User Device Failure**: Lost or broken device
-    - **Recovery**: Restore from cloud backup (if user implemented)
-    - **Prevention**: User education on backup importance
+3. **OPFS Data Corruption**: Browser bugs or quota issues
+    - **Recovery**: No built-in recovery (data loss)
+    - **Prevention**: Transactional writes, proper error handling
 
 ## 5) Network & Security
 

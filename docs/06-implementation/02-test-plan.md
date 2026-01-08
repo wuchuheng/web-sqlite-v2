@@ -1,7 +1,7 @@
 # Test Plan
 
 **Project**: web-sqlite-js
-**Version**: 1.1.0
+**Version**: 1.1.2
 **Last Updated**: 2025-01-09
 **Status**: Production
 

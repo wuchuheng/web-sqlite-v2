@@ -1,30 +1,88 @@
 # 02 Event Catalog
 
+> **Note**: This document describes the **internal worker message protocol** used between the main thread and Web Worker. This is an implementation detail. For the public API that users call, see [01 API Contracts](./01-api.md).
+
+## Message Protocol
+
+All worker messages follow this structure:
+
+**Request Message**:
+```typescript
+type SqliteReqMsg<T> = {
+  id: number;           // Unique message ID for correlation
+  event: string;        // Event type: "open", "execute", "query", "close"
+  payload?: T;          // Optional event-specific payload
+};
+```
+
+**Success Response**:
+```typescript
+type SqliteResMsg<T> = {
+  id: number;           // Same ID as request
+  success: true;        // Indicates success
+  payload: T;           // Response payload (event-specific)
+};
+```
+
+**Error Response**:
+```typescript
+type SqliteResMsg<void> = {
+  id: number;           // Same ID as request
+  success: false;       // Indicates failure
+  error: {
+    name: string;       // Error class name
+    message: string;    // Error message
+    stack: string;      // Stack trace
+  };
+};
+```
+
+---
+
 ## 1) Worker Message Events
 
 ### Event: OPEN
 
-**Description**: Initialize and open a database connection in the worker context. Supports both active (user data) and metadata (release tracking) databases.
+**Description**: Initialize and open a database connection in the worker context. Used internally for both user databases and metadata tracking.
 
 **Direction**: Main Thread → Worker
+
+**Usage Note**: This is an internal event. Users call `openDB(filename, options)` which generates these worker messages automatically.
 
 **Payload Schema**:
 
 ```typescript
 type OpenDBArgs = {
-    filename: string; // Database file name (relative to base directory)
+    filename: string;      // Full database file path in OPFS (e.g., "myapp/release.sqlite3")
     options?: {
-        debug?: boolean; // Enable SQL execution logging
+        debug?: boolean;   // Enable SQL execution logging
     };
-    target?: "active" | "meta"; // Database target (default: "active")
-    replace?: boolean; // Close existing connection before opening
+    target?: "active" | "meta";  // "active" = user data, "meta" = release metadata
+    replace?: boolean;     // Close existing connection before opening (internal use)
 };
 ```
+
+**Internal Usage**:
+
+- `target: "meta"` - Opens the release metadata database (tracks versions)
+- `target: "active"` - Opens the user's actual database
+- `filename` - Full OPFS path constructed by `openReleaseDB()`, not user input
+- `replace` - Used internally when switching between versions
 
 **Response Schema**:
 
 ```typescript
-type OpenDBResponse = void; // No payload on success
+// Success: no payload (void)
+type OpenDBResponse = undefined;
+
+// Error: error object
+type ErrorResponse = {
+  error: {
+    name: string;
+    message: string;
+    stack: string;
+  };
+};
 ```
 
 **Error Conditions**:
@@ -43,28 +101,36 @@ type OpenDBResponse = void; // No payload on success
 **Example**:
 
 ```typescript
-// Request
+// Internal: Opening metadata database
 {
   id: 1,
   event: "open",
   payload: {
-    filename: "demo/1.0.0/db.sqlite3",
+    filename: "myapp/release.sqlite3",
+    target: "meta"
+  }
+}
+
+// Internal: Opening user's active database
+{
+  id: 2,
+  event: "open",
+  payload: {
+    filename: "myapp/1.0.0/db.sqlite3",
     options: { debug: true },
-    target: "active",
-    replace: true
+    target: "active"
   }
 }
 
 // Response (success)
 {
-  id: 1,
-  success: true,
-  payload: undefined
+  id: 2,
+  success: true
 }
 
 // Response (error)
 {
-  id: 1,
+  id: 2,
   success: false,
   error: {
     name: "Error",
@@ -72,6 +138,17 @@ type OpenDBResponse = void; // No payload on success
     stack: "..."
   }
 }
+```
+
+**Public API to Internal Messages**:
+
+```typescript
+// User calls:
+const db = await openDB("myapp", { debug: true });
+
+// Which generates internal worker messages:
+// 1. OPEN { filename: "myapp/release.sqlite3", target: "meta" }
+// 2. OPEN { filename: "myapp/1.0.0/db.sqlite3", target: "active", options: { debug: true } }
 ```
 
 **Flow Diagram**:
@@ -155,17 +232,6 @@ type ExecuteResult = {
   }
 }
 
-// Request (named parameters)
-{
-  id: 3,
-  event: "execute",
-  payload: {
-    sql: "UPDATE users SET email = $email WHERE id = $id",
-    bind: { $email: "new@email.com", $id: 1 },
-    target: "active"
-  }
-}
-
 // Response (success)
 {
   id: 2,
@@ -173,6 +239,17 @@ type ExecuteResult = {
   payload: {
     changes: 1,
     lastInsertRowid: 1
+  }
+}
+
+// Response (error)
+{
+  id: 2,
+  success: false,
+  error: {
+    name: "Error",
+    message: "SQLITE_CONSTRAINT: UNIQUE constraint failed: users.email",
+    stack: "..."
   }
 }
 ```
@@ -259,6 +336,17 @@ type QueryResult<T = unknown> = T[]; // Array of row objects
   success: true,
   payload: []
 }
+
+// Response (error)
+{
+  id: 4,
+  success: false,
+  error: {
+    name: "Error",
+    message: "no such table: users",
+    stack: "..."
+  }
+}
 ```
 
 **Debug Logging**:
@@ -289,7 +377,8 @@ type ClosePayload = undefined; // No payload
 **Response Schema**:
 
 ```typescript
-type CloseResponse = void; // No payload on success
+// Success: no payload (void)
+type CloseResponse = undefined;
 ```
 
 **Error Conditions**:
@@ -309,15 +398,13 @@ type CloseResponse = void; // No payload on success
 // Request
 {
   id: 5,
-  event: "close",
-  payload: undefined
+  event: "close"
 }
 
 // Response (success)
 {
   id: 5,
-  success: true,
-  payload: undefined
+  success: true
 }
 ```
 
@@ -540,11 +627,15 @@ type WorkerError = {
 **Response Schema**:
 
 ```typescript
+// Error response (success: false)
 type ErrorResponse = {
-    id: number;
-    success: false;
-    error: WorkerError;
-    payload?: undefined;
+  id: number;
+  success: false;
+  error: {
+    name: string;
+    message: string;
+    stack: string;
+  };
 };
 ```
 

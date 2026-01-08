@@ -127,7 +127,7 @@
 
 - [x] **TASK-009**: [Release] Design release data structures
   - **Priority**: P0
-  - **Boundary**: `src/release/release-types.ts`
+  - **Boundary**: `src/release/types.ts`
   - **DoD**: Release types defined, TypeScript types work
   - **Completed**: 2024
 

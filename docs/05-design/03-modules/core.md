@@ -6,14 +6,14 @@
 
 **Links to Contracts**:
 
-- API: `docs/05-design/01-contracts/01-api.md#module-core-database-api`
-- Events: `docs/05-design/01-contracts/02-events.md`
-- Errors: `docs/05-design/01-contracts/03-errors.md`
+-   API: `docs/05-design/01-contracts/01-api.md#module-core-database-api`
+-   Events: `docs/05-design/01-contracts/02-events.md`
+-   Errors: `docs/05-design/01-contracts/03-errors.md`
 
 **Links to Schema**:
 
-- Database: `docs/05-design/02-schema/01-database.md`
-- Migrations: `docs/05-design/02-schema/02-migrations.md`
+-   Database: `docs/05-design/02-schema/01-database.md`
+-   Migrations: `docs/05-design/02-schema/02-migrations.md`
 
 ---
 
@@ -30,11 +30,11 @@
 
 ### Cross-Cutting Concerns
 
-- **Type Safety**: Full TypeScript type definitions with generics
-- **Error Handling**: Comprehensive error propagation with stack trace preservation
-- **Concurrency**: Mutex-based operation serialization
-- **Validation**: Input validation for all public APIs
-- **Logging**: Debug mode for SQL execution logging
+-   **Type Safety**: Full TypeScript type definitions with generics
+-   **Error Handling**: Comprehensive error propagation with stack trace preservation
+-   **Concurrency**: Mutex-based operation serialization
+-   **Validation**: Input validation for all public APIs
+-   **Logging**: Debug mode for SQL execution logging
 
 ---
 
@@ -48,10 +48,10 @@
 
 **Dependencies**:
 
-- `abilityCheck()` - SharedArrayBuffer validation
-- `createWorkerBridge()` - Worker communication layer
-- `createMutex()` - Concurrency control
-- `openReleaseDB()` - Release management logic
+-   `abilityCheck()` - SharedArrayBuffer validation
+-   `createWorkerBridge()` - Worker communication layer
+-   `createMutex()` - Concurrency control
+-   `openReleaseDB()` - Release management logic
 
 **Flow**:
 
@@ -78,7 +78,7 @@ flowchart TD
 ```typescript
 export const openDB = async (
     filename: string,
-    options?: OpenDBOptions,
+    options?: OpenDBOptions
 ): Promise<DBInterface> => {
     abilityCheck(); // Throws if SharedArrayBuffer unavailable
 
@@ -104,8 +104,8 @@ export const openDB = async (
 
 **Dependencies**:
 
-- `runMutex()` - Concurrency control
-- `sendMsg()` - Worker communication
+-   `runMutex()` - Concurrency control
+-   `sendMsg()` - Worker communication
 
 **Flow**:
 
@@ -134,7 +134,7 @@ const exec = async (sql: string, params?: SQLParams): Promise<ExecResult> => {
 const _exec = async (
     sql: string,
     params?: SQLParams,
-    target: DbTarget = "active",
+    target: DbTarget = "active"
 ): Promise<ExecResult> => {
     return await sendMsg<ExecResult, ExecParams>(SqliteEvent.EXECUTE, {
         sql,
@@ -154,8 +154,8 @@ const _exec = async (
 
 **Dependencies**:
 
-- `runMutex()` - Concurrency control
-- `sendMsg()` - Worker communication
+-   `runMutex()` - Concurrency control
+-   `sendMsg()` - Worker communication
 
 **Flow**:
 
@@ -171,7 +171,7 @@ flowchart TD
     G --> H
     H --> I[Worker executes query]
     I --> J{Success?}
-    J -->|Yes| K[Return T[]]
+    J -->|Yes| K["Return T[]"]
     J -->|No| L[Reject with Error]
     K --> M[Release mutex]
     L --> M
@@ -182,7 +182,7 @@ flowchart TD
 ```typescript
 const query = async <T = unknown>(
     sql: string,
-    params?: SQLParams,
+    params?: SQLParams
 ): Promise<T[]> => {
     return runMutex(() => _query<T>(sql, params, "active"));
 };
@@ -190,7 +190,7 @@ const query = async <T = unknown>(
 const _query = async <T = unknown>(
     sql: string,
     params?: SQLParams,
-    target: DbTarget = "active",
+    target: DbTarget = "active"
 ): Promise<T[]> => {
     if (typeof sql !== "string" || sql.trim() === "") {
         throw new Error("SQL query must be a non-empty string");
@@ -213,8 +213,8 @@ const _query = async <T = unknown>(
 
 **Dependencies**:
 
-- `runMutex()` - Concurrency control
-- `_exec()` - SQL execution
+-   `runMutex()` - Concurrency control
+-   `_exec()` - SQL execution
 
 **Flow**:
 
@@ -265,8 +265,8 @@ const transaction = async <T>(fn: transactionCallback<T>): Promise<T> => {
 
 **Dependencies**:
 
-- `runMutex()` - Concurrency control
-- `sendMsg()` - Worker communication
+-   `runMutex()` - Concurrency control
+-   `sendMsg()` - Worker communication
 
 **Flow**:
 
@@ -300,10 +300,10 @@ const close = async (): Promise<void> => {
 
 **Dependencies**:
 
-- `validateAndHashReleases()` - Release validation
-- `compareVersions()` - Version comparison
-- `withReleaseLock()` - Metadata lock
-- `applyVersion()` - Version application
+-   `validateAndHashReleases()` - Release validation
+-   `compareVersions()` - Version comparison
+-   `withReleaseLock()` - Metadata lock
+-   `applyVersion()` - Version application
 
 **Flow**:
 
@@ -332,7 +332,7 @@ const devToolRelease: DevTool["release"] = async (input) => {
         }
         if (compareVersions(config.version, latestVersion) <= 0) {
             throw new Error(
-                "devTool.release version must be greater than latest",
+                "devTool.release version must be greater than latest"
             );
         }
         await withReleaseLock(async () => {
@@ -352,9 +352,9 @@ const devToolRelease: DevTool["release"] = async (input) => {
 
 **Dependencies**:
 
-- `withReleaseLock()` - Metadata lock
-- `compareVersions()` - Version comparison
-- `removeDir()` - OPFS cleanup
+-   `withReleaseLock()` - Metadata lock
+-   `compareVersions()` - Version comparison
+-   `removeDir()` - OPFS cleanup
 
 **Flow**:
 
@@ -385,7 +385,7 @@ const devToolRollback: DevTool["rollback"] = async (version) => {
 
         await withReleaseLock(async () => {
             const rows = await metaQuery<ReleaseRow>(
-                "SELECT * FROM release ORDER BY id",
+                "SELECT * FROM release ORDER BY id"
             );
 
             const targetRow = rows.find((row) => row.version === version);
@@ -394,19 +394,19 @@ const devToolRollback: DevTool["rollback"] = async (version) => {
             }
 
             const latestRelease = getLatestReleaseVersion(
-                rows.filter((row) => row.mode === "release"),
+                rows.filter((row) => row.mode === "release")
             );
 
             if (compareVersions(version, latestRelease) < 0) {
                 throw new Error(
-                    "Cannot rollback below the latest release version",
+                    "Cannot rollback below the latest release version"
                 );
             }
 
             const devRowsToRemove = rows.filter(
                 (row) =>
                     row.mode === "dev" &&
-                    compareVersions(row.version, version) > 0,
+                    compareVersions(row.version, version) > 0
             );
 
             for (const row of devRowsToRemove) {
@@ -418,11 +418,11 @@ const devToolRollback: DevTool["rollback"] = async (version) => {
             latestDbHandle = await getDbHandleForVersion(
                 baseDir,
                 version,
-                false,
+                false
             );
             await openActiveDb(
                 getDbPathForVersion(normalizedFilename, version),
-                true,
+                true
             );
         });
     });
@@ -449,9 +449,9 @@ if (typeof sql !== "string" || sql.trim() === "") {
 
 **Rules**:
 
-- SQL must be a string
-- SQL cannot be empty or whitespace-only
-- Validation happens before mutex queue
+-   SQL must be a string
+-   SQL cannot be empty or whitespace-only
+-   Validation happens before mutex queue
 
 ---
 
@@ -556,7 +556,7 @@ sequenceDiagram
 ```typescript
 const sendMsg = <TRes, TReq = unknown>(
     event: SqliteEvent,
-    payload?: TReq,
+    payload?: TReq
 ): Promise<TRes> => {
     const id = getLatestMsgId();
     const msg: SqliteReqMsg<TReq> = { id, event, payload };
@@ -719,15 +719,15 @@ sequenceDiagram
 
 ### Concurrency
 
-- **Mutex Queue**: Serializes all operations (no concurrent execution)
-- **Throughput**: 1000+ transactions/second (measured)
-- **Queue Depth**: Unlimited (but typically < 10 concurrent operations)
+-   **Mutex Queue**: Serializes all operations (no concurrent execution)
+-   **Throughput**: 1000+ transactions/second (measured)
+-   **Queue Depth**: Unlimited (but typically < 10 concurrent operations)
 
 ### Memory
 
-- **Worker Memory**: Separate from main thread
-- **Result Sets**: Full arrays transferred via structured clone
-- **Query Results**: No streaming (future enhancement)
+-   **Worker Memory**: Separate from main thread
+-   **Result Sets**: Full arrays transferred via structured clone
+-   **Query Results**: No streaming (future enhancement)
 
 ---
 
@@ -751,8 +751,8 @@ src/main.ts
 
 ### External Dependencies
 
-- **sqlite3.wasm**: SQLite WASM module (vendored in `src/jswasm/`)
-- **Browser APIs**: OPFS, Web Workers, SharedArrayBuffer, Web Crypto
+-   **sqlite3.wasm**: SQLite WASM module (vendored in `src/jswasm/`)
+-   **Browser APIs**: OPFS, Web Workers, SharedArrayBuffer, Web Crypto
 
 ---
 
@@ -760,27 +760,29 @@ src/main.ts
 
 ### Unit Tests
 
-- **Mutex Queue**: `tests/unit/mutex.test.ts`
-    - Queue ordering
-    - Lock/unlock behavior
-    - Concurrent operations
+-   **Mutex Queue**: `tests/unit/mutex.test.ts`
+    -   Queue ordering
+    -   Lock/unlock behavior
+    -   Concurrent operations
 
 ### E2E Tests
 
-- **Database Operations**: `tests/e2e/core.e2e.test.ts`
-    - openDB initialization
-    - exec, query, transaction operations
-    - close behavior
+-   **Database Operations**: `tests/e2e/core.e2e.test.ts`
 
-- **Release Management**: `tests/e2e/release.e2e.test.ts`
-    - Migration application
-    - Hash validation
-    - Dev tool release and rollback
+    -   openDB initialization
+    -   exec, query, transaction operations
+    -   close behavior
 
-- **Error Handling**: `tests/e2e/error.e2e.test.ts`
-    - Invalid SQL handling
-    - Transaction rollback
-    - Hash mismatch errors
+-   **Release Management**: `tests/e2e/release.e2e.test.ts`
+
+    -   Migration application
+    -   Hash validation
+    -   Dev tool release and rollback
+
+-   **Error Handling**: `tests/e2e/error.e2e.test.ts`
+    -   Invalid SQL handling
+    -   Transaction rollback
+    -   Hash mismatch errors
 
 ---
 
@@ -788,23 +790,23 @@ src/main.ts
 
 ### Input Validation
 
-- **Filename**: Non-empty string validation
-- **SQL**: Non-empty string validation
-- **Version**: Semver pattern validation
-- **Bind Parameters**: Accepted as-is (SQLite handles validation)
+-   **Filename**: Non-empty string validation
+-   **SQL**: Non-empty string validation
+-   **Version**: Semver pattern validation
+-   **Bind Parameters**: Accepted as-is (SQLite handles validation)
 
 ### SQL Injection Prevention
 
-- **Parameterized Queries**: Enforced via bind parameters
-- **No String Concatenation**: SQL statements never concatenated with user input
-- **Prepared Statements**: SQLite prepared statements used internally
+-   **Parameterized Queries**: Enforced via bind parameters
+-   **No String Concatenation**: SQL statements never concatenated with user input
+-   **Prepared Statements**: SQLite prepared statements used internally
 
 ### Worker Isolation
 
-- **Sandbox**: Worker runs in isolated context
-- **No DOM Access**: Worker cannot access main thread DOM
-- **Same-Origin**: OPFS access restricted to same origin
-- **WASM Isolation**: SQLite runs in WASM sandbox
+-   **Sandbox**: Worker runs in isolated context
+-   **No DOM Access**: Worker cannot access main thread DOM
+-   **Same-Origin**: OPFS access restricted to same origin
+-   **WASM Isolation**: SQLite runs in WASM sandbox
 
 ---
 
@@ -816,17 +818,17 @@ src/main.ts
 
 **Related Design Documents**:
 
-- [Back to Modules](./)
-- [API Contracts](../01-contracts/01-api.md) - Public API specifications
+-   [Back to Modules](./)
+-   [API Contracts](../01-contracts/01-api.md) - Public API specifications
 
 **All Design Documents**:
 
-- [Contracts](../01-contracts/) - API, Events, Errors
-- [Schema](../02-schema/) - Database, Migrations
+-   [Contracts](../01-contracts/) - API, Events, Errors
+-   [Schema](../02-schema/) - Database, Migrations
 
 **Related ADRs**:
 
-- [ADR-0001: Web Worker](../../04-adr/0001-web-worker-architecture.md) - Worker architecture
-- [ADR-0003: Mutex Queue](../../04-adr/0003-mutex-queue-concurrency.md) - Concurrency control
+-   [ADR-0001: Web Worker](../../04-adr/0001-web-worker-architecture.md) - Worker architecture
+-   [ADR-0003: Mutex Queue](../../04-adr/0003-mutex-queue-concurrency.md) - Concurrency control
 
 **Back to**: [Spec Index](../../00-control/00-spec.md)

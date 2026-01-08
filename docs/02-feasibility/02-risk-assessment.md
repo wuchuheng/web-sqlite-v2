@@ -183,9 +183,9 @@ SQLite WASM module is ~500KB, which is large compared to pure JavaScript alterna
 2. **Code Splitting**
 
     ```typescript
-    // Worker loads WASM dynamically
-    const sqliteWasm = await import("@sqlite.org/sqlite-wasm");
-    // Not included in main bundle
+    // Worker loads WASM dynamically from vendored file
+    // SQLite WASM is bundled separately and loaded on-demand
+    // Not included in main application bundle
     ```
 
 3. **Tree Shaking**

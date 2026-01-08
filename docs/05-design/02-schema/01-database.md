@@ -23,14 +23,14 @@
 ```sql
 CREATE TABLE release (
   id INTEGER PRIMARY KEY AUTOINCREMENT,
-  version TEXT NOT NULL UNIQUE,
+  version TEXT NOT NULL,
   migrationSQLHash TEXT,
   seedSQLHash TEXT,
   mode TEXT NOT NULL CHECK (mode IN ('release', 'dev')),
   createdAt TEXT NOT NULL
 );
 
-CREATE INDEX release_version_idx ON release(version);
+CREATE UNIQUE INDEX idx_release_version ON release(version);
 ```
 
 **Column Descriptions**:
@@ -38,7 +38,7 @@ CREATE INDEX release_version_idx ON release(version);
 | Column             | Type    | Constraints               | Description                                            |
 | ------------------ | ------- | ------------------------- | ------------------------------------------------------ |
 | `id`               | INTEGER | PRIMARY KEY AUTOINCREMENT | Auto-incrementing unique identifier                    |
-| `version`          | TEXT    | NOT NULL, UNIQUE          | Semantic version string (e.g., "1.0.0", "1.0.1-dev")   |
+| `version`          | TEXT    | NOT NULL, UNIQUE          | Semantic version string (e.g., "1.0.0", "1.0.1")       |
 | `migrationSQLHash` | TEXT    | NULL                      | SHA-256 hash of migration SQL (NULL for version 0.0.0) |
 | `seedSQLHash`      | TEXT    | NULL                      | SHA-256 hash of seed SQL (NULL if no seed SQL)         |
 | `mode`             | TEXT    | NOT NULL, CHECK           | Version mode: "release" (immutable) or "dev" (mutable) |
@@ -46,24 +46,26 @@ CREATE INDEX release_version_idx ON release(version);
 
 **Indexes**:
 
-- `release_version_idx`: On `version` column for fast version lookups
+- `idx_release_version`: Unique index on `version` column for fast version lookups and uniqueness constraint
 
 **Constraints**:
 
-- `version UNIQUE`: Ensures no duplicate versions
-- `mode CHECK`: Ensures only valid mode values
+- `version UNIQUE`: Ensured by unique index `idx_release_version`
+- `mode CHECK`: Ensures only valid mode values ("release" or "dev")
 
 **Default Data**:
 
 ```sql
 INSERT INTO release (version, migrationSQLHash, seedSQLHash, mode, createdAt)
-VALUES ('0.0.0', NULL, NULL, 'release', '<timestamp>');
+VALUES ('default', NULL, NULL, 'release', '<timestamp>');
 ```
+
+**Note**: The 'default' version is an internal version representing the initial empty database file (`default.sqlite3`). User-provided releases start from version "0.0.0" or higher.
 
 **Example Rows**:
 
 ```sql
--- Version 0.0.0 (initial empty database)
+-- Version 0.0.0 (first user-provided release)
 INSERT INTO release (version, migrationSQLHash, seedSQLHash, mode, createdAt)
 VALUES ('0.0.0', NULL, NULL, 'release', '2025-01-09T00:00:00.000Z');
 
@@ -77,10 +79,10 @@ VALUES (
   '2025-01-09T01:00:00.000Z'
 );
 
--- Version 1.0.1-dev (dev version)
+-- Version 1.0.1 (dev version)
 INSERT INTO release (version, migrationSQLHash, seedSQLHash, mode, createdAt)
 VALUES (
-  '1.0.1-dev',
+  '1.0.1',
   '789xyz012abc...',
   NULL,  -- No seed SQL for this version
   'dev',
@@ -269,7 +271,7 @@ OPFS Root
     │   ├── db.sqlite3
     │   ├── migration.sql
     │   └── seed.sql
-    └── 1.0.2-dev/                       # Dev version directory
+    └── 1.0.2/                           # Dev version directory
         ├── db.sqlite3
         ├── migration.sql
         └── seed.sql
@@ -385,8 +387,8 @@ stateDiagram-v2
     Uninitialized --> Active0_0_0: openDB() called
     Active0_0_0 --> Active1_0_0: Apply version 1.0.0
     Active1_0_0 --> Active1_0_1: Apply version 1.0.1
-    Active1_0_1 --> Active1_0_2_dev: devTool.release()
-    Active1_0_2_dev --> Active1_0_1: devTool.rollback(1.0.1)
+    Active1_0_1 --> Active1_0_2: devTool.release() (dev mode)
+    Active1_0_2 --> Active1_0_1: devTool.rollback(1.0.1)
     Active1_0_1 --> Closed: close() called
     Closed --> [*]
 ```
@@ -431,8 +433,8 @@ ORDER BY id;
 
 **Version Format**: Semantic versioning (semver)
 
-- Pattern: `^(\d+)\.(\d+)\.(\d+)(-dev)?$`
-- Examples: "0.0.0", "1.0.0", "1.0.1-dev", "2.3.4"
+- Pattern: `^(\d+)\.(\d+)\.(\d+)$`
+- Examples: "0.0.0", "1.0.0", "1.0.1", "2.3.4"
 
 **Comparison Logic**:
 
@@ -456,8 +458,9 @@ function compareVersions(v1: string, v2: string): number {
 
 **Version Ordering**:
 
-- "0.0.0" < "1.0.0" < "1.0.1" < "1.0.1-dev" < "1.1.0" < "2.0.0"
-- Dev versions come after their base version
+- "0.0.0" < "1.0.0" < "1.0.1" < "1.0.2" < "1.1.0" < "2.0.0"
+- Dev versions follow the same semantic version pattern (no special suffix)
+- Distinction is only in the `mode` field ("release" vs "dev")
 
 ### Rollback Constraints
 
@@ -474,8 +477,8 @@ if (compareVersions(targetVersion, latestReleaseVersion) < 0) {
 **Example**:
 
 - Latest release: "1.0.0"
-- Dev versions: "1.0.1-dev", "1.0.2-dev"
-- Valid rollback: "1.0.1-dev", "1.0.0"
+- Dev versions: "1.0.1", "1.0.2"
+- Valid rollback: "1.0.1", "1.0.0"
 - Invalid rollback: "0.9.0", "0.0.0"
 
 ---
