@@ -258,7 +258,7 @@ await db.query("SELECT * FROM notes WHERE id = ?", [1]);
 
 The console output highlights SQL keywords and shows how long each statement took (click to preview):
 
-[![Debug console output](docs/assets/debug.png)](docs/assets/debug.png)
+[![Debug console output](vitepress-docs/assets/debug.png)](docs/assets/debug.png)
 
 #### Transactions
 

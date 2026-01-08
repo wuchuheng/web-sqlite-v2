@@ -3,7 +3,7 @@
 **Project**: web-sqlite-js (web-sqlite-v2 repository)
 **Version**: 1.1.0
 **Last Updated**: 2025-01-09
-**Status**: Stage 5 (Low-Level Design & Contracts) - Complete
+**Status**: Stage 7 (Roadmap & Task Catalog) - Complete
 
 ---
 
@@ -22,7 +22,9 @@
 9. **[Data Flow](../03-architecture/02-dataflow.md)** - Data flow and sequence diagrams
 10. **[Deployment](../03-architecture/03-deployment.md)** - Deployment and infrastructure
 11. **[ADR Index](../04-adr/)** - Architecture decision records
-12. **[LLD & Contracts](../05-design/)** - Low-level design and API contracts (NEW)
+12. **[LLD & Contracts](../05-design/)** - Low-level design and API contracts
+13. **[Implementation Strategy](../06-implementation/)** - Build, test, release standards
+14. **[Roadmap & Task Catalog](../taskManager/)** - Release planning and task breakdown (NEW)
 
 **Navigation Note**: All documentation files now include navigation links at the bottom for easy browsing between related documents and stages.
 
@@ -36,7 +38,7 @@
 - **[ADR-0006: TypeScript Type System](../04-adr/0006-typescript-type-system.md)** - Generic type parameters
 - **[ADR-0007: Error Handling Strategy](../04-adr/0007-error-handling-strategy.md)** - Stack trace preservation
 
-### Low-Level Design & Contracts (NEW)
+### Low-Level Design & Contracts
 
 - **[01 API Contracts](../05-design/01-contracts/01-api.md)** - Public API specifications with flow diagrams
 - **[02 Event Catalog](../05-design/01-contracts/02-events.md)** - Worker message events and data structures
@@ -46,6 +48,18 @@
 - **[Module: Core](../05-design/03-modules/core.md)** - Core database API implementation
 - **[Module: Release Management](../05-design/03-modules/release-management.md)** - Release versioning system
 - **[Module: Worker Bridge](../05-design/03-modules/worker-bridge.md)** - Worker communication layer
+
+### Implementation Strategy & Standards
+
+- **[01 Build and Run Guide](../06-implementation/01-build-and-run.md)** - Build workflow and coding conventions
+- **[02 Test Plan](../06-implementation/02-test-plan.md)** - Testing strategy (unit + E2E with Vitest/Playwright)
+- **[03 Observability Guide](../06-implementation/03-observability.md)** - Debug mode and logging standards
+- **[04 Release and Rollback Guide](../06-implementation/04-release-and-rollback.md)** - npm publishing and versioning
+
+### Roadmap & Task Management (NEW)
+
+- **[01 Roadmap & Strategy](../taskManager/01-roadmap.md)** - Release planning, timeline visualization, strategic priorities
+- **[02 Task Catalog](../taskManager/02-task-catalog.md)** - Detailed task breakdown, Kanban board, dependencies, DoD
 
 ### Existing Specifications
 
@@ -100,9 +114,15 @@ docs/
 │       ├── release-management.md # Release versioning system
 │       └── worker-bridge.md    # Worker communication layer
 │
-└── 06-implementation/             # Stage 6: Implementation (✓ COMPLETE)
-    ├── 01-testing-strategy.md   # Test plans and coverage
-    └── 02-verification.md       # Verification and validation
+├── 06-implementation/             # Stage 6: Implementation (✓ COMPLETE)
+│   ├── 01-build-and-run.md     # Build workflow and coding conventions
+│   ├── 02-test-plan.md         # Testing strategy and coverage
+│   ├── 03-observability.md     # Debug mode and logging standards
+│   └── 04-release-and-rollback.md # Release process and rollback procedures
+│
+└── taskManager/                   # Stage 7: Roadmap & Tasks (✓ COMPLETE)
+    ├── 01-roadmap.md           # Release strategy and timeline
+    └── 02-task-catalog.md      # Task breakdown and Kanban board
 ```
 
 ---
@@ -117,8 +137,10 @@ docs/
 4. Read **[Options Analysis](../02-feasibility/01-options.md)** for technical decisions
 5. Read **[High-Level Design](../03-architecture/01-hld.md)** for system architecture
 6. Review **[ADR Index](../04-adr/)** for architectural decisions
-7. **NEW**: Review **[LLD & Contracts](../05-design/)** for API specifications
-8. Check **[Status Board](./01-status.md)** for current progress
+7. Review **[LLD & Contracts](../05-design/)** for API specifications
+8. Review **[Implementation Strategy](../06-implementation/)** for coding standards
+9. **NEW**: Review **[Roadmap & Task Catalog](../taskManager/)** for planning and tasks
+10. Check **[Status Board](./01-status.md)** for current progress
 
 ### For Architecture Decisions
 
@@ -127,7 +149,7 @@ docs/
 3. Review **[High-Level Design](../03-architecture/01-hld.md)** for system structure
 4. Review **[Data Flow](../03-architecture/02-dataflow.md)** for interaction patterns
 5. Review **[ADR Index](../04-adr/)** for detailed decision records
-6. **NEW**: Review **[LLD & Contracts](../05-design/)** for implementation details
+6. Review **[LLD & Contracts](../05-design/)** for implementation details
 7. Check **[Release Versioning Spec](../../specs/RELEASES.md)** for core architecture
 8. See **[Status Board](./01-status.md)** for implementation stage
 
@@ -136,36 +158,49 @@ docs/
 1. Review **[Requirements](../01-discovery/02-requirements.md)** for P0 scope
 2. Check **[Non-goals](../01-discovery/02-requirements.md#3-non-goals-explicitly-out-of-scope)** to avoid scope creep
 3. Check **[Backlog](../01-discovery/02-requirements.md#4-backlog-future-ideas)** for future considerations
-4. **NEW**: Review **[API Contracts](../05-design/01-contracts/01-api.md)** for API specifications
-5. **NEW**: Review **[Module LLDs](../05-design/03-modules/)** for implementation details
-6. Review **[Data Flow](../03-architecture/02-dataflow.md)** for sequence diagrams
-7. Review **[Spike Plan](../02-feasibility/03-spike-plan.md)** for validation needs
-8. Review relevant **[specs/](../../specs/)** for detailed specifications
-9. Check relevant **[ADRs](../04-adr/)** for architectural constraints
+4. Review **[API Contracts](../05-design/01-contracts/01-api.md)** for API specifications
+5. Review **[Module LLDs](../05-design/03-modules/)** for implementation details
+6. Review **[Build and Run Guide](../06-implementation/01-build-and-run.md)** for coding standards
+7. Review **[Data Flow](../03-architecture/02-dataflow.md)** for sequence diagrams
+8. **NEW**: Review **[Task Catalog](../taskManager/02-task-catalog.md)** for task breakdown
+9. Review **[Spike Plan](../02-feasibility/03-spike-plan.md)** for validation needs
+10. Review relevant **[specs/](../../specs/)** for detailed specifications
+11. Check relevant **[ADRs](../04-adr/)** for architectural constraints
 
 ### For API Integration
 
-1. **NEW**: Review **[API Contracts](../05-design/01-contracts/01-api.md)** for complete API reference
-2. **NEW**: Review **[Event Catalog](../05-design/01-contracts/02-events.md)** for worker protocol
-3. **NEW**: Review **[Error Standards](../05-design/01-contracts/03-errors.md)** for error handling
+1. Review **[API Contracts](../05-design/01-contracts/01-api.md)** for complete API reference
+2. Review **[Event Catalog](../05-design/01-contracts/02-events.md)** for worker protocol
+3. Review **[Error Standards](../05-design/01-contracts/03-errors.md)** for error handling
 4. Review **[Requirements](../01-discovery/02-requirements.md)** for feature scope
 5. Check **[Data Flow](../03-architecture/02-dataflow.md)** for usage patterns
 6. Review **[ADR Index](../04-adr/)** for architectural constraints
 
-### For Future Roadmap
+### For Development & Testing
 
-1. Read **[Spike Plan](../02-feasibility/03-spike-plan.md)** for v2.0 investigations
-2. Review **[Backlog](../01-discovery/02-requirements.md#4-backlog-future-ideas)** for feature ideas
-3. Check **[Risk Assessment](../02-feasibility/02-risk-assessment.md)** for future risks
-4. See **[Status Board](./01-status.md)** for current priorities
+1. Read **[Build and Run Guide](../06-implementation/01-build-and-run.md)** for development workflow
+2. Read **[Test Plan](../06-implementation/02-test-plan.md)** for testing strategy
+3. Read **[Observability Guide](../06-implementation/03-observability.md)** for debugging
+4. Review **[API Contracts](../05-design/01-contracts/01-api.md)** for API usage
+5. Check **[Error Standards](../05-design/01-contracts/03-errors.md)** for error handling
 
 ### For Deployment & Operations
 
-1. Read **[Deployment Guide](../03-architecture/03-deployment.md)** for infrastructure
-2. Review **[ADR-0005: COOP/COEP](../04-adr/0005-coop-coep-requirement.md)** for header configuration
-3. Review **[Data Flow](../03-architecture/02-dataflow.md)** for error handling and recovery
-4. Check **[High-Level Design](../03-architecture/01-hld.md)** for observability
-5. Review **[Options Analysis](../02-feasibility/01-options.md)** for browser support
+1. Read **[Release and Rollback Guide](../06-implementation/04-release-and-rollback.md)** for publishing
+2. Read **[Deployment Guide](../03-architecture/03-deployment.md)** for infrastructure
+3. Review **[ADR-0005: COOP/COEP](../04-adr/0005-coop-coep-requirement.md)** for header configuration
+4. Review **[Data Flow](../03-architecture/02-dataflow.md)** for error handling and recovery
+5. Check **[High-Level Design](../03-architecture/01-hld.md)** for observability
+6. Review **[Options Analysis](../02-feasibility/01-options.md)** for browser support
+
+### For Future Roadmap
+
+1. **NEW**: Read **[Roadmap & Strategy](../taskManager/01-roadmap.md)** for release planning
+2. **NEW**: Read **[Task Catalog](../taskManager/02-task-catalog.md)** for task breakdown
+3. Read **[Spike Plan](../02-feasibility/03-spike-plan.md)** for v2.0 investigations
+4. Review **[Backlog](../01-discovery/02-requirements.md#4-backlog-future-ideas)** for feature ideas
+5. Check **[Risk Assessment](../02-feasibility/02-risk-assessment.md)** for future risks
+6. See **[Status Board](./01-status.md)** for current priorities
 
 ---
 
@@ -207,298 +242,157 @@ docs/
 | **3. HLD**            | ✅ COMPLETE | Architecture, Data Flow, Deployment            | System structure formalized, flows documented          |
 | **4. ADR**            | ✅ COMPLETE | 7 Architecture Decision Records                | All major architectural decisions documented           |
 | **5. LLD**            | ✅ COMPLETE | API contracts, Events, Errors, Schema, Modules | API and implementation specifications documented       |
-| **6. Implementation** | ✅ COMPLETE | Tests, Source code                             | Core features implemented                              |
+| **6. Implementation** | ✅ COMPLETE | Build, Test, Observability, Release            | Coding standards and workflows defined                 |
+| **7. Roadmap**        | ✅ COMPLETE | Roadmap, Task Catalog                          | Release strategy and task breakdown created            |
 
 ### Notes
 
-- **Stages 1-5 documentation complete**: Comprehensive documentation for production v1.1.0
-- **Stage 5 complete**: All API contracts, database schema, and module LLDs documented
+- **All stages complete**: Comprehensive documentation for production v1.1.0 and future planning
+- **Stage 7 complete**: Roadmap and task catalog provide clear direction for future releases
 - **Existing specs**: Detailed specifications exist in `/specs/` for specific features
 - **Implementation**: All MVP requirements (P0) are implemented and tested
 - **Documentation**: Production-ready documentation for onboarding and maintenance
 
 ---
 
-## Stage 5 Summary: Low-Level Design & Contracts
+## Stage 7 Summary: Roadmap & Task Catalog
 
-### LLD Overview
+### Purpose
 
-**Purpose**: Document detailed design specifications for API contracts, database schema, and module implementations.
+Transform the comprehensive design and implementation documentation into actionable work plans for future releases.
 
-**Scope**:
+### Scope
 
-- **API Contracts**: Complete public API reference with flow diagrams
-- **Event Catalog**: Worker message protocol and data structures
-- **Error Standards**: Comprehensive error codes and handling strategies
-- **Database Schema**: Metadata database and OPFS file structure
-- **Migration Strategy**: Release versioning system and workflows
-- **Module LLDs**: Implementation details for core modules
+- **Release Roadmap**: Strategic planning for v1.1.x maintenance, v1.2.0, v2.0.0, v2.1.0, and v3.0.0
+- **Task Breakdown**: Detailed task catalog with dependencies, priorities, and Definition of Done
+- **Timeline Visualization**: Mermaid Gantt charts showing release schedules
+- **Risk Management**: Identification of high-risk items and mitigation strategies
 
 ### Key Deliverables
 
-**01-contracts/**:
+**01-roadmap.md**:
 
-- **01-api.md**: Public API specifications with Mermaid sequence diagrams
-    - Core Database API (openDB, exec, query, transaction, close)
-    - Dev Tooling (devTool.release, devTool.rollback)
-    - Internal Worker API (OPEN, EXECUTE, QUERY, CLOSE events)
-    - Type definitions and usage patterns
+- Release strategy for v1.1.x through v3.0.0
+- Timeline visualization with Gantt charts
+- Strategic priorities (immediate, short-term, long-term)
+- Risk assessment and dependencies
+- Success metrics and decision framework
+- Communication plan
 
-- **02-events.md**: Worker message event catalog
-    - Worker message protocol (request/response format)
-    - Event types and payloads (OPEN, EXECUTE, QUERY, CLOSE)
-    - Internal application events (release lock, version application, rollback)
-    - Debug events and error events
-    - Event flow examples and timing characteristics
+**02-task-catalog.md**:
 
-- **03-errors.md**: Error standards and recovery strategies
-    - Error categories (initialization, SQL execution, release, OPFS, transaction, worker)
-    - Error message format with context
-    - Error propagation flow diagrams
-    - Automatic recovery strategies (transaction rollback, migration cleanup)
-    - Error reference table with codes and solutions
-
-**02-schema/**:
-
-- **01-database.md**: Database schema and OPFS structure
-    - Release metadata database (release, release_lock tables)
-    - User application databases (versioned snapshots)
-    - OPFS file structure and directory layout
-    - Active database pointers and switching
-    - Database maintenance and inspection
-
-- **02-migrations.md**: Migration strategy and workflows
-    - Release-based versioning philosophy
-    - Migration types (schema, data seeding, combined)
-    - Migration application flow with diagrams
-    - Dev workflow for testing migrations
-    - Migration best practices and troubleshooting
-
-**03-modules/**:
-
-- **core.md**: Core database API module
-    - Module responsibilities and public interface
-    - Internal operations (SQL validation, mutex queue, worker communication)
-    - Data flow diagrams for query and transaction execution
-    - Performance characteristics and dependencies
-
-- **release-management.md**: Release management module
-    - Release validation and hash computation
-    - Version application and rollback operations
-    - Metadata lock management
-    - OPFS file operations
-    - Data flow for release and rollback operations
-
-- **worker-bridge.md**: Worker bridge module
-    - Worker creation and message protocol
-    - Promise management and error reconstruction
-    - Worker-side message handlers
-    - Debug logging and error handling
-    - Performance characteristics and security considerations
+- Comprehensive task breakdown for all releases
+- Kanban board structure (Pending, In Progress, Review, Done)
+- Task dependencies with Mermaid diagrams
+- Definition of Done for each task
+- Retrospective tasks for v1.1.0 (29 completed tasks)
+- Future tasks for v1.2.0, v2.0.0, v2.1.0, v3.0.0
 
 ### Documentation Quality
 
-**Diagrams**: Extensive use of Mermaid diagrams for clarity
+**Diagrams**: Extensive use of Mermaid diagrams
 
-- Sequence diagrams for API flows
-- Flowcharts for decision logic
-- ER diagrams for database schema
-- State diagrams for lifecycle management
+- Gantt charts for release timelines
+- Dependency graphs for task relationships
+- Flowcharts for decision processes
 
-**Code Examples**: Real TypeScript code throughout
+**Task Details**:
 
-- API usage patterns
-- Error handling examples
-- Dev workflow examples
-- Integration examples
+- 1-4 hour granularity per task
+- Vertical slicing (feature-based tasks)
+- Clear boundaries and DoD
+- Priority levels (P0-P3)
 
-**Cross-References**: Comprehensive linking between documents
+**Cross-References**: Comprehensive linking
 
-- API contracts linked to module LLDs
-- Schema linked to migration strategy
-- Errors linked to handling strategies
-
----
-
-## Stage 4 Summary: Architecture Decision Records
-
-### ADR Overview
-
-**Purpose**: Document significant architectural decisions with rationale, alternatives, and consequences.
-
-**ADR-0001: Web Worker Architecture**
-
-- **Decision**: Use dedicated Web Worker for all SQLite operations
-- **Rationale**: Prevent main thread blocking, enable responsive UI
-- **Trade-off**: Complexity of worker communication, debugging challenges
-- **Status**: Production validated, 100% test pass rate
-
-**ADR-0002: OPFS for Persistent Storage**
-
-- **Decision**: Use Origin Private File System for database file storage
-- **Rationale**: True file-backed storage, synchronous access in worker
-- **Trade-off**: Limited browser support (Chrome/Edge/Opera only)
-- **Status**: Production validated, handles 500MB-1GB databases
-
-**ADR-0003: Mutex Queue for Concurrency Control**
-
-- **Decision**: Use mutex queue to serialize all database operations
-- **Rationale**: SQLite is not thread-safe, requires sequential access
-- **Trade-off**: Serial execution limits throughput
-- **Status**: Proven in production, 1000+ transactions/second
-
-**ADR-0004: Release Versioning System**
-
-- **Decision**: Implement OPFS-based version isolation with metadata tracking
-- **Rationale**: Schema evolution without data loss, rollback capability
-- **Trade-off**: Complexity of version management, OPFS space usage
-- **Status**: Fully operational, atomic migrations validated
-
-**ADR-0005: COOP/COEP Requirement**
-
-- **Decision**: Require COOP/COEP headers for SharedArrayBuffer support
-- **Rationale**: Zero-copy data transfer optimization
-- **Trade-off**: Deployment complexity, hosting platform limitations
-- **Status**: Documented with platform-specific configuration guides
-
-**ADR-0006: TypeScript Type System**
-
-- **Decision**: Use generic type parameters with manual annotations
-- **Rationale**: Type safety with flexibility, familiar TypeScript patterns
-- **Trade-off**: Manual type annotations, potential for type drift
-- **Status**: 100% TypeScript coverage, production validated
-
-**ADR-0007: Error Handling Strategy**
-
-- **Decision**: Comprehensive error handling with stack trace preservation
-- **Rationale**: Debugging capability, automatic rollback on failures
-- **Trade-off**: Implementation complexity, error serialization overhead
-- **Status**: Production-validated with comprehensive test coverage
-
-### ADR Structure
-
-Each ADR follows the template:
-
-- **Status**: Proposed / Accepted / Deprecated
-- **Context**: Problem, constraints, urgency
-- **Decision**: Clear statement of the decision
-- **Alternatives Considered**: Options with pros/cons
-- **Consequences**: Positive, negative, and risks
-- **Implementation Evidence**: Files, metrics, validation
+- Roadmap links to Spike Plan (S-001 through S-005)
+- Task Catalog references implementation standards
+- Dependencies clearly documented
 
 ---
 
-## Stage 3 Summary: High-Level Design
+## Stage 6 Summary: Implementation Strategy & Standards
 
-### Architecture Overview
+### Implementation Overview
 
-**System Style**: Worker-Based Client-Side Architecture
+**Purpose**: Define the constitution for engineers working on the web-sqlite-js project.
 
-- **Pattern**: Web Worker + OPFS + Message Passing
-- **Key Principles**:
-    - Non-blocking by default (all DB operations in worker)
-    - Type safety first (full TypeScript)
-    - Mutex-serialized operations (sequential SQLite access)
-    - Versioned persistence (release management)
+**Scope**:
 
-### Core Components
+- **Build Workflow**: Code -> Test -> Refactor loop with quality gates
+- **Testing Strategy**: E2E-first with selective unit testing
+- **Observability**: Debug mode with SQL syntax highlighting and query timing
+- **Release Process**: Automated CI/CD with semantic versioning and rollback procedures
 
-**1. Main Thread Layer**
+### Key Deliverables
 
-- Public API surface (`openDB`, `DBInterface`)
-- Worker bridge (message protocol abstraction)
-- Mutex queue (operation serialization)
-- Release manager (version orchestration)
+**01-build-and-run.md**:
 
-**2. Worker Layer**
+- Mandatory "Code -> Test -> Refactor" workflow
+- Trunk-based development (short-lived feature branches)
+- Conventional commits (NO AI watermarks)
+- Coding standards (max 30 lines/function, max 3 nesting levels)
+- Functional programming preference
+- Vertical slicing (one file per use-case)
+- Build commands and environment setup
+- Troubleshooting guide
 
-- SQLite WASM engine (database operations)
-- OPFS integration (file system access)
-- Message handler (request/response processing)
-- Debug logging (query timing)
+**02-test-plan.md**:
 
-**3. Storage Layer**
+- Testing tools (Vitest + Playwright)
+- E2E-first testing strategy (primary approach)
+- Selective unit testing (only for pure utilities)
+- Coverage requirements (100% for critical paths)
+- E2E test suite with critical flows
+- Test execution and CI pipeline
+- Test data management and isolation
+- Debugging tests
 
-- OPFS file system (persistent storage)
-- Metadata database (release tracking)
-- Versioned databases (isolated snapshots)
+**03-observability.md**:
 
-### Data Flow Highlights
+- Debug mode configuration
+- Logging standards (debug, info, warn, error)
+- SQL syntax highlighting
+- Worker message logging
+- Performance metrics and benchmarks
+- Error tracking and context
+- Browser DevTools integration
+- Production monitoring
 
-**Critical Flows Documented**:
+**04-release-and-rollback.md**:
 
-1. Database initialization with release migrations
-2. SQL query execution (non-blocking)
-3. Transaction execution (atomic operations)
-4. Dev tool release creation (testing)
-5. Dev tool rollback (version management)
+- Release workflow with CI/CD
+- Publishing to npm (automated)
+- Version bumping (semantic versioning)
+- Rollback procedures (unpublish/deprecate)
+- Hotfix process
+- Release notes and changelog
+- Release checklist
+- Troubleshooting
 
-**State Machines Documented**:
+### Documentation Quality
 
-- Database connection lifecycle
-- Release version state transitions
-- Worker message processing
+**Diagrams**: Extensive use of Mermaid diagrams
 
-**Error Handling Documented**:
+- Build pipeline flowcharts
+- Test pyramids and CI workflows
+- Release and rollback flows
+- Performance benchmarks
 
-- Migration failure compensation (automatic rollback)
-- Transaction error handling (automatic ROLLBACK)
-- Worker crash recovery (promise rejection)
-- OPFS quota exceeded (user notification)
+**Code Examples**: Real commands and configurations
 
-### Deployment Highlights
+- npm scripts
+- Git workflows
+- CI/CD configurations
+- Test examples
 
-**Deployment Topology**:
+**Standards Enforced**:
 
-- Client-side only (no server infrastructure)
-- Static library distribution via npm
-- CDN-hosted bundles
-- COOP/COEP headers required for SharedArrayBuffer
-
-**Capacity & Scaling**:
-
-- Single-user per browser instance
-- OPFS quota: 500MB-1GB per origin
-- Query performance: 0.2-0.5ms per query
-- Transaction throughput: 1000+ transactions/second
-
-**Security & Compliance**:
-
-- Same-origin isolation (OPFS protection)
-- WASM sandbox (SQLite isolation)
-- Worker isolation (operation isolation)
-- SQL injection protection (parameterized queries)
-
-**Platform Support**:
-
-- Supported: Vercel, Netlify, Cloudflare Pages, AWS S3+CloudFront, Azure
-- Unsupported: GitHub Pages (no custom headers)
-- Browser Support: Chrome/Edge/Opera (full), Firefox/Safari (partial)
-
-### Architecture Validation
-
-**Production Evidence**:
-
-- ✅ v1.1.0 deployed to npm (2025-01-08)
-- ✅ 100% test pass rate (unit + e2e)
-- ✅ Documentation site live: https://web-sqlite-js.wuchuheng.com
-- ✅ Real-world usage confirms performance targets
-- ✅ All MVP requirements met
-- ✅ All architectural decisions validated
-
-**Performance Metrics**:
-
-- Query execution: 0.2-0.5ms (10x faster than pure JS)
-- Database load: <100ms for 50MB database
-- Concurrent queries: 100+ concurrent operations
-- Transaction throughput: 1000+ transactions/second
-
-**Quality Metrics**:
-
-- Test coverage: 100% (unit + e2e)
-- TypeScript coverage: 100%
-- Documentation: Complete with Mermaid diagrams
-- Error handling: Comprehensive with stack trace preservation
+- Max 30 lines per function
+- Max 3 nesting levels
+- Max 4 parameters per function
+- Three-phase pattern (Input -> Process -> Output)
+- Conventional commits (feat, fix, refactor, test, docs, chore)
 
 ---
 
@@ -519,11 +413,13 @@ A task is **DONE** only if:
 | ---------- | -------------------------------------------------- | --------------------------------------------------------------------- |
 | 2025-01-08 | Initial Stage 1 Discovery documentation            | Created discovery docs, established spec index                        |
 | 2025-01-08 | Created control documents                          | Set up status tracking and navigation                                 |
-| 2025-01-08 | **Stage 2 Feasibility Analysis complete**          | Added options analysis, risk assessment, spike plans                  |
-| 2025-01-08 | **Stage 3 High-Level Design complete**             | Added system architecture, data flow, deployment docs                 |
-| 2025-01-09 | **Stage 4 Architecture Decision Records complete** | Added 7 ADRs documenting all major architectural decisions            |
-| 2025-01-09 | **Stage 5 Low-Level Design & Contracts complete**  | Added API contracts, events, errors, schema, modules documentation    |
-| 2025-01-09 | **Navigation links added to all documents**        | Enhanced document discoverability with consistent navigation sections |
+| 2025-01-08 | Stage 2 Feasibility Analysis complete              | Added options analysis, risk assessment, spike plans                  |
+| 2025-01-08 | Stage 3 High-Level Design complete                 | Added system architecture, data flow, deployment docs                 |
+| 2025-01-09 | Stage 4 Architecture Decision Records complete     | Added 7 ADRs documenting all major architectural decisions            |
+| 2025-01-09 | Stage 5 Low-Level Design & Contracts complete      | Added API contracts, events, errors, schema, modules documentation    |
+| 2025-01-09 | Navigation links added to all documents            | Enhanced document discoverability with consistent navigation sections |
+| 2025-01-09 | Stage 6 Implementation Strategy complete           | Added build, test, observability, and release standards               |
+| 2025-01-09 | **Stage 7 Roadmap & Task Catalog complete**        | Added release strategy and task breakdown for all future versions     |
 
 ---
 
@@ -544,6 +440,12 @@ A task is **DONE** only if:
 - **Architecture Decisions**: [docs/04-adr/](../04-adr/)
 - **API Contracts**: [docs/05-design/01-contracts/01-api.md](../05-design/01-contracts/01-api.md)
 - **Database Schema**: [docs/05-design/02-schema/01-database.md](../05-design/02-schema/01-database.md)
+- **Build and Run Guide**: [docs/06-implementation/01-build-and-run.md](../06-implementation/01-build-and-run.md)
+- **Test Plan**: [docs/06-implementation/02-test-plan.md](../06-implementation/02-test-plan.md)
+- **Observability Guide**: [docs/06-implementation/03-observability.md](../06-implementation/03-observability.md)
+- **Release and Rollback Guide**: [docs/06-implementation/04-release-and-rollback.md](../06-implementation/04-release-and-rollback.md)
+- **Roadmap & Strategy**: [docs/taskManager/01-roadmap.md](../taskManager/01-roadmap.md)
+- **Task Catalog**: [docs/taskManager/02-task-catalog.md](../taskManager/02-task-catalog.md)
 
 ### Architecture Key Points
 
@@ -554,6 +456,10 @@ A task is **DONE** only if:
 - **Release versioning**: Schema migrations tracked in metadata database
 - **Type-safe**: Full TypeScript support with generic query results
 - **COOP/COEP required**: For SharedArrayBuffer zero-copy performance
+- **Trunk-based development**: Short-lived feature branches, main always deployable
+- **Code quality gates**: Max 30 lines/function, max 3 nesting levels
+- **E2E-first testing**: Primary testing approach in real browsers
+- **Selective unit tests**: Only for pure utilities without browser dependencies
 
 ### External Dependencies
 
@@ -561,6 +467,8 @@ A task is **DONE** only if:
 - **HTTP Headers**: COOP/COEP required for SharedArrayBuffer
 - **Build Tools**: Vite, TypeScript, Vitest, Playwright
 - **Deployment**: Vercel, Netlify, Cloudflare Pages supported
+- **Package Registry**: npm (public)
+- **CI/CD**: GitHub Actions with NPM_TOKEN secret
 
 ---
 

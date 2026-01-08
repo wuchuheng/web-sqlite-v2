@@ -274,7 +274,7 @@ await db.exec("VALID SQL"); // Succeeds (queue not broken)
 
 ## Navigation
 
-**Previous ADR**: [ADR-0002: OPFS Storage](./0002-opfs-persistent-storage.md) - File-based persistence
+**Previous ADR**: [ADR-0002: OPFS Storage](./0004-release-versioning-system.md) - File-based persistence
 
 **Next ADR**: [ADR-0004: Release Versioning](./0004-release-versioning-system.md) - Migration management
 
