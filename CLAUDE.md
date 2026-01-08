@@ -15,6 +15,20 @@ Stage 1 docs:
 Stage 2 docs:
 - `docs/02-feasibility/01-options.md`
 
+Stage 3 docs:
+- `docs/03-architecture/01-hld.md`
+- `docs/03-architecture/02-dataflow.md`
+- `docs/03-architecture/03-deployment.md`
+
+Stage 4 docs (Architecture Decision Records):
+- `docs/04-adr/0001-web-worker-architecture.md` - Worker-based architecture for non-blocking operations
+- `docs/04-adr/0002-opfs-persistent-storage.md` - OPFS for persistent file-based storage
+- `docs/04-adr/0003-mutex-queue-concurrency.md` - Mutex queue for serialized operations
+- `docs/04-adr/0004-release-versioning-system.md` - Release versioning for database migrations
+- `docs/04-adr/0005-coop-coep-requirement.md` - COOP/COEP headers for SharedArrayBuffer
+- `docs/04-adr/0006-typescript-type-system.md` - TypeScript type system with generic parameters
+- `docs/04-adr/0007-error-handling-strategy.md` - Error handling with stack trace preservation
+
 ---
 
 ## Output boundary rules (non-negotiable)
