@@ -3,13 +3,14 @@
 **Project**: web-sqlite-js (web-sqlite-v2 repository)
 **Version**: 1.1.0
 **Last Updated**: 2025-01-09
-**Status**: Stage 4 (Architecture Decision Records) - Complete
+**Status**: Stage 5 (Low-Level Design & Contracts) - Complete
 
 ---
 
 ## Quick Navigation
 
 ### Start Here
+
 1. **[Status Board](./01-status.md)** - Live progress tracking and task states
 2. **[Discovery Brief](../01-discovery/01-brief.md)** - Problem, users, solution overview
 3. **[Requirements](../01-discovery/02-requirements.md)** - MVP requirements, success criteria, non-goals
@@ -20,9 +21,13 @@
 8. **[High-Level Design](../03-architecture/01-hld.md)** - System architecture and components
 9. **[Data Flow](../03-architecture/02-dataflow.md)** - Data flow and sequence diagrams
 10. **[Deployment](../03-architecture/03-deployment.md)** - Deployment and infrastructure
-11. **[ADR Index](../04-adr/)** - Architecture decision records (NEW)
+11. **[ADR Index](../04-adr/)** - Architecture decision records
+12. **[LLD & Contracts](../05-design/)** - Low-level design and API contracts (NEW)
+
+**Navigation Note**: All documentation files now include navigation links at the bottom for easy browsing between related documents and stages.
 
 ### Architecture Decision Records (ADRs)
+
 - **[ADR-0001: Web Worker Architecture](../04-adr/0001-web-worker-architecture.md)** - Non-blocking database operations
 - **[ADR-0002: OPFS for Persistent Storage](../04-adr/0002-opfs-persistent-storage.md)** - File-based persistence
 - **[ADR-0003: Mutex Queue for Concurrency](../04-adr/0003-mutex-queue-concurrency.md)** - Serialized operation execution
@@ -31,7 +36,19 @@
 - **[ADR-0006: TypeScript Type System](../04-adr/0006-typescript-type-system.md)** - Generic type parameters
 - **[ADR-0007: Error Handling Strategy](../04-adr/0007-error-handling-strategy.md)** - Stack trace preservation
 
+### Low-Level Design & Contracts (NEW)
+
+- **[01 API Contracts](../05-design/01-contracts/01-api.md)** - Public API specifications with flow diagrams
+- **[02 Event Catalog](../05-design/01-contracts/02-events.md)** - Worker message events and data structures
+- **[03 Error Standards](../05-design/01-contracts/03-errors.md)** - Error codes, handling, and recovery
+- **[01 Database Schema](../05-design/02-schema/01-database.md)** - Metadata database and OPFS structure
+- **[02 Migration Strategy](../05-design/02-schema/02-migrations.md)** - Release versioning and migrations
+- **[Module: Core](../05-design/03-modules/core.md)** - Core database API implementation
+- **[Module: Release Management](../05-design/03-modules/release-management.md)** - Release versioning system
+- **[Module: Worker Bridge](../05-design/03-modules/worker-bridge.md)** - Worker communication layer
+
 ### Existing Specifications
+
 - **[Release Versioning System](../../specs/RELEASES.md)** - OPFS-based database migration and versioning
 - **[OPFS Explorer Refresh](../../specs/OPFS_REFRESH_AFTER_SQL.md)** - UI synchronization after SQL execution
 - Additional specs in `/specs/` directory for specific features
@@ -70,10 +87,18 @@ docs/
 │   ├── 0006-typescript-type-system.md
 │   └── 0007-error-handling-strategy.md
 │
-├── 05-lld/                        # Stage 5: Low-level design (FUTURE)
-│   ├── 01-api-contract.md       # API specifications and contracts
-│   ├── 02-worker-protocol.md    # Worker message protocol
-│   └── 03-opfs-layout.md        # OPFS file structure
+├── 05-design/                     # Stage 5: Low-level design (✓ COMPLETE)
+│   ├── 01-contracts/           # API contracts and event catalog
+│   │   ├── 01-api.md           # Public API specifications
+│   │   ├── 02-events.md        # Worker message events
+│   │   └── 03-errors.md        # Error codes and handling
+│   ├── 02-schema/              # Database schema and migrations
+│   │   ├── 01-database.md      # Metadata database and OPFS structure
+│   │   └── 02-migrations.md    # Migration strategy and workflow
+│   └── 03-modules/             # Module-level implementation details
+│       ├── core.md             # Core database API
+│       ├── release-management.md # Release versioning system
+│       └── worker-bridge.md    # Worker communication layer
 │
 └── 06-implementation/             # Stage 6: Implementation (✓ COMPLETE)
     ├── 01-testing-strategy.md   # Test plans and coverage
@@ -85,39 +110,57 @@ docs/
 ## Reading Order
 
 ### For New Contributors
+
 1. Read **[Brief](../01-discovery/01-brief.md)** to understand the project
 2. Read **[Requirements](../01-discovery/02-requirements.md)** for MVP scope
 3. Read **[Scope & Glossary](../01-discovery/03-scope.md)** for boundaries and terms
 4. Read **[Options Analysis](../02-feasibility/01-options.md)** for technical decisions
 5. Read **[High-Level Design](../03-architecture/01-hld.md)** for system architecture
 6. Review **[ADR Index](../04-adr/)** for architectural decisions
-7. Check **[Status Board](./01-status.md)** for current progress
+7. **NEW**: Review **[LLD & Contracts](../05-design/)** for API specifications
+8. Check **[Status Board](./01-status.md)** for current progress
 
 ### For Architecture Decisions
+
 1. Start with **[Brief](../01-discovery/01-brief.md)** for context
 2. Review **[Options Analysis](../02-feasibility/01-options.md)** for architectural choices
 3. Review **[High-Level Design](../03-architecture/01-hld.md)** for system structure
 4. Review **[Data Flow](../03-architecture/02-dataflow.md)** for interaction patterns
 5. Review **[ADR Index](../04-adr/)** for detailed decision records
-6. Check **[Release Versioning Spec](../../specs/RELEASES.md)** for core architecture
-7. See **[Status Board](./01-status.md)** for implementation stage
+6. **NEW**: Review **[LLD & Contracts](../05-design/)** for implementation details
+7. Check **[Release Versioning Spec](../../specs/RELEASES.md)** for core architecture
+8. See **[Status Board](./01-status.md)** for implementation stage
 
 ### For Feature Implementation
+
 1. Review **[Requirements](../01-discovery/02-requirements.md)** for P0 scope
 2. Check **[Non-goals](../01-discovery/02-requirements.md#3-non-goals-explicitly-out-of-scope)** to avoid scope creep
 3. Check **[Backlog](../01-discovery/02-requirements.md#4-backlog-future-ideas)** for future considerations
-4. Review **[Data Flow](../03-architecture/02-dataflow.md)** for sequence diagrams
-5. Review **[Spike Plan](../02-feasibility/03-spike-plan.md)** for validation needs
-6. Review relevant **[specs/](../../specs/)** for detailed specifications
-7. Check relevant **[ADRs](../04-adr/)** for architectural constraints
+4. **NEW**: Review **[API Contracts](../05-design/01-contracts/01-api.md)** for API specifications
+5. **NEW**: Review **[Module LLDs](../05-design/03-modules/)** for implementation details
+6. Review **[Data Flow](../03-architecture/02-dataflow.md)** for sequence diagrams
+7. Review **[Spike Plan](../02-feasibility/03-spike-plan.md)** for validation needs
+8. Review relevant **[specs/](../../specs/)** for detailed specifications
+9. Check relevant **[ADRs](../04-adr/)** for architectural constraints
+
+### For API Integration
+
+1. **NEW**: Review **[API Contracts](../05-design/01-contracts/01-api.md)** for complete API reference
+2. **NEW**: Review **[Event Catalog](../05-design/01-contracts/02-events.md)** for worker protocol
+3. **NEW**: Review **[Error Standards](../05-design/01-contracts/03-errors.md)** for error handling
+4. Review **[Requirements](../01-discovery/02-requirements.md)** for feature scope
+5. Check **[Data Flow](../03-architecture/02-dataflow.md)** for usage patterns
+6. Review **[ADR Index](../04-adr/)** for architectural constraints
 
 ### For Future Roadmap
+
 1. Read **[Spike Plan](../02-feasibility/03-spike-plan.md)** for v2.0 investigations
 2. Review **[Backlog](../01-discovery/02-requirements.md#4-backlog-future-ideas)** for feature ideas
 3. Check **[Risk Assessment](../02-feasibility/02-risk-assessment.md)** for future risks
 4. See **[Status Board](./01-status.md)** for current priorities
 
 ### For Deployment & Operations
+
 1. Read **[Deployment Guide](../03-architecture/03-deployment.md)** for infrastructure
 2. Review **[ADR-0005: COOP/COEP](../04-adr/0005-coop-coep-requirement.md)** for header configuration
 3. Review **[Data Flow](../03-architecture/02-dataflow.md)** for error handling and recovery
@@ -138,12 +181,14 @@ docs/
 - Dev tooling for testing and rollback
 
 ### Current Version
+
 - **Version**: 1.1.0
 - **NPM Package**: [web-sqlite-js](https://www.npmjs.com/package/web-sqlite-js)
 - **Documentation**: https://web-sqlite-js.wuchuheng.com
 - **Repository**: https://github.com/wuchuheng/web-sqlite-js
 
 ### Key Technologies
+
 - **SQLite**: Vendored WASM build (sqlite3.wasm)
 - **Storage**: OPFS (Origin Private File System)
 - **Concurrency**: Mutex-based operation queue
@@ -155,21 +200,123 @@ docs/
 
 ## Stage Progress
 
-| Stage | Status | Documents | Key Decisions |
-|-------|--------|-----------|---------------|
-| **1. Discovery** | ✅ COMPLETE | Brief, Requirements, Scope | Problem framed, users identified, MVP defined |
-| **2. Feasibility** | ✅ COMPLETE | Options, Risk Assessment, Spike Plan | Option B selected (WASM+OPFS+Workers), risks mitigated |
-| **3. HLD** | ✅ COMPLETE | Architecture, Data Flow, Deployment | System structure formalized, flows documented |
-| **4. ADR** | ✅ COMPLETE | 7 Architecture Decision Records | All major architectural decisions documented |
-| **5. LLD** | ⏳ NOT STARTED | - | API contracts in source types only |
-| **6. Implementation** | ✅ COMPLETE | Tests, Source code | Core features implemented |
+| Stage                 | Status      | Documents                                      | Key Decisions                                          |
+| --------------------- | ----------- | ---------------------------------------------- | ------------------------------------------------------ |
+| **1. Discovery**      | ✅ COMPLETE | Brief, Requirements, Scope                     | Problem framed, users identified, MVP defined          |
+| **2. Feasibility**    | ✅ COMPLETE | Options, Risk Assessment, Spike Plan           | Option B selected (WASM+OPFS+Workers), risks mitigated |
+| **3. HLD**            | ✅ COMPLETE | Architecture, Data Flow, Deployment            | System structure formalized, flows documented          |
+| **4. ADR**            | ✅ COMPLETE | 7 Architecture Decision Records                | All major architectural decisions documented           |
+| **5. LLD**            | ✅ COMPLETE | API contracts, Events, Errors, Schema, Modules | API and implementation specifications documented       |
+| **6. Implementation** | ✅ COMPLETE | Tests, Source code                             | Core features implemented                              |
 
 ### Notes
-- **Stages 1-4 documentation complete**: Comprehensive documentation for production v1.1.0
-- **Stage 4 complete**: All major architectural decisions documented with rationale
+
+- **Stages 1-5 documentation complete**: Comprehensive documentation for production v1.1.0
+- **Stage 5 complete**: All API contracts, database schema, and module LLDs documented
 - **Existing specs**: Detailed specifications exist in `/specs/` for specific features
 - **Implementation**: All MVP requirements (P0) are implemented and tested
-- **Next steps**: Consider formalizing Stage 5 (LLD) for better maintainability and onboarding
+- **Documentation**: Production-ready documentation for onboarding and maintenance
+
+---
+
+## Stage 5 Summary: Low-Level Design & Contracts
+
+### LLD Overview
+
+**Purpose**: Document detailed design specifications for API contracts, database schema, and module implementations.
+
+**Scope**:
+
+- **API Contracts**: Complete public API reference with flow diagrams
+- **Event Catalog**: Worker message protocol and data structures
+- **Error Standards**: Comprehensive error codes and handling strategies
+- **Database Schema**: Metadata database and OPFS file structure
+- **Migration Strategy**: Release versioning system and workflows
+- **Module LLDs**: Implementation details for core modules
+
+### Key Deliverables
+
+**01-contracts/**:
+
+- **01-api.md**: Public API specifications with Mermaid sequence diagrams
+    - Core Database API (openDB, exec, query, transaction, close)
+    - Dev Tooling (devTool.release, devTool.rollback)
+    - Internal Worker API (OPEN, EXECUTE, QUERY, CLOSE events)
+    - Type definitions and usage patterns
+
+- **02-events.md**: Worker message event catalog
+    - Worker message protocol (request/response format)
+    - Event types and payloads (OPEN, EXECUTE, QUERY, CLOSE)
+    - Internal application events (release lock, version application, rollback)
+    - Debug events and error events
+    - Event flow examples and timing characteristics
+
+- **03-errors.md**: Error standards and recovery strategies
+    - Error categories (initialization, SQL execution, release, OPFS, transaction, worker)
+    - Error message format with context
+    - Error propagation flow diagrams
+    - Automatic recovery strategies (transaction rollback, migration cleanup)
+    - Error reference table with codes and solutions
+
+**02-schema/**:
+
+- **01-database.md**: Database schema and OPFS structure
+    - Release metadata database (release, release_lock tables)
+    - User application databases (versioned snapshots)
+    - OPFS file structure and directory layout
+    - Active database pointers and switching
+    - Database maintenance and inspection
+
+- **02-migrations.md**: Migration strategy and workflows
+    - Release-based versioning philosophy
+    - Migration types (schema, data seeding, combined)
+    - Migration application flow with diagrams
+    - Dev workflow for testing migrations
+    - Migration best practices and troubleshooting
+
+**03-modules/**:
+
+- **core.md**: Core database API module
+    - Module responsibilities and public interface
+    - Internal operations (SQL validation, mutex queue, worker communication)
+    - Data flow diagrams for query and transaction execution
+    - Performance characteristics and dependencies
+
+- **release-management.md**: Release management module
+    - Release validation and hash computation
+    - Version application and rollback operations
+    - Metadata lock management
+    - OPFS file operations
+    - Data flow for release and rollback operations
+
+- **worker-bridge.md**: Worker bridge module
+    - Worker creation and message protocol
+    - Promise management and error reconstruction
+    - Worker-side message handlers
+    - Debug logging and error handling
+    - Performance characteristics and security considerations
+
+### Documentation Quality
+
+**Diagrams**: Extensive use of Mermaid diagrams for clarity
+
+- Sequence diagrams for API flows
+- Flowcharts for decision logic
+- ER diagrams for database schema
+- State diagrams for lifecycle management
+
+**Code Examples**: Real TypeScript code throughout
+
+- API usage patterns
+- Error handling examples
+- Dev workflow examples
+- Integration examples
+
+**Cross-References**: Comprehensive linking between documents
+
+- API contracts linked to module LLDs
+- Schema linked to migration strategy
+- Errors linked to handling strategies
 
 ---
 
@@ -180,42 +327,49 @@ docs/
 **Purpose**: Document significant architectural decisions with rationale, alternatives, and consequences.
 
 **ADR-0001: Web Worker Architecture**
+
 - **Decision**: Use dedicated Web Worker for all SQLite operations
 - **Rationale**: Prevent main thread blocking, enable responsive UI
 - **Trade-off**: Complexity of worker communication, debugging challenges
 - **Status**: Production validated, 100% test pass rate
 
 **ADR-0002: OPFS for Persistent Storage**
+
 - **Decision**: Use Origin Private File System for database file storage
 - **Rationale**: True file-backed storage, synchronous access in worker
 - **Trade-off**: Limited browser support (Chrome/Edge/Opera only)
 - **Status**: Production validated, handles 500MB-1GB databases
 
 **ADR-0003: Mutex Queue for Concurrency Control**
+
 - **Decision**: Use mutex queue to serialize all database operations
 - **Rationale**: SQLite is not thread-safe, requires sequential access
 - **Trade-off**: Serial execution limits throughput
 - **Status**: Proven in production, 1000+ transactions/second
 
 **ADR-0004: Release Versioning System**
+
 - **Decision**: Implement OPFS-based version isolation with metadata tracking
 - **Rationale**: Schema evolution without data loss, rollback capability
 - **Trade-off**: Complexity of version management, OPFS space usage
 - **Status**: Fully operational, atomic migrations validated
 
 **ADR-0005: COOP/COEP Requirement**
+
 - **Decision**: Require COOP/COEP headers for SharedArrayBuffer support
 - **Rationale**: Zero-copy data transfer optimization
 - **Trade-off**: Deployment complexity, hosting platform limitations
 - **Status**: Documented with platform-specific configuration guides
 
 **ADR-0006: TypeScript Type System**
+
 - **Decision**: Use generic type parameters with manual annotations
 - **Rationale**: Type safety with flexibility, familiar TypeScript patterns
 - **Trade-off**: Manual type annotations, potential for type drift
 - **Status**: 100% TypeScript coverage, production validated
 
 **ADR-0007: Error Handling Strategy**
+
 - **Decision**: Comprehensive error handling with stack trace preservation
 - **Rationale**: Debugging capability, automatic rollback on failures
 - **Trade-off**: Implementation complexity, error serialization overhead
@@ -224,6 +378,7 @@ docs/
 ### ADR Structure
 
 Each ADR follows the template:
+
 - **Status**: Proposed / Accepted / Deprecated
 - **Context**: Problem, constraints, urgency
 - **Decision**: Clear statement of the decision
@@ -241,26 +396,29 @@ Each ADR follows the template:
 
 - **Pattern**: Web Worker + OPFS + Message Passing
 - **Key Principles**:
-  - Non-blocking by default (all DB operations in worker)
-  - Type safety first (full TypeScript)
-  - Mutex-serialized operations (sequential SQLite access)
-  - Versioned persistence (release management)
+    - Non-blocking by default (all DB operations in worker)
+    - Type safety first (full TypeScript)
+    - Mutex-serialized operations (sequential SQLite access)
+    - Versioned persistence (release management)
 
 ### Core Components
 
 **1. Main Thread Layer**
+
 - Public API surface (`openDB`, `DBInterface`)
 - Worker bridge (message protocol abstraction)
 - Mutex queue (operation serialization)
 - Release manager (version orchestration)
 
 **2. Worker Layer**
+
 - SQLite WASM engine (database operations)
 - OPFS integration (file system access)
 - Message handler (request/response processing)
 - Debug logging (query timing)
 
 **3. Storage Layer**
+
 - OPFS file system (persistent storage)
 - Metadata database (release tracking)
 - Versioned databases (isolated snapshots)
@@ -268,6 +426,7 @@ Each ADR follows the template:
 ### Data Flow Highlights
 
 **Critical Flows Documented**:
+
 1. Database initialization with release migrations
 2. SQL query execution (non-blocking)
 3. Transaction execution (atomic operations)
@@ -275,11 +434,13 @@ Each ADR follows the template:
 5. Dev tool rollback (version management)
 
 **State Machines Documented**:
+
 - Database connection lifecycle
 - Release version state transitions
 - Worker message processing
 
 **Error Handling Documented**:
+
 - Migration failure compensation (automatic rollback)
 - Transaction error handling (automatic ROLLBACK)
 - Worker crash recovery (promise rejection)
@@ -288,24 +449,28 @@ Each ADR follows the template:
 ### Deployment Highlights
 
 **Deployment Topology**:
+
 - Client-side only (no server infrastructure)
 - Static library distribution via npm
 - CDN-hosted bundles
 - COOP/COEP headers required for SharedArrayBuffer
 
 **Capacity & Scaling**:
+
 - Single-user per browser instance
 - OPFS quota: 500MB-1GB per origin
 - Query performance: 0.2-0.5ms per query
 - Transaction throughput: 1000+ transactions/second
 
 **Security & Compliance**:
+
 - Same-origin isolation (OPFS protection)
 - WASM sandbox (SQLite isolation)
 - Worker isolation (operation isolation)
 - SQL injection protection (parameterized queries)
 
 **Platform Support**:
+
 - Supported: Vercel, Netlify, Cloudflare Pages, AWS S3+CloudFront, Azure
 - Unsupported: GitHub Pages (no custom headers)
 - Browser Support: Chrome/Edge/Opera (full), Firefox/Safari (partial)
@@ -313,6 +478,7 @@ Each ADR follows the template:
 ### Architecture Validation
 
 **Production Evidence**:
+
 - ✅ v1.1.0 deployed to npm (2025-01-08)
 - ✅ 100% test pass rate (unit + e2e)
 - ✅ Documentation site live: https://web-sqlite-js.wuchuheng.com
@@ -321,12 +487,14 @@ Each ADR follows the template:
 - ✅ All architectural decisions validated
 
 **Performance Metrics**:
+
 - Query execution: 0.2-0.5ms (10x faster than pure JS)
 - Database load: <100ms for 50MB database
 - Concurrent queries: 100+ concurrent operations
 - Transaction throughput: 1000+ transactions/second
 
 **Quality Metrics**:
+
 - Test coverage: 100% (unit + e2e)
 - TypeScript coverage: 100%
 - Documentation: Complete with Mermaid diagrams
@@ -337,6 +505,7 @@ Each ADR follows the template:
 ## Definition of Done
 
 A task is **DONE** only if:
+
 - ✅ Work completed
 - ✅ Evidence provided (commit/PR/test commands/results)
 - ✅ Status board updated: [docs/00-control/01-status.md](./01-status.md)
@@ -346,19 +515,22 @@ A task is **DONE** only if:
 
 ## Change Log
 
-| Date | Change | Impact |
-|------|--------|--------|
-| 2025-01-08 | Initial Stage 1 Discovery documentation | Created discovery docs, established spec index |
-| 2025-01-08 | Created control documents | Set up status tracking and navigation |
-| 2025-01-08 | **Stage 2 Feasibility Analysis complete** | Added options analysis, risk assessment, spike plans |
-| 2025-01-08 | **Stage 3 High-Level Design complete** | Added system architecture, data flow, deployment docs |
-| 2025-01-09 | **Stage 4 Architecture Decision Records complete** | Added 7 ADRs documenting all major architectural decisions |
+| Date       | Change                                             | Impact                                                                |
+| ---------- | -------------------------------------------------- | --------------------------------------------------------------------- |
+| 2025-01-08 | Initial Stage 1 Discovery documentation            | Created discovery docs, established spec index                        |
+| 2025-01-08 | Created control documents                          | Set up status tracking and navigation                                 |
+| 2025-01-08 | **Stage 2 Feasibility Analysis complete**          | Added options analysis, risk assessment, spike plans                  |
+| 2025-01-08 | **Stage 3 High-Level Design complete**             | Added system architecture, data flow, deployment docs                 |
+| 2025-01-09 | **Stage 4 Architecture Decision Records complete** | Added 7 ADRs documenting all major architectural decisions            |
+| 2025-01-09 | **Stage 5 Low-Level Design & Contracts complete**  | Added API contracts, events, errors, schema, modules documentation    |
+| 2025-01-09 | **Navigation links added to all documents**        | Enhanced document discoverability with consistent navigation sections |
 
 ---
 
 ## Quick Reference
 
 ### Critical Paths
+
 - **MVP Requirements**: [docs/01-discovery/02-requirements.md#1-mvp-p0-requirements](../01-discovery/02-requirements.md#1-mvp-p0-requirements)
 - **Success Criteria**: [docs/01-discovery/02-requirements.md#2-success-criteria](../01-discovery/02-requirements.md#2-success-criteria)
 - **Non-goals**: [docs/01-discovery/02-requirements.md#3-non-goals-explicitly-out-of-scope](../01-discovery/02-requirements.md#3-non-goals-explicitly-out-of-scope)
@@ -370,8 +542,11 @@ A task is **DONE** only if:
 - **Data Flow**: [docs/03-architecture/02-dataflow.md](../03-architecture/02-dataflow.md)
 - **Deployment**: [docs/03-architecture/03-deployment.md](../03-architecture/03-deployment.md)
 - **Architecture Decisions**: [docs/04-adr/](../04-adr/)
+- **API Contracts**: [docs/05-design/01-contracts/01-api.md](../05-design/01-contracts/01-api.md)
+- **Database Schema**: [docs/05-design/02-schema/01-database.md](../05-design/02-schema/01-database.md)
 
 ### Architecture Key Points
+
 - **Option B Selected**: SQLite WASM + OPFS + Dedicated Workers
 - **Worker-based**: All SQLite operations run in Web Worker
 - **OPFS storage**: Databases stored in Origin Private File System
@@ -381,6 +556,7 @@ A task is **DONE** only if:
 - **COOP/COEP required**: For SharedArrayBuffer zero-copy performance
 
 ### External Dependencies
+
 - **Browser APIs**: OPFS, Web Workers, SharedArrayBuffer
 - **HTTP Headers**: COOP/COEP required for SharedArrayBuffer
 - **Build Tools**: Vite, TypeScript, Vitest, Playwright

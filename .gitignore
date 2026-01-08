@@ -5,7 +5,7 @@ __screenshots__/
 dist/
 coverage/
 *.tgz
-docs/.vitepress/cache/
+vitepress-docs/.vitepress/cache/
 .env
 *.tar.gz
 tmp/

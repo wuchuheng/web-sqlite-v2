@@ -15,18 +15,22 @@ Developers building offline-first applications, progressive web apps (PWAs), and
 ## 2) Target users
 
 ### Primary users
+
 - **Frontend web developers** building offline-first or data-intensive web applications
 - **PWA developers** requiring reliable local data persistence
 - **Web application developers** needing complex querying and relational data management
 - **Internal tool builders** creating browser-based data management interfaces
 
 ### Secondary users
+
 - **Full-stack developers** prototyping applications with client-side databases
 - **Educators** teaching SQL and database concepts in the browser
 - **Data analysts** needing local data processing capabilities
 
 ### Technical context
+
 Users are comfortable with:
+
 - JavaScript/TypeScript
 - SQL fundamentals
 - Modern build tools (Vite, Webpack, etc.)
@@ -56,23 +60,27 @@ Users are comfortable with:
 ## 4) Success metrics
 
 ### Usage metrics
+
 - Successful database initialization in supported browsers
 - SQL queries execute and return correct results
 - Database persists across browser sessions and page reloads
 
 ### Functional metrics
+
 - Release migrations apply correctly and atomically
 - Dev tooling (release/rollback) functions as specified
 - Transactions maintain ACID properties within browser constraints
 - Debug mode provides useful SQL execution logs
 
 ### Developer experience metrics
+
 - API is intuitive and requires minimal documentation reading
 - Error messages are clear and actionable
 - TypeScript types provide accurate autocomplete and type checking
 - Integration with modern build tools works seamlessly
 
 ### Technical metrics
+
 - No main thread blocking during database operations
 - Memory usage remains within reasonable browser limits
 - COOP/COEP header requirements are clearly documented
@@ -81,6 +89,7 @@ Users are comfortable with:
 ## 5) High-level context
 
 ### Technical architecture
+
 ```
 ┌─────────────────────────────────────────────────────────────┐
 │                      Browser Environment                     │
@@ -106,6 +115,7 @@ Users are comfortable with:
 ```
 
 ### Dependencies and constraints
+
 - **Browser requirements**: Modern browsers with OPFS and SharedArrayBuffer support
 - **HTTP headers**: COOP/COEP headers required for SharedArrayBuffer
 - **Build tools**: Vite for bundling library and documentation
@@ -113,6 +123,7 @@ Users are comfortable with:
 - **SQLite**: Vendored WASM build of SQLite 3
 
 ### Release versioning flow
+
 ```mermaid
 flowchart TD
     A[openDB called] --> B[Validate releases config]
@@ -134,9 +145,24 @@ flowchart TD
 ```
 
 ### Current status
+
 The project is **actively developed and production-ready** with:
+
 - Core SQLite functionality fully implemented
 - Release versioning system operational
 - Comprehensive test coverage (unit + E2E)
 - Documentation site deployed at https://web-sqlite-js.wuchuheng.com
 - Version 1.1.0 published to npm
+
+---
+
+## Navigation
+
+**Next in Series**: [02 Requirements](./02-requirements.md) - MVP requirements, success criteria, and non-goals
+
+**Related Discovery Documents**:
+
+- [03 Scope & Glossary](./03-scope.md) - Scope boundaries and terminology
+- [Back to Spec Index](../00-control/00-spec.md)
+
+**Continue to**: [Stage 2: Feasibility Analysis](../02-feasibility/01-options.md) - Technical options and recommendations

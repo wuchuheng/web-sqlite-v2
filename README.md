@@ -2,7 +2,7 @@
 
 <p align="center">
   <a href="https://web-sqlite-js.wuchuheng.com" target="_blank">
-    <img src="docs/public/web-sqlite-js.gif" width="80%" style="border-radius: 10px;"  />
+    <img src="vitepress-docs/public/web-sqlite-js.gif" width="80%" style="border-radius: 10px;"  />
   </a>
 </p>
 
