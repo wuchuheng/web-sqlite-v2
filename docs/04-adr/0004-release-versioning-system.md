@@ -263,7 +263,7 @@ Support multiple release branches (e.g., stable, beta, dev).
 ```
 demo.sqlite3/
   release.sqlite3              # Metadata database
-  default.sqlite3              # Initial empty database (version 0.0.0)
+  default.sqlite3              # Initial empty database (version "default")
   0.0.1/
     db.sqlite3                 # Versioned database snapshot
     migration.sql              # Migration SQL (for inspection)
@@ -272,8 +272,8 @@ demo.sqlite3/
     db.sqlite3
     migration.sql
     seed.sql
-  0.0.3-dev/
-    db.sqlite3                 # Dev version
+  0.0.3/
+    db.sqlite3                 # Dev version (mode = "dev")
     migration.sql
     seed.sql
 ```

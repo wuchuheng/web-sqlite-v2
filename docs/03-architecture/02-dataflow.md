@@ -26,11 +26,11 @@ sequenceDiagram
     participant Meta as Metadata DB
 
     App->>Main: openDB(filename, options)
-    Main->>Main: validateSharedArrayBuffer()
+    Main->>Main: abilityCheck()
     Main->>Main: validateAndHashReleases(options.releases)
 
     alt SharedArrayBuffer Unavailable
-        Main-->>App: throw Error("SharedArrayBuffer not available")
+        Main-->>App: throw Error("[web-sqlite-js] SharedArrayBuffer is not enabled.")
     end
 
     Main->>OPFS: navigator.storage.getDirectory()
@@ -44,7 +44,7 @@ sequenceDiagram
 
     Main->>Bridge: sendMsg(OPEN, target="meta")
     Bridge->>Worker: postMessage({ id, event: OPEN, payload })
-    Worker->>Meta: new sqlite3.oo1.OpfsDb("release.sqlite3")
+    Worker->>Meta: new sqlite3.oo1.OpfsDb("myapp.sqlite3/release.sqlite3")
     Worker-->>Bridge: postMessage({ id, success: true })
     Bridge-->>Main: resolve promise
 
@@ -464,8 +464,8 @@ stateDiagram-v2
 
 -   **EXECUTE**: Not idempotent by default (e.g., INSERT creates new rows)
 -   **QUERY**: Idempotent (read-only, no state change)
--   **CLOSE**: Idempotent (safe to close already closed connection)
--   **devTool.release**: Idempotent if version already exists (hash validation ensures consistency)
+-   **CLOSE**: Not idempotent; subsequent close fails with "Database is not open"
+-   **devTool.release**: Not idempotent; throws if version is <= latest
 -   **devTool.rollback**: Idempotent (safe to rollback to same version)
 
 **Release Application Idempotency**:

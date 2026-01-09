@@ -39,7 +39,7 @@ CREATE UNIQUE INDEX idx_release_version ON release(version);
 | ------------------ | ------- | ------------------------- | ------------------------------------------------------ |
 | `id`               | INTEGER | PRIMARY KEY AUTOINCREMENT | Auto-incrementing unique identifier                    |
 | `version`          | TEXT    | NOT NULL, UNIQUE          | Semantic version string (e.g., "1.0.0", "1.0.1")       |
-| `migrationSQLHash` | TEXT    | NULL                      | SHA-256 hash of migration SQL (NULL for version 0.0.0) |
+| `migrationSQLHash` | TEXT    | NULL                      | SHA-256 hash of migration SQL (NULL only for `default`) |
 | `seedSQLHash`      | TEXT    | NULL                      | SHA-256 hash of seed SQL (NULL if no seed SQL)         |
 | `mode`             | TEXT    | NOT NULL, CHECK           | Version mode: "release" (immutable) or "dev" (mutable) |
 | `createdAt`        | TEXT    | NOT NULL                  | ISO 8601 timestamp of version creation                 |
@@ -60,14 +60,14 @@ INSERT INTO release (version, migrationSQLHash, seedSQLHash, mode, createdAt)
 VALUES ('default', NULL, NULL, 'release', '<timestamp>');
 ```
 
-**Note**: The 'default' version is an internal version representing the initial empty database file (`default.sqlite3`). User-provided releases start from version "0.0.0" or higher.
+**Note**: The 'default' version is an internal version representing the initial empty database file (`default.sqlite3`). User-provided versions must be semver `x.y.z` (no leading zeros), and `default` is reserved.
 
 **Example Rows**:
 
 ```sql
 -- Version 0.0.0 (first user-provided release)
 INSERT INTO release (version, migrationSQLHash, seedSQLHash, mode, createdAt)
-VALUES ('0.0.0', NULL, NULL, 'release', '2025-01-09T00:00:00.000Z');
+VALUES ('0.0.0', 'abc123def456...', NULL, 'release', '2025-01-09T00:00:00.000Z');
 
 -- Version 1.0.0 (first release)
 INSERT INTO release (version, migrationSQLHash, seedSQLHash, mode, createdAt)
@@ -259,10 +259,9 @@ erDiagram
 
 ```
 OPFS Root
-└── {baseDir}/                           # Base directory (e.g., "demo", "myapp")
+└── {baseDir}/                           # Base directory (e.g., "demo.sqlite3", "myapp.sqlite3")
     ├── release.sqlite3                  # Metadata database
-    ├── default.sqlite3                  # Initial empty database (version 0.0.0)
-    ├── 0.0.0/                           # Version 0.0.0 directory (alias to default.sqlite3)
+    ├── default.sqlite3                  # Initial empty database (version "default")
     ├── 1.0.0/                           # Version 1.0.0 directory
     │   ├── db.sqlite3                   # Versioned database snapshot
     │   ├── migration.sql                # Migration SQL (for inspection)
@@ -271,7 +270,7 @@ OPFS Root
     │   ├── db.sqlite3
     │   ├── migration.sql
     │   └── seed.sql
-    └── 1.0.2/                           # Dev version directory
+    └── 1.0.2/                           # Dev version directory (mode = "dev")
         ├── db.sqlite3
         ├── migration.sql
         └── seed.sql
@@ -288,7 +287,7 @@ OPFS Root
 
 #### `default.sqlite3`
 
-- **Purpose**: Initial empty database (version 0.0.0)
+- **Purpose**: Initial empty database (version "default")
 - **Schema**: Empty (no tables)
 - **Location**: `{baseDir}/default.sqlite3`
 - **Size**: Empty SQLite file (typically 8KB)
@@ -332,11 +331,11 @@ sequenceDiagram
     App->>OPFS: ensureFile(baseDir, "default.sqlite3")
     OPFS-->>App: default.sqlite3 file
 
-    App->>Worker: OPEN release.sqlite3
+    App->>Worker: OPEN {baseDir}/release.sqlite3
     Worker-->>App: metadata DB opened
 
     App->>Meta: Ensure metadata tables
-    App->>Meta: Insert default row (version 0.0.0)
+    App->>Meta: Insert default row (version "default")
 
     loop For each new version
         App->>OPFS: getDirectoryHandle(version, create: true)
@@ -346,7 +345,7 @@ sequenceDiagram
         App->>OPFS: writeTextFile(versionDir, "migration.sql", sql)
         App->>OPFS: writeTextFile(versionDir, "seed.sql", seedSql)
 
-        App->>Worker: OPEN version/db.sqlite3
+        App->>Worker: OPEN {baseDir}/{version}/db.sqlite3
         App->>Worker: EXECUTE migration.sql
         App->>Worker: EXECUTE seed.sql
 
@@ -418,7 +417,7 @@ LIMIT 1;
 -- Latest release version (excluding dev)
 SELECT id, version, migrationSQLHash, seedSQLHash, mode, createdAt
 FROM release
-WHERE mode = 'release' AND version != '0.0.0'
+WHERE mode = 'release' AND version != 'default'
 ORDER BY id DESC
 LIMIT 1;
 
@@ -433,26 +432,35 @@ ORDER BY id;
 
 **Version Format**: Semantic versioning (semver)
 
-- Pattern: `^(\d+)\.(\d+)\.(\d+)$`
+- Pattern: `^(0|[1-9]\d*)\.(0|[1-9]\d*)\.(0|[1-9]\d*)$`
 - Examples: "0.0.0", "1.0.0", "1.0.1", "2.3.4"
+- Reserved: "default" (internal initial version)
 
 **Comparison Logic**:
 
 ```typescript
-function compareVersions(v1: string, v2: string): number {
-    const parse = (v: string) => {
-        const match = v.match(/^(\d+)\.(\d+)\.(\d+)/);
-        return match
-            ? [parseInt(match[1]), parseInt(match[2]), parseInt(match[3])]
-            : [0, 0, 0];
-    };
+const VERSION_RE = /^(0|[1-9]\d*)\.(0|[1-9]\d*)\.(0|[1-9]\d*)$/;
 
-    const [major1, minor1, patch1] = parse(v1);
-    const [major2, minor2, patch2] = parse(v2);
+function compareVersions(a: string, b: string): number {
+    if (a === b) return 0;
+    if (a === "default") return -1;
+    if (b === "default") return 1;
 
-    if (major1 !== major2) return major1 - major2;
-    if (minor1 !== minor2) return minor1 - minor2;
-    return patch1 - patch2;
+    const matchA = VERSION_RE.exec(a);
+    const matchB = VERSION_RE.exec(b);
+    if (!matchA || !matchB) {
+        throw new Error(`Invalid version format: ${!matchA ? a : b}`);
+    }
+
+    const aParts = [Number(matchA[1]), Number(matchA[2]), Number(matchA[3])];
+    const bParts = [Number(matchB[1]), Number(matchB[2]), Number(matchB[3])];
+
+    for (let i = 0; i < aParts.length; i++) {
+        if (aParts[i] !== bParts[i]) {
+            return aParts[i] > bParts[i] ? 1 : -1;
+        }
+    }
+    return 0;
 }
 ```
 
@@ -565,7 +573,7 @@ let isDebug = false; // Debug logging flag
 ```mermaid
 stateDiagram-v2
     [*] --> Uninitialized
-    Uninitialized --> MetaOnly: OPEN release.sqlite3
+    Uninitialized --> MetaOnly: OPEN {baseDir}/release.sqlite3
     MetaOnly --> BothOpen: OPEN active database
     BothOpen --> Querying: QUERY operation
     BothOpen --> Executing: EXECUTE operation

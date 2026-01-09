@@ -275,9 +275,8 @@ flowchart TD
     A[close called] --> B[runMutex queue]
     B --> C[sendMsg CLOSE]
     C --> D[Worker closes connections]
-    D --> E[Worker terminated]
-    E --> F[Pending promises rejected]
-    F --> G[Return void]
+    D --> E[SQLite state reset]
+    E --> F[Return void]
 ```
 
 **Code**:
@@ -715,7 +714,7 @@ sequenceDiagram
 | `exec()`                | 0.3-0.6ms       | Mutex + worker communication + SQL execution |
 | `query()`               | 0.3-0.6ms       | Mutex + worker communication + SQL execution |
 | `transaction()`         | 0.5-2ms         | BEGIN + operations + COMMIT/ROLLBACK         |
-| `close()`               | <10ms           | Worker termination                           |
+| `close()`               | <10ms           | Close active/meta DBs and reset worker state |
 
 ### Concurrency
 
@@ -760,24 +759,25 @@ src/main.ts
 
 ### Unit Tests
 
--   **Mutex Queue**: `tests/unit/mutex.test.ts`
+-   **Mutex Queue**: `src/utils/mutex/mutex.unit.test.ts`
     -   Queue ordering
     -   Lock/unlock behavior
     -   Concurrent operations
 
 ### E2E Tests
 
--   **Database Operations**: `tests/e2e/core.e2e.test.ts`
-
+-   **Database Lifecycle**: `tests/e2e/sqlite3.e2e.test.ts`
     -   openDB initialization
-    -   exec, query, transaction operations
     -   close behavior
-
--   **Release Management**: `tests/e2e/release.e2e.test.ts`
-
-    -   Migration application
-    -   Hash validation
-    -   Dev tool release and rollback
+-   **Exec Operations**: `tests/e2e/exec.e2e.test.ts`
+    -   DDL/DML execution
+    -   change counts and lastInsertRowid
+-   **Query Operations**: `tests/e2e/query.e2e.test.ts`
+    -   SELECT queries with bind params
+-   **Transactions**: `tests/e2e/transaction.e2e.test.ts`
+    -   commit and rollback behavior
+-   **Error Handling**: `tests/e2e/error.e2e.test.ts`
+    -   worker error propagation
 
 -   **Error Handling**: `tests/e2e/error.e2e.test.ts`
     -   Invalid SQL handling

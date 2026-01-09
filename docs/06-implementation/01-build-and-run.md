@@ -247,22 +247,33 @@ class Mutex {
 
 ```
 src/
-├── core/                  # Core database API
-│   └── main.ts
-├── release/               # Release management
-│   ├── release-manager.ts
-│   ├── opfs-utils.ts
+├── main.ts                       # Public API entry point
+├── worker-bridge.ts              # Worker communication
+├── worker.ts                     # Worker implementation
+├── config/
+│   └── config.ts                 # Docs/config constants
+├── validations/
+│   └── shareBufferAbiliCheck.ts  # SharedArrayBuffer check
+├── release/                      # Release management
+│   ├── constants.ts
 │   ├── hash-utils.ts
-│   └── lock-utils.ts
-├── utils/                 # Utilities
+│   ├── lock-utils.ts
+│   ├── opfs-utils.ts
+│   ├── release-manager.ts
+│   ├── types.ts
+│   └── version-utils.ts
+├── utils/                         # Utilities
+│   ├── logger.ts
 │   └── mutex/
 │       ├── mutex.ts
 │       └── mutex.unit.test.ts
-├── worker-bridge.ts       # Worker communication
-├── worker.ts              # Worker implementation
-└── types/                 # Type definitions
-    ├── DB.ts
-    └── message.ts
+├── types/                         # Type definitions
+│   ├── DB.ts
+│   └── message.ts
+└── jswasm/
+    ├── sqlite3.d.ts
+    ├── sqlite3.mjs
+    └── sqlite3.wasm
 ```
 
 **Rules**:

@@ -460,7 +460,7 @@ describe("devTool.rollback", () => {
 
         // Create dev version
         await db.devTool.release({
-            version: "1.0.1-dev",
+            version: "1.0.1",
             migrationSQL: "ALTER TABLE v1 ADD COLUMN name TEXT;",
         });
 

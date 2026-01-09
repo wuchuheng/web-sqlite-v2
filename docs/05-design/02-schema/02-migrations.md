@@ -161,8 +161,8 @@ sequenceDiagram
     App->>Main: openDB(filename, { releases })
     Main->>Main: validateAndHashReleases(releases)
     Main->>OPFS: getDirectory()
-    Main->>OPFS: ensureFile(default.sqlite3)
-    Main->>Worker: OPEN release.sqlite3
+    Main->>OPFS: ensureFile(baseDir, "default.sqlite3")
+    Main->>Worker: OPEN {baseDir}/release.sqlite3
     Main->>Meta: Ensure metadata tables
 
     Main->>Meta: SELECT latest version
@@ -241,10 +241,10 @@ for (const row of releaseRows) {
 
 ### Version Validation
 
-**Version Format**: Semver with optional `-dev` suffix
+**Version Format**: Semver `x.y.z` with no leading zeros
 
 ```typescript
-const VERSION_RE = /^(\d+)\.(\d+)\.(\d+)(-dev)?$/;
+const VERSION_RE = /^(0|[1-9]\d*)\.(0|[1-9]\d*)\.(0|[1-9]\d*)$/;
 ```
 
 **Version Ordering**: Semantic version comparison
@@ -414,9 +414,9 @@ DROP COLUMN age;
 **Test Strategy**:
 
 1. Write migration SQL
-2. Create dev version: `db.devTool.release({ version: "1.0.0-dev", migrationSQL })`
+2. Create dev version: `db.devTool.release({ version: "1.0.0", migrationSQL })`
 3. Test application with new schema
-4. Rollback if issues: `db.devTool.rollback("0.0.0")`
+4. Rollback if issues: `db.devTool.rollback("default")`
 5. Iterate until stable
 6. Deploy as release: `openDB("myapp", { releases: [{ version: "1.0.0", migrationSQL }] })`
 
@@ -492,7 +492,7 @@ const db = await openDB("myapp", {
 
 ```typescript
 await db.devTool.release({
-    version: "1.1.0-dev",
+    version: "1.0.1",
     migrationSQL: "ALTER TABLE users ADD COLUMN email TEXT;",
     seedSQL: "UPDATE users SET email = 'test@example.com' WHERE email IS NULL;",
 });
@@ -521,7 +521,7 @@ await db.devTool.rollback("1.0.0");
 ```typescript
 // Create new dev version with fixes
 await db.devTool.release({
-    version: "1.1.0-dev",
+    version: "1.0.2",
     migrationSQL: "ALTER TABLE users ADD COLUMN email TEXT UNIQUE;", // Added UNIQUE constraint
 });
 ```
@@ -565,7 +565,7 @@ const db = await openDB("myapp", {
 **Cannot Rollback Below Latest Release**
 
 ```typescript
-// Versions: 1.0.0 (release), 1.0.1-dev, 1.0.2-dev
+// Versions: 1.0.0 (release), 1.0.1 (dev), 1.0.2 (dev)
 await db.devTool.rollback("1.0.0"); // OK
 await db.devTool.rollback("0.9.0"); // ERROR: Cannot rollback below latest release
 ```
@@ -577,8 +577,8 @@ await db.devTool.rollback("0.9.0"); // ERROR: Cannot rollback below latest relea
 **Free Rollback Within Dev Versions**
 
 ```typescript
-// Versions: 1.0.0 (release), 1.0.1-dev, 1.0.2-dev, 1.0.3-dev
-await db.devTool.rollback("1.0.1-dev"); // OK (removes 1.0.2-dev, 1.0.3-dev)
+// Versions: 1.0.0 (release), 1.0.1 (dev), 1.0.2 (dev), 1.0.3 (dev)
+await db.devTool.rollback("1.0.1"); // OK (removes 1.0.2, 1.0.3)
 ```
 
 **Rollback Behavior**:
@@ -915,7 +915,7 @@ const db = await openDB("myapp", {
 
 // Create dev version for testing
 await db.devTool.release({
-    version: "1.1.0-dev",
+    version: "1.0.1",
     migrationSQL: "ALTER TABLE users ADD COLUMN email TEXT;",
 });
 
@@ -932,7 +932,7 @@ await db.devTool.rollback("1.0.0");
 
 // Create new dev version with fixes
 await db.devTool.release({
-    version: "1.1.0-dev",
+    version: "1.0.2",
     migrationSQL: "ALTER TABLE users ADD COLUMN email TEXT UNIQUE;", // Added UNIQUE
 });
 

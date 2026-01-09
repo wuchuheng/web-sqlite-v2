@@ -183,20 +183,33 @@ flowchart LR
 
 ```
 src/
-├── main.ts                 # Public API entry point
+├── main.ts                       # Public API entry point
+├── worker-bridge.ts              # Worker communication
+├── worker.ts                     # Web Worker implementation
+├── config/
+│   └── config.ts                 # Docs/config constants
+├── validations/
+│   └── shareBufferAbiliCheck.ts  # SharedArrayBuffer check
 ├── release/
-│   ├── release-manager.ts  # Release versioning logic
-│   ├── release-types.ts    # Release type definitions
-│   └── opfs-utils.ts       # OPFS file operations
-├── worker-bridge.ts        # Worker communication
-├── worker.ts               # Web Worker implementation
+│   ├── constants.ts              # SQL constants, version regex
+│   ├── hash-utils.ts             # Release validation
+│   ├── lock-utils.ts             # Metadata locking
+│   ├── opfs-utils.ts             # OPFS file operations
+│   ├── release-manager.ts        # Release versioning logic
+│   ├── types.ts                  # Release domain types
+│   └── version-utils.ts          # Version comparison
 ├── types/
-│   ├── index.ts            # Main type definitions
-│   └── events.ts           # Worker event types
-└── utils/
-    ├── hash.ts             # SHA-256 hash utilities
-    ├── mutex/              # Mutex queue implementation
-    └── logger.ts           # Debug logging
+│   ├── DB.ts                     # DBInterface, ReleaseConfig, types
+│   └── message.ts                # Worker protocol types
+├── utils/
+│   ├── logger.ts                 # Debug logging
+│   └── mutex/
+│       ├── mutex.ts
+│       └── mutex.unit.test.ts
+└── jswasm/
+    ├── sqlite3.d.ts
+    ├── sqlite3.mjs
+    └── sqlite3.wasm
 ```
 
 ---

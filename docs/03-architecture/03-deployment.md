@@ -321,10 +321,10 @@ flowchart LR
 ```typescript
 // Library checks SharedArrayBuffer availability
 const abilityCheck = () => {
-    if (typeof SharedArrayBuffer === "undefined") {
-        throw new Error(
-            "SharedArrayBuffer is not available. Ensure COOP/COEP headers are set.",
-        );
+    try {
+        new SharedArrayBuffer();
+    } catch {
+        throw new Error("[web-sqlite-js] SharedArrayBuffer is not enabled.");
     }
 };
 ```

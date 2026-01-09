@@ -20,6 +20,7 @@ function openDB(
 **Parameters:**
 
 - `filename` (string): The base database name. A directory is created in OPFS with this name.
+    - If it does not end with `.sqlite3`, the suffix is appended automatically.
     - Constraints: Non-empty string, trimmed
     - Validation: Throws if invalid
     - Example: `"demo"`, `"myapp.sqlite3"`
@@ -41,7 +42,7 @@ function openDB(
 
 **Throws:**
 
-- `Error`: "SharedArrayBuffer is not available. Ensure COOP/COEP headers are set."
+- `Error`: "[web-sqlite-js] SharedArrayBuffer is not enabled." (message includes COOP/COEP header instructions and setup link)
 - `Error`: "filename must be a non-empty string"
 - `Error`: "Missing release config for {version}"
 - `Error`: "migrationSQL hash mismatch for {version}"
@@ -128,7 +129,7 @@ interface DBInterface {
 **Parameters:**
 
 - `sql` (string): SQL string to execute
-    - Constraints: Non-empty string, trimmed
+    - Constraints: string
     - Can contain multiple statements separated by semicolons
     - Examples: DDL (CREATE, DROP, ALTER), DML (INSERT, UPDATE, DELETE)
 
@@ -146,7 +147,7 @@ interface DBInterface {
 
 **Throws:**
 
-- `Error`: "SQL query must be a non-empty string"
+- `Error`: "Invalid payload for EXECUTE event: expected SQL string or { sql, bind }"
 - `Error`: SQLite errors (syntax, constraints, table not found, etc.)
 - `Error`: "Database is not open" (if worker not initialized)
 
@@ -476,9 +477,8 @@ interface DBInterface {
 
 - Closes active database connection
 - Closes metadata database connection
-- Terminates worker
-- Rejects all pending operations with "Worker terminated" error
-- Idempotent (safe to call multiple times)
+- Resets worker-side SQLite state
+- Further operations (including `close()`) fail with "Database is not open"
 
 **Example:**
 
@@ -532,7 +532,7 @@ interface DevTool {
 
 ```typescript
 await db.devTool.release({
-    version: "1.0.1-dev",
+    version: "1.0.1",
     migrationSQL: "ALTER TABLE users ADD COLUMN age INTEGER;",
     seedSQL: "UPDATE users SET age = 25 WHERE age IS NULL;",
 });
@@ -580,7 +580,7 @@ interface DevTool {
 **Example:**
 
 ```typescript
-// Current: 1.0.1-dev, 1.0.2-dev
+// Current dev versions: 1.0.1, 1.0.2
 // Latest release: 1.0.0
 await db.devTool.rollback("1.0.0");
 // Result: Back to 1.0.0, dev versions removed
@@ -950,7 +950,7 @@ users[0].id; // number
 ```typescript
 // Create dev version for testing migration
 await db.devTool.release({
-    version: "2.0.0-dev",
+    version: "2.0.0",
     migrationSQL: "ALTER TABLE users ADD COLUMN bio TEXT;",
 });
 

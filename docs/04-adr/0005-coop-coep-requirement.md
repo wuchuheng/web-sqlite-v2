@@ -21,7 +21,7 @@ Accepted
     - Without these headers, SharedArrayBuffer is unavailable in modern browsers
 
 - **What are the constraints?**
-    - SharedArrayBuffer is optional but provides performance benefits for worker communication
+    - SharedArrayBuffer is required for worker communication in this library
     - COOP/COEP headers must be set by the hosting server (not configurable from client code)
     - Some hosting platforms don't support custom headers (e.g., GitHub Pages)
     - Headers affect entire origin, not just the library
@@ -35,7 +35,7 @@ Accepted
 
 ## Decision
 
-We will **require COOP/COEP headers** for optimal performance but provide graceful degradation.
+We will **require COOP/COEP headers** and fail fast when SharedArrayBuffer is unavailable.
 
 **Header Requirements**: Cross-Origin isolation for SharedArrayBuffer
 
@@ -50,11 +50,10 @@ graph TB
     D --> F{SharedArrayBuffer Available?}
     E --> F
 
-    F -->|Yes| G[web-sqlite-js Optimal Performance]
-    F -->|No| H[web-sqlite-js Works with Structured Clone]
+    F -->|Yes| G[web-sqlite-js Ready]
+    F -->|No| H[Throw error with setup guidance]
 
     G --> I[Zero-Copy Data Transfer]
-    H --> J[postMessage with Structured Clone]
 
     style F fill:#ff9,stroke:#333,stroke-width:2px
     style G fill:#9f9,stroke:#333,stroke-width:2px
@@ -68,14 +67,14 @@ graph TB
     Cross-Origin-Opener-Policy: same-origin
     Cross-Origin-Embedder-Policy: require-corp
     ```
-- **Feature Detection**: Check `typeof SharedArrayBuffer !== 'undefined'` on initialization
-- **Graceful Degradation**: Library works without SharedArrayBuffer using structured clone
+- **Feature Detection**: Attempt `new SharedArrayBuffer()` on initialization
+- **Fail Fast**: Throw a descriptive error when SharedArrayBuffer is unavailable
 - **Clear Error Messages**: Inform users when headers are missing
 - **Documentation**: Comprehensive deployment guides for common platforms
 
 ## Alternatives Considered
 
-### Option 1: Require SharedArrayBuffer (Rejected)
+### Option 1: Require SharedArrayBuffer (Chosen)
 
 Mandate COOP/COEP headers and refuse to work without them.
 
@@ -152,10 +151,9 @@ Provide a browser extension to enable SharedArrayBuffer for development.
     - Optimal performance for users who configure headers
     - Production-validated (v1.1.0 with COOP/COEP headers)
 
-- **Graceful Degradation**: Library works without SharedArrayBuffer
-    - Structured clone fallback for unsupported configurations
-    - Clear error messages guide users to header configuration
-    - No breaking changes for users without headers
+- **Fail-Fast Guidance**: Missing headers produce a clear, actionable error
+    - Descriptive message includes COOP/COEP requirements and a docs link
+    - Reduces ambiguous failures during initialization
 
 - **Future-Proof**: Architecture supports SharedArrayBuffer optimizations
     - Prepared for future WASM features that require SharedArrayBuffer
@@ -181,11 +179,9 @@ Provide a browser extension to enable SharedArrayBuffer for development.
     - Older browsers: No support
     - **Mitigation**: Document browser requirements, feature detection
 
-- **Testing Complexity**: Must test both code paths
-    - Unit tests for SharedArrayBuffer and structured clone paths
+- **Testing Complexity**: Must test header-present vs header-missing behavior
     - E2E tests with and without headers
-    - Increases test matrix
-    - **Mitigation**: Comprehensive test suite, CI/CD with headers configured
+    - **Mitigation**: CI/CD with headers configured and clear failure assertions
 
 - **Error Messages**: Users may encounter confusing errors
     - "SharedArrayBuffer is not defined" if headers missing
@@ -220,19 +216,23 @@ Provide a browser extension to enable SharedArrayBuffer for development.
 
 - Feature detection for SharedArrayBuffer availability
 - Clear error messages when headers missing
-- Graceful degradation to structured clone
+- Fail fast with descriptive error when SharedArrayBuffer is unavailable
 
 **Implementation Details**:
 
 ```typescript
 const abilityCheck = () => {
-    if (typeof SharedArrayBuffer === "undefined") {
+    try {
+        new SharedArrayBuffer();
+    } catch {
         throw new Error(
-            "SharedArrayBuffer is not available. " +
-                "Ensure COOP/COEP headers are set:\n" +
-                "Cross-Origin-Opener-Policy: same-origin\n" +
-                "Cross-Origin-Embedder-Policy: require-corp\n\n" +
-                "See https://web-sqlite-js.wuchuheng.com/deployment for configuration guides.",
+            "[web-sqlite-js] SharedArrayBuffer is not enabled.\n\n" +
+                "This library requires SharedArrayBuffer for high-performance database operations.\n" +
+                "To enable it, your server must send the following HTTP headers:\n\n" +
+                "  Cross-Origin-Opener-Policy: same-origin\n" +
+                "  Cross-Origin-Embedder-Policy: require-corp\n\n" +
+                "For configuration guides (Vite, Next.js, Nginx, etc.), visit:\n" +
+                "https://web-sqlite-js.wuchuheng.com/getting-started.html#setup-http-headers",
         );
     }
 };

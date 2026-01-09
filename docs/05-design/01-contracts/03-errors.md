@@ -41,7 +41,7 @@
 #### E001: SharedArrayBuffer Unavailable
 
 ```typescript
-Error: SharedArrayBuffer is not available. Ensure COOP/COEP headers are set.
+Error: [web-sqlite-js] SharedArrayBuffer is not enabled.
 ```
 
 **Cause**:
@@ -362,7 +362,7 @@ Error: devTool.release version must be greater than latest
 **Solution**:
 
 - Use version number greater than latest
-- Follow semver format (e.g., "1.0.1-dev", "1.0.2-dev")
+- Follow semver format (e.g., "1.0.1", "1.0.2")
 
 **Where**: `src/release/release-manager.ts`
 
@@ -384,7 +384,7 @@ Error: Invalid version format: 1.0
 
 - Use semver format: "x.y.z"
 - No leading zeros: "1.0.0", not "1.0.00"
-- Use "-dev" suffix for dev versions: "1.0.1-dev"
+- Dev versions are tracked via metadata mode; version strings still use "x.y.z"
 
 **Where**: `src/release/release-manager.ts`
 
@@ -726,7 +726,7 @@ SQL: SELCT * FROM users WHERE id = ?
 **With Version**:
 
 ```typescript
-Error: Cannot rollback below latest release version 1.0.0
+Error: Cannot rollback below the latest release version
 Target: 0.9.0
 ```
 

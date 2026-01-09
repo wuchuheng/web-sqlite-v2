@@ -113,7 +113,7 @@ type ReleaseConfig = {
 
 **Validation Rules**:
 
-1. Version must match semver pattern: `^(\d+)\.(\d+)\.(\d+)$`
+1. Version must match semver pattern: `^(0|[1-9]\d*)\.(0|[1-9]\d*)\.(0|[1-9]\d*)$`
 2. Migration SQL must be non-empty string
 3. Seed SQL must be string or null/undefined
 4. Versions must be in ascending order
@@ -121,15 +121,18 @@ type ReleaseConfig = {
 **Hash Computation**:
 
 ```typescript
-async function computeHash(sql: string | undefined | null): Promise<string> {
-    if (!sql) return "";
-    const normalized = sql.trim();
-    const encoder = new TextEncoder();
-    const data = encoder.encode(normalized);
+async function hashSQL(value: string): Promise<string> {
+    const data = new TextEncoder().encode(value);
     const hashBuffer = await crypto.subtle.digest("SHA-256", data);
     const hashArray = Array.from(new Uint8Array(hashBuffer));
     return hashArray.map((b) => b.toString(16).padStart(2, "0")).join("");
 }
+
+const normalizedSeedSQL = seedSQL === undefined || seedSQL === null || seedSQL === ""
+    ? null
+    : seedSQL;
+const migrationSQLHash = await hashSQL(migrationSQL);
+const seedSQLHash = normalizedSeedSQL ? await hashSQL(normalizedSeedSQL) : null;
 ```
 
 **Flow**:
@@ -379,7 +382,7 @@ INSERT INTO release (version, migrationSQLHash, seedSQLHash, mode, createdAt)
 VALUES ('default', NULL, NULL, 'release', '<timestamp>');
 ```
 
-**Note**: The 'default' version is an internal version representing the initial empty database file (`default.sqlite3`). User-provided releases start from version "0.0.0" or higher.
+**Note**: The 'default' version is an internal version representing the initial empty database file (`default.sqlite3`). User-provided versions must be semver `x.y.z` (no leading zeros); `default` is reserved.
 
 **Code**:
 
@@ -789,15 +792,8 @@ src/release/release-manager.ts
 
 ### Unit Tests
 
-- **Hash Computation**: `tests/unit/hash-utils.test.ts`
-    - SHA-256 hash correctness
-    - SQL normalization
-    - Empty SQL handling
-
-- **Version Comparison**: `tests/unit/version-utils.test.ts`
-    - Semantic version comparison
-    - Version ordering (release and dev modes)
-    - Edge cases (equal versions, etc.)
+- No dedicated unit tests for release hashing/versioning yet.
+- Coverage is exercised via E2E release tests (hash mismatch, release apply, rollback).
 
 ### E2E Tests
 
@@ -807,10 +803,9 @@ src/release/release-manager.ts
     - Metadata row creation
     - Version directory creation
 
-- **Dev Tooling**: `tests/e2e/dev-tool.e2e.test.ts`
+- **Dev Tooling**: `tests/e2e/release.e2e.test.ts`
     - devTool.release() creation
     - devTool.rollback() behavior
-    - Lock contention scenarios
     - Rollback constraints
 
 ---

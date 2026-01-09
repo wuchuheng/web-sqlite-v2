@@ -63,7 +63,7 @@ graph TB
 **Key Implementation Details**:
 
 - Database files stored in OPFS directory structure: `<filename>.sqlite3/`
-- Synchronous file access (`fs.open()`, `fs.write()`, `fs.close()`) available in worker context
+- OPFS File System Access API via FileSystem handles (`FileSystemDirectoryHandle`, `FileSystemFileHandle`)
 - Persistent across browser sessions and page reloads
 - Isolated per origin (same-origin policy)
 - Supports directory creation, file copying, and deletion

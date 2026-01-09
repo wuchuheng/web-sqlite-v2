@@ -14,7 +14,7 @@ TEMPLATE SOURCE
 - **Key Principles**:
     - **Non-blocking by default**: All database operations execute in a dedicated Web Worker, ensuring the main thread never blocks
     - **Type safety first**: Full TypeScript API with strict type definitions for all operations
-    - **Zero-copy where possible**: SharedArrayBuffer for efficient worker-main thread communication (requires COOP/COEP)
+    - **SharedArrayBuffer required**: Environment must be cross-origin isolated (COOP/COEP); library fails fast otherwise
     - **Mutex-serialized operations**: Single-threaded SQLite access via mutex queue prevents race conditions
     - **Versioned persistence**: OPFS-based storage with release management for schema evolution
     - **Developer experience**: Simple async/await API abstracting worker communication complexity
@@ -66,7 +66,7 @@ C4Container
   Rel(bridge, worker, "postMessage (Structured Clone)")
   Rel(worker, opfs, "Synchronous File I/O")
   Rel(worker, meta, "SQL Queries")
-  Rel(main, worker, "SharedArrayBuffer", "Zero-copy optional")
+  Rel(main, worker, "SharedArrayBuffer", "Required (COOP/COEP)")
 ```
 
 **Technology Rationale**:
@@ -153,10 +153,12 @@ OPFS Storage (Persistent File System)
     worker.ts             # Worker entry point (SQLite operations)
   /tests
     /e2e                  # End-to-end browser tests
-    /unit                 # Unit tests for utilities
   /specs                  # Feature specifications
-  /docs                   # VitePress documentation site
+  /docs                   # Internal specs/ADRs (this folder)
+  /vitepress-docs          # Public documentation site
 ```
+
+**Unit Tests**: Co-located with source files (e.g., `src/utils/mutex/mutex.unit.test.ts`).
 
 **Module Pattern**: Layered architecture with clear separation
 
@@ -177,8 +179,8 @@ OPFS Storage (Persistent File System)
 
   /utils                  # Infrastructure: Cross-cutting utilities
     /mutex                # Concurrency control
-    /logger               # Debug logging
-    /validations          # Input validation
+    logger.ts             # Debug logging
+  /validations            # Input validation
 
   main.ts                 # Interface: Public API
   worker-bridge.ts        # Infrastructure: Worker protocol

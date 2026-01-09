@@ -25,7 +25,7 @@ This document describes the architecture and implementation of web-sqlite-js, a 
 
 ```mermaid
 graph TB
-    A[Application Code] --> B[WebSQLite API]
+    A[Application Code] --> B[web-sqlite-js API]
     B --> C[Worker Bridge]
     C --> D[Dedicated Worker Thread]
     D --> E[SQLite WASM Module]
@@ -49,7 +49,7 @@ graph TB
 - **Core**: SQLite 3.x compiled to WebAssembly via Emscripten
 - **Worker**: Dedicated Worker for all database operations (main thread never blocked)
 - **Concurrency**: Mutex queue for serializing access to SQLite connection
-- **Persistence**: OPFS with synchronous file access (fs.open(), fs.write(), fs.close())
+- **Persistence**: OPFS via File System Access API (FileSystem handles)
 - **Communication**: postMessage with Transferable objects for result sets
 - **Releases**: Multi-version WASM support with isolated database files per version
 

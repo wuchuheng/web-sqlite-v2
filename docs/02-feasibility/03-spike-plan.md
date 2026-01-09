@@ -24,9 +24,9 @@ This document describes the technical validation and implementation features tha
 | Feature | Status | Description | Evidence |
 | ------- | ------ | ----------- | -------- |
 | Database Open/Close | ✅ Implemented | Open SQLite database from OPFS, close connection | `src/main.ts:openDB()` |
-| SQL Execution | ✅ Implemented | Execute INSERT, UPDATE, DELETE, CREATE statements | `src/main.ts:exec()` |
-| SQL Queries | ✅ Implemented | Execute SELECT queries with parameterized inputs | `src/main.ts:query()` |
-| Transactions | ✅ Implemented | Atomic transactions with auto-commit/rollback | `src/main.ts:transaction()` |
+| SQL Execution | ✅ Implemented | Execute INSERT, UPDATE, DELETE, CREATE statements | `src/release/release-manager.ts` |
+| SQL Queries | ✅ Implemented | Execute SELECT queries with parameterized inputs | `src/release/release-manager.ts` |
+| Transactions | ✅ Implemented | Atomic transactions with auto-commit/rollback | `src/release/release-manager.ts` |
 | Parameterized Queries | ✅ Implemented | Positional (?) and named ($param) parameters | `src/worker.ts` |
 
 ### Persistence Layer
@@ -35,18 +35,18 @@ This document describes the technical validation and implementation features tha
 | ------- | ------ | ----------- | -------- |
 | OPFS Storage | ✅ Implemented | Persistent file-backed storage in OPFS | `src/release/opfs-utils.ts` |
 | Database Files | ✅ Implemented | SQLite database files stored in OPFS | `.sqlite3` files in OPFS |
-| File System API | ✅ Implemented | Synchronous file access from worker | `fs.open()`, `fs.write()`, `fs.close()` |
+| File System API | ✅ Implemented | OPFS File System Access API via FileSystem handles | `src/release/opfs-utils.ts` |
 
 ### Release Versioning System
 
 | Feature | Status | Description | Evidence |
 | ------- | ------ | ----------- | -------- |
-| Release Management | ✅ Implemented | Multi-version database support with isolated files | `src/release-manager.ts` |
+| Release Management | ✅ Implemented | Multi-version database support with isolated files | `src/release/release-manager.ts` |
 | Migration SQL | ✅ Implemented | Schema migrations with migrationSQL | Release config interface |
 | Seed SQL | ✅ Implemented | Data seeding with seedSQL | Release config interface |
 | Version Metadata | ✅ Implemented | Tracks version history in metadata DB | `release.sqlite3` |
 | Rollback Support | ✅ Implemented | Dev tooling for version rollback | `devTool.rollback()` |
-| Hash Validation | ✅ Implemented | SHA-256 hash validation for releases | `src/release-manager.ts` |
+| Hash Validation | ✅ Implemented | SHA-256 hash validation for releases | `src/release/hash-utils.ts` |
 
 ### Concurrency & Safety
 
@@ -54,8 +54,8 @@ This document describes the technical validation and implementation features tha
 | ------- | ------ | ----------- | -------- |
 | Mutex Queue | ✅ Implemented | Serializes all database operations | `src/utils/mutex/mutex.ts` |
 | Worker Isolation | ✅ Implemented | All SQLite operations in dedicated worker | `src/worker.ts` |
-| Error Handling | ✅ Implemented | Comprehensive error handling with stack traces | `src/utils/error.ts` |
-| Transaction Safety | ✅ Implemented | Auto-rollback on transaction errors | `src/main.ts:transaction()` |
+| Error Handling | ✅ Implemented | Error propagation with stack traces | `src/worker-bridge.ts` |
+| Transaction Safety | ✅ Implemented | Auto-rollback on transaction errors | `src/release/release-manager.ts` |
 
 ### Developer Experience
 
@@ -64,7 +64,7 @@ This document describes the technical validation and implementation features tha
 | TypeScript API | ✅ Implemented | Full TypeScript type definitions | `src/types/` |
 | Debug Mode | ✅ Implemented | SQL execution logging with timing | `src/utils/logger.ts` |
 | Generic Query Types | ✅ Implemented | Type-safe query results with generics | `query<T>()` |
-| Dev Tooling | ✅ Implemented | `devTool.release()` and `devTool.rollback()` | `src/dev-tool.ts` |
+| Dev Tooling | ✅ Implemented | `devTool.release()` and `devTool.rollback()` | `src/release/release-manager.ts` |
 
 ---
 

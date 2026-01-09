@@ -310,20 +310,20 @@ try {
 
 ```typescript
 // SharedArrayBuffer unavailable
-Error: SharedArrayBuffer is not available. Ensure COOP/COEP headers are set.
+Error: [web-sqlite-js] SharedArrayBuffer is not enabled.
 
 // SQL syntax error
 Error: near "INVALID": syntax error
     at worker.ts:45:15
-    at query (main.ts:123:10)
+    at query (release-manager.ts:123:10)
 
 // Hash mismatch
-Error: Release hash mismatch for version 0.0.1.
+Error: migrationSQL hash mismatch for 0.0.1
 Expected: abc123...
 Actual: def456...
 
 // Rollback below latest release
-Error: Cannot rollback below latest release version 0.0.2.
+Error: Cannot rollback below the latest release version
 Target: 0.0.1
 ```
 

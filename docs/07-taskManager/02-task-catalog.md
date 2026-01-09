@@ -81,26 +81,26 @@
 
 - [x] **TASK-002**: [Core] Implement exec API
   - **Priority**: P0
-  - **Boundary**: `src/main.ts` (DBInterface.exec)
+  - **Boundary**: `src/release/release-manager.ts` (DBInterface.exec)
   - **DoD**: INSERT, UPDATE, DELETE, CREATE operations work, E2E tests pass
   - **Completed**: 2024
 
 - [x] **TASK-003**: [Core] Implement query API
   - **Priority**: P0
-  - **Boundary**: `src/main.ts` (DBInterface.query)
+  - **Boundary**: `src/release/release-manager.ts` (DBInterface.query)
   - **DoD**: SELECT operations work, type-safe results, E2E tests pass
   - **Completed**: 2024
 
 - [x] **TASK-004**: [Core] Implement transaction API
   - **Priority**: P0
-  - **Boundary**: `src/main.ts` (DBInterface.transaction)
+  - **Boundary**: `src/release/release-manager.ts` (DBInterface.transaction)
   - **DoD**: Transactions work atomically, auto rollback on error, E2E tests pass
   - **Completed**: 2024
 
 - [x] **TASK-005**: [Core] Implement close API
   - **Priority**: P0
-  - **Boundary**: `src/main.ts` (DBInterface.close)
-  - **DoD**: Database closes cleanly, worker terminated, E2E tests pass
+  - **Boundary**: `src/release/release-manager.ts` (DBInterface.close)
+  - **DoD**: Database closes cleanly, further operations fail with "Database is not open", E2E tests pass
   - **Completed**: 2024
 
 ### Web Worker Architecture
@@ -145,7 +145,7 @@
 
 - [x] **TASK-012**: [Release] Implement SHA-256 hashing
   - **Priority**: P0
-  - **Boundary**: `src/utils/hash.ts`
+  - **Boundary**: `src/release/hash-utils.ts`
   - **DoD**: Hash computation works correctly, matches reference
   - **Completed**: 2024
 
@@ -165,7 +165,7 @@
 
 - [x] **TASK-015**: [DevTool] Implement metadata lock
   - **Priority**: P0
-  - **Boundary**: `src/release/opfs-utils.ts`
+  - **Boundary**: `src/release/release-manager.ts`
   - **DoD**: Lock prevents concurrent modifications, E2E tests pass
   - **Completed**: 2024
 
@@ -173,13 +173,13 @@
 
 - [x] **TASK-016**: [Types] Define main type interfaces
   - **Priority**: P0
-  - **Boundary**: `src/types/index.ts`
+  - **Boundary**: `src/types/DB.ts`
   - **DoD**: DBInterface, Release, and other types defined, TypeScript compiles
   - **Completed**: 2024
 
 - [x] **TASK-017**: [Types] Define worker event types
   - **Priority**: P0
-  - **Boundary**: `src/types/events.ts`
+  - **Boundary**: `src/types/message.ts`
   - **DoD**: Worker message types defined, type-safe communication
   - **Completed**: 2024
 

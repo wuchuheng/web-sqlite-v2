@@ -28,6 +28,8 @@
 
 **Navigation Note**: All documentation files now include navigation links at the bottom for easy browsing between related documents and stages.
 
+**Docs Scope Note**: `/docs` contains internal specifications and ADRs. The public documentation site lives in `/vitepress-docs`.
+
 ### Architecture Decision Records (ADRs)
 
 -   **[ADR-0001: Web Worker Architecture](../04-adr/0001-web-worker-architecture.md)** - Non-blocking database operations
@@ -124,6 +126,13 @@ docs/
     ├── 01-roadmap.md           # Release strategy and timeline
     └── 02-task-catalog.md      # Task breakdown and Kanban board
 ```
+
+**Doc Update Checklist**:
+
+- Update `docs/05-design/01-contracts/01-api.md` and `docs/05-design/01-contracts/02-events.md` when public API or worker protocol changes.
+- Update `docs/03-architecture/02-dataflow.md` and relevant ADRs for concurrency, release, or storage changes.
+- Keep `docs/06-implementation/02-test-plan.md` and module test sections in sync with actual test files.
+- Mirror user-facing changes in `vitepress-docs/` (public docs site).
 
 ---
 

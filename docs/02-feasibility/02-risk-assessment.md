@@ -67,14 +67,15 @@ SharedArrayBuffer (required for zero-copy performance) requires COOP and COEP HT
 2. **Feature Detection**
 
     ```typescript
-    // Detected in worker-bridge.ts
-    const hasSharedArrayBuffer = typeof SharedArrayBuffer !== "undefined";
-    const hasCOOPCOEP = crossOriginIsolated; // Read-only flag
-
-    if (!hasSharedArrayBuffer || !hasCOOPCOEP) {
-        throw new WebSQLiteError(
-            "SharedArrayBuffer requires COOP and COEP headers. " +
-                "See https://web-sqlite-js.wuchuheng.com/deployment",
+    // Detected in src/validations/shareBufferAbiliCheck.ts
+    try {
+        new SharedArrayBuffer();
+    } catch {
+        throw new Error(
+            "[web-sqlite-js] SharedArrayBuffer is not enabled.\n\n" +
+                "This library requires SharedArrayBuffer for high-performance database operations.\n" +
+                "To enable it, your server must send COOP/COEP headers.\n\n" +
+                "https://web-sqlite-js.wuchuheng.com/getting-started.html#setup-http-headers",
         );
     }
     ```
@@ -134,7 +135,7 @@ OPFS is a newer API, and browser bugs or quota issues could cause data loss. Add
 
     ```typescript
     // Built-in rollback mechanism
-    await api.rollback("1.0.0"); // Revert to v1.0.0 database
+    await db.devTool.rollback("1.0.0"); // Revert to v1.0.0 database
     ```
 
 4. **Comprehensive Testing**
@@ -567,12 +568,12 @@ Worker isolation makes debugging harder. Errors in worker are less accessible in
 
     ```typescript
     // Enable debug logging
-    const db = await WebSQLite.init({
+    const db = await openDB("myapp", {
         debug: true, // Enables detailed logging
     });
 
-    // Worker logs with context
-    logger.info("Query executed", { sql, params, duration, rows });
+    // Worker logs with context (console.debug)
+    await db.query("SELECT * FROM users");
     ```
 
 2. **Source Maps**
@@ -583,13 +584,12 @@ Worker isolation makes debugging harder. Errors in worker are less accessible in
 3. **Detailed Error Messages**
 
     ```typescript
-    // Errors include full context
-    throw new WebSQLiteError("Query failed", {
-        sql,
-        params,
-        cause: error,
-        stack: error.stack,
-    });
+    // Errors are propagated from the worker with name/message/stack
+    try {
+        await db.query("SELECT * FROM missing_table");
+    } catch (error) {
+        console.error(error);
+    }
     ```
 
 4. **Documentation**

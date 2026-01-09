@@ -53,7 +53,7 @@ type SqliteResMsg<void> = {
 
 ```typescript
 type OpenDBArgs = {
-    filename: string;      // Full database file path in OPFS (e.g., "myapp/release.sqlite3")
+    filename: string;      // Full database file path in OPFS (e.g., "myapp.sqlite3/release.sqlite3")
     options?: {
         debug?: boolean;   // Enable SQL execution logging
     };
@@ -106,7 +106,7 @@ type ErrorResponse = {
   id: 1,
   event: "open",
   payload: {
-    filename: "myapp/release.sqlite3",
+    filename: "myapp.sqlite3/release.sqlite3",
     target: "meta"
   }
 }
@@ -116,7 +116,7 @@ type ErrorResponse = {
   id: 2,
   event: "open",
   payload: {
-    filename: "myapp/1.0.0/db.sqlite3",
+    filename: "myapp.sqlite3/1.0.0/db.sqlite3",
     options: { debug: true },
     target: "active"
   }
@@ -147,8 +147,8 @@ type ErrorResponse = {
 const db = await openDB("myapp", { debug: true });
 
 // Which generates internal worker messages:
-// 1. OPEN { filename: "myapp/release.sqlite3", target: "meta" }
-// 2. OPEN { filename: "myapp/1.0.0/db.sqlite3", target: "active", options: { debug: true } }
+// 1. OPEN { filename: "myapp.sqlite3/release.sqlite3", target: "meta" }
+// 2. OPEN { filename: "myapp.sqlite3/1.0.0/db.sqlite3", target: "active", options: { debug: true } }
 ```
 
 **Flow Diagram**:
@@ -972,8 +972,8 @@ const db = await openDB("myapp", {
 [release] lock released
 
 // Dev tooling
-[devTool.release] start 1.2.0-dev
-[devTool.release] end 1.2.0-dev
+[devTool.release] start 1.2.0
+[devTool.release] end 1.2.0
 [devTool.rollback] start 1.0.0
 [devTool.rollback] end 1.0.0
 ```
