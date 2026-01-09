@@ -74,7 +74,7 @@
 ## Document Structure
 
 ```
-docs/
+agent-docs/
 ├── 00-control/                    # Control and coordination
 │   ├── 00-spec.md              # This file - specification index
 │   └── 01-status.md            # Live progress board
@@ -129,10 +129,10 @@ docs/
 
 **Doc Update Checklist**:
 
-- Update `docs/05-design/01-contracts/01-api.md` and `docs/05-design/01-contracts/02-events.md` when public API or worker protocol changes.
-- Update `docs/03-architecture/02-dataflow.md` and relevant ADRs for concurrency, release, or storage changes.
-- Keep `docs/06-implementation/02-test-plan.md` and module test sections in sync with actual test files.
-- Mirror user-facing changes in `vitepress-docs/` (public docs site).
+-   Update `agent-docs/05-design/01-contracts/01-api.md` and `agent-docs/05-design/01-contracts/02-events.md` when public API or worker protocol changes.
+-   Update `agent-docs/03-architecture/02-dataflow.md` and relevant ADRs for concurrency, release, or storage changes.
+-   Keep `agent-docs/06-implementation/02-test-plan.md` and module test sections in sync with actual test files.
+-   Mirror user-facing changes in `vitepress-agent-docs/` (public docs site).
 
 ---
 
@@ -411,7 +411,7 @@ A task is **DONE** only if:
 
 -   ✅ Work completed
 -   ✅ Evidence provided (commit/PR/test commands/results)
--   ✅ Status board updated: [docs/00-control/01-status.md](./01-status.md)
+-   ✅ Status board updated: [agent-docs/00-control/01-status.md](./01-status.md)
 -   ✅ This spec index updated if any reading order or stage outputs changed
 
 ---
@@ -436,25 +436,25 @@ A task is **DONE** only if:
 
 ### Critical Paths
 
--   **MVP Requirements**: [docs/01-discovery/02-requirements.md#1-mvp-p0-requirements](../01-discovery/02-requirements.md#1-mvp-p0-requirements)
--   **Success Criteria**: [docs/01-discovery/02-requirements.md#2-success-criteria](../01-discovery/02-requirements.md#2-success-criteria)
--   **Non-goals**: [docs/01-discovery/02-requirements.md#3-non-goals-explicitly-out-of-scope](../01-discovery/02-requirements.md#3-non-goals-explicitly-out-of-scope)
--   **Glossary**: [docs/01-discovery/03-scope.md#4-glossary](../01-discovery/03-scope.md#4-glossary)
--   **Technical Options**: [docs/02-feasibility/01-options.md](../02-feasibility/01-options.md)
--   **Risk Register**: [docs/02-feasibility/02-risk-assessment.md](../02-feasibility/02-risk-assessment.md)
--   **Spike Plans**: [docs/02-feasibility/03-spike-plan.md](../02-feasibility/03-spike-plan.md)
--   **System Architecture**: [docs/03-architecture/01-hld.md](../03-architecture/01-hld.md)
--   **Data Flow**: [docs/03-architecture/02-dataflow.md](../03-architecture/02-dataflow.md)
--   **Deployment**: [docs/03-architecture/03-deployment.md](../03-architecture/03-deployment.md)
--   **Architecture Decisions**: [docs/04-adr/](../04-adr/)
--   **API Contracts**: [docs/05-design/01-contracts/01-api.md](../05-design/01-contracts/01-api.md)
--   **Database Schema**: [docs/05-design/02-schema/01-database.md](../05-design/02-schema/01-database.md)
--   **Build and Run Guide**: [docs/06-implementation/01-build-and-run.md](../06-implementation/01-build-and-run.md)
--   **Test Plan**: [docs/06-implementation/02-test-plan.md](../06-implementation/02-test-plan.md)
--   **Observability Guide**: [docs/06-implementation/03-observability.md](../06-implementation/03-observability.md)
--   **Release and Rollback Guide**: [docs/06-implementation/04-release-and-rollback.md](../06-implementation/04-release-and-rollback.md)
--   **Roadmap & Strategy**: [docs/07-taskManager/01-roadmap.md](../07-taskManager/01-roadmap.md)
--   **Task Catalog**: [docs/07-taskManager/02-task-catalog.md](../07-taskManager/02-task-catalog.md)
+-   **MVP Requirements**: [agent-docs/01-discovery/02-requirements.md#1-mvp-p0-requirements](../01-discovery/02-requirements.md#1-mvp-p0-requirements)
+-   **Success Criteria**: [agent-docs/01-discovery/02-requirements.md#2-success-criteria](../01-discovery/02-requirements.md#2-success-criteria)
+-   **Non-goals**: [agent-docs/01-discovery/02-requirements.md#3-non-goals-explicitly-out-of-scope](../01-discovery/02-requirements.md#3-non-goals-explicitly-out-of-scope)
+-   **Glossary**: [agent-docs/01-discovery/03-scope.md#4-glossary](../01-discovery/03-scope.md#4-glossary)
+-   **Technical Options**: [agent-docs/02-feasibility/01-options.md](../02-feasibility/01-options.md)
+-   **Risk Register**: [agent-docs/02-feasibility/02-risk-assessment.md](../02-feasibility/02-risk-assessment.md)
+-   **Spike Plans**: [agent-docs/02-feasibility/03-spike-plan.md](../02-feasibility/03-spike-plan.md)
+-   **System Architecture**: [agent-docs/03-architecture/01-hld.md](../03-architecture/01-hld.md)
+-   **Data Flow**: [agent-docs/03-architecture/02-dataflow.md](../03-architecture/02-dataflow.md)
+-   **Deployment**: [agent-docs/03-architecture/03-deployment.md](../03-architecture/03-deployment.md)
+-   **Architecture Decisions**: [agent-docs/04-adr/](../04-adr/)
+-   **API Contracts**: [agent-docs/05-design/01-contracts/01-api.md](../05-design/01-contracts/01-api.md)
+-   **Database Schema**: [agent-docs/05-design/02-schema/01-database.md](../05-design/02-schema/01-database.md)
+-   **Build and Run Guide**: [agent-docs/06-implementation/01-build-and-run.md](../06-implementation/01-build-and-run.md)
+-   **Test Plan**: [agent-docs/06-implementation/02-test-plan.md](../06-implementation/02-test-plan.md)
+-   **Observability Guide**: [agent-docs/06-implementation/03-observability.md](../06-implementation/03-observability.md)
+-   **Release and Rollback Guide**: [agent-docs/06-implementation/04-release-and-rollback.md](../06-implementation/04-release-and-rollback.md)
+-   **Roadmap & Strategy**: [agent-docs/07-taskManager/01-roadmap.md](../07-taskManager/01-roadmap.md)
+-   **Task Catalog**: [agent-docs/07-taskManager/02-task-catalog.md](../07-taskManager/02-task-catalog.md)
 
 ### Architecture Key Points
 

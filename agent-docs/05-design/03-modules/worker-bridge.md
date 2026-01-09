@@ -6,9 +6,9 @@
 
 **Links to Contracts**:
 
-- API: `docs/05-design/01-contracts/01-api.md#internal-worker-api`
-- Events: `docs/05-design/01-contracts/02-events.md#worker-message-events`
-- Errors: `docs/05-design/01-contracts/03-errors.md#category-7-worker-errors`
+-   API: `agent-docs/05-design/01-contracts/01-api.md#internal-worker-api`
+-   Events: `agent-docs/05-design/01-contracts/02-events.md#worker-message-events`
+-   Errors: `agent-docs/05-design/01-contracts/03-errors.md#category-7-worker-errors`
 
 ---
 
@@ -25,9 +25,9 @@
 
 ### Cross-Cutting Concerns
 
-- **Async Communication**: All worker operations are asynchronous
-- **Error Propagation**: Stack traces preserved across worker boundary
-- **Resource Cleanup**: Proper worker termination and promise cleanup
+-   **Async Communication**: All worker operations are asynchronous
+-   **Error Propagation**: Stack traces preserved across worker boundary
+-   **Resource Cleanup**: Proper worker termination and promise cleanup
 
 ---
 
@@ -47,7 +47,7 @@
 type WorkerBridge = {
     sendMsg: <TRes, TReq = unknown>(
         event: SqliteEvent,
-        payload?: TReq,
+        payload?: TReq
     ) => Promise<TRes>;
     terminate: () => void;
 };
@@ -61,8 +61,8 @@ type WorkerBridge = {
 
 **Parameters**:
 
-- `event` (SqliteEvent): Event type (OPEN, EXECUTE, QUERY, CLOSE)
-- `payload` (TReq, optional): Request payload
+-   `event` (SqliteEvent): Event type (OPEN, EXECUTE, QUERY, CLOSE)
+-   `payload` (TReq, optional): Request payload
 
 **Returns**: `Promise<TRes>` - Response payload
 
@@ -94,7 +94,7 @@ sequenceDiagram
 ```typescript
 const sendMsg = <TRes, TReq = unknown>(
     event: SqliteEvent,
-    payload?: TReq,
+    payload?: TReq
 ): Promise<TRes> => {
     const id = getLatestMsgId();
     const msg: SqliteReqMsg<TReq> = {
@@ -121,9 +121,9 @@ const sendMsg = <TRes, TReq = unknown>(
 
 **Behavior**:
 
-- Calls `worker.terminate()`
-- Rejects all pending promises with "Worker terminated" error
-- Clears message ID map
+-   Calls `worker.terminate()`
+-   Rejects all pending promises with "Worker terminated" error
+-   Clears message ID map
 
 **Code**:
 
@@ -158,9 +158,9 @@ const getLatestMsgId = (() => {
 
 **Properties**:
 
-- Starts at 1 (first call returns 1)
-- Increments by 1 each call
-- Safe for concurrent use (single-threaded JavaScript)
+-   Starts at 1 (first call returns 1)
+-   Increments by 1 each call
+-   Safe for concurrent use (single-threaded JavaScript)
 
 **Usage**:
 
@@ -208,9 +208,9 @@ if (task) {
 
 **Cleanup**:
 
-- Promises removed after response received
-- All promises rejected on worker termination
-- Map cleared on terminate
+-   Promises removed after response received
+-   All promises rejected on worker termination
+-   Map cleared on terminate
 
 ---
 
@@ -282,14 +282,14 @@ export const createWorkerBridge = () => {
 
 **Vite Configuration**:
 
-- `?worker`: Import as Web Worker
-- `&inline`: Inline worker code in bundle (no separate file)
+-   `?worker`: Import as Web Worker
+-   `&inline`: Inline worker code in bundle (no separate file)
 
 **Worker Context**:
 
-- Runs in isolated thread
-- Has access to `sqlite3` global (initialized in worker)
-- Cannot access main thread DOM or globals
+-   Runs in isolated thread
+-   Has access to `sqlite3` global (initialized in worker)
+-   Cannot access main thread DOM or globals
 
 ---
 
@@ -374,7 +374,7 @@ self.onmessage = async (msg: MessageEvent<SqliteReqMsg<unknown>>) => {
 const handleOpen = async (payload: OpenDBArgs) => {
     if (typeof payload.filename !== "string") {
         throw new Error(
-            "Invalid payload for OPEN event: expected filename string",
+            "Invalid payload for OPEN event: expected filename string"
         );
     }
 
@@ -437,7 +437,7 @@ const handleExecute = (payload: unknown) => {
 
     if (typeof sql !== "string") {
         throw new Error(
-            "Invalid payload for EXECUTE event: expected SQL string or { sql, bind }",
+            "Invalid payload for EXECUTE event: expected SQL string or { sql, bind }"
         );
     }
 
@@ -473,7 +473,7 @@ const handleQuery = (payload: ExecParams) => {
 
     if (typeof sql !== "string") {
         throw new Error(
-            "Invalid payload for QUERY event: expected { sql: string, bind?: any[] }",
+            "Invalid payload for QUERY event: expected { sql: string, bind?: any[] }"
         );
     }
 
@@ -641,15 +641,15 @@ worker.onmessage = (event) => {
 
 **Properties Preserved**:
 
-- `name`: Error class name (e.g., "Error", "TypeError")
-- `message`: Error message
-- `stack`: Stack trace with file names and line numbers
+-   `name`: Error class name (e.g., "Error", "TypeError")
+-   `message`: Error message
+-   `stack`: Stack trace with file names and line numbers
 
 **Properties Lost**:
 
-- Custom error properties (not standard)
-- Error cause (if available)
-- Prototype chain (reconstructed as plain Error)
+-   Custom error properties (not standard)
+-   Error cause (if available)
+-   Prototype chain (reconstructed as plain Error)
 
 ---
 
@@ -667,15 +667,15 @@ worker.onmessage = (event) => {
 
 ### Concurrency
 
-- **No Concurrent Operations**: Worker processes one message at a time
-- **Mutex Queue**: Main thread serializes operations via mutex
-- **Message Ordering**: FIFO ordering maintained
+-   **No Concurrent Operations**: Worker processes one message at a time
+-   **Mutex Queue**: Main thread serializes operations via mutex
+-   **Message Ordering**: FIFO ordering maintained
 
 ### Memory
 
-- **Promise Map**: Stores pending promises (typically < 10)
-- **Structured Clone**: Copies data between threads (no shared memory)
-- **Worker Memory**: Separate from main thread (limited by browser)
+-   **Promise Map**: Stores pending promises (typically < 10)
+-   **Structured Clone**: Copies data between threads (no shared memory)
+-   **Worker Memory**: Separate from main thread (limited by browser)
 
 ---
 
@@ -693,8 +693,8 @@ src/worker-bridge.ts
 
 ### External Dependencies
 
-- **sqlite3.wasm**: SQLite WASM module (vendored)
-- **Browser APIs**: Web Workers, postMessage, performance.now()
+-   **sqlite3.wasm**: SQLite WASM module (vendored)
+-   **Browser APIs**: Web Workers, postMessage, performance.now()
 
 ---
 
@@ -702,17 +702,17 @@ src/worker-bridge.ts
 
 ### Unit Tests
 
-- **Message ID Generation**: Verify unique incremental IDs
-- **Promise Storage**: Verify map operations
-- **Error Reconstruction**: Verify error properties preserved
+-   **Message ID Generation**: Verify unique incremental IDs
+-   **Promise Storage**: Verify map operations
+-   **Error Reconstruction**: Verify error properties preserved
 
 ### E2E Tests
 
-- **Worker Communication**: `tests/e2e/worker.e2e.test.ts`
-    - Message send/receive
-    - Promise resolution
-    - Error propagation
-    - Worker termination
+-   **Worker Communication**: `tests/e2e/worker.e2e.test.ts`
+    -   Message send/receive
+    -   Promise resolution
+    -   Error propagation
+    -   Worker termination
 
 ---
 
@@ -800,29 +800,29 @@ if (typeof payload.filename !== "string") {
 
 if (typeof sql !== "string") {
     throw new Error(
-        "Invalid payload for QUERY event: expected { sql: string }",
+        "Invalid payload for QUERY event: expected { sql: string }"
     );
 }
 ```
 
 ### SQL Injection Prevention
 
-- **Parameterized Queries**: Bind parameters used for all SQL
-- **No String Concatenation**: SQL statements never concatenated with user input
-- **SQLite Prepared Statements**: Used internally by SQLite WASM
+-   **Parameterized Queries**: Bind parameters used for all SQL
+-   **No String Concatenation**: SQL statements never concatenated with user input
+-   **SQLite Prepared Statements**: Used internally by SQLite WASM
 
 ### Worker Isolation
 
-- **Sandbox**: Worker runs in isolated thread
-- **No DOM Access**: Worker cannot access main thread DOM
-- **Same-Origin**: Worker script subject to same-origin policy
-- **WASM Isolation**: SQLite runs in WASM sandbox
+-   **Sandbox**: Worker runs in isolated thread
+-   **No DOM Access**: Worker cannot access main thread DOM
+-   **Same-Origin**: Worker script subject to same-origin policy
+-   **WASM Isolation**: SQLite runs in WASM sandbox
 
 ### Memory Isolation
 
-- **Structured Clone**: Data copied between threads (not shared)
-- **No Shared State**: Worker cannot access main thread variables
-- **Memory Limits**: Worker has separate memory limits
+-   **Structured Clone**: Data copied between threads (not shared)
+-   **No Shared State**: Worker cannot access main thread variables
+-   **Memory Limits**: Worker has separate memory limits
 
 ---
 
@@ -834,17 +834,17 @@ if (typeof sql !== "string") {
 
 **Related Design Documents**:
 
-- [Back to Modules: Core](./core.md)
-- [Back to Modules: Release Management](./release-management.md)
+-   [Back to Modules: Core](./core.md)
+-   [Back to Modules: Release Management](./release-management.md)
 
 **All Design Documents**:
 
-- [Contracts](../01-contracts/) - API, Events, Errors
-- [Schema](../02-schema/) - Database, Migrations
+-   [Contracts](../01-contracts/) - API, Events, Errors
+-   [Schema](../02-schema/) - Database, Migrations
 
 **Related ADRs**:
 
-- [ADR-0001: Web Worker](../../04-adr/0001-web-worker-architecture.md) - Worker architecture
-- [ADR-0007: Error Handling](../../04-adr/0007-error-handling-strategy.md) - Error reconstruction
+-   [ADR-0001: Web Worker](../../04-adr/0001-web-worker-architecture.md) - Worker architecture
+-   [ADR-0007: Error Handling](../../04-adr/0007-error-handling-strategy.md) - Error reconstruction
 
 **Back to**: [Spec Index](../../00-control/00-spec.md)

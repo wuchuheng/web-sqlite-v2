@@ -1,9 +1,9 @@
 <!--
 OUTPUT MAP
-docs/03-architecture/02-dataflow.md
+agent-docs/03-architecture/02-dataflow.md
 
 TEMPLATE SOURCE
-.claude/templates/docs/03-architecture/02-dataflow.md
+.claude/templates/agent-docs/03-architecture/02-dataflow.md
 -->
 
 # 02 Data Flow & Sequences

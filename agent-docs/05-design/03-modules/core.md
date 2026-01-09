@@ -6,14 +6,14 @@
 
 **Links to Contracts**:
 
--   API: `docs/05-design/01-contracts/01-api.md#module-core-database-api`
--   Events: `docs/05-design/01-contracts/02-events.md`
--   Errors: `docs/05-design/01-contracts/03-errors.md`
+-   API: `agent-docs/05-design/01-contracts/01-api.md#module-core-database-api`
+-   Events: `agent-docs/05-design/01-contracts/02-events.md`
+-   Errors: `agent-docs/05-design/01-contracts/03-errors.md`
 
 **Links to Schema**:
 
--   Database: `docs/05-design/02-schema/01-database.md`
--   Migrations: `docs/05-design/02-schema/02-migrations.md`
+-   Database: `agent-docs/05-design/02-schema/01-database.md`
+-   Migrations: `agent-docs/05-design/02-schema/02-migrations.md`
 
 ---
 
@@ -777,6 +777,7 @@ src/main.ts
 -   **Transactions**: `tests/e2e/transaction.e2e.test.ts`
     -   commit and rollback behavior
 -   **Error Handling**: `tests/e2e/error.e2e.test.ts`
+
     -   worker error propagation
 
 -   **Error Handling**: `tests/e2e/error.e2e.test.ts`

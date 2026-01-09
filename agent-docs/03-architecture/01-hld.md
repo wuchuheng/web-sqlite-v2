@@ -1,28 +1,28 @@
 <!--
 OUTPUT MAP
-docs/03-architecture/01-hld.md
+agent-docs/03-architecture/01-hld.md
 
 TEMPLATE SOURCE
-.claude/templates/docs/03-architecture/01-hld.md
+.claude/templates/agent-docs/03-architecture/01-hld.md
 -->
 
 # 01 High-Level Design (HLD) — Structure
 
 ## 1) Architecture Style & Principles
 
-- **Pattern**: Worker-Based Client-Side Architecture (Web Worker + OPFS)
-- **Key Principles**:
-    - **Non-blocking by default**: All database operations execute in a dedicated Web Worker, ensuring the main thread never blocks
-    - **Type safety first**: Full TypeScript API with strict type definitions for all operations
-    - **SharedArrayBuffer required**: Environment must be cross-origin isolated (COOP/COEP); library fails fast otherwise
-    - **Mutex-serialized operations**: Single-threaded SQLite access via mutex queue prevents race conditions
-    - **Versioned persistence**: OPFS-based storage with release management for schema evolution
-    - **Developer experience**: Simple async/await API abstracting worker communication complexity
+-   **Pattern**: Worker-Based Client-Side Architecture (Web Worker + OPFS)
+-   **Key Principles**:
+    -   **Non-blocking by default**: All database operations execute in a dedicated Web Worker, ensuring the main thread never blocks
+    -   **Type safety first**: Full TypeScript API with strict type definitions for all operations
+    -   **SharedArrayBuffer required**: Environment must be cross-origin isolated (COOP/COEP); library fails fast otherwise
+    -   **Mutex-serialized operations**: Single-threaded SQLite access via mutex queue prevents race conditions
+    -   **Versioned persistence**: OPFS-based storage with release management for schema evolution
+    -   **Developer experience**: Simple async/await API abstracting worker communication complexity
 
 ## 2) System Boundary (C4 Context)
 
-- **Users**: Frontend web developers building offline-first or data-intensive applications
-- **External Systems**: Web Browser APIs (OPFS, Web Workers, SharedArrayBuffer)
+-   **Users**: Frontend web developers building offline-first or data-intensive applications
+-   **External Systems**: Web Browser APIs (OPFS, Web Workers, SharedArrayBuffer)
 
 ```mermaid
 C4Context
@@ -41,17 +41,17 @@ C4Context
 
 **Context Notes**:
 
-- **Browser Requirements**: Modern browsers (Chrome/Edge/Opera) with OPFS and SharedArrayBuffer support
-- **Deployment Constraints**: Requires COOP/COEP headers for SharedArrayBuffer availability
-- **Build Integration**: Library bundled via Vite, consumed by user applications via npm
+-   **Browser Requirements**: Modern browsers (Chrome/Edge/Opera) with OPFS and SharedArrayBuffer support
+-   **Deployment Constraints**: Requires COOP/COEP headers for SharedArrayBuffer availability
+-   **Build Integration**: Library bundled via Vite, consumed by user applications via npm
 
 ## 3) Containers & Tech Stack (C4 Container)
 
-- **Main Thread**: TypeScript/JavaScript (Reason: User API layer, async coordination)
-- **Worker Bridge**: TypeScript/JavaScript (Reason: Message passing abstraction, promise management)
-- **Web Worker**: SQLite WASM + JavaScript (Reason: Off-main-thread execution, SQLite engine)
-- **OPFS Storage**: Browser API (Reason: Persistent file-backed storage, survives browser restarts)
-- **Metadata Database**: SQLite (Reason: Version tracking, release history)
+-   **Main Thread**: TypeScript/JavaScript (Reason: User API layer, async coordination)
+-   **Worker Bridge**: TypeScript/JavaScript (Reason: Message passing abstraction, promise management)
+-   **Web Worker**: SQLite WASM + JavaScript (Reason: Off-main-thread execution, SQLite engine)
+-   **OPFS Storage**: Browser API (Reason: Persistent file-backed storage, survives browser restarts)
+-   **Metadata Database**: SQLite (Reason: Version tracking, release history)
 
 ```mermaid
 C4Container
@@ -71,25 +71,25 @@ C4Container
 
 **Technology Rationale**:
 
-- **SQLite WASM**: Industry-standard SQL engine compiled to WebAssembly for near-native performance
-- **Web Worker**: Prevents main thread blocking, enabling responsive UI during database operations
-- **OPFS**: Provides true file-backed storage with synchronous access within worker context
-- **Mutex Queue**: Ensures sequential SQLite operations (SQLite is not thread-safe)
-- **TypeScript**: Full type safety for API contracts and query results
+-   **SQLite WASM**: Industry-standard SQL engine compiled to WebAssembly for near-native performance
+-   **Web Worker**: Prevents main thread blocking, enabling responsive UI during database operations
+-   **OPFS**: Provides true file-backed storage with synchronous access within worker context
+-   **Mutex Queue**: Ensures sequential SQLite operations (SQLite is not thread-safe)
+-   **TypeScript**: Full type safety for API contracts and query results
 
 ## 4) Data Architecture Strategy
 
-- **Ownership**:
-    - **Active Database**: Primary application data, owned by user application
-    - **Metadata Database**: Release versioning history, owned by library internals
-    - **Versioned Databases**: Isolated snapshots per release, owned by release manager
-- **Caching**:
-    - **Worker State**: Active SQLite connections maintained in worker memory
-    - **No External Cache**: All data persisted directly to OPFS
-- **Consistency**:
-    - **Strong Consistency**: ACID transactions within single database operations
-    - **Sequential Execution**: Mutex queue ensures no concurrent writes to same database
-    - **Release Isolation**: Each version has isolated database file, preventing cross-version contamination
+-   **Ownership**:
+    -   **Active Database**: Primary application data, owned by user application
+    -   **Metadata Database**: Release versioning history, owned by library internals
+    -   **Versioned Databases**: Isolated snapshots per release, owned by release manager
+-   **Caching**:
+    -   **Worker State**: Active SQLite connections maintained in worker memory
+    -   **No External Cache**: All data persisted directly to OPFS
+-   **Consistency**:
+    -   **Strong Consistency**: ACID transactions within single database operations
+    -   **Sequential Execution**: Mutex queue ensures no concurrent writes to same database
+    -   **Release Isolation**: Each version has isolated database file, preventing cross-version contamination
 
 **Data Flow Strategy**:
 
@@ -107,35 +107,35 @@ OPFS Storage (Persistent File System)
 
 ### 5.1 Authentication & Authorization
 
-- **AuthN**: Not applicable (client-side library, no server authentication)
-- **AuthZ**: Not applicable (browser same-origin policy provides isolation)
-- **Access Control**: OPFS restricts access to same-origin, prevents cross-origin data access
+-   **AuthN**: Not applicable (client-side library, no server authentication)
+-   **AuthZ**: Not applicable (browser same-origin policy provides isolation)
+-   **Access Control**: OPFS restricts access to same-origin, prevents cross-origin data access
 
 ### 5.2 Observability
 
-- **Logs**:
-    - **Debug Mode**: Optional SQL execution logging with timing (`debug: true` option)
-    - **Console.debug**: Structured log messages with `{ sql, duration, bind }` format
-    - **Worker Logs**: Console.debug output from worker for initialization and errors
-- **Metrics**:
-    - **Query Timing**: `performance.now()` measurements for each SQL execution
-    - **Changes Tracking**: `db.changes()` returns affected row count
-    - **Last Insert ID**: `last_insert_rowid()` for auto-increment tracking
-- **Tracing**: Not implemented (client-side library, no distributed tracing)
+-   **Logs**:
+    -   **Debug Mode**: Optional SQL execution logging with timing (`debug: true` option)
+    -   **Console.debug**: Structured log messages with `{ sql, duration, bind }` format
+    -   **Worker Logs**: Console.debug output from worker for initialization and errors
+-   **Metrics**:
+    -   **Query Timing**: `performance.now()` measurements for each SQL execution
+    -   **Changes Tracking**: `db.changes()` returns affected row count
+    -   **Last Insert ID**: `last_insert_rowid()` for auto-increment tracking
+-   **Tracing**: Not implemented (client-side library, no distributed tracing)
 
 ### 5.3 Error Handling
 
-- **Global Strategy**:
-    - **Typed Errors**: Error objects with `name`, `message`, `stack` preserved across worker boundary
-    - **Promise Rejection**: All errors propagated as rejected promises to main thread
-    - **Transaction Rollback**: Automatic ROLLBACK on transaction errors
-    - **Release Validation**: Hash mismatch errors for release integrity violations
-- **Error Types**:
-    - **Initialization Errors**: SharedArrayBuffer unavailable, invalid filename
-    - **SQL Execution Errors**: Syntax errors, constraint violations, table not found
-    - **Release Errors**: Hash mismatches, version conflicts, rollback failures
-    - **OPFS Errors**: File not found, quota exceeded, permission denied
-- **Stack Trace Preservation**: Worker errors reconstructed in main thread with original stack traces
+-   **Global Strategy**:
+    -   **Typed Errors**: Error objects with `name`, `message`, `stack` preserved across worker boundary
+    -   **Promise Rejection**: All errors propagated as rejected promises to main thread
+    -   **Transaction Rollback**: Automatic ROLLBACK on transaction errors
+    -   **Release Validation**: Hash mismatch errors for release integrity violations
+-   **Error Types**:
+    -   **Initialization Errors**: SharedArrayBuffer unavailable, invalid filename
+    -   **SQL Execution Errors**: Syntax errors, constraint violations, table not found
+    -   **Release Errors**: Hash mismatches, version conflicts, rollback failures
+    -   **OPFS Errors**: File not found, quota exceeded, permission denied
+-   **Stack Trace Preservation**: Worker errors reconstructed in main thread with original stack traces
 
 ## 6) Code Structure Strategy (High-Level File Tree)
 
@@ -195,11 +195,11 @@ OPFS Storage (Persistent File System)
 
 **Key Design Decisions**:
 
-- **Vendored WASM**: SQLite WASM module bundled in source (`jswasm/`), not external dependency
-- **Worker Protocol**: Message-based communication with request/response pattern via ID mapping
-- **Mutex Queue**: All database operations serialized through single mutex to prevent race conditions
-- **Release Isolation**: Each database version stored in separate OPFS directory for rollback capability
-- **Metadata Separation**: `release.sqlite3` metadata database separate from user data for version tracking
+-   **Vendored WASM**: SQLite WASM module bundled in source (`jswasm/`), not external dependency
+-   **Worker Protocol**: Message-based communication with request/response pattern via ID mapping
+-   **Mutex Queue**: All database operations serialized through single mutex to prevent race conditions
+-   **Release Isolation**: Each database version stored in separate OPFS directory for rollback capability
+-   **Metadata Separation**: `release.sqlite3` metadata database separate from user data for version tracking
 
 ---
 
@@ -211,11 +211,11 @@ OPFS Storage (Persistent File System)
 
 **Related Architecture Documents**:
 
-- [03 Deployment](./03-deployment.md) - Deployment and infrastructure
-- [Back to Spec Index](../00-control/00-spec.md)
+-   [03 Deployment](./03-deployment.md) - Deployment and infrastructure
+-   [Back to Spec Index](../00-control/00-spec.md)
 
 **Related Feasibility Documents**:
 
-- [01 Options Analysis](../02-feasibility/01-options.md) - Selected architecture option
+-   [01 Options Analysis](../02-feasibility/01-options.md) - Selected architecture option
 
 **Continue to**: [Stage 4: ADR Index](../04-adr/) - Architecture decision records

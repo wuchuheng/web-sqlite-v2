@@ -36,12 +36,12 @@ const db = await openDB("mydb", {
 
 **What Gets Logged**:
 
-- Database initialization steps
-- Release migration application
-- SQL queries with syntax highlighting
-- Query execution timing
-- Worker message protocol
-- Dev tool operations (release, rollback)
+-   Database initialization steps
+-   Release migration application
+-   SQL queries with syntax highlighting
+-   Query execution timing
+-   Worker message protocol
+-   Dev tool operations (release, rollback)
 
 ### 1.2 Debug Output Format
 
@@ -350,7 +350,7 @@ throw new Error(
             expected: "abc123",
             actual: "def456",
         },
-    } as ErrorContext),
+    } as ErrorContext)
 );
 ```
 
@@ -364,10 +364,10 @@ throw new Error(
 
 **Useful Tabs**:
 
-- **Console**: View debug logs
-- **Network**: Monitor worker messages
-- **Application**: Inspect OPFS storage
-- **Performance**: Profile query execution
+-   **Console**: View debug logs
+-   **Network**: Monitor worker messages
+-   **Application**: Inspect OPFS storage
+-   **Performance**: Profile query execution
 
 ### 6.2 OPFS Inspector
 
@@ -506,12 +506,12 @@ if (!navigator.storage?.getDirectory) {
 
 Before reporting issues, verify:
 
-- [ ] Debug mode enabled
-- [ ] Console logs reviewed
-- [ ] Worker console checked
-- [ ] OPFS contents inspected
-- [ ] Browser compatibility verified
-- [ ] COOP/COEP headers set
+-   [ ] Debug mode enabled
+-   [ ] Console logs reviewed
+-   [ ] Worker console checked
+-   [ ] OPFS contents inspected
+-   [ ] Browser compatibility verified
+-   [ ] COOP/COEP headers set
 
 ---
 
@@ -521,25 +521,25 @@ Before reporting issues, verify:
 
 **DO**:
 
-- Log at appropriate levels (debug, info, warn, error)
-- Include context in error messages
-- Use structured log formats
-- Log timing for performance-critical operations
+-   Log at appropriate levels (debug, info, warn, error)
+-   Include context in error messages
+-   Use structured log formats
+-   Log timing for performance-critical operations
 
 **DON'T**:
 
-- Log sensitive data (passwords, tokens)
-- Log excessive output in production
-- Use `console.log` (use `console.debug` for debug info)
-- Log in tight loops (avoid performance impact)
+-   Log sensitive data (passwords, tokens)
+-   Log excessive output in production
+-   Use `console.log` (use `console.debug` for debug info)
+-   Log in tight loops (avoid performance impact)
 
 ### 9.2 Performance Considerations
 
 **Debug Mode Overhead**:
 
-- Query timing: ~0.01ms overhead
-- Log formatting: ~0.05ms per log
-- SQL syntax highlighting: ~0.1ms per query
+-   Query timing: ~0.01ms overhead
+-   Log formatting: ~0.05ms per log
+-   SQL syntax highlighting: ~0.1ms per query
 
 **Recommendation**: Disable debug mode in production
 
@@ -556,15 +556,15 @@ const db = await openDB("mydb", {
 
 ### Internal Documentation
 
-- [Build and Run Guide](./01-build-and-run.md) - Development workflow
-- [Test Plan](./02-test-plan.md) - Testing strategy
-- [Error Standards](../05-design/01-contracts/03-errors.md) - Error handling
+-   [Build and Run Guide](./01-build-and-run.md) - Development workflow
+-   [Test Plan](./02-test-plan.md) - Testing strategy
+-   [Error Standards](../05-design/01-contracts/03-errors.md) - Error handling
 
 ### External Resources
 
-- [Chrome DevTools](https://developer.chrome.com/docs/devtools/)
-- [OPFS Specification](https://fs.spec.whatwg.org/)
-- [Web Workers API](https://developer.mozilla.org/en-US/docs/Web/API/Web_Workers_API)
+-   [Chrome DevTools](https://developer.chrome.com/agent-docs/devtools/)
+-   [OPFS Specification](https://fs.spec.whatwg.org/)
+-   [Web Workers API](https://developer.mozilla.org/en-US/agent-docs/Web/API/Web_Workers_API)
 
 ---
 

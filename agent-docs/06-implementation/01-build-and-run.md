@@ -85,11 +85,13 @@ flowchart LR
 **Build Stages**:
 
 1. **WASM Optimization** (prebuild hook)
+
     - Optimizes SQLite WASM binary with `wasm-opt -Oz`
     - Compresses with gzip and base64-encodes
     - Outputs to `src/jswasm/wasm-asset.js`
 
 2. **Vite Build**
+
     - Compiles TypeScript to ES modules
     - Bundles WASM asset inline
     - Generates type definitions
@@ -122,11 +124,11 @@ flowchart LR
 
 **Rules**:
 
-- **Main branch** is always deployable
-- **Short-lived feature branches** (max 2-3 days)
-- **Pull requests required** for all changes
-- **CI checks must pass** before merging
-- **No long-lived branches** (no GitFlow)
+-   **Main branch** is always deployable
+-   **Short-lived feature branches** (max 2-3 days)
+-   **Pull requests required** for all changes
+-   **CI checks must pass** before merging
+-   **No long-lived branches** (no GitFlow)
 
 ### 2.2 Conventional Commits (Mandatory)
 
@@ -134,12 +136,12 @@ flowchart LR
 
 **Types**:
 
-- `feat`: New feature (user-facing)
-- `fix`: Bug fix (user-facing)
-- `refactor`: Code refactoring (no user impact)
-- `test`: Test updates
-- `docs`: Documentation changes
-- `chore`: Build/config changes
+-   `feat`: New feature (user-facing)
+-   `fix`: Bug fix (user-facing)
+-   `refactor`: Code refactoring (no user impact)
+-   `test`: Test updates
+-   `docs`: Documentation changes
+-   `chore`: Build/config changes
 
 **Examples**:
 
@@ -154,9 +156,9 @@ chore: upgrade vite to v7.2.7
 
 **STRICT PROHIBITION**: NO AI watermarks in commits
 
-- ❌ "Assistant: added feature"
-- ❌ "AI-generated: fix bug"
-- ✅ "feat: add support for batch queries"
+-   ❌ "Assistant: added feature"
+-   ❌ "AI-generated: fix bug"
+-   ✅ "feat: add support for batch queries"
 
 ### 2.3 Branch Naming
 
@@ -164,7 +166,7 @@ chore: upgrade vite to v7.2.7
 feat/feature-name
 fix/bug-description
 refactor/module-name
-docs/documentation-update
+agent-docs/documentation-update
 ```
 
 ---
@@ -251,7 +253,7 @@ src/
 ├── worker-bridge.ts              # Worker communication
 ├── worker.ts                     # Worker implementation
 ├── config/
-│   └── config.ts                 # Docs/config constants
+│   └── config.ts                 # agent-docs/config constants
 ├── validations/
 │   └── shareBufferAbiliCheck.ts  # SharedArrayBuffer check
 ├── release/                      # Release management
@@ -278,10 +280,10 @@ src/
 
 **Rules**:
 
-- Split by feature/domain (e.g., `src/release/`, `src/utils/mutex/`)
-- Avoid monolithic service classes
-- Each module has isolated responsibilities
-- Co-locate tests with source (`*.unit.test.ts`)
+-   Split by feature/domain (e.g., `src/release/`, `src/utils/mutex/`)
+-   Avoid monolithic service classes
+-   Each module has isolated responsibilities
+-   Co-locate tests with source (`*.unit.test.ts`)
 
 ---
 
@@ -319,10 +321,10 @@ node -e "console.log('WASM supported')"
 
 **Recommended**: VSCode with extensions:
 
-- ESLint
-- Prettier
-- TypeScript Vue Plugin (Volar)
-- Vitest
+-   ESLint
+-   Prettier
+-   TypeScript Vue Plugin (Volar)
+-   Vitest
 
 **VSCode Settings** (`.vscode/settings.json`):
 
@@ -377,10 +379,10 @@ const db = await openDB("mydb", {
 
 **Debug Output**:
 
-- SQL queries with syntax highlighting
-- Query execution timing
-- Worker message logs
-- Release operation logs
+-   SQL queries with syntax highlighting
+-   Query execution timing
+-   Worker message logs
+-   Release operation logs
 
 ---
 
@@ -390,13 +392,13 @@ const db = await openDB("mydb", {
 
 Before submitting a PR, ensure:
 
-- [ ] All tests pass (`npm test`)
-- [ ] Linting passes (`npm run lint`)
-- [ ] Type checking passes (`npm run typecheck`)
-- [ ] New features have tests (unit + E2E)
-- [ ] Documentation updated (if needed)
-- [ ] Commit messages follow conventions
-- [ ] No AI watermarks in commits
+-   [ ] All tests pass (`npm test`)
+-   [ ] Linting passes (`npm run lint`)
+-   [ ] Type checking passes (`npm run typecheck`)
+-   [ ] New features have tests (unit + E2E)
+-   [ ] Documentation updated (if needed)
+-   [ ] Commit messages follow conventions
+-   [ ] No AI watermarks in commits
 
 ### 6.2 Review Criteria
 
@@ -451,8 +453,8 @@ Error: SharedArrayBuffer is not defined
 
 **Solution**:
 
-- Use `npm run http` for local testing (includes COOP/COEP headers)
-- Ensure headers are set in deployment
+-   Use `npm run http` for local testing (includes COOP/COEP headers)
+-   Ensure headers are set in deployment
 
 **Issue**: Tests timeout
 
@@ -462,8 +464,8 @@ Error: Test timeout exceeded
 
 **Solution**:
 
-- Increase timeout in `vitest.e2e.config.ts`
-- Check for hanging promises or worker issues
+-   Increase timeout in `vitest.e2e.config.ts`
+-   Check for hanging promises or worker issues
 
 ---
 
@@ -493,17 +495,17 @@ Error: Test timeout exceeded
 
 ### Internal Documentation
 
-- [API Contracts](../05-design/01-contracts/01-api.md) - Public API specifications
-- [Module LLDs](../05-design/03-modules/) - Implementation details
-- [ADR-0006: TypeScript Type System](../04-adr/0006-typescript-type-system.md) - Type system decisions
+-   [API Contracts](../05-design/01-contracts/01-api.md) - Public API specifications
+-   [Module LLDs](../05-design/03-modules/) - Implementation details
+-   [ADR-0006: TypeScript Type System](../04-adr/0006-typescript-type-system.md) - Type system decisions
 
 ### External Resources
 
-- [Vite Documentation](https://vitejs.dev/)
-- [Vitest Documentation](https://vitest.dev/)
-- [TypeScript Handbook](https://www.typescriptlang.org/docs/)
-- [WebAssembly](https://webassembly.org/)
-- [OPFS Specification](https://fs.spec.whatwg.org/)
+-   [Vite Documentation](https://vitejs.dev/)
+-   [Vitest Documentation](https://vitest.dev/)
+-   [TypeScript Handbook](https://www.typescriptlang.org/agent-docs/)
+-   [WebAssembly](https://webassembly.org/)
+-   [OPFS Specification](https://fs.spec.whatwg.org/)
 
 ---
 

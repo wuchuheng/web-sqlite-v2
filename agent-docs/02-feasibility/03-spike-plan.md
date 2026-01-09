@@ -1,9 +1,9 @@
 <!--
 OUTPUT MAP
-docs/02-feasibility/03-spike-plan.md
+agent-docs/02-feasibility/03-spike-plan.md
 
 TEMPLATE SOURCE
-.claude/templates/docs/02-feasibility/03-spike-plan.md
+.claude/templates/agent-docs/02-feasibility/03-spike-plan.md
 -->
 
 # 03 Implementation Validation
@@ -21,50 +21,50 @@ This document describes the technical validation and implementation features tha
 
 ### Core Database Operations
 
-| Feature | Status | Description | Evidence |
-| ------- | ------ | ----------- | -------- |
-| Database Open/Close | ✅ Implemented | Open SQLite database from OPFS, close connection | `src/main.ts:openDB()` |
-| SQL Execution | ✅ Implemented | Execute INSERT, UPDATE, DELETE, CREATE statements | `src/release/release-manager.ts` |
-| SQL Queries | ✅ Implemented | Execute SELECT queries with parameterized inputs | `src/release/release-manager.ts` |
-| Transactions | ✅ Implemented | Atomic transactions with auto-commit/rollback | `src/release/release-manager.ts` |
-| Parameterized Queries | ✅ Implemented | Positional (?) and named ($param) parameters | `src/worker.ts` |
+| Feature               | Status         | Description                                       | Evidence                         |
+| --------------------- | -------------- | ------------------------------------------------- | -------------------------------- |
+| Database Open/Close   | ✅ Implemented | Open SQLite database from OPFS, close connection  | `src/main.ts:openDB()`           |
+| SQL Execution         | ✅ Implemented | Execute INSERT, UPDATE, DELETE, CREATE statements | `src/release/release-manager.ts` |
+| SQL Queries           | ✅ Implemented | Execute SELECT queries with parameterized inputs  | `src/release/release-manager.ts` |
+| Transactions          | ✅ Implemented | Atomic transactions with auto-commit/rollback     | `src/release/release-manager.ts` |
+| Parameterized Queries | ✅ Implemented | Positional (?) and named ($param) parameters      | `src/worker.ts`                  |
 
 ### Persistence Layer
 
-| Feature | Status | Description | Evidence |
-| ------- | ------ | ----------- | -------- |
-| OPFS Storage | ✅ Implemented | Persistent file-backed storage in OPFS | `src/release/opfs-utils.ts` |
-| Database Files | ✅ Implemented | SQLite database files stored in OPFS | `.sqlite3` files in OPFS |
+| Feature         | Status         | Description                                        | Evidence                    |
+| --------------- | -------------- | -------------------------------------------------- | --------------------------- |
+| OPFS Storage    | ✅ Implemented | Persistent file-backed storage in OPFS             | `src/release/opfs-utils.ts` |
+| Database Files  | ✅ Implemented | SQLite database files stored in OPFS               | `.sqlite3` files in OPFS    |
 | File System API | ✅ Implemented | OPFS File System Access API via FileSystem handles | `src/release/opfs-utils.ts` |
 
 ### Release Versioning System
 
-| Feature | Status | Description | Evidence |
-| ------- | ------ | ----------- | -------- |
+| Feature            | Status         | Description                                        | Evidence                         |
+| ------------------ | -------------- | -------------------------------------------------- | -------------------------------- |
 | Release Management | ✅ Implemented | Multi-version database support with isolated files | `src/release/release-manager.ts` |
-| Migration SQL | ✅ Implemented | Schema migrations with migrationSQL | Release config interface |
-| Seed SQL | ✅ Implemented | Data seeding with seedSQL | Release config interface |
-| Version Metadata | ✅ Implemented | Tracks version history in metadata DB | `release.sqlite3` |
-| Rollback Support | ✅ Implemented | Dev tooling for version rollback | `devTool.rollback()` |
-| Hash Validation | ✅ Implemented | SHA-256 hash validation for releases | `src/release/hash-utils.ts` |
+| Migration SQL      | ✅ Implemented | Schema migrations with migrationSQL                | Release config interface         |
+| Seed SQL           | ✅ Implemented | Data seeding with seedSQL                          | Release config interface         |
+| Version Metadata   | ✅ Implemented | Tracks version history in metadata DB              | `release.sqlite3`                |
+| Rollback Support   | ✅ Implemented | Dev tooling for version rollback                   | `devTool.rollback()`             |
+| Hash Validation    | ✅ Implemented | SHA-256 hash validation for releases               | `src/release/hash-utils.ts`      |
 
 ### Concurrency & Safety
 
-| Feature | Status | Description | Evidence |
-| ------- | ------ | ----------- | -------- |
-| Mutex Queue | ✅ Implemented | Serializes all database operations | `src/utils/mutex/mutex.ts` |
-| Worker Isolation | ✅ Implemented | All SQLite operations in dedicated worker | `src/worker.ts` |
-| Error Handling | ✅ Implemented | Error propagation with stack traces | `src/worker-bridge.ts` |
-| Transaction Safety | ✅ Implemented | Auto-rollback on transaction errors | `src/release/release-manager.ts` |
+| Feature            | Status         | Description                               | Evidence                         |
+| ------------------ | -------------- | ----------------------------------------- | -------------------------------- |
+| Mutex Queue        | ✅ Implemented | Serializes all database operations        | `src/utils/mutex/mutex.ts`       |
+| Worker Isolation   | ✅ Implemented | All SQLite operations in dedicated worker | `src/worker.ts`                  |
+| Error Handling     | ✅ Implemented | Error propagation with stack traces       | `src/worker-bridge.ts`           |
+| Transaction Safety | ✅ Implemented | Auto-rollback on transaction errors       | `src/release/release-manager.ts` |
 
 ### Developer Experience
 
-| Feature | Status | Description | Evidence |
-| ------- | ------ | ----------- | -------- |
-| TypeScript API | ✅ Implemented | Full TypeScript type definitions | `src/types/` |
-| Debug Mode | ✅ Implemented | SQL execution logging with timing | `src/utils/logger.ts` |
-| Generic Query Types | ✅ Implemented | Type-safe query results with generics | `query<T>()` |
-| Dev Tooling | ✅ Implemented | `devTool.release()` and `devTool.rollback()` | `src/release/release-manager.ts` |
+| Feature             | Status         | Description                                  | Evidence                         |
+| ------------------- | -------------- | -------------------------------------------- | -------------------------------- |
+| TypeScript API      | ✅ Implemented | Full TypeScript type definitions             | `src/types/`                     |
+| Debug Mode          | ✅ Implemented | SQL execution logging with timing            | `src/utils/logger.ts`            |
+| Generic Query Types | ✅ Implemented | Type-safe query results with generics        | `query<T>()`                     |
+| Dev Tooling         | ✅ Implemented | `devTool.release()` and `devTool.rollback()` | `src/release/release-manager.ts` |
 
 ---
 
@@ -72,30 +72,30 @@ This document describes the technical validation and implementation features tha
 
 ### Performance Validation
 
-| Metric | Target | Actual | Status |
-| ------ | ------ | ------ | ------ |
-| Query Execution | <1ms | 0.2-0.5ms | ✅ Pass |
-| Database Load (50MB) | <200ms | <100ms | ✅ Pass |
+| Metric                 | Target   | Actual    | Status  |
+| ---------------------- | -------- | --------- | ------- |
+| Query Execution        | <1ms     | 0.2-0.5ms | ✅ Pass |
+| Database Load (50MB)   | <200ms   | <100ms    | ✅ Pass |
 | Transaction Throughput | >100/sec | 1000+/sec | ✅ Pass |
-| Concurrent Queries | 50+ | 100+ | ✅ Pass |
+| Concurrent Queries     | 50+      | 100+      | ✅ Pass |
 
 ### Browser Compatibility Validation
 
-| Platform | OPFS Support | COOP/COEP | Status |
-| -------- | ------------ | --------- | ------ |
-| Chrome | ✅ Full | Required | ✅ Supported |
-| Edge | ✅ Full | Required | ✅ Supported |
-| Opera | ✅ Full | Required | ✅ Supported |
-| Firefox | ⚠️ Partial | Required | ⚠️ Partial |
-| Safari | ⚠️ Partial | Required | ⚠️ Partial |
+| Platform | OPFS Support | COOP/COEP | Status       |
+| -------- | ------------ | --------- | ------------ |
+| Chrome   | ✅ Full      | Required  | ✅ Supported |
+| Edge     | ✅ Full      | Required  | ✅ Supported |
+| Opera    | ✅ Full      | Required  | ✅ Supported |
+| Firefox  | ⚠️ Partial   | Required  | ⚠️ Partial   |
+| Safari   | ⚠️ Partial   | Required  | ⚠️ Partial   |
 
 ### Storage Validation
 
-| Aspect | Target | Actual | Status |
-| ------ | ------ | ------ | ------ |
-| Max Database Size | 500MB+ | 500MB-1GB | ✅ Pass |
-| Persistence | Survives restart | ✅ Yes | ✅ Pass |
-| Data Integrity | No corruption | ✅ Validated | ✅ Pass |
+| Aspect            | Target                | Actual       | Status  |
+| ----------------- | --------------------- | ------------ | ------- |
+| Max Database Size | 500MB+                | 500MB-1GB    | ✅ Pass |
+| Persistence       | Survives restart      | ✅ Yes       | ✅ Pass |
+| Data Integrity    | No corruption         | ✅ Validated | ✅ Pass |
 | Version Isolation | No cross-version bugs | ✅ Validated | ✅ Pass |
 
 ---
@@ -104,19 +104,19 @@ This document describes the technical validation and implementation features tha
 
 ### E2E Tests
 
-| Test Suite | Status | Coverage |
-| ---------- | ------ | -------- |
-| Database Operations | ✅ Passing | `tests/e2e/sqlite3.e2e.test.ts` |
-| Query Operations | ✅ Passing | `tests/e2e/query.e2e.test.ts` |
-| Exec Operations | ✅ Passing | `tests/e2e/exec.e2e.test.ts` |
-| Transactions | ✅ Passing | `tests/e2e/transaction.e2e.test.ts` |
-| Releases | ✅ Passing | `tests/e2e/release.e2e.test.ts` |
-| Error Handling | ✅ Passing | `tests/e2e/error.e2e.test.ts` |
+| Test Suite          | Status     | Coverage                            |
+| ------------------- | ---------- | ----------------------------------- |
+| Database Operations | ✅ Passing | `tests/e2e/sqlite3.e2e.test.ts`     |
+| Query Operations    | ✅ Passing | `tests/e2e/query.e2e.test.ts`       |
+| Exec Operations     | ✅ Passing | `tests/e2e/exec.e2e.test.ts`        |
+| Transactions        | ✅ Passing | `tests/e2e/transaction.e2e.test.ts` |
+| Releases            | ✅ Passing | `tests/e2e/release.e2e.test.ts`     |
+| Error Handling      | ✅ Passing | `tests/e2e/error.e2e.test.ts`       |
 
 ### Unit Tests
 
-| Test Suite | Status | Coverage |
-| ---------- | ------ | -------- |
+| Test Suite  | Status     | Coverage                             |
+| ----------- | ---------- | ------------------------------------ |
 | Mutex Queue | ✅ Passing | `src/utils/mutex/mutex.unit.test.ts` |
 
 ---
@@ -125,17 +125,18 @@ This document describes the technical validation and implementation features tha
 
 ### Platform Testing
 
-| Platform | Deployed | Status | Notes |
-| -------- | -------- | ------ | ----- |
-| Vercel | ✅ Yes | ✅ Working | Requires COOP/COEP headers |
-| Netlify | ✅ Yes | ✅ Working | Requires COOP/COEP headers |
+| Platform         | Deployed  | Status        | Notes                      |
+| ---------------- | --------- | ------------- | -------------------------- |
+| Vercel           | ✅ Yes    | ✅ Working    | Requires COOP/COEP headers |
+| Netlify          | ✅ Yes    | ✅ Working    | Requires COOP/COEP headers |
 | Cloudflare Pages | ✅ Tested | ✅ Compatible | Requires COOP/COEP headers |
-| nginx | ✅ Tested | ✅ Compatible | Requires header config |
-| Apache | ✅ Tested | ✅ Compatible | Requires header config |
+| nginx            | ✅ Tested | ✅ Compatible | Requires header config     |
+| Apache           | ✅ Tested | ✅ Compatible | Requires header config     |
 
 ### Header Requirements
 
 **Required Headers** (for SharedArrayBuffer):
+
 ```
 Cross-Origin-Opener-Policy: same-origin
 Cross-Origin-Embedder-Policy: require-corp
@@ -146,82 +147,92 @@ Cross-Origin-Embedder-Policy: require-corp
 ## Architecture Decisions Validated
 
 ### Worker-Based Architecture
-- **Decision**: Run SQLite in dedicated Web Worker
-- **Validation**: ✅ Production proven, 100% test pass rate
-- **Benefits**: Non-blocking UI, main thread never blocked
-- **Trade-offs**: Worker isolation adds debugging complexity
+
+-   **Decision**: Run SQLite in dedicated Web Worker
+-   **Validation**: ✅ Production proven, 100% test pass rate
+-   **Benefits**: Non-blocking UI, main thread never blocked
+-   **Trade-offs**: Worker isolation adds debugging complexity
 
 ### OPFS for Persistence
-- **Decision**: Use Origin Private File System for database storage
-- **Validation**: ✅ Stable in Chrome/Edge/Opera, handles 500MB-1GB databases
-- **Benefits**: True file-backed storage, no manual serialization
-- **Trade-offs**: Limited browser support
+
+-   **Decision**: Use Origin Private File System for database storage
+-   **Validation**: ✅ Stable in Chrome/Edge/Opera, handles 500MB-1GB databases
+-   **Benefits**: True file-backed storage, no manual serialization
+-   **Trade-offs**: Limited browser support
 
 ### Mutex Queue for Concurrency
-- **Decision**: Serialize all operations through mutex queue
-- **Validation**: ✅ 1000+ transactions/second, no race conditions
-- **Benefits**: Prevents concurrency bugs, fair query scheduling
-- **Trade-offs**: Serial execution limits throughput
+
+-   **Decision**: Serialize all operations through mutex queue
+-   **Validation**: ✅ 1000+ transactions/second, no race conditions
+-   **Benefits**: Prevents concurrency bugs, fair query scheduling
+-   **Trade-offs**: Serial execution limits throughput
 
 ### Release Versioning System
-- **Decision**: Isolated database files per version with metadata tracking
-- **Validation**: ✅ Atomic migrations, rollback support validated
-- **Benefits**: Zero-downtime upgrades, safe schema evolution
-- **Trade-offs**: OPFS space usage for multiple versions
+
+-   **Decision**: Isolated database files per version with metadata tracking
+-   **Validation**: ✅ Atomic migrations, rollback support validated
+-   **Benefits**: Zero-downtime upgrades, safe schema evolution
+-   **Trade-offs**: OPFS space usage for multiple versions
 
 ---
 
 ## Known Limitations
 
 ### Browser Support
-- **Limitation**: Requires OPFS support (Chrome/Edge/Opera full support)
-- **Impact**: Safari/Firefox have partial support
-- **Documentation**: ✅ Clearly documented in README and deployment guides
-- **Future**: May add hybrid approach if customer demand exists
+
+-   **Limitation**: Requires OPFS support (Chrome/Edge/Opera full support)
+-   **Impact**: Safari/Firefox have partial support
+-   **Documentation**: ✅ Clearly documented in README and deployment guides
+-   **Future**: May add hybrid approach if customer demand exists
 
 ### Deployment Requirements
-- **Limitation**: Requires COOP/COEP headers for SharedArrayBuffer
-- **Impact**: Cannot deploy to platforms without custom header support
-- **Documentation**: ✅ Platform-specific deployment guides provided
-- **Workaround**: Documented for Vercel, Netlify, Cloudflare Pages, nginx, Apache
+
+-   **Limitation**: Requires COOP/COEP headers for SharedArrayBuffer
+-   **Impact**: Cannot deploy to platforms without custom header support
+-   **Documentation**: ✅ Platform-specific deployment guides provided
+-   **Workaround**: Documented for Vercel, Netlify, Cloudflare Pages, nginx, Apache
 
 ### Bundle Size
-- **Limitation**: SQLite WASM module is ~500KB (compressed ~150-200KB)
-- **Impact**: Initial page load includes WASM download
-- **Mitigation**: CDN caching, one-time cost amortized over usage
-- **Validation**: ✅ Accepted by early adopters, no complaints
+
+-   **Limitation**: SQLite WASM module is ~500KB (compressed ~150-200KB)
+-   **Impact**: Initial page load includes WASM download
+-   **Mitigation**: CDN caching, one-time cost amortized over usage
+-   **Validation**: ✅ Accepted by early adopters, no complaints
 
 ---
 
 ## Production Metrics
 
 ### Version History
-- **v1.0.0**: Initial release (2024)
-- **v1.1.0**: Production release with all MVP features (2025-01-08)
-- **v1.1.1**: Documentation updates
-- **v1.1.2**: Current version (2025-01-09)
+
+-   **v1.0.0**: Initial release (2024)
+-   **v1.1.0**: Production release with all MVP features (2025-01-08)
+-   **v1.1.1**: Documentation updates
+-   **v1.1.2**: Current version (2025-01-09)
 
 ### NPM Package
-- **Package**: `web-sqlite-js`
-- **Downloads**: Available on https://www.npmjs.com/package/web-sqlite-js
-- **Documentation**: https://web-sqlite-js.wuchuheng.com
+
+-   **Package**: `web-sqlite-js`
+-   **Downloads**: Available on https://www.npmjs.com/package/web-sqlite-js
+-   **Documentation**: https://web-sqlite-js.wuchuheng.com
 
 ### Code Quality
-- **TypeScript Coverage**: 100%
-- **Test Pass Rate**: 100%
-- **Lint Status**: Clean
-- **Build Status**: Passing
+
+-   **TypeScript Coverage**: 100%
+-   **Test Pass Rate**: 100%
+-   **Lint Status**: Clean
+-   **Build Status**: Passing
 
 ---
 
 ## References
 
-- **Options Analysis**: `docs/02-feasibility/01-options.md` - Architecture and implementation
-- **Risk Assessment**: `docs/02-feasibility/02-risk-assessment.md` - Risk register and mitigations
-- **Requirements**: `docs/01-discovery/02-requirements.md` - MVP requirements (all implemented)
-- **Status Board**: `docs/00-control/01-status.md` - Current project status
-- **Source Code**: `src/` - Implementation
-- **Tests**: `tests/` - Test suites
+-   **Options Analysis**: `agent-docs/02-feasibility/01-options.md` - Architecture and implementation
+-   **Risk Assessment**: `agent-docs/02-feasibility/02-risk-assessment.md` - Risk register and mitigations
+-   **Requirements**: `agent-docs/01-discovery/02-requirements.md` - MVP requirements (all implemented)
+-   **Status Board**: `agent-docs/00-control/01-status.md` - Current project status
+-   **Source Code**: `src/` - Implementation
+-   **Tests**: `tests/` - Test suites
 
 ---
 
@@ -233,12 +244,12 @@ Cross-Origin-Embedder-Policy: require-corp
 
 **Related Feasibility Documents**:
 
-- [Back to Feasibility: 01 Options](./01-options.md) - Architecture and implementation
-- [Back to Feasibility: 02 Risk Assessment](./02-risk-assessment.md) - Risk register
-- [Back to Spec Index](../00-control/00-spec.md)
+-   [Back to Feasibility: 01 Options](./01-options.md) - Architecture and implementation
+-   [Back to Feasibility: 02 Risk Assessment](./02-risk-assessment.md) - Risk register
+-   [Back to Spec Index](../00-control/00-spec.md)
 
 **Related Discovery Documents**:
 
-- [02 Requirements](../01-discovery/02-requirements.md) - MVP requirements (all implemented)
+-   [02 Requirements](../01-discovery/02-requirements.md) - MVP requirements (all implemented)
 
 **Continue to**: [Stage 3: High-Level Design](../03-architecture/01-hld.md) - System architecture and components
